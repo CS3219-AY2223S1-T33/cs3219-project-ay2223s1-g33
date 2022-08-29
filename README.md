@@ -2,6 +2,10 @@
 
 This is a template repository for CS3219 project.
 
+## Protocol Buffer Generation
+1. In the root of the project, run `npm i`.
+2. Then, run `npm run-script gen-proto`.
+
 ## User Service
 1. Rename `.env.sample` file to `.env`.
 2. Create a Cloud DB URL using Mongo Atlas.
