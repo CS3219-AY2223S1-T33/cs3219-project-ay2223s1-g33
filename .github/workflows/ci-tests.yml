@@ -1,0 +1,28 @@
+name: ci-tests
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@main
+
+      - name: Set up repository
+        uses: actions/checkout@main
+        with:
+          ref: main
+
+      - name: Merge to main branch
+        run: git checkout --progress --force ${{ github.sha }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 'Setup CI script'
+        run: chmod 755 ./scripts/run-ci.sh
+
+      - name: Run repository-wide tests
+        run: ./scripts/run-ci.sh
