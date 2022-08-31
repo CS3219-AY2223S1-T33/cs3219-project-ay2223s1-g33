@@ -30,8 +30,9 @@ message LoginRequest {
 
 message LoginResponse {
   common.User user = 1;
-  LoginErrorCode error_code = 2;
-  string error_message = 3;
+  string session_token = 2;
+  LoginErrorCode error_code = 3;
+  string error_message = 4;
 }
 
 message RegisterRequest {
