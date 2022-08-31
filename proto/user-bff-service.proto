@@ -44,3 +44,8 @@ message RegisterRresponse {
   RegisterErrorCode error_code = 2;
   string error_message = 3;
 }
+
+service UserBFFService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Register(RegisterRequest) returns (RegisterRresponse);
+}
