@@ -6,8 +6,7 @@ for P in ${DIRECTORIES[@]}; do
     cd $P
     CURRENT=`pwd`
     echo "Entering folder: ${CURRENT}"
-    npm run-script lint
-    npm test
+    npm install
     
     if [ $? -ne 0 ]; then
         exit 1

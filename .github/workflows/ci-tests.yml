@@ -24,5 +24,11 @@ jobs:
       - name: 'Setup CI script'
         run: chmod 755 ./scripts/run-ci.sh
 
+      - name: 'Setup CI script'
+        run: chmod 755 ./scripts/run-ci-setup.sh
+
+      - name: 'Setup sub-module NPM'
+        run: ./scripts/run-ci-setup.sh
+
       - name: Run repository-wide tests
         run: ./scripts/run-ci.sh
