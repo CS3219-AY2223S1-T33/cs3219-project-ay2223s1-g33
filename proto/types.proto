@@ -3,8 +3,12 @@ syntax = "proto3";
 package common;
 
 message User {
-    int32 id = 1;
-    string username = 2;
-    string passphrase = 3;
-    string nickname = 4;
+  uint64 user_id = 1;
+  string username = 2;
+  string nickname = 3;
+}
+
+message PasswordUser {
+  User user = 1;
+  string password = 2;
 }
