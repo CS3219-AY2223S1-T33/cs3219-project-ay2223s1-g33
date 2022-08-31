@@ -14,14 +14,15 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { PasswordUser } from "./types";
+import { User } from "./types";
 /**
  * @generated from protobuf message user_service.GetUserRequest
  */
 export interface GetUserRequest {
     /**
-     * @generated from protobuf field: common.PasswordUser user = 1;
+     * @generated from protobuf field: common.User user = 1;
      */
-    user?: PasswordUser;
+    user?: User;
 }
 /**
  * @generated from protobuf message user_service.GetUserResponse
@@ -53,6 +54,10 @@ export interface CreateUserResponse {
      * @generated from protobuf field: common.PasswordUser user = 1;
      */
     user?: PasswordUser;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
 }
 /**
  * @generated from protobuf message user_service.EditUserRequest
@@ -98,7 +103,7 @@ export interface DeleteUserResponse {
 class GetUserRequest$Type extends MessageType<GetUserRequest> {
     constructor() {
         super("user_service.GetUserRequest", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser }
+            { no: 1, name: "user", kind: "message", T: () => User }
         ]);
     }
     create(value?: PartialMessage<GetUserRequest>): GetUserRequest {
@@ -113,8 +118,8 @@ class GetUserRequest$Type extends MessageType<GetUserRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.PasswordUser user */ 1:
-                    message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                case /* common.User user */ 1:
+                    message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -128,9 +133,9 @@ class GetUserRequest$Type extends MessageType<GetUserRequest> {
         return message;
     }
     internalBinaryWrite(message: GetUserRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.PasswordUser user = 1; */
+        /* common.User user = 1; */
         if (message.user)
-            PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+            User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -246,11 +251,12 @@ export const CreateUserRequest = new CreateUserRequest$Type();
 class CreateUserResponse$Type extends MessageType<CreateUserResponse> {
     constructor() {
         super("user_service.CreateUserResponse", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser }
+            { no: 1, name: "user", kind: "message", T: () => PasswordUser },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<CreateUserResponse>): CreateUserResponse {
-        const message = {};
+        const message = { errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<CreateUserResponse>(this, message, value);
@@ -263,6 +269,9 @@ class CreateUserResponse$Type extends MessageType<CreateUserResponse> {
             switch (fieldNo) {
                 case /* common.PasswordUser user */ 1:
                     message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -279,6 +288,9 @@ class CreateUserResponse$Type extends MessageType<CreateUserResponse> {
         /* common.PasswordUser user = 1; */
         if (message.user)
             PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

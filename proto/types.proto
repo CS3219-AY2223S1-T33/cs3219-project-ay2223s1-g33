@@ -9,6 +9,6 @@ message User {
 }
 
 message PasswordUser {
-  User user = 1;
+  User user_info = 1;
   string password = 2;
 }

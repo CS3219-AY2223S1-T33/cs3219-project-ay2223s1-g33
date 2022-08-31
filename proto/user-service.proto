@@ -5,7 +5,7 @@ package user_service;
 import "types.proto";
 
 message GetUserRequest {
-  common.PasswordUser user = 1;
+  common.User user = 1;
 }
 
 message GetUserResponse {
@@ -19,6 +19,7 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   common.PasswordUser user = 1;
+  string error_message = 2;
 }
 
 message EditUserRequest {

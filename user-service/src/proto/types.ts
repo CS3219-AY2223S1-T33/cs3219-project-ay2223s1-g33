@@ -34,9 +34,9 @@ export interface User {
  */
 export interface PasswordUser {
     /**
-     * @generated from protobuf field: common.User user = 1;
+     * @generated from protobuf field: common.User user_info = 1;
      */
-    user?: User;
+    userInfo?: User;
     /**
      * @generated from protobuf field: string password = 2;
      */
@@ -107,7 +107,7 @@ export const User = new User$Type();
 class PasswordUser$Type extends MessageType<PasswordUser> {
     constructor() {
         super("common.PasswordUser", [
-            { no: 1, name: "user", kind: "message", T: () => User },
+            { no: 1, name: "user_info", kind: "message", T: () => User },
             { no: 2, name: "password", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
@@ -123,8 +123,8 @@ class PasswordUser$Type extends MessageType<PasswordUser> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.User user */ 1:
-                    message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                case /* common.User user_info */ 1:
+                    message.userInfo = User.internalBinaryRead(reader, reader.uint32(), options, message.userInfo);
                     break;
                 case /* string password */ 2:
                     message.password = reader.string();
@@ -141,9 +141,9 @@ class PasswordUser$Type extends MessageType<PasswordUser> {
         return message;
     }
     internalBinaryWrite(message: PasswordUser, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.User user = 1; */
-        if (message.user)
-            User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* common.User user_info = 1; */
+        if (message.userInfo)
+            User.internalBinaryWrite(message.userInfo, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* string password = 2; */
         if (message.password !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.password);
