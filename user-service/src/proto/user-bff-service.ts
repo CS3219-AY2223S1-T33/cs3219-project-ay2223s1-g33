@@ -67,9 +67,9 @@ export interface RegisterRequest {
     nickname: string;
 }
 /**
- * @generated from protobuf message user_bff_service.RegisterRresponse
+ * @generated from protobuf message user_bff_service.RegisterResponse
  */
-export interface RegisterRresponse {
+export interface RegisterResponse {
     /**
      * @generated from protobuf field: common.User user = 1;
      */
@@ -346,22 +346,22 @@ class RegisterRequest$Type extends MessageType<RegisterRequest> {
  */
 export const RegisterRequest = new RegisterRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class RegisterRresponse$Type extends MessageType<RegisterRresponse> {
+class RegisterResponse$Type extends MessageType<RegisterResponse> {
     constructor() {
-        super("user_bff_service.RegisterRresponse", [
+        super("user_bff_service.RegisterResponse", [
             { no: 1, name: "user", kind: "message", T: () => User },
             { no: 2, name: "error_code", kind: "enum", T: () => ["user_bff_service.RegisterErrorCode", RegisterErrorCode] },
             { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<RegisterRresponse>): RegisterRresponse {
+    create(value?: PartialMessage<RegisterResponse>): RegisterResponse {
         const message = { errorCode: 0, errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<RegisterRresponse>(this, message, value);
+            reflectionMergePartial<RegisterResponse>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RegisterRresponse): RegisterRresponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RegisterResponse): RegisterResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -386,7 +386,7 @@ class RegisterRresponse$Type extends MessageType<RegisterRresponse> {
         }
         return message;
     }
-    internalBinaryWrite(message: RegisterRresponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: RegisterResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* common.User user = 1; */
         if (message.user)
             User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
@@ -403,13 +403,13 @@ class RegisterRresponse$Type extends MessageType<RegisterRresponse> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_bff_service.RegisterRresponse
+ * @generated MessageType for protobuf message user_bff_service.RegisterResponse
  */
-export const RegisterRresponse = new RegisterRresponse$Type();
+export const RegisterResponse = new RegisterResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_bff_service.UserBFFService
  */
 export const UserBFFService = new ServiceType("user_bff_service.UserBFFService", [
     { name: "Login", options: {}, I: LoginRequest, O: LoginResponse },
-    { name: "Register", options: {}, I: RegisterRequest, O: RegisterRresponse }
+    { name: "Register", options: {}, I: RegisterRequest, O: RegisterResponse }
 ]);
