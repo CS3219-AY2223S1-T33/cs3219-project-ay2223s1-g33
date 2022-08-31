@@ -35,14 +35,19 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   respType: IMessageType<ResponseType>,
 ): ((object: any) => any) {
   return (requestJson: any): any => {
-    const requestObject = reqType.fromJson(requestJson);
+    let requestObject: RequestType;
+    try {
+      requestObject = reqType.fromJson(requestJson);
+    } catch {
+      return respType.create();
+    }
     const responseObject = handler.handle(requestObject);
     return respType.toJson(responseObject);
   };
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function fromHandler<RequestType extends object, ResponseType extends object>(
+export function fromApiHandler<RequestType extends object, ResponseType extends object>(
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
   respType: IMessageType<ResponseType>,

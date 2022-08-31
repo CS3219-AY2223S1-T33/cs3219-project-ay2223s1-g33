@@ -62,7 +62,7 @@ class ApiServer {
 
     const httpRouter = express.Router();
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
-      httpRouter.post(key, jsonParseMiddleware, (req: Request, resp: Response) => {
+      httpRouter.post(`/${key}`, jsonParseMiddleware, (req: Request, resp: Response) => {
         resp.setHeader('Access-Control-Allow-Origin', '*');
         resp.json(apiService.serviceHandlerDefinition[key].httpRouteHandler(req.body));
       });
