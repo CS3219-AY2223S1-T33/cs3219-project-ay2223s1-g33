@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is a template repository for CS3219 project.",
   "config": {
-    "proto_output": "./user-service/proto ./matching-service/proto"
+    "proto_output": "./user-service/src/proto ./matching-service/proto"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

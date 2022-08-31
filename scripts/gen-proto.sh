@@ -13,7 +13,7 @@ mkdir -p $OUT_DIR
 protoc \
     --plugin=protoc-gen-ts="./node_modules/.bin/protoc-gen-ts" \
     --ts_out="${OUT_DIR}" \
-    --ts_opt server_grpc1 \
+    --ts_opt server_grpc1,client_grpc1,eslint_disable,long_type_number \
     --proto_path="${PROTO_DIR}" \
     $FILES
 
