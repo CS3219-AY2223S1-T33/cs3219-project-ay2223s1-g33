@@ -29,6 +29,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.6.11",
     "@protobuf-ts/runtime": "^2.8.0",
+    "@protobuf-ts/runtime-rpc": "^2.8.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
