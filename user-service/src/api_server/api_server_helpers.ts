@@ -1,14 +1,21 @@
-import { IApiHandler, ApiCallHandler } from './api_server_types';
-import { ServerUnaryCall, sendUnaryData, Metadata, handleUnaryCall } from '@grpc/grpc-js';
+import {
+  ServerUnaryCall,
+  sendUnaryData,
+  Metadata,
+  handleUnaryCall,
+} from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
-import { Logger } from '../utils/logger';
+import { IApiHandler, ApiCallHandler } from './api_server_types';
+import Logger from '../utils/logger';
 
-function getGrpcRouteHandler<RequestType, ResponseType>(handler: IApiHandler<RequestType, ResponseType>): handleUnaryCall<RequestType, ResponseType> {
+function getGrpcRouteHandler<RequestType, ResponseType>(
+  handler: IApiHandler<RequestType, ResponseType>,
+): handleUnaryCall<RequestType, ResponseType> {
   return (
     call: ServerUnaryCall<RequestType, ResponseType>,
-    callback: sendUnaryData<ResponseType>
+    callback: sendUnaryData<ResponseType>,
   ) => {
-    call.on('error', args => {
+    call.on('error', (args) => {
       Logger.warn(`Error on GRPC Route call: ${args}`);
     });
 
@@ -25,7 +32,7 @@ function getGrpcRouteHandler<RequestType, ResponseType>(handler: IApiHandler<Req
 function getHttpRouteHandler<RequestType extends object, ResponseType extends object>(
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
-  respType: IMessageType<ResponseType>
+  respType: IMessageType<ResponseType>,
 ): ((object: any) => any) {
   return (requestJson: any): any => {
     const requestObject = reqType.fromJson(requestJson);
@@ -34,12 +41,14 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   };
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export function fromHandler<RequestType extends object, ResponseType extends object>(
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
-  respType: IMessageType<ResponseType>): ApiCallHandler<RequestType, ResponseType> {
+  respType: IMessageType<ResponseType>,
+): ApiCallHandler<RequestType, ResponseType> {
   return {
-    handler: handler,
+    handler,
     grpcRouteHandler: getGrpcRouteHandler(handler),
     httpRouteHandler: getHttpRouteHandler(handler, reqType, respType),
   };

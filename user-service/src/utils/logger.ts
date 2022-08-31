@@ -1,5 +1,6 @@
 function printMessage(logLevel: string, message: string) {
   const timestamp = new Date().toLocaleString('en-us', {});
+  // eslint-disable-next-line no-console
   console.log(`[${logLevel}][${timestamp}] ${message}`);
 }
 
@@ -21,6 +22,4 @@ class Logger {
   }
 }
 
-export {
-  Logger,
-};
+export default Logger;
