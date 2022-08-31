@@ -11,7 +11,7 @@ import Logger from '../utils/logger';
 function getGrpcRouteHandler<RequestType, ResponseType>(
   handler: IApiHandler<RequestType, ResponseType>,
 ): handleUnaryCall<RequestType, ResponseType> {
-  return (
+  return async (
     call: ServerUnaryCall<RequestType, ResponseType>,
     callback: sendUnaryData<ResponseType>,
   ) => {
@@ -19,7 +19,7 @@ function getGrpcRouteHandler<RequestType, ResponseType>(
       Logger.warn(`Error on GRPC Route call: ${args}`);
     });
 
-    const response = handler.handle(call.request);
+    const response: ResponseType = await handler.handle(call.request);
 
     const responseHeaders = new Metadata();
     responseHeaders.add('server-header', 'server header value');
@@ -33,15 +33,15 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
   respType: IMessageType<ResponseType>,
-): ((object: any) => any) {
-  return (requestJson: any): any => {
+): ((object: any) => Promise<any>) {
+  return async (requestJson: any): Promise<any> => {
     let requestObject: RequestType;
     try {
       requestObject = reqType.fromJson(requestJson);
     } catch {
       return respType.create();
     }
-    const responseObject = handler.handle(requestObject);
+    const responseObject: ResponseType = await handler.handle(requestObject);
     return respType.toJson(responseObject);
   };
 }
