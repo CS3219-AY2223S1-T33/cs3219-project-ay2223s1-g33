@@ -1,16 +1,16 @@
-import { User } from '../proto/types';
+import { StoredUser } from '../model/user_store_model';
 
 declare interface IStorage {
   getUserStore(): IUserStore;
 }
 
 declare interface IUserStore {
-  addUser(user: User): User;
+  addUser(user: StoredUser): StoredUser;
   removeUser(id: number): void;
-  replaceUser(user: User): void;
-  getUser(id: number): (User | undefined);
-  getUserByUsername(username: string): (User | undefined);
-  getAllUsers(): User[];
+  replaceUser(user: StoredUser): void;
+  getUser(id: number): (StoredUser | undefined);
+  getUserByUsername(username: string): (StoredUser | undefined);
+  getAllUsers(): StoredUser[];
 }
 
 export {
