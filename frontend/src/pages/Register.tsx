@@ -13,11 +13,15 @@ import {
 	useBoolean,
 	Text,
 	FormErrorMessage,
+	useToast,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FieldValues, SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
+import axios from "axios";
 import Link from "../components/ui/Link";
+import { PasswordUser, User } from "../proto/types";
+import { CreateUserRequest, CreateUserResponse } from "../proto/user-service";
 
 function Register() {
 	const {
@@ -25,15 +29,50 @@ function Register() {
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
+
+	const toast = useToast();
 	const [showPassword, setShowPassword] = useBoolean();
 
-	const validFormHandler = (data: any) => {
-		// ! At this point, submit to the backend to login
-		console.info("valid");
-		console.log(data);
+	const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+		const { email, password, nickname } = data;
+		const user = User.fromJson({ username: email, nickname });
+		const pwUser = PasswordUser.fromJson({ user_info: User.toJson(user), password });
+		const createReq = CreateUserRequest.fromJson({ user: PasswordUser.toJson(pwUser) });
+
+		// Send registration request to the server
+		axios
+			.post<CreateUserResponse>("http://127.0.0.1:8081/grpc/createUser", createReq)
+			.then((res) => {
+				const { data: resData } = res;
+				if (resData.errorMessage !== "") {
+					throw new Error(resData.errorMessage);
+				}
+
+				console.log("Success");
+				// console.log(resData);
+				toast({
+					title: "Success!",
+					description: "Yay! Click on the link below to login.",
+					status: "success",
+					position: "top",
+					isClosable: true,
+					duration: 5000,
+				});
+			})
+			.catch((err) => {
+				const description = err.message;
+				toast({
+					title: "Error",
+					status: "error",
+					duration: 5000,
+					isClosable: true,
+					position: "top",
+					description,
+				});
+			});
 	};
 
-	const invalidFormHandler = (data: any) => {
+	const invalidFormHandler: SubmitErrorHandler<FieldValues> = (data: any) => {
 		console.warn("invalid");
 		console.log(data);
 	};
