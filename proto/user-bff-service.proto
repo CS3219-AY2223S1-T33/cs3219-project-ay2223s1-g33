@@ -41,9 +41,8 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-  common.User user = 1;
-  RegisterErrorCode error_code = 2;
-  string error_message = 3;
+  RegisterErrorCode error_code = 1;
+  string error_message = 2;
 }
 
 service UserBFFService {
