@@ -9,7 +9,7 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
     this.userStore = storage.getUserStore();
   }
 
-  handle(request: DeleteUserRequest): DeleteUserResponse {
+  async handle(request: DeleteUserRequest): Promise<DeleteUserResponse> {
     if (request.userId <= 0) {
       return {
         errorMessage: 'Malformed request',

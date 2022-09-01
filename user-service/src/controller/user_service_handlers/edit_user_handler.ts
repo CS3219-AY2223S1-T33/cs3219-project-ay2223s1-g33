@@ -10,7 +10,7 @@ class EditUserHandler implements IApiHandler<EditUserRequest, EditUserResponse> 
     this.userStore = storage.getUserStore();
   }
 
-  handle(request: EditUserRequest): EditUserResponse {
+  async handle(request: EditUserRequest): Promise<EditUserResponse> {
     if (!request.user) {
       return {
         user: undefined,

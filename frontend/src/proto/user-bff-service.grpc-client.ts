@@ -5,7 +5,7 @@
 import { UserBFFService } from "./user-bff-service";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
-import type { RegisterRresponse } from "./user-bff-service";
+import type { RegisterResponse } from "./user-bff-service";
 import type { RegisterRequest } from "./user-bff-service";
 import type { LoginResponse } from "./user-bff-service";
 import type { LoginRequest } from "./user-bff-service";
@@ -22,12 +22,12 @@ export interface IUserBFFServiceClient {
     login(input: LoginRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LoginResponse) => void): grpc.ClientUnaryCall;
     login(input: LoginRequest, callback: (err: grpc.ServiceError | null, value?: LoginResponse) => void): grpc.ClientUnaryCall;
     /**
-     * @generated from protobuf rpc: Register(user_bff_service.RegisterRequest) returns (user_bff_service.RegisterRresponse);
+     * @generated from protobuf rpc: Register(user_bff_service.RegisterRequest) returns (user_bff_service.RegisterResponse);
      */
-    register(input: RegisterRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterRresponse) => void): grpc.ClientUnaryCall;
-    register(input: RegisterRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: RegisterRresponse) => void): grpc.ClientUnaryCall;
-    register(input: RegisterRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterRresponse) => void): grpc.ClientUnaryCall;
-    register(input: RegisterRequest, callback: (err: grpc.ServiceError | null, value?: RegisterRresponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service user_bff_service.UserBFFService
@@ -46,10 +46,10 @@ export class UserBFFServiceClient extends grpc.Client implements IUserBFFService
         return this.makeUnaryRequest<LoginRequest, LoginResponse>(`/${UserBFFService.typeName}/${method.name}`, (value: LoginRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): LoginResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: Register(user_bff_service.RegisterRequest) returns (user_bff_service.RegisterRresponse);
+     * @generated from protobuf rpc: Register(user_bff_service.RegisterRequest) returns (user_bff_service.RegisterResponse);
      */
-    register(input: RegisterRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterRresponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterRresponse) => void), callback?: ((err: grpc.ServiceError | null, value?: RegisterRresponse) => void)): grpc.ClientUnaryCall {
+    register(input: RegisterRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: RegisterResponse) => void)): grpc.ClientUnaryCall {
         const method = UserBFFService.methods[1];
-        return this.makeUnaryRequest<RegisterRequest, RegisterRresponse>(`/${UserBFFService.typeName}/${method.name}`, (value: RegisterRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): RegisterRresponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+        return this.makeUnaryRequest<RegisterRequest, RegisterResponse>(`/${UserBFFService.typeName}/${method.name}`, (value: RegisterRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): RegisterResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }

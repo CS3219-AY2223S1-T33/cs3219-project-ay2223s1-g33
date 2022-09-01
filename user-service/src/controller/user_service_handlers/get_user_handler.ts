@@ -10,7 +10,7 @@ class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
     this.userStore = storage.getUserStore();
   }
 
-  handle(request: GetUserRequest): GetUserResponse {
+  async handle(request: GetUserRequest): Promise<GetUserResponse> {
     if (request.user) {
       if (request.user.username !== '') {
         const user = this.userStore.getUserByUsername(request.user.username);

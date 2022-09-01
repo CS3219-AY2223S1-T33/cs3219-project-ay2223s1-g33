@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import ApiServer from './api_server/api_server';
+import UserBFFServiceApi from './controller/user_service_bff_controller';
 import UserServiceApi from './controller/user_service_controller';
 import AppStorage from './storage/app_storage';
 
@@ -17,4 +18,5 @@ expressApp.get('/', (_: Request, resp: Response) => {
 });
 
 apiServer.registerServiceRoutes(new UserServiceApi(dataStore));
+apiServer.registerServiceRoutes(new UserBFFServiceApi());
 apiServer.bind();

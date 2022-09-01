@@ -45,11 +45,15 @@ export interface LoginResponse {
      */
     user?: User;
     /**
-     * @generated from protobuf field: user_bff_service.LoginErrorCode error_code = 2;
+     * @generated from protobuf field: string session_token = 2;
+     */
+    sessionToken: string;
+    /**
+     * @generated from protobuf field: user_bff_service.LoginErrorCode error_code = 3;
      */
     errorCode: LoginErrorCode;
     /**
-     * @generated from protobuf field: string error_message = 3;
+     * @generated from protobuf field: string error_message = 4;
      */
     errorMessage: string;
 }
@@ -67,9 +71,9 @@ export interface RegisterRequest {
     nickname: string;
 }
 /**
- * @generated from protobuf message user_bff_service.RegisterRresponse
+ * @generated from protobuf message user_bff_service.RegisterResponse
  */
-export interface RegisterRresponse {
+export interface RegisterResponse {
     /**
      * @generated from protobuf field: common.User user = 1;
      */
@@ -235,12 +239,13 @@ class LoginResponse$Type extends MessageType<LoginResponse> {
     constructor() {
         super("user_bff_service.LoginResponse", [
             { no: 1, name: "user", kind: "message", T: () => User },
-            { no: 2, name: "error_code", kind: "enum", T: () => ["user_bff_service.LoginErrorCode", LoginErrorCode] },
-            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "error_code", kind: "enum", T: () => ["user_bff_service.LoginErrorCode", LoginErrorCode] },
+            { no: 4, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<LoginResponse>): LoginResponse {
-        const message = { errorCode: 0, errorMessage: "" };
+        const message = { sessionToken: "", errorCode: 0, errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<LoginResponse>(this, message, value);
@@ -254,10 +259,13 @@ class LoginResponse$Type extends MessageType<LoginResponse> {
                 case /* common.User user */ 1:
                     message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
                     break;
-                case /* user_bff_service.LoginErrorCode error_code */ 2:
+                case /* string session_token */ 2:
+                    message.sessionToken = reader.string();
+                    break;
+                case /* user_bff_service.LoginErrorCode error_code */ 3:
                     message.errorCode = reader.int32();
                     break;
-                case /* string error_message */ 3:
+                case /* string error_message */ 4:
                     message.errorMessage = reader.string();
                     break;
                 default:
@@ -275,12 +283,15 @@ class LoginResponse$Type extends MessageType<LoginResponse> {
         /* common.User user = 1; */
         if (message.user)
             User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* user_bff_service.LoginErrorCode error_code = 2; */
+        /* string session_token = 2; */
+        if (message.sessionToken !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.sessionToken);
+        /* user_bff_service.LoginErrorCode error_code = 3; */
         if (message.errorCode !== 0)
-            writer.tag(2, WireType.Varint).int32(message.errorCode);
-        /* string error_message = 3; */
+            writer.tag(3, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 4; */
         if (message.errorMessage !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.errorMessage);
+            writer.tag(4, WireType.LengthDelimited).string(message.errorMessage);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -346,22 +357,22 @@ class RegisterRequest$Type extends MessageType<RegisterRequest> {
  */
 export const RegisterRequest = new RegisterRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class RegisterRresponse$Type extends MessageType<RegisterRresponse> {
+class RegisterResponse$Type extends MessageType<RegisterResponse> {
     constructor() {
-        super("user_bff_service.RegisterRresponse", [
+        super("user_bff_service.RegisterResponse", [
             { no: 1, name: "user", kind: "message", T: () => User },
             { no: 2, name: "error_code", kind: "enum", T: () => ["user_bff_service.RegisterErrorCode", RegisterErrorCode] },
             { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<RegisterRresponse>): RegisterRresponse {
+    create(value?: PartialMessage<RegisterResponse>): RegisterResponse {
         const message = { errorCode: 0, errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<RegisterRresponse>(this, message, value);
+            reflectionMergePartial<RegisterResponse>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RegisterRresponse): RegisterRresponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RegisterResponse): RegisterResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -386,7 +397,7 @@ class RegisterRresponse$Type extends MessageType<RegisterRresponse> {
         }
         return message;
     }
-    internalBinaryWrite(message: RegisterRresponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: RegisterResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* common.User user = 1; */
         if (message.user)
             User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
@@ -403,13 +414,13 @@ class RegisterRresponse$Type extends MessageType<RegisterRresponse> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_bff_service.RegisterRresponse
+ * @generated MessageType for protobuf message user_bff_service.RegisterResponse
  */
-export const RegisterRresponse = new RegisterRresponse$Type();
+export const RegisterResponse = new RegisterResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_bff_service.UserBFFService
  */
 export const UserBFFService = new ServiceType("user_bff_service.UserBFFService", [
     { name: "Login", options: {}, I: LoginRequest, O: LoginResponse },
-    { name: "Register", options: {}, I: RegisterRequest, O: RegisterRresponse }
+    { name: "Register", options: {}, I: RegisterRequest, O: RegisterResponse }
 ]);

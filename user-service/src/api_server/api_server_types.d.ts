@@ -1,13 +1,13 @@
 import { UntypedServiceImplementation, ServiceDefinition, handleUnaryCall } from '@grpc/grpc-js';
 
 declare interface IApiHandler<RequestType, ResponseType> {
-  handle(request: RequestType): ResponseType;
+  handle(request: RequestType): Promise<ResponseType>;
 }
 
 declare type ApiCallHandler<RequestType, ResponseType> = {
   handler: IApiHandler<RequestType, ResponseType>,
   grpcRouteHandler: handleUnaryCall<RequestType, ResponseType>
-  httpRouteHandler: (json: any) => any,
+  httpRouteHandler: (json: any) => Promise<any>,
 };
 
 declare type ServiceHandlerDefinition<ServiceDefinition = UntypedServiceImplementation> = {

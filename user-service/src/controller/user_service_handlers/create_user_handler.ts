@@ -11,7 +11,7 @@ class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResp
     this.userStore = storage.getUserStore();
   }
 
-  handle(request: CreateUserRequest): CreateUserResponse {
+  async handle(request: CreateUserRequest): Promise<CreateUserResponse> {
     if (!request.user) {
       return {
         user: undefined,
