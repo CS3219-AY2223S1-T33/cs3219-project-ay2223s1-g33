@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import Validator from 'validator';
 import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bff-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
@@ -12,28 +13,37 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   }
 
   async handle(request: LoginRequest): Promise<LoginResponse> {
-    if (!request.credentials) {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_BAD_REQUEST, 'Bad Login Request');
-    }
-
-    if (request.credentials.username.trim() === '' || request.credentials.password.trim() === '') {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_BAD_REQUEST, 'Bad Login Request');
+    const validatedRequest = LoginHandler.validateRequest(request);
+    if (validatedRequest instanceof Error) {
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_BAD_REQUEST,
+        validatedRequest.message,
+      );
     }
 
     let user: (PasswordUser | undefined);
     try {
-      user = await this.getUserByUsername(request.credentials.username);
+      user = await this.getUserByUsername(validatedRequest.username);
     } catch {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR, 'An internal error occurred');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR,
+        'An internal error occurred',
+      );
     }
 
     if (!user) {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS, 'Invalid Credentials');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
+        'Invalid Credentials',
+      );
     }
 
-    const isLoginSuccessful = await bcrypt.compare(request.credentials.password, user.password);
+    const isLoginSuccessful = await bcrypt.compare(validatedRequest.password, user.password);
     if (!isLoginSuccessful) {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS, 'Invalid Credentials');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
+        'Invalid Credentials',
+      );
     }
 
     return {
@@ -41,6 +51,33 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       user: user.userInfo,
       errorMessage: '',
       sessionToken: 'Placeholder token',
+    };
+  }
+
+  static validateRequest(request: LoginRequest): (ValidatedRequest | Error) {
+    if (!request.credentials) {
+      return new Error('No credentials provided');
+    }
+
+    const username = request.credentials.username.trim();
+    const password = request.credentials.password.trim();
+
+    if (Validator.isEmpty(username) || Validator.isEmpty(password)) {
+      return new Error('Empty field provided');
+    }
+
+    if (!Validator.isEmail(username)) {
+      return new Error('Username must be a valid email');
+    }
+
+    const sanitizedEmail = Validator.normalizeEmail(username);
+    if (!sanitizedEmail) {
+      return new Error('Username must be a valid email');
+    }
+
+    return {
+      username: sanitizedEmail,
+      password,
     };
   }
 
@@ -74,5 +111,10 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     };
   }
 }
+
+type ValidatedRequest = {
+  username: string,
+  password: string,
+};
 
 export default LoginHandler;
