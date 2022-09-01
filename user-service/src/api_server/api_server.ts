@@ -21,7 +21,7 @@ class ApiServer {
     this.grpcPort = grpcPort;
     this.httpServer = express();
     this.httpServer.use(cors());
-    
+
     this.grpcServer = new GrpcServer();
   }
 
