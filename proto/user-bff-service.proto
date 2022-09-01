@@ -30,8 +30,9 @@ message LoginRequest {
 
 message LoginResponse {
   common.User user = 1;
-  LoginErrorCode error_code = 2;
-  string error_message = 3;
+  string session_token = 2;
+  LoginErrorCode error_code = 3;
+  string error_message = 4;
 }
 
 message RegisterRequest {
@@ -39,7 +40,7 @@ message RegisterRequest {
   string nickname = 2;
 }
 
-message RegisterRresponse {
+message RegisterResponse {
   common.User user = 1;
   RegisterErrorCode error_code = 2;
   string error_message = 3;
@@ -47,5 +48,5 @@ message RegisterRresponse {
 
 service UserBFFService {
   rpc Login(LoginRequest) returns (LoginResponse);
-  rpc Register(RegisterRequest) returns (RegisterRresponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
 }
