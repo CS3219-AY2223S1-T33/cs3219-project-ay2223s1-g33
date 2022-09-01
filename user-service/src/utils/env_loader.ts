@@ -13,7 +13,10 @@ function requireExists(key: string): void {
 }
 
 function requireString(key: string, defaultValue?: string): string {
-  requireExists(key);
+  if (!defaultValue) {
+    requireExists(key);
+  }
+
   const variable = process.env[key];
   if (!variable || variable === '') {
     if (!defaultValue) {
@@ -26,7 +29,10 @@ function requireString(key: string, defaultValue?: string): string {
 }
 
 function requireInt(key: string, defaultValue?: number): number {
-  requireExists(key);
+  if (!defaultValue) {
+    requireExists(key);
+  }
+
   const variable = process.env[key];
   if (!variable || variable === '') {
     if (!defaultValue) {
