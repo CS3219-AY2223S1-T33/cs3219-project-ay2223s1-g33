@@ -1,13 +1,13 @@
 import cors from 'cors';
 import express, { Express, Request, Response } from 'express';
 import { Server as GrpcServer, ServerCredentials, UntypedServiceImplementation } from '@grpc/grpc-js';
-import { ApiService } from './api_server_types';
+import { ApiService, IApiServer } from './api_server_types';
 import jsonParseMiddleware from '../utils/json_middleware';
 import Logger from '../utils/logger';
 
 const hostAddress = '0.0.0.0';
 
-class ApiServer {
+class ApiServer implements IApiServer {
   httpPort: number;
 
   grpcPort: number;
@@ -59,7 +59,7 @@ class ApiServer {
     this.bindGrpcServer();
   }
 
-  registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>) {
+  registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void {
     this.grpcServer.addService(apiService.serviceDefinition, apiService.serviceImplementation);
 
     const httpRouter = express.Router();
@@ -73,4 +73,8 @@ class ApiServer {
   }
 }
 
-export default ApiServer;
+function createApiServer(httpPort: number, grpcPort: number): IApiServer {
+  return new ApiServer(httpPort, grpcPort);
+}
+
+export default createApiServer;
