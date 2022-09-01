@@ -65,8 +65,13 @@ class ApiServer implements IApiServer {
     const httpRouter = express.Router();
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
       httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
-        const response = await apiService.serviceHandlerDefinition[key].httpRouteHandler(req.body);
-        resp.json(response);
+        try {
+          const response = await apiService.serviceHandlerDefinition[key]
+            .httpRouteHandler(req.body);
+          resp.json(response);
+        } catch {
+          resp.status(400).json({});
+        }
       });
     });
     this.httpServer.use('/grpc', httpRouter);
