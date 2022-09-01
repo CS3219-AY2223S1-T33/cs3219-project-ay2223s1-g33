@@ -4,13 +4,13 @@ import getApiServer from './api_server/api_server';
 import UserBFFServiceApi from './controller/user_service_bff_controller';
 import UserServiceApi from './controller/user_service_controller';
 import AppStorage from './storage/app_storage';
+import loadEnvironment from './utils/env_loader';
+
+const envConfig = loadEnvironment();
 
 const dataStore: AppStorage = new AppStorage();
 
-const httpPort: number = 8081;
-const grpcPort: number = 4000;
-
-const apiServer = getApiServer(httpPort, grpcPort);
+const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
 const expressApp = apiServer.getHttpServer();
 
 expressApp.get('/', (_: Request, resp: Response) => {
