@@ -1,3 +1,4 @@
+import { PasswordReset } from './entities/PasswordReset';
 import { History, Question, User } from './entities/';
 import "reflect-metadata"
 import { DataSource } from "typeorm";
@@ -12,7 +13,7 @@ const ds = new DataSource({
     database: process.env.DATABASE_NAME!,
     synchronize: true,
     logging: true,
-    entities: [User, Question, History],
+    entities: [User, Question, History, PasswordReset],
     subscribers: [],
     migrations: [],
 });
