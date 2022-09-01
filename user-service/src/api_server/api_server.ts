@@ -20,6 +20,8 @@ class ApiServer {
     this.httpPort = httpPort;
     this.grpcPort = grpcPort;
     this.httpServer = express();
+    this.httpServer.use(cors());
+    
     this.grpcServer = new GrpcServer();
   }
 
@@ -63,12 +65,10 @@ class ApiServer {
     const httpRouter = express.Router();
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
       httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
-        resp.setHeader('Access-Control-Allow-Origin', '*');
         const response = await apiService.serviceHandlerDefinition[key].httpRouteHandler(req.body);
         resp.json(response);
       });
     });
-    this.httpServer.use(cors());
     this.httpServer.use('/grpc', httpRouter);
   }
 }
