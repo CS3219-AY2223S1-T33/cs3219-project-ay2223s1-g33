@@ -9,10 +9,10 @@ function Home() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   // eslint-disable-next-line
-  const [cookies, setCookies, removeCookies] = useCookies(["token"]);
+  const [cookies, setCookies, removeCookies] = useCookies(["session_token"]);
 
   const logoutHandler = () => {
-    removeCookies("token");
+    removeCookies("session_token");
     dispatch(logout);
     navigate("/login", { replace: true });
   };

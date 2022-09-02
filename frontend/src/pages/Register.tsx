@@ -12,7 +12,7 @@ import {
   useBoolean,
   Text,
   FormErrorMessage,
-  useToast,
+  useToast
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import React from "react";
@@ -20,21 +20,21 @@ import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm,
+  useForm
 } from "react-hook-form";
 import axios from "../axios";
 import Link from "../components/ui/Link";
 import {
   RegisterRequest,
   RegisterResponse,
-  UserCredentials,
+  UserCredentials
 } from "../proto/user-bff-service";
 
 function Register() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm();
 
   const toast = useToast();
@@ -43,11 +43,8 @@ function Register() {
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
     const { email, password, nickname } = data;
 
-    const credentials = UserCredentials.fromJson({ username: email, password });
-    const registerRequest = RegisterRequest.fromJson({
-      credentials: UserCredentials.toJson(credentials),
-      nickname,
-    });
+    const credentials: UserCredentials = { username: email, password };
+    const registerRequest: RegisterRequest = { credentials, nickname };
 
     // Send registration request to the server
     axios
@@ -67,7 +64,7 @@ function Register() {
           status: "success",
           position: "top",
           isClosable: true,
-          duration: 5000,
+          duration: 5000
         });
       })
       .catch((err) => {
@@ -77,7 +74,7 @@ function Register() {
           duration: 5000,
           isClosable: true,
           position: "top",
-          description: err.message,
+          description: err.message
         });
       });
   };
@@ -90,7 +87,7 @@ function Register() {
       status: "error",
       duration: 5000,
       isClosable: true,
-      position: "top",
+      position: "top"
     });
   };
 
@@ -108,7 +105,7 @@ function Register() {
                 <Input
                   type="text"
                   {...register("nickname", {
-                    required: "Please enter your nickname.",
+                    required: "Please enter your nickname."
                   })}
                 />
                 <FormErrorMessage>
@@ -121,7 +118,7 @@ function Register() {
                 <Input
                   type="email"
                   {...register("email", {
-                    required: "Please enter your email.",
+                    required: "Please enter your email."
                   })}
                 />
                 <FormErrorMessage>
@@ -139,8 +136,8 @@ function Register() {
                       minLength: {
                         value: 8,
                         message:
-                          "Please make sure your password is at least 8 characters long.",
-                      },
+                          "Please make sure your password is at least 8 characters long."
+                      }
                     })}
                   />
                   <InputRightElement h="full">
@@ -161,7 +158,7 @@ function Register() {
                   bg="blue.400"
                   color="white"
                   _hover={{
-                    bg: "blue.500",
+                    bg: "blue.500"
                   }}
                   type="submit"
                 >
