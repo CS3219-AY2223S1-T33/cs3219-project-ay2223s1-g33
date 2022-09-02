@@ -14,18 +14,18 @@ if (!container) throw new Error("Failed to find the root element");
 const root = ReactDOM.createRoot(container);
 
 root.render(
-	<React.StrictMode>
-		<ColorModeScript />
-		<ChakraProvider theme={theme}>
-			<BrowserRouter>
-				<CookiesProvider>
-					<Provider store={store}>
-						<App />
-					</Provider>
-				</CookiesProvider>
-			</BrowserRouter>
-		</ChakraProvider>
-	</React.StrictMode>
+  <React.StrictMode>
+    <ColorModeScript />
+    <ChakraProvider theme={theme}>
+      <BrowserRouter>
+        <CookiesProvider>
+          <Provider store={store}>
+            <App />
+          </Provider>
+        </CookiesProvider>
+      </BrowserRouter>
+    </ChakraProvider>
+  </React.StrictMode>
 );
 
 // If you want your app to work offline and load faster, you can change
