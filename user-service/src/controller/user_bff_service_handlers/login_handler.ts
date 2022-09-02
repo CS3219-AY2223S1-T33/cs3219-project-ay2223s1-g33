@@ -4,12 +4,16 @@ import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bf
 import { IApiHandler } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
+import { IAuthenticationService } from '../../auth/authentication_service_types';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: UserServiceClient;
 
-  constructor(rpcClient: UserServiceClient) {
+  authService: IAuthenticationService;
+
+  constructor(rpcClient: UserServiceClient, authService: IAuthenticationService) {
     this.rpcClient = rpcClient;
+    this.authService = authService;
   }
 
   async handle(request: LoginRequest): Promise<LoginResponse> {
@@ -50,7 +54,9 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       errorCode: LoginErrorCode.LOGIN_ERROR_NONE,
       user: user.userInfo,
       errorMessage: '',
-      sessionToken: 'Placeholder token',
+      sessionToken: this.authService.createToken({
+        username: user.userInfo?.username,
+      }),
     };
   }
 

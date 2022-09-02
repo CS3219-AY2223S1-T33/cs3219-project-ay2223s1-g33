@@ -11,6 +11,7 @@ import {
   RegisterResponse,
 } from '../proto/user-bff-service';
 import LoginHandler from './user_bff_service_handlers/login_handler';
+import { IAuthenticationService } from '../auth/authentication_service_types';
 
 class UserBFFServiceApi implements ApiService<IUserBFFService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserBFFService>;
@@ -19,7 +20,7 @@ class UserBFFServiceApi implements ApiService<IUserBFFService> {
 
   serviceImplementation: IUserBFFService;
 
-  constructor() {
+  constructor(authService: IAuthenticationService) {
     const grpcClient = new UserServiceClient(
       '127.0.0.1:4000',
       ChannelCredentials.createInsecure(),
@@ -29,7 +30,7 @@ class UserBFFServiceApi implements ApiService<IUserBFFService> {
 
     const handlerDefinitions: ServiceHandlerDefinition<IUserBFFService> = {
       register: fromApiHandler(new RegisterHandler(grpcClient), RegisterRequest, RegisterResponse),
-      login: fromApiHandler(new LoginHandler(grpcClient), LoginRequest, LoginResponse),
+      login: fromApiHandler(new LoginHandler(grpcClient, authService), LoginRequest, LoginResponse),
     };
 
     const userBFFService: IUserBFFService = {
