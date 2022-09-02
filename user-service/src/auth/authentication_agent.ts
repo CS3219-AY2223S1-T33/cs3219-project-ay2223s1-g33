@@ -1,8 +1,8 @@
 import { sign, verify } from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
-import { IAuthenticationService } from './authentication_service_types';
+import { IAuthenticationAgent } from './authentication_agent_types';
 
-class AuthenticationService implements IAuthenticationService {
+class AuthenticationAgent implements IAuthenticationAgent {
   signingSecret: string;
 
   constructor(signingSecret: string) {
@@ -12,7 +12,7 @@ class AuthenticationService implements IAuthenticationService {
   createToken(payload: Object): string {
     const token = sign({
       data: payload,
-      uuid: AuthenticationService.generateSecureUUID(),
+      uuid: AuthenticationAgent.generateSecureUUID(),
 
     }, this.signingSecret);
 
@@ -33,8 +33,8 @@ class AuthenticationService implements IAuthenticationService {
   }
 }
 
-function createAuthenticationService(signingSecret: string): IAuthenticationService {
-  return new AuthenticationService(signingSecret);
+function createAuthenticationService(signingSecret: string): IAuthenticationAgent {
+  return new AuthenticationAgent(signingSecret);
 }
 
 export default createAuthenticationService;
