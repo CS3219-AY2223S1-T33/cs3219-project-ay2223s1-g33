@@ -20,8 +20,7 @@ import React from "react";
 import { FieldValues, SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import Link from "../components/ui/Link";
-import { PasswordUser, User } from "../proto/types";
-import { CreateUserRequest, CreateUserResponse } from "../proto/user-service";
+import { RegisterRequest, RegisterResponse, UserCredentials } from "../proto/user-bff-service";
 
 function Register() {
 	const {
@@ -35,21 +34,25 @@ function Register() {
 
 	const validFormHandler: SubmitHandler<FieldValues> = (data) => {
 		const { email, password, nickname } = data;
-		const user = User.fromJson({ username: email, nickname });
-		const pwUser = PasswordUser.fromJson({ user_info: User.toJson(user), password });
-		const createReq = CreateUserRequest.fromJson({ user: PasswordUser.toJson(pwUser) });
+
+		const credentials = UserCredentials.fromJson({ username: email, password });
+		const registerRequest = RegisterRequest.fromJson({
+			credentials: UserCredentials.toJson(credentials),
+			nickname,
+		});
 
 		// Send registration request to the server
 		axios
-			.post<CreateUserResponse>("http://127.0.0.1:8081/grpc/createUser", createReq)
+			.post<RegisterResponse>("http://127.0.0.1:8081/grpc/register", registerRequest)
 			.then((res) => {
 				const { data: resData } = res;
-				if (resData.errorMessage !== "") {
+
+				// Since proto-buffers treat 0 and empty string as undefined, a successful registration
+				// will return an empty object
+				if (resData.errorCode) {
 					throw new Error(resData.errorMessage);
 				}
 
-				console.log("Success");
-				// console.log(resData);
 				toast({
 					title: "Success!",
 					description: "Yay! Click on the link below to login.",
@@ -60,21 +63,26 @@ function Register() {
 				});
 			})
 			.catch((err) => {
-				const description = err.message;
 				toast({
 					title: "Error",
 					status: "error",
 					duration: 5000,
 					isClosable: true,
 					position: "top",
-					description,
+					description: err.message,
 				});
 			});
 	};
 
-	const invalidFormHandler: SubmitErrorHandler<FieldValues> = (data: any) => {
-		console.warn("invalid");
-		console.log(data);
+	const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
+		toast({
+			title: "Oops!",
+			description: "Please check if you have filled everything in correctly before submitting",
+			status: "error",
+			duration: 5000,
+			isClosable: true,
+			position: "top",
+		});
 	};
 
 	return (
