@@ -4,14 +4,14 @@ import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bf
 import { IApiHandler } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
-import { IAuthenticationService } from '../../auth/authentication_service_types';
+import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: UserServiceClient;
 
-  authService: IAuthenticationService;
+  authService: IAuthenticationAgent;
 
-  constructor(rpcClient: UserServiceClient, authService: IAuthenticationService) {
+  constructor(rpcClient: UserServiceClient, authService: IAuthenticationAgent) {
     this.rpcClient = rpcClient;
     this.authService = authService;
   }

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 
 import getApiServer from './api_server/api_server';
-import createAuthenticationService from './auth/authentication_service';
-import { IAuthenticationService } from './auth/authentication_service_types';
+import createAuthenticationService from './auth/authentication_agent';
+import { IAuthenticationAgent } from './auth/authentication_agent_types';
 import UserBFFServiceApi from './controller/user_service_bff_controller';
 import UserServiceApi from './controller/user_service_controller';
 import AppStorage from './storage/app_storage';
@@ -11,7 +11,7 @@ import loadEnvironment from './utils/env_loader';
 const envConfig = loadEnvironment();
 
 const dataStore: AppStorage = new AppStorage();
-const authService: IAuthenticationService = createAuthenticationService(
+const authService: IAuthenticationAgent = createAuthenticationService(
   envConfig.JWT_SIGNING_SECRET,
 );
 

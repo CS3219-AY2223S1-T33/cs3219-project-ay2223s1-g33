@@ -5,6 +5,10 @@
 import { UserBFFService } from "./user-bff-service";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
+import type { GetUserProfileResponse } from "./user-bff-service";
+import type { GetUserProfileRequest } from "./user-bff-service";
+import type { LogoutResponse } from "./user-bff-service";
+import type { LogoutRequest } from "./user-bff-service";
 import type { RegisterResponse } from "./user-bff-service";
 import type { RegisterRequest } from "./user-bff-service";
 import type { LoginResponse } from "./user-bff-service";
@@ -28,6 +32,20 @@ export interface IUserBFFServiceClient {
     register(input: RegisterRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
     register(input: RegisterRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
     register(input: RegisterRequest, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: Logout(user_bff_service.LogoutRequest) returns (user_bff_service.LogoutResponse);
+     */
+    logout(input: LogoutRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: GetUserProfile(user_bff_service.GetUserProfileRequest) returns (user_bff_service.GetUserProfileResponse);
+     */
+    getUserProfile(input: GetUserProfileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service user_bff_service.UserBFFService
@@ -51,5 +69,19 @@ export class UserBFFServiceClient extends grpc.Client implements IUserBFFService
     register(input: RegisterRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: RegisterResponse) => void)): grpc.ClientUnaryCall {
         const method = UserBFFService.methods[1];
         return this.makeUnaryRequest<RegisterRequest, RegisterResponse>(`/${UserBFFService.typeName}/${method.name}`, (value: RegisterRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): RegisterResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: Logout(user_bff_service.LogoutRequest) returns (user_bff_service.LogoutResponse);
+     */
+    logout(input: LogoutRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: LogoutResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: LogoutResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: LogoutResponse) => void)): grpc.ClientUnaryCall {
+        const method = UserBFFService.methods[2];
+        return this.makeUnaryRequest<LogoutRequest, LogoutResponse>(`/${UserBFFService.typeName}/${method.name}`, (value: LogoutRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): LogoutResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: GetUserProfile(user_bff_service.GetUserProfileRequest) returns (user_bff_service.GetUserProfileResponse);
+     */
+    getUserProfile(input: GetUserProfileRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void)): grpc.ClientUnaryCall {
+        const method = UserBFFService.methods[3];
+        return this.makeUnaryRequest<GetUserProfileRequest, GetUserProfileResponse>(`/${UserBFFService.typeName}/${method.name}`, (value: GetUserProfileRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): GetUserProfileResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }
