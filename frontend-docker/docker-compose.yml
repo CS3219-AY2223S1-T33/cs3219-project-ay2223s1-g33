@@ -1,9 +1,0 @@
-version: "3.8"
-services:
-  web:
-    build: .
-    volumes:
-      - .:/home/node/frontend
-      - /home/node/frontend/node_modules
-    ports:
-      - "3000:3000"
