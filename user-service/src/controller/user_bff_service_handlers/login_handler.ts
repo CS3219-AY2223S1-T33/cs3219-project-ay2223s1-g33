@@ -4,14 +4,14 @@ import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bf
 import { IApiHandler } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
-import { IAuthenticationService } from '../../auth/authentication_service_types';
+import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: UserServiceClient;
 
-  authService: IAuthenticationService;
+  authService: IAuthenticationAgent;
 
-  constructor(rpcClient: UserServiceClient, authService: IAuthenticationService) {
+  constructor(rpcClient: UserServiceClient, authService: IAuthenticationAgent) {
     this.rpcClient = rpcClient;
     this.authService = authService;
   }
@@ -25,7 +25,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    let user: (PasswordUser | undefined);
+    let user: PasswordUser | undefined;
     try {
       user = await this.getUserByUsername(validatedRequest.username);
     } catch {
@@ -87,25 +87,28 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     };
   }
 
-  getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
+  getUserByUsername(username: string): Promise<PasswordUser | undefined> {
     const searchUserObject: User = User.create();
     searchUserObject.username = username;
 
-    return new Promise<(PasswordUser | undefined)>((resolve, reject) => {
-      this.rpcClient.getUser({
-        user: searchUserObject,
-      }, (err, value) => {
-        if (!value) {
-          reject(err);
-          return;
-        }
+    return new Promise<PasswordUser | undefined>((resolve, reject) => {
+      this.rpcClient.getUser(
+        {
+          user: searchUserObject,
+        },
+        (err, value) => {
+          if (!value) {
+            reject(err);
+            return;
+          }
 
-        if (!value.user && value.errorMessage !== '') {
-          reject(value.errorMessage);
-          return;
-        }
-        resolve(value.user);
-      });
+          if (!value.user && value.errorMessage !== '') {
+            reject(value.errorMessage);
+            return;
+          }
+          resolve(value.user);
+        },
+      );
     });
   }
 

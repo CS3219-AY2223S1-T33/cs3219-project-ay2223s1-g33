@@ -84,6 +84,50 @@ export interface RegisterResponse {
     errorMessage: string;
 }
 /**
+ * @generated from protobuf message user_bff_service.LogoutRequest
+ */
+export interface LogoutRequest {
+    /**
+     * @generated from protobuf field: string session_token = 1;
+     */
+    sessionToken: string;
+}
+/**
+ * @generated from protobuf message user_bff_service.LogoutResponse
+ */
+export interface LogoutResponse {
+    /**
+     * @generated from protobuf field: user_bff_service.LogoutErrorCode error_code = 1;
+     */
+    errorCode: LogoutErrorCode;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message user_bff_service.GetUserProfileRequest
+ */
+export interface GetUserProfileRequest {
+    /**
+     * @generated from protobuf field: string session_token = 1;
+     */
+    sessionToken: string;
+}
+/**
+ * @generated from protobuf message user_bff_service.GetUserProfileResponse
+ */
+export interface GetUserProfileResponse {
+    /**
+     * @generated from protobuf field: common.User user = 1;
+     */
+    user?: User;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
  * @generated from protobuf enum user_bff_service.LoginErrorCode
  */
 export enum LoginErrorCode {
@@ -128,6 +172,23 @@ export enum RegisterErrorCode {
      * @generated from protobuf enum value: REGISTER_ERROR_INTERNAL_ERROR = 101;
      */
     REGISTER_ERROR_INTERNAL_ERROR = 101
+}
+/**
+ * @generated from protobuf enum user_bff_service.LogoutErrorCode
+ */
+export enum LogoutErrorCode {
+    /**
+     * @generated from protobuf enum value: LOGOUT_ERROR_NONE = 0;
+     */
+    LOGOUT_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: LOGOUT_ERROR_BAD_REQUEST = 100;
+     */
+    LOGOUT_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: LOGOUT_ERROR_INTERNAL_ERROR = 101;
+     */
+    LOGOUT_ERROR_INTERNAL_ERROR = 101
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class UserCredentials$Type extends MessageType<UserCredentials> {
@@ -406,10 +467,214 @@ class RegisterResponse$Type extends MessageType<RegisterResponse> {
  * @generated MessageType for protobuf message user_bff_service.RegisterResponse
  */
 export const RegisterResponse = new RegisterResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class LogoutRequest$Type extends MessageType<LogoutRequest> {
+    constructor() {
+        super("user_bff_service.LogoutRequest", [
+            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<LogoutRequest>): LogoutRequest {
+        const message = { sessionToken: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<LogoutRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LogoutRequest): LogoutRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string session_token */ 1:
+                    message.sessionToken = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: LogoutRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string session_token = 1; */
+        if (message.sessionToken !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_bff_service.LogoutRequest
+ */
+export const LogoutRequest = new LogoutRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class LogoutResponse$Type extends MessageType<LogoutResponse> {
+    constructor() {
+        super("user_bff_service.LogoutResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_bff_service.LogoutErrorCode", LogoutErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<LogoutResponse>): LogoutResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<LogoutResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LogoutResponse): LogoutResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_bff_service.LogoutErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: LogoutResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_bff_service.LogoutErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_bff_service.LogoutResponse
+ */
+export const LogoutResponse = new LogoutResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetUserProfileRequest$Type extends MessageType<GetUserProfileRequest> {
+    constructor() {
+        super("user_bff_service.GetUserProfileRequest", [
+            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetUserProfileRequest>): GetUserProfileRequest {
+        const message = { sessionToken: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetUserProfileRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserProfileRequest): GetUserProfileRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string session_token */ 1:
+                    message.sessionToken = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetUserProfileRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string session_token = 1; */
+        if (message.sessionToken !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_bff_service.GetUserProfileRequest
+ */
+export const GetUserProfileRequest = new GetUserProfileRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetUserProfileResponse$Type extends MessageType<GetUserProfileResponse> {
+    constructor() {
+        super("user_bff_service.GetUserProfileResponse", [
+            { no: 1, name: "user", kind: "message", T: () => User },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetUserProfileResponse>): GetUserProfileResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetUserProfileResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserProfileResponse): GetUserProfileResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.User user */ 1:
+                    message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetUserProfileResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.User user = 1; */
+        if (message.user)
+            User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_bff_service.GetUserProfileResponse
+ */
+export const GetUserProfileResponse = new GetUserProfileResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_bff_service.UserBFFService
  */
 export const UserBFFService = new ServiceType("user_bff_service.UserBFFService", [
     { name: "Login", options: {}, I: LoginRequest, O: LoginResponse },
-    { name: "Register", options: {}, I: RegisterRequest, O: RegisterResponse }
+    { name: "Register", options: {}, I: RegisterRequest, O: RegisterResponse },
+    { name: "Logout", options: {}, I: LogoutRequest, O: LogoutResponse },
+    { name: "GetUserProfile", options: {}, I: GetUserProfileRequest, O: GetUserProfileResponse }
 ]);

@@ -1,17 +1,22 @@
-# CS3219-AY22-23-Project-Skeleton
+# PeerPrep (G33)
 
-This is a template repository for CS3219 project.
+PeerPrep is a web application for collaborating on technical interview questions and challenges. Users can practice with other like-minded users on coding challenges and take each other to new heights through peer-learning. The collaborative nature of the application breaks the monotonous grind of improving technical skills, tailored to the user’s skills.
+
+## Quickstart Steps
+1. In the root of the project, run `npm i`.
+2. Run `npm run-script init-permissions`.
+3. Run `npm run-script gen-proto` to compile protocol buffer typescript files.
+4. Configure the `.env` file for each microservice. Refer to `.env.sample` for the variables that need to be configured.
+5. In the microservice folder, run `npm i`.
+6. In the microservice folder, run `npm start`.
 
 ## Protocol Buffer Generation
 1. In the root of the project, run `npm i`.
 2. Then, run `npm run-script gen-proto`.
 
-## User Service
-1. Rename `.env.sample` file to `.env`.
-2. Create a Cloud DB URL using Mongo Atlas.
-3. Enter the DB URL created as `DB_CLOUD_URI` in `.env` file.
-4. Install npm packages using `npm i`.
-5. Run User Service using `npm run dev`.
+## Database Schema Synchronization
+1. In the root of the project, run `npm i`.
+2. Then, run `npm run-script sync-schema`.
 
 ## Frontend
 1. Install npm packages using `npm i`.

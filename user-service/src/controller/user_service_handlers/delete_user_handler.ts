@@ -16,7 +16,7 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
       };
     }
 
-    this.userStore.removeUser(request.userId);
+    await this.userStore.removeUser(request.userId);
 
     return {
       errorMessage: '',

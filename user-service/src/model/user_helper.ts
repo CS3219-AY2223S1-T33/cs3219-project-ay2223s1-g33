@@ -1,7 +1,7 @@
 import { PasswordUser } from '../proto/types';
 import { StoredUser } from './user_store_model';
 
-function convertPasswordUserToStoredUser(user: PasswordUser | undefined): (StoredUser | undefined) {
+function convertPasswordUserToStoredUser(user: PasswordUser | undefined): StoredUser | undefined {
   if (!user) {
     return undefined;
   }
@@ -18,7 +18,7 @@ function convertPasswordUserToStoredUser(user: PasswordUser | undefined): (Store
   };
 }
 
-function convertStoredUserToPasswordUser(user: StoredUser | undefined): (PasswordUser | undefined) {
+function convertStoredUserToPasswordUser(user: StoredUser | undefined): PasswordUser | undefined {
   if (!user) {
     return undefined;
   }
@@ -33,7 +33,4 @@ function convertStoredUserToPasswordUser(user: StoredUser | undefined): (Passwor
   };
 }
 
-export {
-  convertPasswordUserToStoredUser,
-  convertStoredUserToPasswordUser,
-};
+export { convertPasswordUserToStoredUser, convertStoredUserToPasswordUser };

@@ -19,6 +19,12 @@ enum RegisterErrorCode {
   REGISTER_ERROR_INTERNAL_ERROR = 101;
 }
 
+enum LogoutErrorCode {
+  LOGOUT_ERROR_NONE = 0;
+  LOGOUT_ERROR_BAD_REQUEST = 100;
+  LOGOUT_ERROR_INTERNAL_ERROR = 101;
+}
+
 message UserCredentials {
   string username = 1;
   string password = 2;
@@ -45,7 +51,27 @@ message RegisterResponse {
   string error_message = 2;
 }
 
+message LogoutRequest {
+  string session_token = 1;
+}
+
+message LogoutResponse {
+  LogoutErrorCode error_code = 1;
+  string error_message = 2;
+}
+
+message GetUserProfileRequest {
+  string session_token = 1;
+}
+
+message GetUserProfileResponse {
+  common.User user = 1;
+  string error_message = 2;
+}
+
 service UserBFFService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
 }
