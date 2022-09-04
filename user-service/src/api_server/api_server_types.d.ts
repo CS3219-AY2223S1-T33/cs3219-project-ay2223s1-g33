@@ -1,4 +1,17 @@
-import { UntypedServiceImplementation, ServiceDefinition, handleUnaryCall } from '@grpc/grpc-js';
+import {
+  Server as GrpcServer,
+  UntypedServiceImplementation,
+  ServiceDefinition,
+  handleUnaryCall,
+} from '@grpc/grpc-js';
+import { Express } from 'express';
+
+declare interface IApiServer {
+  getHttpServer(): Express;
+  getGrpcServer(): GrpcServer;
+  bind(): void;
+  registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void;
+}
 
 declare interface IApiHandler<RequestType, ResponseType> {
   handle(request: RequestType): Promise<ResponseType>;
@@ -21,5 +34,9 @@ declare interface ApiService<T extends UntypedServiceImplementation> {
 }
 
 export {
-  IApiHandler, ApiCallHandler, ServiceHandlerDefinition, ApiService,
+  IApiServer,
+  IApiHandler,
+  ApiCallHandler,
+  ServiceHandlerDefinition,
+  ApiService,
 };

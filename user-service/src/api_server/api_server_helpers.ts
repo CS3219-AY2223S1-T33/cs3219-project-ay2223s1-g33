@@ -32,14 +32,11 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   respType: IMessageType<ResponseType>,
 ): (object: any) => Promise<any> {
   return async (requestJson: any): Promise<any> => {
-    let requestObject: RequestType;
-    try {
-      requestObject = reqType.fromJson(requestJson);
-    } catch {
-      return respType.create();
-    }
+    const requestObject = reqType.fromJson(requestJson);
     const responseObject: ResponseType = await handler.handle(requestObject);
-    return respType.toJson(responseObject);
+    return respType.toJson(responseObject, {
+      enumAsInteger: true,
+    });
   };
 }
 

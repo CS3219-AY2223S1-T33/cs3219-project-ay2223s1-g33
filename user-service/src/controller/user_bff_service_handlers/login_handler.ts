@@ -1,34 +1,33 @@
 import bcrypt from 'bcrypt';
+import Validator from 'validator';
 import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bff-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
+import { IAuthenticationService } from '../../auth/authentication_service_types';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: UserServiceClient;
 
-  constructor(rpcClient: UserServiceClient) {
+  authService: IAuthenticationService;
+
+  constructor(rpcClient: UserServiceClient, authService: IAuthenticationService) {
     this.rpcClient = rpcClient;
+    this.authService = authService;
   }
 
   async handle(request: LoginRequest): Promise<LoginResponse> {
-    if (!request.credentials) {
+    const validatedRequest = LoginHandler.validateRequest(request);
+    if (validatedRequest instanceof Error) {
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_BAD_REQUEST,
-        'Bad Login Request',
-      );
-    }
-
-    if (request.credentials.username.trim() === '' || request.credentials.password.trim() === '') {
-      return LoginHandler.buildErrorResponse(
-        LoginErrorCode.LOGIN_ERROR_BAD_REQUEST,
-        'Bad Login Request',
+        validatedRequest.message,
       );
     }
 
     let user: PasswordUser | undefined;
     try {
-      user = await this.getUserByUsername(request.credentials.username);
+      user = await this.getUserByUsername(validatedRequest.username);
     } catch {
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR,
@@ -43,7 +42,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    const isLoginSuccessful = await bcrypt.compare(request.credentials.password, user.password);
+    const isLoginSuccessful = await bcrypt.compare(validatedRequest.password, user.password);
     if (!isLoginSuccessful) {
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
@@ -55,7 +54,36 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       errorCode: LoginErrorCode.LOGIN_ERROR_NONE,
       user: user.userInfo,
       errorMessage: '',
-      sessionToken: 'Placeholder token',
+      sessionToken: this.authService.createToken({
+        username: user.userInfo?.username,
+      }),
+    };
+  }
+
+  static validateRequest(request: LoginRequest): (ValidatedRequest | Error) {
+    if (!request.credentials) {
+      return new Error('No credentials provided');
+    }
+
+    const username = request.credentials.username.trim();
+    const password = request.credentials.password.trim();
+
+    if (Validator.isEmpty(username) || Validator.isEmpty(password)) {
+      return new Error('Empty field provided');
+    }
+
+    if (!Validator.isEmail(username)) {
+      return new Error('Username must be a valid email');
+    }
+
+    const sanitizedEmail = Validator.normalizeEmail(username);
+    if (!sanitizedEmail) {
+      return new Error('Username must be a valid email');
+    }
+
+    return {
+      username: sanitizedEmail,
+      password,
     };
   }
 
@@ -92,5 +120,10 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     };
   }
 }
+
+type ValidatedRequest = {
+  username: string,
+  password: string,
+};
 
 export default LoginHandler;

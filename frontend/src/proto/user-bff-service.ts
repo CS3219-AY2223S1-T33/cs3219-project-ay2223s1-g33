@@ -75,15 +75,11 @@ export interface RegisterRequest {
  */
 export interface RegisterResponse {
     /**
-     * @generated from protobuf field: common.User user = 1;
-     */
-    user?: User;
-    /**
-     * @generated from protobuf field: user_bff_service.RegisterErrorCode error_code = 2;
+     * @generated from protobuf field: user_bff_service.RegisterErrorCode error_code = 1;
      */
     errorCode: RegisterErrorCode;
     /**
-     * @generated from protobuf field: string error_message = 3;
+     * @generated from protobuf field: string error_message = 2;
      */
     errorMessage: string;
 }
@@ -360,9 +356,8 @@ export const RegisterRequest = new RegisterRequest$Type();
 class RegisterResponse$Type extends MessageType<RegisterResponse> {
     constructor() {
         super("user_bff_service.RegisterResponse", [
-            { no: 1, name: "user", kind: "message", T: () => User },
-            { no: 2, name: "error_code", kind: "enum", T: () => ["user_bff_service.RegisterErrorCode", RegisterErrorCode] },
-            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_bff_service.RegisterErrorCode", RegisterErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<RegisterResponse>): RegisterResponse {
@@ -377,13 +372,10 @@ class RegisterResponse$Type extends MessageType<RegisterResponse> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.User user */ 1:
-                    message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
-                    break;
-                case /* user_bff_service.RegisterErrorCode error_code */ 2:
+                case /* user_bff_service.RegisterErrorCode error_code */ 1:
                     message.errorCode = reader.int32();
                     break;
-                case /* string error_message */ 3:
+                case /* string error_message */ 2:
                     message.errorMessage = reader.string();
                     break;
                 default:
@@ -398,15 +390,12 @@ class RegisterResponse$Type extends MessageType<RegisterResponse> {
         return message;
     }
     internalBinaryWrite(message: RegisterResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.User user = 1; */
-        if (message.user)
-            User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* user_bff_service.RegisterErrorCode error_code = 2; */
+        /* user_bff_service.RegisterErrorCode error_code = 1; */
         if (message.errorCode !== 0)
-            writer.tag(2, WireType.Varint).int32(message.errorCode);
-        /* string error_message = 3; */
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 2; */
         if (message.errorMessage !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.errorMessage);
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
