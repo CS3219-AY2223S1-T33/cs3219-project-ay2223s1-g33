@@ -1,6 +1,11 @@
 /* eslint import/no-cycle: 0 */
 import {
-  Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import Question from './Question';
 
@@ -9,7 +14,7 @@ export default class History {
   @PrimaryGeneratedColumn()
     id!: string;
 
-  @ManyToOne('Question', 'histories')
+  @ManyToOne(() => Question, (question) => question.histories)
     question!: Question;
 
   @Column()

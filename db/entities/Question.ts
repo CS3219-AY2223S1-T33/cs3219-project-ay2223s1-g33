@@ -1,6 +1,11 @@
 /* eslint import/no-cycle: 0 */
 import {
-  Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import History from './History';
 
@@ -11,9 +16,9 @@ export enum Diffculty {
 }
 
 export type Solution = {
-  input: string,
-  output: string,
-  explination: string,
+  input: string;
+  output: string;
+  explination: string;
 };
 
 @Entity('Question')
@@ -36,7 +41,7 @@ export default class Question {
   @Column()
     hint?: string;
 
-  @OneToMany('History', 'question')
+  @OneToMany(() => History, (history) => history.question)
     histories?: History[];
 
   @CreateDateColumn()

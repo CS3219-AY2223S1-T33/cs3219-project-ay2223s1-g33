@@ -1,6 +1,13 @@
+/* eslint import/no-cycle: 0 */
 import {
-  Column, CreateDateColumn, Entity, JoinTable, ManyToMany,
-  OneToMany, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import PasswordReset from './PasswordReset';
 import History from './History';
@@ -26,7 +33,7 @@ export default class User {
   @JoinTable()
     histories?: History[];
 
-  @OneToMany('PasswordReset', 'user')
+  @OneToMany(() => PasswordReset, (passwordReset) => passwordReset.user)
     passwordReset?: PasswordReset[];
 
   @CreateDateColumn()

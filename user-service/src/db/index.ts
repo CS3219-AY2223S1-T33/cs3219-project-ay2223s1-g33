@@ -42,12 +42,7 @@ const passwordResetRepo = () => ds.getRepository(PasswordReset);
 const questionRepo = () => ds.getRepository(Question);
 
 export {
-  ds,
-  DB,
-  userRepo,
-  historyRepo,
-  passwordResetRepo,
-  questionRepo,
+  ds, DB, userRepo, historyRepo, passwordResetRepo, questionRepo,
   User,
   History,
   Question,

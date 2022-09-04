@@ -41,7 +41,7 @@ export default class Question {
   @Column()
     hint?: string;
 
-  @OneToMany('History', 'question')
+  @OneToMany(() => History, (history) => history.question)
     histories?: History[];
 
   @CreateDateColumn()

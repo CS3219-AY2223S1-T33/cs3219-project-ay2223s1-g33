@@ -1,3 +1,4 @@
+/* eslint import/no-cycle: 0 */
 import {
   Column,
   CreateDateColumn,
@@ -32,7 +33,7 @@ export default class User {
   @JoinTable()
     histories?: History[];
 
-  @OneToMany('PasswordReset', 'user')
+  @OneToMany(() => PasswordReset, (passwordReset) => passwordReset.user)
     passwordReset?: PasswordReset[];
 
   @CreateDateColumn()

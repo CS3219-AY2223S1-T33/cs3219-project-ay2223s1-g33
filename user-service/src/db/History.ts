@@ -14,7 +14,7 @@ export default class History {
   @PrimaryGeneratedColumn()
     id!: string;
 
-  @ManyToOne('Question', 'histories')
+  @ManyToOne(() => Question, (question) => question.histories)
     question!: Question;
 
   @Column()

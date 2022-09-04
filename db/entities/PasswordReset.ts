@@ -1,14 +1,19 @@
+/* eslint import/no-cycle: 0 */
 import {
-  CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import type User from './User';
+import User from './User';
 
 @Entity('PasswordReset')
 export default class PasswordReset {
   @PrimaryGeneratedColumn()
     id!: string;
 
-  @ManyToOne('User', 'passwordReset')
+  @ManyToOne(() => User, (user) => user.passwordReset)
     user!: User;
 
   @CreateDateColumn()
