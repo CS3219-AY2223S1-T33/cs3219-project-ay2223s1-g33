@@ -27,7 +27,7 @@ class EditUserHandler implements IApiHandler<EditUserRequest, EditUserResponse> 
     }
 
     try {
-      this.userStore.replaceUser(userModel);
+      await this.userStore.replaceUser(userModel);
     } catch (err) {
       return {
         user: undefined,

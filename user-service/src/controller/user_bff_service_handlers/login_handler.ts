@@ -25,7 +25,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    let user: (PasswordUser | undefined);
+    let user: PasswordUser | undefined;
     try {
       user = await this.getUserByUsername(validatedRequest.username);
     } catch {
@@ -87,25 +87,28 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     };
   }
 
-  getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
+  getUserByUsername(username: string): Promise<PasswordUser | undefined> {
     const searchUserObject: User = User.create();
     searchUserObject.username = username;
 
-    return new Promise<(PasswordUser | undefined)>((resolve, reject) => {
-      this.rpcClient.getUser({
-        user: searchUserObject,
-      }, (err, value) => {
-        if (!value) {
-          reject(err);
-          return;
-        }
+    return new Promise<PasswordUser | undefined>((resolve, reject) => {
+      this.rpcClient.getUser(
+        {
+          user: searchUserObject,
+        },
+        (err, value) => {
+          if (!value) {
+            reject(err);
+            return;
+          }
 
-        if (!value.user && value.errorMessage !== '') {
-          reject(value.errorMessage);
-          return;
-        }
-        resolve(value.user);
-      });
+          if (!value.user && value.errorMessage !== '') {
+            reject(value.errorMessage);
+            return;
+          }
+          resolve(value.user);
+        },
+      );
     });
   }
 
