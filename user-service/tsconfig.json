@@ -4,13 +4,14 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "es2020",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": ["src/**/*"],
   // Options for file/directory watching
