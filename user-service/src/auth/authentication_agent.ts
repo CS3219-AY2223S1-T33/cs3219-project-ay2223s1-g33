@@ -1,6 +1,11 @@
 import { sign, verify } from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
-import { IAuthenticationAgent, ITokenBlacklist } from './authentication_agent_types';
+import {
+  IAuthenticationAgent,
+  ITokenBlacklist,
+  TokenPayload,
+  TokenUserData,
+} from './authentication_agent_types';
 import createTokenBlacklist from './token_blacklist';
 
 class AuthenticationAgent implements IAuthenticationAgent {
@@ -13,23 +18,26 @@ class AuthenticationAgent implements IAuthenticationAgent {
     this.tokenBlacklist = createTokenBlacklist();
   }
 
-  createToken(payload: Object): string {
-    const token = sign({
-      data: payload,
+  createToken(userData: TokenUserData): string {
+    const payload: TokenPayload = {
+      user: userData,
       uuid: AuthenticationAgent.generateSecureUUID(),
-
-    }, this.signingSecret);
+    };
+    const token = sign(payload, this.signingSecret);
 
     return token;
   }
 
-  async verifyToken(token: string): Promise<boolean> {
+  async verifyToken(token: string): Promise<TokenUserData | undefined> {
     try {
-      verify(token, this.signingSecret);
+      const decoded = <TokenPayload> verify(token, this.signingSecret);
       const isBlacklisted = await this.tokenBlacklist.isTokenBlacklisted(token);
-      return !isBlacklisted;
+      if (isBlacklisted) {
+        return undefined;
+      }
+      return decoded.user;
     } catch {
-      return false;
+      return undefined;
     }
   }
 

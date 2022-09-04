@@ -1,6 +1,6 @@
 declare interface IAuthenticationAgent {
   createToken(payload: Object): string;
-  verifyToken(token: string): Promise<boolean>;
+  verifyToken(token: string): Promise<TokenUserData | undefined>;
   invalidateToken(token: string): Promise<boolean>;
 }
 
@@ -10,7 +10,18 @@ declare interface ITokenBlacklist {
   removeToken(token: string): Promise<boolean>;
 }
 
+declare type TokenUserData = {
+  username: string;
+};
+
+declare type TokenPayload = {
+  user: TokenUserData;
+  uuid: string;
+};
+
 export {
   IAuthenticationAgent,
   ITokenBlacklist,
+  TokenUserData,
+  TokenPayload,
 };
