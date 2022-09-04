@@ -13,7 +13,7 @@ class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
   async handle(request: GetUserRequest): Promise<GetUserResponse> {
     if (request.user) {
       if (request.user.username !== '') {
-        const user = this.userStore.getUserByUsername(request.user.username);
+        const user = await this.userStore.getUserByUsername(request.user.username);
         return {
           user: convertStoredUserToPasswordUser(user),
           errorMessage: '',
@@ -21,7 +21,7 @@ class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
       }
 
       if (request.user.userId > 0) {
-        const user = this.userStore.getUser(request.user.userId);
+        const user = await this.userStore.getUser(request.user.userId);
         return {
           user: convertStoredUserToPasswordUser(user),
           errorMessage: '',

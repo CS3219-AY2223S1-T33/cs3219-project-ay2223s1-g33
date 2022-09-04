@@ -1,76 +1,116 @@
+/* eslint class-methods-use-this: 0 */
+import { getDatabase, User } from '../db';
 import { StoredUser } from '../model/user_store_model';
 import { IUserStore } from './storage';
 
+const returnValues = ['username', 'password', 'nickname'];
 class UserStore implements IUserStore {
-  idStore: Map<number, StoredUser>;
+  async addUser(user: StoredUser): Promise<StoredUser> {
+    const { username, password, nickname } = user;
 
-  usernameStore: Map<string, StoredUser>;
+    const isExist = await getDatabase()
+      .getUserRepo()
+      .findOneBy({ username });
 
-  nextId: number;
-
-  constructor() {
-    this.idStore = new Map<number, StoredUser>();
-    this.usernameStore = new Map<string, StoredUser>();
-    this.nextId = 1;
-  }
-
-  addUser(user: StoredUser): StoredUser {
-    if (this.usernameStore.has(user.username)) {
+    if (isExist) {
       throw new Error('User with same username already exists');
     }
 
-    const userClone = user;
+    const insertResult: User = (
+      await getDatabase()
+        .getDataSource()
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values([{ username, password, nickname }])
+        .returning(returnValues)
+        .execute()
+    ).raw[0];
+    const newUser: StoredUser = {
+      ...insertResult,
+    };
 
-    userClone.userId = this.nextId;
-    this.idStore.set(userClone.userId, userClone);
-    this.usernameStore.set(userClone.username, userClone);
-    this.nextId += 1;
-
-    return userClone;
+    return newUser;
   }
 
-  removeUser(id: number) {
-    if (this.idStore.has(id)) {
-      const user: StoredUser = <StoredUser> this.idStore.get(id);
-      this.idStore.delete(id);
-      this.usernameStore.delete(user.username);
-    }
+  async removeUser(userId: number): Promise<void> {
+    await getDatabase()
+      .getDataSource()
+      .createQueryBuilder()
+      .delete()
+      .from(User)
+      .where('userId = :userId', { userId })
+      .execute();
   }
 
-  replaceUser(user: StoredUser) {
-    if (user.userId === 0) {
-      return;
+  async replaceUser(user: StoredUser): Promise<void> {
+    const {
+      userId, username, password, nickname,
+    } = user;
+
+    const isExist = await getDatabase()
+      .getUserRepo()
+      .findOneBy({ username });
+
+    if (isExist) {
+      throw new Error('User with same username already exists');
     }
 
-    if (this.idStore.has(user.userId)) {
-      const oldUser: StoredUser = <StoredUser> this.idStore.get(user.userId);
-      if (this.usernameStore.has(user.username)
-        && this.usernameStore.get(user.username) !== oldUser) {
-        throw new Error('User with same username already exists');
-      }
-
-      this.usernameStore.delete(oldUser.username);
-      this.idStore.set(user.userId, user);
-      this.usernameStore.set(user.username, user);
-    }
+    await getDatabase()
+      .getDataSource()
+      .createQueryBuilder()
+      .update(User)
+      .set({
+        username,
+        password,
+        nickname,
+      })
+      .where('userId = :userId', { userId })
+      .execute();
   }
 
-  getUser(id: number): (StoredUser | undefined) {
-    if (!this.idStore.has(id)) {
+  async getUser(userId: number): Promise<StoredUser | undefined> {
+    const selectResult: User | null = await getDatabase()
+      .getUserRepo()
+      .createQueryBuilder('user')
+      .where('user.userId = :userId', { userId })
+      .getOne();
+
+    if (!selectResult) {
       return undefined;
     }
-    return this.idStore.get(id);
+    const user: StoredUser = {
+      ...selectResult,
+    };
+    return user;
   }
 
-  getUserByUsername(username: string): (StoredUser | undefined) {
-    if (!this.usernameStore.has(username)) {
+  async getUserByUsername(username: string): Promise<StoredUser | undefined> {
+    const selectResult: User | null = await getDatabase()
+      .getUserRepo()
+      .createQueryBuilder('user')
+      .where('user.username = :username', { username })
+      .getOne();
+
+    if (!selectResult) {
       return undefined;
     }
-    return this.usernameStore.get(username);
+    const user: StoredUser = {
+      ...selectResult,
+    };
+    return user;
   }
 
-  getAllUsers(): StoredUser[] {
-    return Array.from(this.idStore.values());
+  async getAllUsers(): Promise<StoredUser[]> {
+    const selectResult: User[] = await getDatabase()
+      .getUserRepo()
+      .createQueryBuilder('user')
+      .getMany();
+
+    const storedUser: StoredUser[] = selectResult.map((user) => ({
+      ...user,
+    }));
+    return storedUser;
   }
 }
 
