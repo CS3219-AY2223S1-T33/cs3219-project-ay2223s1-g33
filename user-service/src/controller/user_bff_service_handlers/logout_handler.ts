@@ -18,7 +18,11 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
       );
     }
 
-    const isTokenValid = (await this.authService.verifyToken(validatedRequest.sessionToken)) !== undefined;
+    const isTokenValid = (
+      await this.authService
+        .verifyToken(validatedRequest.sessionToken)
+    ) !== undefined;
+
     if (!isTokenValid) {
       return LogoutHandler.buildErrorResponse(
         LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST,
