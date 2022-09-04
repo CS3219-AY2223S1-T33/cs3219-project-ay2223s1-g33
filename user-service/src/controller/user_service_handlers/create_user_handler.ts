@@ -32,7 +32,7 @@ class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResp
 
     let user: StoredUser | undefined;
     try {
-      user = this.userStore.addUser(userModel);
+      user = await this.userStore.addUser(userModel);
     } catch (err) {
       return {
         user: undefined,

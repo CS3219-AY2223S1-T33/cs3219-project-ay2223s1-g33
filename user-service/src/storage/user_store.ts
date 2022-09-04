@@ -30,7 +30,7 @@ class UserStore implements IUserStore {
     return newUser;
   }
 
-  async removeUser(userId: number) {
+  async removeUser(userId: number): Promise<void> {
     await ds
       .createQueryBuilder()
       .delete()
@@ -39,7 +39,7 @@ class UserStore implements IUserStore {
       .execute();
   }
 
-  async replaceUser(user: StoredUser) {
+  async replaceUser(user: StoredUser): Promise<void> {
     const {
       userId, username, password, nickname,
     } = user;

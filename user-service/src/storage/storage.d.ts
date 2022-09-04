@@ -6,8 +6,8 @@ declare interface IStorage {
 
 declare interface IUserStore {
   addUser(user: StoredUser): Promise<StoredUser>;
-  removeUser(id: number): void;
-  replaceUser(user: StoredUser): void;
+  removeUser(id: number): Promise<void>;
+  replaceUser(user: StoredUser): Promise<void>;
   getUser(id: number): Promise<StoredUser | undefined>;
   getUserByUsername(username: string): Promise<StoredUser | undefined>;
   getAllUsers(): Promise<StoredUser[]>;
