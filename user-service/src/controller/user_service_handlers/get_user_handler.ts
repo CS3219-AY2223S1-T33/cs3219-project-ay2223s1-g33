@@ -2,6 +2,7 @@ import { GetUserRequest, GetUserResponse } from '../../proto/user-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage.d';
 import { convertStoredUserToPasswordUser } from '../../model/user_helper';
+
 class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
   userStore: IUserStore;
 
