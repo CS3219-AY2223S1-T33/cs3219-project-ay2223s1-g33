@@ -1,12 +1,16 @@
 import { sign, verify } from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
-import { IAuthenticationAgent } from './authentication_agent_types';
+import { IAuthenticationAgent, ITokenBlacklist } from './authentication_agent_types';
+import createTokenBlacklist from './token_blacklist';
 
 class AuthenticationAgent implements IAuthenticationAgent {
   signingSecret: string;
 
+  tokenBlacklist: ITokenBlacklist;
+
   constructor(signingSecret: string) {
     this.signingSecret = signingSecret;
+    this.tokenBlacklist = createTokenBlacklist();
   }
 
   createToken(payload: Object): string {
@@ -19,13 +23,23 @@ class AuthenticationAgent implements IAuthenticationAgent {
     return token;
   }
 
-  verifyToken(token: string): boolean {
+  async verifyToken(token: string): Promise<boolean> {
     try {
       verify(token, this.signingSecret);
-      return true;
+      const isBlacklisted = await this.tokenBlacklist.isTokenBlacklisted(token);
+      return !isBlacklisted;
     } catch {
       return false;
     }
+  }
+
+  async invalidateToken(token: string): Promise<boolean> {
+    if (!this.verifyToken(token)) {
+      return false;
+    }
+
+    await this.tokenBlacklist.addToken(token);
+    return true;
   }
 
   static generateSecureUUID(): string {
