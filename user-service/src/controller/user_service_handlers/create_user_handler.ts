@@ -1,7 +1,10 @@
 import { CreateUserRequest, CreateUserResponse } from '../../proto/user-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage.d';
-import { convertPasswordUserToStoredUser, convertStoredUserToPasswordUser } from '../../model/user_helper';
+import {
+  convertPasswordUserToStoredUser,
+  convertStoredUserToPasswordUser,
+} from '../../model/user_helper';
 import { StoredUser } from '../../model/user_store_model';
 
 class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResponse> {
@@ -27,7 +30,7 @@ class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResp
       };
     }
 
-    let user: (StoredUser | undefined);
+    let user: StoredUser | undefined;
     try {
       user = this.userStore.addUser(userModel);
     } catch (err) {

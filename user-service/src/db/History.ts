@@ -1,21 +1,28 @@
-import { Question } from './Question';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+/* eslint import/no-cycle: 0 */
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import Question from './Question';
 
-@Entity()
-export class History {
-
-    @PrimaryGeneratedColumn()
+@Entity('History')
+export default class History {
+  @PrimaryGeneratedColumn()
     id!: string;
 
-    @ManyToOne(() => Question, (question) => question.histories)
-    question!: Question
+  @ManyToOne('Question', 'histories')
+    question!: Question;
 
-    @Column()
-    submission!: string
+  @Column()
+    submission!: string;
 
-    @CreateDateColumn()
-    createDateTime!: Date
+  @CreateDateColumn()
+    createDateTime!: Date;
 
-    @UpdateDateColumn()
-    updateDateTime!: Date
+  @UpdateDateColumn()
+    updateDateTime!: Date;
 }

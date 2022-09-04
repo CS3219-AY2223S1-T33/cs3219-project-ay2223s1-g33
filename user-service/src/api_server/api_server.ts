@@ -1,6 +1,10 @@
 import cors from 'cors';
 import express, { Express, Request, Response } from 'express';
-import { Server as GrpcServer, ServerCredentials, UntypedServiceImplementation } from '@grpc/grpc-js';
+import {
+  Server as GrpcServer,
+  ServerCredentials,
+  UntypedServiceImplementation,
+} from '@grpc/grpc-js';
 import { ApiService } from './api_server_types';
 import jsonParseMiddleware from '../utils/json_middleware';
 import Logger from '../utils/logger';

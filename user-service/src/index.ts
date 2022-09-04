@@ -4,6 +4,7 @@ import ApiServer from './api_server/api_server';
 import UserBFFServiceApi from './controller/user_service_bff_controller';
 import UserServiceApi from './controller/user_service_controller';
 import AppStorage from './storage/app_storage';
+import 'reflect-metadata';
 
 const dataStore: AppStorage = new AppStorage();
 

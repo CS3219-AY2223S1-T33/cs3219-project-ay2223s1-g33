@@ -13,27 +13,42 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
 
   async handle(request: LoginRequest): Promise<LoginResponse> {
     if (!request.credentials) {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_BAD_REQUEST, 'Bad Login Request');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_BAD_REQUEST,
+        'Bad Login Request',
+      );
     }
 
     if (request.credentials.username.trim() === '' || request.credentials.password.trim() === '') {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_BAD_REQUEST, 'Bad Login Request');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_BAD_REQUEST,
+        'Bad Login Request',
+      );
     }
 
-    let user: (PasswordUser | undefined);
+    let user: PasswordUser | undefined;
     try {
       user = await this.getUserByUsername(request.credentials.username);
     } catch {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR, 'An internal error occurred');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR,
+        'An internal error occurred',
+      );
     }
 
     if (!user) {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS, 'Invalid Credentials');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
+        'Invalid Credentials',
+      );
     }
 
     const isLoginSuccessful = await bcrypt.compare(request.credentials.password, user.password);
     if (!isLoginSuccessful) {
-      return LoginHandler.buildErrorResponse(LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS, 'Invalid Credentials');
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
+        'Invalid Credentials',
+      );
     }
 
     return {
@@ -44,25 +59,28 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     };
   }
 
-  getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
+  getUserByUsername(username: string): Promise<PasswordUser | undefined> {
     const searchUserObject: User = User.create();
     searchUserObject.username = username;
 
-    return new Promise<(PasswordUser | undefined)>((resolve, reject) => {
-      this.rpcClient.getUser({
-        user: searchUserObject,
-      }, (err, value) => {
-        if (!value) {
-          reject(err);
-          return;
-        }
+    return new Promise<PasswordUser | undefined>((resolve, reject) => {
+      this.rpcClient.getUser(
+        {
+          user: searchUserObject,
+        },
+        (err, value) => {
+          if (!value) {
+            reject(err);
+            return;
+          }
 
-        if (!value.user && value.errorMessage !== '') {
-          reject(value.errorMessage);
-          return;
-        }
-        resolve(value.user);
-      });
+          if (!value.user && value.errorMessage !== '') {
+            reject(value.errorMessage);
+            return;
+          }
+          resolve(value.user);
+        },
+      );
     });
   }
 

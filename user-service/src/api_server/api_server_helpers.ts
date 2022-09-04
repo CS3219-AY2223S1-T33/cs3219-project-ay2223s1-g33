@@ -1,8 +1,5 @@
 import {
-  ServerUnaryCall,
-  sendUnaryData,
-  Metadata,
-  handleUnaryCall,
+  ServerUnaryCall, sendUnaryData, Metadata, handleUnaryCall,
 } from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
 import { IApiHandler, ApiCallHandler } from './api_server_types';
@@ -33,7 +30,7 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
   respType: IMessageType<ResponseType>,
-): ((object: any) => Promise<any>) {
+): (object: any) => Promise<any> {
   return async (requestJson: any): Promise<any> => {
     let requestObject: RequestType;
     try {

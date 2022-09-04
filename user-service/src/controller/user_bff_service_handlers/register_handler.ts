@@ -20,7 +20,11 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
       };
     }
 
-    if (request.credentials.username.trim() === '' || request.credentials.password.trim() === '' || request.nickname.trim() === '') {
+    if (
+      request.credentials.username.trim() === ''
+      || request.credentials.password.trim() === ''
+      || request.nickname.trim() === ''
+    ) {
       return {
         errorCode: RegisterErrorCode.REGISTER_ERROR_BAD_REQUEST,
         errorMessage: 'Empty field provided',
@@ -37,14 +41,17 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
       password: hash,
     };
     const createUserOperation = new Promise<CreateUserResponse>((resolve, reject) => {
-      this.rpcClient.createUser({
-        user: userObject,
-      }, (err, value) => {
-        if (value) {
-          resolve(value);
-        }
-        reject(err);
-      });
+      this.rpcClient.createUser(
+        {
+          user: userObject,
+        },
+        (err, value) => {
+          if (value) {
+            resolve(value);
+          }
+          reject(err);
+        },
+      );
     });
 
     let response: CreateUserResponse;

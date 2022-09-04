@@ -5,15 +5,12 @@ declare interface IStorage {
 }
 
 declare interface IUserStore {
-  addUser(user: StoredUser): StoredUser;
+  addUser(user: StoredUser): Promise<StoredUser>;
   removeUser(id: number): void;
   replaceUser(user: StoredUser): void;
-  getUser(id: number): (StoredUser | undefined);
-  getUserByUsername(username: string): (StoredUser | undefined);
-  getAllUsers(): StoredUser[];
+  getUser(id: number): Promise<StoredUser | undefined>;
+  getUserByUsername(username: string): Promise<StoredUser | undefined>;
+  getAllUsers(): Promise<StoredUser[]>;
 }
 
-export {
-  IStorage,
-  IUserStore,
-};
+export { IStorage, IUserStore };

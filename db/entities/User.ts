@@ -1,35 +1,37 @@
-import { PasswordReset } from './PasswordReset';
-import { History } from './History';
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column, CreateDateColumn, Entity, JoinTable, ManyToMany,
+  OneToMany, PrimaryGeneratedColumn, UpdateDateColumn,
+} from 'typeorm';
+import PasswordReset from './PasswordReset';
+import History from './History';
 
-@Entity()
-export class User {
+@Entity('User')
+export default class User {
+  @PrimaryGeneratedColumn()
+    userId!: number;
 
-    @PrimaryGeneratedColumn()
-    id!: string
-
-    @Column()
+  @Column()
     nickname!: string;
 
-    @Column()
-    email!: string;
+  @Column()
+    username!: string;
 
-    @Column()
+  @Column()
     password!: string;
 
-    @Column({default: true})
+  @Column({ default: true })
     isActive!: boolean;
 
-    @ManyToMany(() => History)
-    @JoinTable()
-    histories?: History[]
+  @ManyToMany(() => History)
+  @JoinTable()
+    histories?: History[];
 
-    @OneToMany(() => PasswordReset, (passwordReset) => passwordReset.user)
-    passwordReset?: PasswordReset[]
+  @OneToMany('PasswordReset', 'user')
+    passwordReset?: PasswordReset[];
 
-    @CreateDateColumn()
-    createDateTime!: Date
+  @CreateDateColumn()
+    createDateTime!: Date;
 
-    @UpdateDateColumn()
-    updateDateTime!: Date
+  @UpdateDateColumn()
+    updateDateTime!: Date;
 }

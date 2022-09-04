@@ -1,18 +1,19 @@
-import { CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { User } from '.';
+import {
+  CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+} from 'typeorm';
+import type User from './User';
 
-@Entity()
-export class PasswordReset {
+@Entity('PasswordReset')
+export default class PasswordReset {
+  @PrimaryGeneratedColumn()
+    id!: string;
 
-    @PrimaryGeneratedColumn()
-    id!: string
+  @ManyToOne('User', 'passwordReset')
+    user!: User;
 
-    @ManyToOne(() => User, (user) => user.passwordReset)
-    user!: User
-    
-    @CreateDateColumn()
-    createDateTime!: Date
+  @CreateDateColumn()
+    createDateTime!: Date;
 
-    @UpdateDateColumn()
-    updateDateTime!: Date
+  @UpdateDateColumn()
+    updateDateTime!: Date;
 }
