@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package common;
+
+message User {
+  uint64 user_id = 1;
+  string username = 2;
+  string nickname = 3;
+}
+
+message PasswordUser {
+  User user_info = 1;
+  string password = 2;
+}

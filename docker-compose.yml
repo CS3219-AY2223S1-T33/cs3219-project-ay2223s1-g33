@@ -1,0 +1,88 @@
+version: '3.8'
+services:
+  # Define the Flask web application
+  reactapp:
+
+    # Build the Dockerfile that is in the web directory
+    build: ./frontend-docker
+
+    command: npm start
+
+    # Always restart the container regardless of the exit status; try and restart the container indefinitely
+    restart: always
+
+    # Expose port 8000 to other containers (not to the host of the machine)
+    expose:
+      - "3000"
+
+    # Mount the web directory within the container at /usr/app/frontend
+    volumes:
+      - ./frontend-docker:/usr/app
+      - ./frontend-docker/frontend:/usr/app/frontend
+
+#    # Don't create this container until the redis and postgres containers (below) have been created
+#    depends_on:
+#      - redis
+#      - postgres
+#
+#    # Link the redis and postgres containers together so they can talk to one another
+#    links:
+#      - redis
+#      - postgres
+#
+#    # Pass environment variables to the flask container (this debug level lets you see more useful information)
+#    environment:
+#      FLASK_DEBUG: 1
+#
+#    # Deploy with three replicas in the case one of the containers fails (only in Docker Swarm)
+#    deploy:
+#      mode: replicated
+#      replicas: 3
+
+#  # Define the redis Docker container
+#  redis:
+#
+#    # use the redis:alpine image: https://hub.docker.com/_/redis/
+#    image: redis:alpine
+#    restart: always
+#    deploy:
+#      mode: replicated
+#      replicas: 3
+
+  # Define the redis NGINX forward proxy container
+  nginx:
+
+    # build the nginx Dockerfile: http://bit.ly/2kuYaIv
+    build: ./nginx
+    restart: always
+
+    # Expose port 80 to the host machine
+    ports:
+      - "80:80"
+#    deploy:
+#      mode: replicated
+#      replicas: 3
+
+    # The Flask application needs to be available for NGINX to make successful proxy requests
+    depends_on:
+      - reactapp
+
+  # Define the postgres database
+#  postgres:
+#    restart: always
+#    # Use the postgres alpine image: https://hub.docker.com/_/postgres/
+#    image: postgres:alpine
+#
+#    # Mount an initialization script and the persistent postgresql data volume
+#    volumes:
+#      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+#      - ./postgres/data:/var/lib/postgresql/data
+#
+#    # Pass postgres environment variables
+#    environment:
+#      POSTGRES_PASSWORD: linode123
+#      POSTGRES_DB: linode
+#
+#    # Expose port 5432 to other Docker containers
+#    expose:
+#      - "5432"

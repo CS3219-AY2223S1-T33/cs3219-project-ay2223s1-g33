@@ -17,7 +17,7 @@
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "axios": "^0.27.2",
-    "framer-motion": "^6.5.1",
+    "framer-motion": "4.1.17",
     "react": "^18.2.0",
     "react-cookie": "^4.1.1",
     "react-dom": "^18.2.0",

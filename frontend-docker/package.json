@@ -1,0 +1,25 @@
+{
+  "name": "cs3219-project-ay2223s1-g33-tools",
+  "version": "1.0.0",
+  "description": "This is a template repository for CS3219 project.",
+  "config": {
+    "proto_output": "./user-service/src/proto ./matching-service/proto ./frontend/src/proto"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33/issues"
+  },
+  "homepage": "https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33#readme",
+  "dependencies": {
+    "@protobuf-ts/plugin": "^2.8.0"
+  }
+}
