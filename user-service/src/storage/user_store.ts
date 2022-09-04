@@ -1,5 +1,5 @@
 /* eslint class-methods-use-this: 0 */
-import { ds, User, userRepo } from '../db';
+import { getDatabase, User } from '../db';
 import { StoredUser } from '../model/user_store_model';
 import { IUserStore } from './storage';
 
@@ -8,14 +8,17 @@ class UserStore implements IUserStore {
   async addUser(user: StoredUser): Promise<StoredUser> {
     const { username, password, nickname } = user;
 
-    const isExist = await userRepo().findOneBy({ username });
+    const isExist = await getDatabase()
+      .getUserRepo()
+      .findOneBy({ username });
 
     if (isExist) {
       throw new Error('User with same username already exists');
     }
 
     const insertResult: User = (
-      await ds
+      await getDatabase()
+        .getDataSource()
         .createQueryBuilder()
         .insert()
         .into(User)
@@ -31,7 +34,8 @@ class UserStore implements IUserStore {
   }
 
   async removeUser(userId: number): Promise<void> {
-    await ds
+    await getDatabase()
+      .getDataSource()
       .createQueryBuilder()
       .delete()
       .from(User)
@@ -44,13 +48,16 @@ class UserStore implements IUserStore {
       userId, username, password, nickname,
     } = user;
 
-    const isExist = await userRepo().findOneBy({ username });
+    const isExist = await getDatabase()
+      .getUserRepo()
+      .findOneBy({ username });
 
     if (isExist) {
       throw new Error('User with same username already exists');
     }
 
-    await ds
+    await getDatabase()
+      .getDataSource()
       .createQueryBuilder()
       .update(User)
       .set({
@@ -63,7 +70,8 @@ class UserStore implements IUserStore {
   }
 
   async getUser(userId: number): Promise<StoredUser | undefined> {
-    const selectResult: User | null = await userRepo()
+    const selectResult: User | null = await getDatabase()
+      .getUserRepo()
       .createQueryBuilder('user')
       .where('user.userId = :userId', { userId })
       .getOne();
@@ -78,7 +86,8 @@ class UserStore implements IUserStore {
   }
 
   async getUserByUsername(username: string): Promise<StoredUser | undefined> {
-    const selectResult: User | null = await userRepo()
+    const selectResult: User | null = await getDatabase()
+      .getUserRepo()
       .createQueryBuilder('user')
       .where('user.username = :username', { username })
       .getOne();
@@ -93,7 +102,11 @@ class UserStore implements IUserStore {
   }
 
   async getAllUsers(): Promise<StoredUser[]> {
-    const selectResult: User[] = await userRepo().createQueryBuilder('user').getMany();
+    const selectResult: User[] = await getDatabase()
+      .getUserRepo()
+      .createQueryBuilder('user')
+      .getMany();
+
     const storedUser: StoredUser[] = selectResult.map((user) => ({
       ...user,
     }));
