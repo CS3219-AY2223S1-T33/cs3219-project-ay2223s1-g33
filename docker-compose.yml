@@ -25,11 +25,9 @@ services:
 
     ports:
       - "8081:8081"
-      - "4000:4000"
 
     expose:
       - "8081"
-      - "4000"
 
     volumes:
       - .:/app/user-service/build
