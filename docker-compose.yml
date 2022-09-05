@@ -17,21 +17,20 @@ services:
       - /etc/nginx/
 
   user-service:
-    env_file: my_env/user-service.env
+    env_file: config_env/user-service.env
 
     build:
       context: .
       dockerfile: user-service.dockerfile
 
-    command: npm start
-
     ports:
       - "8081:8081"
+      - "4000:4000"
 
     expose:
       - "8081"
       - "4000"
 
     volumes:
-      - .:/usr/app/user-service/build
-      - /usr/app/user-service/node_modules
+      - .:/app/user-service/build
+      - /app/user-service/node_modules
