@@ -1,7 +1,8 @@
 # Stage 1 : Builder
 FROM node:alpine as builder
 
-WORKDIR /usr/app
+RUN mkdir -p /app/frontend
+WORKDIR /app
 
 # Patch alpine to run bash and grpc
 RUN apk add --no-cache bash && apk add libc6-compat
@@ -9,7 +10,6 @@ RUN apk add --no-cache bash && apk add libc6-compat
 # Generate protobuff
 COPY proto proto/
 COPY scripts scripts/
-RUN mkdir -p /usr/app/frontend
 COPY frontend/src frontend/src
 COPY package.json package-lock.json ./
 
@@ -17,7 +17,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 RUN npm run-script gen-proto
 
-WORKDIR /usr/app/frontend
+WORKDIR /app/frontend
 
 # Install project dependencies
 COPY frontend/package.json .
@@ -29,14 +29,14 @@ COPY frontend .
 # Build project
 RUN npm run build
 
-
 # Stage 2 : NGINX Setup
 FROM nginx:alpine
 
+RUN rm /etc/nginx/conf.d/default.conf
 COPY ./frontend.nginx.conf /etc/nginx/nginx.conf
 
 # Remove default nginx index page
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built files from the stage 1
-COPY --from=builder /usr/app/frontend/build /usr/share/nginx/html
+COPY --from=builder /app/frontend/build /share/nginx/html
