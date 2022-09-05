@@ -4,7 +4,7 @@ FROM node:alpine as builder
 WORKDIR /usr/app
 
 # Patch alpine to run bash and grpc
-RUN apk add --no-cache bash && apk add libc6-compat &&  apk add nginx
+RUN apk add --no-cache bash && apk add libc6-compat
 
 # Generate protobuff
 COPY proto proto/
@@ -30,7 +30,7 @@ COPY frontend .
 RUN npm run build
 
 
-# Stage 2 : Compiler
+# Stage 2 : NGINX Setup
 FROM nginx:alpine
 
 COPY ./frontend.nginx.conf /etc/nginx/nginx.conf
@@ -40,6 +40,3 @@ RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built files from the stage 1
 COPY --from=builder /usr/app/frontend/build /usr/share/nginx/html
-
-#EXPOSE 3000 80
-#ENTRYPOINT ["nginx", "-g", "daemon off;"]

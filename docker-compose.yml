@@ -16,9 +16,20 @@ services:
     volumes:
       - /etc/nginx/
 
-#  nginx:
-#    build: ./nginx
-#    restart: always
-#
-#    ports:
-#      - "80:80"
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service.dockerfile
+
+    command: npm start
+
+    ports:
+      - "8081:8081"
+
+    expose:
+      - "8081"
+      - "4000"
+
+    volumes:
+      - .:/usr/app/user-service/build
+      - /usr/app/user-service/node_modules
