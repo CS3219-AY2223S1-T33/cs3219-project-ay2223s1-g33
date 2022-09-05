@@ -17,6 +17,8 @@ services:
       - /etc/nginx/
 
   user-service:
+    env_file: my_env/user-service.env
+
     build:
       context: .
       dockerfile: user-service.dockerfile

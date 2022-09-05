@@ -28,11 +28,5 @@ RUN npm install
 
 COPY user-service .
 
-ENV JWT_SIGNING_SECRET="" \
-    DATABASE_DBHOST="" \
-    DATABASE_USERNAME="" \
-    DATABASE_PASSWORD="" \
-    DATABASE_NAME=""
-
 # Build project
 RUN npm run build
