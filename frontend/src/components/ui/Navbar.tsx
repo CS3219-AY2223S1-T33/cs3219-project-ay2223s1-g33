@@ -1,4 +1,3 @@
-import { MoonIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -8,7 +7,8 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  MenuList
+  MenuList,
+  Text
 } from "@chakra-ui/react";
 import React from "react";
 import { useCookies } from "react-cookie";
@@ -34,7 +34,7 @@ function Navbar() {
   }
 
   return (
-    <Box bg="gray.100" px={8} py={2}>
+    <Box bg="gray.100" px={12} py={2}>
       <Flex alignItems="center" justifyContent="space-between" h={16}>
         {/* Future: Logo goes here */}
         <Box>
@@ -43,17 +43,12 @@ function Navbar() {
 
         <Flex alignItems="center">
           <HStack spacing={7}>
-            {/* Placeholder icon for dark mode in future */}
-            <MoonIcon />
+            {/* TODO Placeholder icon for dark mode in future */}
+            {/* <MoonIcon /> */}
 
             <Menu>
-              <MenuButton
-                as={Button}
-                rounded="full"
-                variant="link"
-                cursor="pointer"
-              >
-                {`Hello ${user.nickname}`}
+              <MenuButton as={Button} variant="ghost" cursor="pointer">
+                <Text fontSize="lg">{`Hello, ${user.nickname}!`}</Text>
               </MenuButton>
               <MenuList alignItems="center">
                 <MenuItem>Account Settings</MenuItem>

@@ -2,16 +2,19 @@ import { Button, Stack, Text, useBoolean } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import { useNavigate } from "react-router-dom";
 import { leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 
+// ! console.log() s ar e intentionally left here for backend implementation
 function Countdown() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isPlaying, setIsPlaying] = useBoolean(true);
 
-  // Cleanup function for leaving the queue (may extend for specific scenarios: timeout, matched)
+  // Cleanup function for leaving the queue (may be extended for specific scenarios: timeout, matched)
   const leaveQueueHandler = () => {
-    // API call to leave queue, may require some information from the redux store
+    // TODO API call to leave queue, may require some information from the redux store
     console.log("Call API to leave the queue");
     setIsPlaying.off();
     dispatch(leaveQueue());
@@ -29,8 +32,8 @@ function Countdown() {
     if (r > 85) {
       console.log("Found buddy");
       leaveQueueHandler();
-      // This line will eventually be replaced by navigate().
-      console.log("Move to room");
+      // TODO Integration with the backend
+      navigate("/session/df22c77e-312b-4edf-8b52-b78425572506");
     }
   };
 
