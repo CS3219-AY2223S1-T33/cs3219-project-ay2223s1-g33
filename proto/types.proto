@@ -12,3 +12,9 @@ message PasswordUser {
   User user_info = 1;
   string password = 2;
 }
+
+enum QuestionDiffculty {
+  QUESTION_DIFFCULTY_EASY = 0;
+  QUESTION_DIFFCULTY_MEDIUM = 1;
+  QUESTION_DIFFCULTY_HARD = 2;
+}
