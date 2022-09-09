@@ -58,7 +58,13 @@ function Login() {
         }
 
         // Set cookie to axios instance
-        setCookies("session_token", sessionToken);
+        const now = new Date();
+        setCookies("session_token", sessionToken, {
+          path: "/",
+          expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
+          domain: "127.0.0.1",
+          secure: false
+        });
 
         // Store user information on redux
         dispatch(login({ sessionToken, user }));
