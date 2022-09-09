@@ -1,5 +1,7 @@
 import { Button, Stack } from "@chakra-ui/react";
+import { useDispatch } from "react-redux";
 import React, { useState } from "react";
+import { enterQueue } from "../../feature/matching/matchingSlice";
 
 const DIFFICULTY = [
   {
@@ -17,6 +19,7 @@ const DIFFICULTY = [
 ];
 
 function QueueForm() {
+  const dispatch = useDispatch();
   const [difficulty, setDifficulty] = useState([true, true, true]);
   const noneSelected = difficulty.every((d) => !d);
 
@@ -24,6 +27,13 @@ function QueueForm() {
     const newDifficulty = [...difficulty];
     newDifficulty.splice(index, 1, !difficulty[index]);
     setDifficulty(newDifficulty);
+  };
+
+  const enterQueueHandler = () => {
+    // API call to enter queue, probably may need to pass some information to redux store
+
+    // For now just change the flag
+    dispatch(enterQueue());
   };
 
   return (
@@ -42,7 +52,9 @@ function QueueForm() {
         );
       })}
 
-      <Button disabled={noneSelected}>Find a Buddy</Button>
+      <Button disabled={noneSelected} onClick={enterQueueHandler}>
+        Find Buddy
+      </Button>
     </Stack>
   );
 }

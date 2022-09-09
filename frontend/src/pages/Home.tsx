@@ -4,8 +4,11 @@
 // import { useNavigate } from "react-router-dom";
 import { Box, Grid, Heading } from "@chakra-ui/react";
 import React from "react";
-import QueueForm from "../components/form/QueueForm";
+// import { useSelector } from "react-redux";
+// import QueueForm from "../components/form/QueueForm";
 import Navbar from "../components/ui/Navbar";
+// import { RootState } from "../app/store";
+import Countdown from "../components/matching/Countdown";
 // import { logout } from "../feature/user/userSlice";
 
 function Home() {
@@ -20,6 +23,8 @@ function Home() {
   //   dispatch(logout());
   //   navigate("/login", { replace: true });
   // };
+
+  // const inQueue = useSelector((state: RootState) => state.matching.inQueue);
 
   return (
     <>
@@ -45,10 +50,10 @@ function Home() {
         </Box>
 
         <Box>
-          <Heading>Choose Difficulty</Heading>
+          <Heading>Start Coding!</Heading>
           <Box borderRadius="md" boxShadow="lg" p={8}>
-            {/* This table is used for queue options */}
-            <QueueForm />
+            {/* {inQueue ? <Countdown /> : <QueueForm />} */}
+            <Countdown />
           </Box>
         </Box>
       </Grid>
