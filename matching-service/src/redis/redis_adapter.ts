@@ -71,7 +71,7 @@ class RedisAdapter implements IRedisAdapter {
       EX: MATCHMAKER_LOCK_EXPIRY,
     });
 
-    if (result === null) {
+    if (result !== null) {
       return false;
     }
     return true;
