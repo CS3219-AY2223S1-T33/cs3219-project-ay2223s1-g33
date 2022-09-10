@@ -108,4 +108,3 @@ user-service/dist
 user-service/.env
 /.idea/
 config_env/user-service.env
-.DS_Store
