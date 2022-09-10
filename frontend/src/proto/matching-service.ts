@@ -13,7 +13,7 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { QuestionDiffculty } from "./types";
+import { QuestionDifficulty } from "./types";
 /**
  * @generated from protobuf message matching_service.JoinQueueRequest
  */
@@ -23,9 +23,9 @@ export interface JoinQueueRequest {
      */
     sessionToken: string;
     /**
-     * @generated from protobuf field: common.QuestionDiffculty difficulty = 2;
+     * @generated from protobuf field: common.QuestionDifficulty difficulty = 2;
      */
-    difficulty: QuestionDiffculty;
+    difficulty: QuestionDifficulty;
 }
 /**
  * @generated from protobuf message matching_service.JoinQueueResponse
@@ -35,6 +35,10 @@ export interface JoinQueueResponse {
      * @generated from protobuf field: string error_message = 1;
      */
     errorMessage: string;
+    /**
+     * @generated from protobuf field: matching_service.JoinQueueErrorCode error_code = 2;
+     */
+    errorCode: JoinQueueErrorCode;
 }
 /**
  * @generated from protobuf message matching_service.CheckQueueStatusRequest
@@ -54,13 +58,17 @@ export interface CheckQueueStatusResponse {
      */
     queueStatus: QueueStatus;
     /**
-     * @generated from protobuf field: string room_id = 2;
+     * @generated from protobuf field: string room_token = 2;
      */
-    roomId: string;
+    roomToken: string;
     /**
      * @generated from protobuf field: string error_message = 3;
      */
     errorMessage: string;
+    /**
+     * @generated from protobuf field: matching_service.CheckQueueStatusErrorCode error_code = 4;
+     */
+    errorCode: CheckQueueStatusErrorCode;
 }
 /**
  * @generated from protobuf enum matching_service.JoinQueueErrorCode
@@ -126,7 +134,7 @@ class JoinQueueRequest$Type extends MessageType<JoinQueueRequest> {
     constructor() {
         super("matching_service.JoinQueueRequest", [
             { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "difficulty", kind: "enum", T: () => ["common.QuestionDiffculty", QuestionDiffculty, "QUESTION_DIFFCULTY_"] }
+            { no: 2, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] }
         ]);
     }
     create(value?: PartialMessage<JoinQueueRequest>): JoinQueueRequest {
@@ -144,7 +152,7 @@ class JoinQueueRequest$Type extends MessageType<JoinQueueRequest> {
                 case /* string session_token */ 1:
                     message.sessionToken = reader.string();
                     break;
-                case /* common.QuestionDiffculty difficulty */ 2:
+                case /* common.QuestionDifficulty difficulty */ 2:
                     message.difficulty = reader.int32();
                     break;
                 default:
@@ -162,7 +170,7 @@ class JoinQueueRequest$Type extends MessageType<JoinQueueRequest> {
         /* string session_token = 1; */
         if (message.sessionToken !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
-        /* common.QuestionDiffculty difficulty = 2; */
+        /* common.QuestionDifficulty difficulty = 2; */
         if (message.difficulty !== 0)
             writer.tag(2, WireType.Varint).int32(message.difficulty);
         let u = options.writeUnknownFields;
@@ -179,11 +187,12 @@ export const JoinQueueRequest = new JoinQueueRequest$Type();
 class JoinQueueResponse$Type extends MessageType<JoinQueueResponse> {
     constructor() {
         super("matching_service.JoinQueueResponse", [
-            { no: 1, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "error_code", kind: "enum", T: () => ["matching_service.JoinQueueErrorCode", JoinQueueErrorCode] }
         ]);
     }
     create(value?: PartialMessage<JoinQueueResponse>): JoinQueueResponse {
-        const message = { errorMessage: "" };
+        const message = { errorMessage: "", errorCode: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<JoinQueueResponse>(this, message, value);
@@ -196,6 +205,9 @@ class JoinQueueResponse$Type extends MessageType<JoinQueueResponse> {
             switch (fieldNo) {
                 case /* string error_message */ 1:
                     message.errorMessage = reader.string();
+                    break;
+                case /* matching_service.JoinQueueErrorCode error_code */ 2:
+                    message.errorCode = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -212,6 +224,9 @@ class JoinQueueResponse$Type extends MessageType<JoinQueueResponse> {
         /* string error_message = 1; */
         if (message.errorMessage !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.errorMessage);
+        /* matching_service.JoinQueueErrorCode error_code = 2; */
+        if (message.errorCode !== 0)
+            writer.tag(2, WireType.Varint).int32(message.errorCode);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -274,12 +289,13 @@ class CheckQueueStatusResponse$Type extends MessageType<CheckQueueStatusResponse
     constructor() {
         super("matching_service.CheckQueueStatusResponse", [
             { no: 1, name: "queue_status", kind: "enum", T: () => ["matching_service.QueueStatus", QueueStatus, "QUEUE_STATUS_"] },
-            { no: 2, name: "room_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "room_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "error_code", kind: "enum", T: () => ["matching_service.CheckQueueStatusErrorCode", CheckQueueStatusErrorCode] }
         ]);
     }
     create(value?: PartialMessage<CheckQueueStatusResponse>): CheckQueueStatusResponse {
-        const message = { queueStatus: 0, roomId: "", errorMessage: "" };
+        const message = { queueStatus: 0, roomToken: "", errorMessage: "", errorCode: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<CheckQueueStatusResponse>(this, message, value);
@@ -293,11 +309,14 @@ class CheckQueueStatusResponse$Type extends MessageType<CheckQueueStatusResponse
                 case /* matching_service.QueueStatus queue_status */ 1:
                     message.queueStatus = reader.int32();
                     break;
-                case /* string room_id */ 2:
-                    message.roomId = reader.string();
+                case /* string room_token */ 2:
+                    message.roomToken = reader.string();
                     break;
                 case /* string error_message */ 3:
                     message.errorMessage = reader.string();
+                    break;
+                case /* matching_service.CheckQueueStatusErrorCode error_code */ 4:
+                    message.errorCode = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -314,12 +333,15 @@ class CheckQueueStatusResponse$Type extends MessageType<CheckQueueStatusResponse
         /* matching_service.QueueStatus queue_status = 1; */
         if (message.queueStatus !== 0)
             writer.tag(1, WireType.Varint).int32(message.queueStatus);
-        /* string room_id = 2; */
-        if (message.roomId !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.roomId);
+        /* string room_token = 2; */
+        if (message.roomToken !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.roomToken);
         /* string error_message = 3; */
         if (message.errorMessage !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.errorMessage);
+        /* matching_service.CheckQueueStatusErrorCode error_code = 4; */
+        if (message.errorCode !== 0)
+            writer.tag(4, WireType.Varint).int32(message.errorCode);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

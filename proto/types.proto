@@ -13,8 +13,9 @@ message PasswordUser {
   string password = 2;
 }
 
-enum QuestionDiffculty {
-  QUESTION_DIFFCULTY_EASY = 0;
-  QUESTION_DIFFCULTY_MEDIUM = 1;
-  QUESTION_DIFFCULTY_HARD = 2;
+enum QuestionDifficulty {
+  QUESTION_DIFFICULTY_UNUSED = 0;
+  QUESTION_DIFFICULTY_EASY = 1;
+  QUESTION_DIFFICULTY_MEDIUM = 2;
+  QUESTION_DIFFICULTY_HARD = 3;
 }

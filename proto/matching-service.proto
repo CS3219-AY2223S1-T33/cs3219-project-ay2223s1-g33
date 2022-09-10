@@ -26,22 +26,23 @@ enum QueueStatus {
 
 message JoinQueueRequest {
   string session_token = 1;
-  common.QuestionDiffculty difficulty = 2;
+  common.QuestionDifficulty difficulty = 2;
 }
 
 message JoinQueueResponse {
   string error_message = 1;
+  JoinQueueErrorCode error_code = 2;
 }
 
 message CheckQueueStatusRequest {
   string session_token = 1;
-
 }
 
 message CheckQueueStatusResponse {
   QueueStatus queue_status = 1;
-  string room_id = 2;
+  string room_token = 2;
   string error_message = 3;
+  CheckQueueStatusErrorCode error_code = 4;
 }
 
 service QueueService {
