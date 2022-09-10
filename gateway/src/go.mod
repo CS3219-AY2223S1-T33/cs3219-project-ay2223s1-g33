@@ -3,7 +3,6 @@ module cs3219-project-ay2223s1-g33/gateway
 go 1.19
 
 require (
-	github.com/golang/glog v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
