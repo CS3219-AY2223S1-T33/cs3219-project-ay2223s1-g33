@@ -12,7 +12,7 @@ import (
 	redis "github.com/go-redis/redis/v9"
 )
 
-//go:generate mockgen -destination=../mocks/mock-redis.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/conn RedisMatchmakerClient
+//go:generate mockgen -destination=../mocks/mock_redis.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/conn RedisMatchmakerClient
 type RedisMatchmakerClient interface {
 	Connect()
 	Close()
