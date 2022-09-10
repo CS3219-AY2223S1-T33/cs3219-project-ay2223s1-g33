@@ -60,7 +60,7 @@ export default function loadEnvironment(): EnvironmentConfig {
   return {
     JWT_SIGNING_SECRET: requireString('JWT_SIGNING_SECRET'),
     REDIS_SERVER_URL: requireString('REDIS_SERVER_URL'),
-    HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8081),
+    HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8082),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),
   };
 }
