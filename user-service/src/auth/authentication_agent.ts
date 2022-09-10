@@ -22,7 +22,6 @@ class AuthenticationAgent implements IAuthenticationAgent {
   createToken(userData: TokenUserData): string {
     const payload: TokenPayload = {
       user: userData,
-      uuid: AuthenticationAgent.generateSecureUUID(),
     };
     const token = sign(payload, this.signingSecret, {
       expiresIn: '3d',
