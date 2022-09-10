@@ -5,6 +5,7 @@ import (
 	"cs3219-project-ay2223s1-g33/matchmaker/mocks"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,7 @@ func TestSimpleMatching(t *testing.T) {
 			MediumQueue: medChan,
 			HardQueue:   hardChan,
 		},
+		queueMessageLifespan: 30 * time.Second,
 	}
 
 	executor := worker.createMatchingContext()
@@ -48,6 +50,7 @@ func TestQueueIsolation(t *testing.T) {
 			MediumQueue: medChan,
 			HardQueue:   hardChan,
 		},
+		queueMessageLifespan: 30 * time.Second,
 	}
 
 	executor := worker.createMatchingContext()
