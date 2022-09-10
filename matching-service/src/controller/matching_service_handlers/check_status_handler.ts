@@ -1,4 +1,5 @@
 import {
+  CheckQueueStatusErrorCode,
   CheckQueueStatusRequest,
   CheckQueueStatusResponse,
   QueueStatus,
@@ -9,12 +10,10 @@ import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 class CheckQueueStatusHandler implements
   IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
-  rpcClient: QueueServiceClient;
 
   authService: IAuthenticationAgent;
 
-  constructor(rpcClient: QueueServiceClient, authService: IAuthenticationAgent) {
-    this.rpcClient = rpcClient;
+  constructor(authService: IAuthenticationAgent) {
     this.authService = authService;
   }
 
@@ -35,12 +34,13 @@ class CheckQueueStatusHandler implements
 
     // Get Queue Status
     const queueStatus = QueueStatus.PENDING;
-    const roomId = '';
+    const roomToken = '';
 
     return {
       queueStatus,
-      roomId,
+      roomToken,
       errorMessage: '',
+      errorCode: CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_ERROR_NONE,
     };
   }
 
@@ -60,7 +60,8 @@ class CheckQueueStatusHandler implements
     return {
       errorMessage,
       queueStatus: QueueStatus.INVALID,
-      roomId: '',
+      roomToken: '',
+      errorCode: CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_ERROR_NONE,
     };
   }
 }

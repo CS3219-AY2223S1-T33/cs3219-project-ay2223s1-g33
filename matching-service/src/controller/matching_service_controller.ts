@@ -1,5 +1,4 @@
-import { ChannelCredentials, ServiceDefinition } from '@grpc/grpc-js';
-import { QueueServiceClient } from '../proto/matching-service.grpc-client';
+import { ServiceDefinition } from '@grpc/grpc-js';
 import { IQueueService, queueServiceDefinition } from '../proto/matching-service.grpc-server';
 import {
   JoinQueueRequest,
@@ -21,21 +20,14 @@ class MatchingServiceApi implements ApiService<IQueueService> {
   serviceImplementation: IQueueService;
 
   constructor(authService: IAuthenticationAgent) {
-    const grpcClient = new QueueServiceClient(
-      '127.0.0.1:4000',
-      ChannelCredentials.createInsecure(),
-      {},
-      {},
-    );
-
     const handlerDefinitions: ServiceHandlerDefinition<IQueueService> = {
       joinQueue: fromApiHandler(
-        new JoinQueueHandler(grpcClient, authService),
+        new JoinQueueHandler(authService),
         JoinQueueRequest,
         JoinQueueResponse,
       ),
       checkQueueStatus: fromApiHandler(
-        new CheckQueueStatusHandler(grpcClient, authService),
+        new CheckQueueStatusHandler(authService),
         CheckQueueStatusRequest,
         CheckQueueStatusResponse,
       ),

@@ -1,15 +1,12 @@
-import { JoinQueueRequest, JoinQueueResponse } from '../../proto/matching-service';
+import { JoinQueueErrorCode, JoinQueueRequest, JoinQueueResponse } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { QueueServiceClient } from '../../proto/matching-service.grpc-client';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueResponse> {
-  rpcClient: QueueServiceClient;
-
   authService: IAuthenticationAgent;
 
-  constructor(rpcClient: QueueServiceClient, authService: IAuthenticationAgent) {
-    this.rpcClient = rpcClient;
+  constructor(authService: IAuthenticationAgent) {
     this.authService = authService;
   }
 
@@ -32,6 +29,7 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
 
     return {
       errorMessage: '',
+      errorCode: JoinQueueErrorCode.JOIN_QUEUE_ERROR_NONE,
     };
   }
 
@@ -57,6 +55,7 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
   static buildErrorResponse(errorMessage: string): JoinQueueResponse {
     return {
       errorMessage,
+      errorCode: JoinQueueErrorCode.JOIN_QUEUE_ERROR_NONE,
     };
   }
 }
