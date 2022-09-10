@@ -1,5 +1,10 @@
+#!make
+include .env
+export
+
 run:
-	go run .
+	$(MAKE) -C src run
 
 build:
-	go build -o dist/matchmaker
+	cd src
+	$(MAKE) -C src build
