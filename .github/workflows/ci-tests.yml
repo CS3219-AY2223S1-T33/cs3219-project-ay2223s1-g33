@@ -2,7 +2,7 @@ name: ci-tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  test-node:
     runs-on: ubuntu-latest
     steps:
       - name: Set up repository
@@ -32,3 +32,22 @@ jobs:
 
       - name: Run repository-wide tests
         run: ./scripts/run-ci.sh
+  test-go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@main
+      
+      - name: Merge to main branch
+        run: git checkout --progress --force ${{ github.sha }}
+
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+      
+      - name: 'Focus on matchmaker'
+        run: 'cd matchmaker'
+
+      - name: 'Run matchmaker test'
+        run: 'make test'
