@@ -38,7 +38,11 @@ function TempQueueForm() {
       <Stack spacing={6}>
         {DIFFICULTY.map((d) => (
           <Radio value={d.name} key={d.name}>
-            <Button colorScheme={d.colorScheme} variant="solid">
+            <Button
+              onClick={() => setSelectedDiff(d.name)}
+              colorScheme={d.colorScheme}
+              variant="solid"
+            >
               {`${d.name} Difficulty`}
             </Button>
           </Radio>
