@@ -1,6 +1,8 @@
-package main
+package worker
 
 import (
+	"cs3219-project-ay2223s1-g33/matchmaker/common"
+	"cs3219-project-ay2223s1-g33/matchmaker/conn"
 	"log"
 
 	"github.com/google/uuid"
@@ -17,12 +19,15 @@ type MatchWorker interface {
 }
 
 type matchWorker struct {
-	redisClient RedisMatchmakerClient
-	queues      *QueueBuffers
+	redisClient conn.RedisMatchmakerClient
+	queues      *common.QueueBuffers
 	active      bool
 }
 
-func NewMatchWorker(redisClient RedisMatchmakerClient, queues *QueueBuffers) MatchWorker {
+func NewMatchWorker(
+	redisClient conn.RedisMatchmakerClient,
+	queues *common.QueueBuffers,
+) MatchWorker {
 	return &matchWorker{
 		redisClient: redisClient,
 		queues:      queues,

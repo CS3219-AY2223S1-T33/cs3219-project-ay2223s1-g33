@@ -1,4 +1,4 @@
-package main
+package common
 
 type QueueBuffers struct {
 	EasyQueue   chan *string
@@ -6,7 +6,7 @@ type QueueBuffers struct {
 	HardQueue   chan *string
 }
 
-type RedisQueueObject struct {
+type QueueItem struct {
 	Username   string
 	Difficulty int
 }

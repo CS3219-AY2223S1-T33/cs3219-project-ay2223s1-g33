@@ -1,6 +1,8 @@
-package main
+package worker
 
 import (
+	"cs3219-project-ay2223s1-g33/matchmaker/common"
+	"cs3219-project-ay2223s1-g33/matchmaker/conn"
 	"log"
 	"time"
 )
@@ -9,20 +11,31 @@ type FetchWorker interface {
 	Run()
 }
 
+type sleepAdapter interface {
+	Sleep(duration time.Duration)
+}
+
 type fetchWorker struct {
-	redisClient   RedisMatchmakerClient
-	queues        *QueueBuffers
+	redisClient   conn.RedisMatchmakerClient
+	queues        *common.QueueBuffers
 	pollBatchSize int
 	sleepDuration time.Duration
+	sleepAdapter  func(duration time.Duration)
 	active        bool
 }
 
-func NewFetchWorker(redisClient RedisMatchmakerClient, queues *QueueBuffers, pollBatchSize int, sleepInterval int) FetchWorker {
+func NewFetchWorker(
+	redisClient conn.RedisMatchmakerClient,
+	queues *common.QueueBuffers,
+	pollBatchSize int,
+	sleepInterval int,
+) FetchWorker {
 	return &fetchWorker{
 		redisClient:   redisClient,
 		queues:        queues,
 		pollBatchSize: pollBatchSize,
 		sleepDuration: time.Duration(int64(sleepInterval) * int64(time.Millisecond)),
+		sleepAdapter:  func(duration time.Duration) { time.Sleep(duration) },
 		active:        true,
 	}
 }
@@ -39,13 +52,13 @@ func (worker *fetchWorker) Run() {
 	log.Println("Fetch worker dying")
 }
 
-func (worker *fetchWorker) processInQueue(queueItems []*RedisQueueObject) {
+func (worker *fetchWorker) processInQueue(queueItems []*common.QueueItem) {
 	for _, queueItem := range queueItems {
 		worker.addToQueue(queueItem)
 	}
 }
 
-func (worker *fetchWorker) processExpired(expired []*RedisQueueObject) {
+func (worker *fetchWorker) processExpired(expired []*common.QueueItem) {
 	if len(expired) > 0 {
 		usernames := make([]string, len(expired))
 		for i, expiredItem := range expired {
@@ -58,13 +71,13 @@ func (worker *fetchWorker) processExpired(expired []*RedisQueueObject) {
 	}
 }
 
-func (worker *fetchWorker) addToQueue(queueItem *RedisQueueObject) {
+func (worker *fetchWorker) addToQueue(queueItem *common.QueueItem) {
 	switch queueItem.Difficulty {
-	case DifficultyEasy:
+	case common.DifficultyEasy:
 		worker.queues.EasyQueue <- &queueItem.Username
-	case DifficultyMedium:
+	case common.DifficultyMedium:
 		worker.queues.MediumQueue <- &queueItem.Username
-	case DifficultyHard:
+	case common.DifficultyHard:
 		worker.queues.HardQueue <- &queueItem.Username
 	default:
 		log.Println("Invalid difficulty value detected in queue")
