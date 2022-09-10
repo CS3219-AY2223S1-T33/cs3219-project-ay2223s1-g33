@@ -42,6 +42,27 @@ export interface PasswordUser {
      */
     password: string;
 }
+/**
+ * @generated from protobuf enum common.QuestionDifficulty
+ */
+export enum QuestionDifficulty {
+    /**
+     * @generated from protobuf enum value: QUESTION_DIFFICULTY_UNUSED = 0;
+     */
+    UNUSED = 0,
+    /**
+     * @generated from protobuf enum value: QUESTION_DIFFICULTY_EASY = 1;
+     */
+    EASY = 1,
+    /**
+     * @generated from protobuf enum value: QUESTION_DIFFICULTY_MEDIUM = 2;
+     */
+    MEDIUM = 2,
+    /**
+     * @generated from protobuf enum value: QUESTION_DIFFICULTY_HARD = 3;
+     */
+    HARD = 3
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class User$Type extends MessageType<User> {
     constructor() {

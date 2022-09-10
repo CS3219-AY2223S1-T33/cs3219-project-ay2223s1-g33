@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is a template repository for CS3219 project.",
   "config": {
-    "proto_output": "./user-service/src/proto ./matching-service/proto ./frontend/src/proto",
+    "proto_output": "./user-service/src/proto ./matching-service/src/proto ./frontend/src/proto",
     "schema_output": "./user-service/src/db"
   },
   "scripts": {

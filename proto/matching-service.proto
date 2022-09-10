@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package matching_service;
+
+import "types.proto";
+
+enum JoinQueueErrorCode {
+  JOIN_QUEUE_ERROR_NONE = 0;
+  JOIN_QUEUE_MISSING_DIFFCULTY = 1;
+  JOIN_QUEUE_BAD_REQUEST = 100;
+  JOIN_QUEUE_INTERNAL_ERROR = 101;
+}
+
+enum CheckQueueStatusErrorCode {
+  CHECK_QUEUE_STATUS_ERROR_NONE = 0;
+  CHECK_QUEUE_STATUS_ERROR_REQUEST = 100;
+  CHECK_QUEUE_STATUS_ERRROR_INTERNAL_ERROR = 101;
+}
+
+enum QueueStatus {
+  QUEUE_STATUS_PENDING = 0;
+  QUEUE_STATUS_MATCHED = 1;
+  QUEUE_STATUS_EXPIRED = 2;
+  QUEUE_STATUS_INVALID = 3;
+}
+
+message JoinQueueRequest {
+  string session_token = 1;
+  common.QuestionDifficulty difficulty = 2;
+}
+
+message JoinQueueResponse {
+  string error_message = 1;
+  JoinQueueErrorCode error_code = 2;
+}
+
+message CheckQueueStatusRequest {
+  string session_token = 1;
+}
+
+message CheckQueueStatusResponse {
+  QueueStatus queue_status = 1;
+  string room_token = 2;
+  string error_message = 3;
+  CheckQueueStatusErrorCode error_code = 4;
+}
+
+service QueueService {
+  rpc JoinQueue(JoinQueueRequest) returns (JoinQueueResponse);
+  rpc CheckQueueStatus(CheckQueueStatusRequest) returns (CheckQueueStatusResponse);
+}
