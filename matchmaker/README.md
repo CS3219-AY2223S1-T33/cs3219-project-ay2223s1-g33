@@ -20,3 +20,12 @@ You can use the Docker Golang image for building too. Run the script located in 
 
 To build the alpine-based docker image for running the application, run `./scripts/build-image.sh`.
 
+## Runing Natively
+
+You can also run the app natively after you have built it (assuming your distro of UNIX has similar linking libs, otherwise you need to build natively).
+
+Include a `.env` file in the root of the folder. Its contents should look something like
+
+```
+REDIS_SERVER=localhost:6379
+```
