@@ -1,10 +1,11 @@
 import { Box, Grid, Heading } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
-import QueueForm from "../components/form/QueueForm";
+// import QueueForm from "../components/form/QueueForm";
 import Navbar from "../components/ui/Navbar";
 import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
+import TempQueueForm from "../components/form/TempQueueForm";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);
@@ -31,7 +32,8 @@ function Home() {
         <Box>
           <Heading>Start Coding!</Heading>
           <Box borderRadius="md" boxShadow="lg" p={8}>
-            {inQueue ? <Countdown /> : <QueueForm />}
+            {/* {inQueue ? <Countdown /> : <QueueForm />} */}
+            {inQueue ? <Countdown /> : <TempQueueForm />}
           </Box>
         </Box>
       </Grid>
