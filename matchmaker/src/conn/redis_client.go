@@ -12,7 +12,7 @@ import (
 	redis "github.com/go-redis/redis/v9"
 )
 
-//go:generate mockgen -destination=../mocks/mock_redis.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/conn RedisMatchmakerClient
+//go:generate mockgen -destination=../mocks/mock_redis_client.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/conn RedisMatchmakerClient
 type RedisMatchmakerClient interface {
 	Connect()
 	Close()
@@ -76,8 +76,13 @@ func (client *redisMatchmakerClient) PollQueue(count int) (result []*common.Queu
 		return nil, nil
 	}
 
+	redisTime, err := client.redisClient.Time(ctx).Result()
+	if err != nil {
+		return nil, nil
+	}
+
 	messageStream := resultStreams[0].Messages
-	messagesToDelete, expired, inQueue := client.partitionMesssages(ctx, messageStream)
+	messagesToDelete, expired, inQueue := client.partitionMesssages(ctx, messageStream, redisTime)
 
 	err = client.redisClient.XDel(ctx, queueKey, messagesToDelete...).Err()
 	if err != nil {
@@ -107,15 +112,10 @@ func (client *redisMatchmakerClient) UploadFailures(usernames []string) error {
 	return err
 }
 
-func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, messageStream []redis.XMessage) (
+func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, messageStream []redis.XMessage, timeNow time.Time) (
 	idsToDelete []string,
 	expired []*common.QueueItem,
 	newInQueue []*common.QueueItem) {
-
-	redisTime, err := client.redisClient.Time(ctx).Result()
-	if err != nil {
-		return nil, nil, nil
-	}
 
 	messageCount := len(messageStream)
 	deleteIds := make([]string, messageCount)
@@ -130,7 +130,7 @@ func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, mes
 			continue
 		}
 
-		if redisTime.Sub(*timestamp) < queueMessageLifespan {
+		if timeNow.Sub(*timestamp) < queueMessageLifespan {
 			break
 		}
 

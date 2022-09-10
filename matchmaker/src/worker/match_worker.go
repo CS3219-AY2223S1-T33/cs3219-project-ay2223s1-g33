@@ -36,25 +36,34 @@ func NewMatchWorker(
 }
 
 func (worker *matchWorker) Run() {
-	var easyBuffer, medBuffer, hardBuffer *string
-
 	log.Println("Starting match worker")
+
+	executor := worker.createMatchingContext()
 	for worker.active {
-		var match *MatchmakerMatch
-		select {
-		case queuer := <-worker.queues.EasyQueue:
-			easyBuffer, match = worker.matchmake(easyBuffer, queuer)
-		case queuer := <-worker.queues.MediumQueue:
-			hardBuffer, match = worker.matchmake(medBuffer, queuer)
-		case queuer := <-worker.queues.HardQueue:
-			hardBuffer, match = worker.matchmake(hardBuffer, queuer)
-		}
+		match := executor()
 
 		if match != nil {
 			go worker.uploadMatch(match)
 		}
 	}
 	log.Println("Match worker dying")
+}
+
+func (worker *matchWorker) createMatchingContext() (executor func() *MatchmakerMatch) {
+	var easyBuffer, medBuffer, hardBuffer *string
+
+	return func() *MatchmakerMatch {
+		var match *MatchmakerMatch
+		select {
+		case queuer := <-worker.queues.EasyQueue:
+			easyBuffer, match = worker.matchmake(easyBuffer, queuer)
+		case queuer := <-worker.queues.MediumQueue:
+			medBuffer, match = worker.matchmake(medBuffer, queuer)
+		case queuer := <-worker.queues.HardQueue:
+			hardBuffer, match = worker.matchmake(hardBuffer, queuer)
+		}
+		return match
+	}
 }
 
 func (worker *matchWorker) matchmake(buffer *string, incoming *string) (*string, *MatchmakerMatch) {

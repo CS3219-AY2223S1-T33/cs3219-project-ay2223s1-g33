@@ -8,3 +8,6 @@ build:
 
 generate:
 	go generate ./...
+
+test:
+	go test ./...
