@@ -109,3 +109,5 @@ user-service/.env
 /.idea/
 config_env/user-service.env
 .DS_Store
+config_env/matching-service.env
+config_env/matchmaker.env
