@@ -1,9 +1,11 @@
 package worker
 
 import (
+	"context"
 	"cs3219-project-ay2223s1-g33/matchmaker/common"
 	"cs3219-project-ay2223s1-g33/matchmaker/conn"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -19,19 +21,27 @@ type MatchWorker interface {
 }
 
 type matchWorker struct {
-	redisClient conn.RedisMatchmakerClient
-	queues      *common.QueueBuffers
-	active      bool
+	redisClient          conn.RedisMatchmakerClient
+	queues               *common.QueueBuffers
+	queueMessageLifespan time.Duration
+	active               bool
+}
+
+type bufferObject struct {
+	expiryTime time.Time
+	user       *string
 }
 
 func NewMatchWorker(
 	redisClient conn.RedisMatchmakerClient,
 	queues *common.QueueBuffers,
+	queueMessageLifespan time.Duration,
 ) MatchWorker {
 	return &matchWorker{
-		redisClient: redisClient,
-		queues:      queues,
-		active:      true,
+		redisClient:          redisClient,
+		queues:               queues,
+		queueMessageLifespan: queueMessageLifespan,
+		active:               true,
 	}
 }
 
@@ -50,10 +60,16 @@ func (worker *matchWorker) Run() {
 }
 
 func (worker *matchWorker) createMatchingContext() (executor func() *MatchmakerMatch) {
-	var easyBuffer, medBuffer, hardBuffer *string
+	var easyBuffer, medBuffer, hardBuffer *bufferObject
 
 	return func() *MatchmakerMatch {
+		// Decay buffers
+		easyBuffer, medBuffer, hardBuffer = worker.decayBuffers(easyBuffer, medBuffer, hardBuffer)
+
 		var match *MatchmakerMatch
+		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
+		defer cancel()
+
 		select {
 		case queuer := <-worker.queues.EasyQueue:
 			easyBuffer, match = worker.matchmake(easyBuffer, queuer)
@@ -61,22 +77,46 @@ func (worker *matchWorker) createMatchingContext() (executor func() *MatchmakerM
 			medBuffer, match = worker.matchmake(medBuffer, queuer)
 		case queuer := <-worker.queues.HardQueue:
 			hardBuffer, match = worker.matchmake(hardBuffer, queuer)
+		case <-ctx.Done():
 		}
 		return match
 	}
 }
 
-func (worker *matchWorker) matchmake(buffer *string, incoming *string) (*string, *MatchmakerMatch) {
+func (worker *matchWorker) matchmake(buffer *bufferObject, incoming *string) (*bufferObject, *MatchmakerMatch) {
 	if buffer == nil {
-		return incoming, nil
+		expiryTime := time.Now().Add(worker.queueMessageLifespan)
+		return &bufferObject{
+			expiryTime: expiryTime,
+			user:       incoming,
+		}, nil
 	}
 
 	matchId := uuid.New().String()
 	return nil, &MatchmakerMatch{
-		userA: buffer,
+		userA: buffer.user,
 		userB: incoming,
 		token: &matchId,
 	}
+}
+
+func (worker *matchWorker) decayBuffers(easyBuffer, medBuffer, hardBuffer *bufferObject) (*bufferObject, *bufferObject, *bufferObject) {
+	now := time.Now()
+
+	easyBuffer = worker.decayBuffer(easyBuffer, now)
+	medBuffer = worker.decayBuffer(medBuffer, now)
+	hardBuffer = worker.decayBuffer(hardBuffer, now)
+
+	return easyBuffer, medBuffer, hardBuffer
+}
+
+func (worker *matchWorker) decayBuffer(buffer *bufferObject, now time.Time) *bufferObject {
+	if buffer != nil {
+		if buffer.expiryTime.Before(now) {
+			return nil
+		}
+	}
+	return buffer
 }
 
 func (worker *matchWorker) uploadMatch(match *MatchmakerMatch) {

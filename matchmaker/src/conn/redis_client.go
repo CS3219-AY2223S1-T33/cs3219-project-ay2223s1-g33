@@ -22,21 +22,22 @@ type RedisMatchmakerClient interface {
 }
 
 type redisMatchmakerClient struct {
-	server      string
-	redisClient *redis.Client
+	server        string
+	redisClient   *redis.Client
+	queueLifespan time.Duration
 }
 
 const (
-	queueKey             = "matchmaker-stream"
-	usernameKey          = "user"
-	difficultyKey        = "diff"
-	queueMessageLifespan = 30 * time.Second
-	matchKeyTemplate     = "matchmaker-%s"
+	queueKey         = "matchmaker-stream"
+	usernameKey      = "user"
+	difficultyKey    = "diff"
+	matchKeyTemplate = "matchmaker-%s"
 )
 
-func NewRedisMatchmakerClient(server string) RedisMatchmakerClient {
+func NewRedisMatchmakerClient(server string, queueLifespan time.Duration) RedisMatchmakerClient {
 	return &redisMatchmakerClient{
-		server: server,
+		server:        server,
+		queueLifespan: queueLifespan,
 	}
 }
 
@@ -96,7 +97,7 @@ func (client *redisMatchmakerClient) UploadMatch(username string, matchId string
 	key := fmt.Sprintf(matchKeyTemplate, username)
 	ctx := context.Background()
 
-	err := client.redisClient.Set(ctx, key, matchId, queueMessageLifespan).Err()
+	err := client.redisClient.Set(ctx, key, matchId, client.queueLifespan).Err()
 	return err
 }
 
@@ -130,7 +131,7 @@ func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, mes
 			continue
 		}
 
-		if timeNow.Sub(*timestamp) < queueMessageLifespan {
+		if timeNow.Sub(*timestamp) < client.queueLifespan {
 			break
 		}
 

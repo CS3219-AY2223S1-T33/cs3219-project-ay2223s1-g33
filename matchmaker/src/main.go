@@ -15,7 +15,7 @@ func main() {
 		log.Fatal("Matchmaker environment configuration not found")
 	}
 
-	redisClient := conn.NewRedisMatchmakerClient(config.RedisServer)
+	redisClient := conn.NewRedisMatchmakerClient(config.RedisServer, config.QueueMessageLifespan)
 	redisClient.Connect()
 	defer redisClient.Close()
 
@@ -25,7 +25,7 @@ func main() {
 		HardQueue:   make(chan *string, config.QueueBufferSize),
 	}
 
-	matchWorker := worker.NewMatchWorker(redisClient, &queueBuffer)
+	matchWorker := worker.NewMatchWorker(redisClient, &queueBuffer, config.QueueMessageLifespan)
 	fetchWorker := worker.NewFetchWorker(redisClient, &queueBuffer, config.PollBatchSize, config.SleepInterval)
 	go matchWorker.Run()
 

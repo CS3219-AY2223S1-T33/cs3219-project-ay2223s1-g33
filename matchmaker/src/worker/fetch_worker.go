@@ -20,7 +20,6 @@ type fetchWorker struct {
 	queues        *common.QueueBuffers
 	pollBatchSize int
 	sleepDuration time.Duration
-	sleepAdapter  func(duration time.Duration)
 	active        bool
 }
 
@@ -35,7 +34,6 @@ func NewFetchWorker(
 		queues:        queues,
 		pollBatchSize: pollBatchSize,
 		sleepDuration: time.Duration(int64(sleepInterval) * int64(time.Millisecond)),
-		sleepAdapter:  func(duration time.Duration) { time.Sleep(duration) },
 		active:        true,
 	}
 }

@@ -3,13 +3,15 @@ package main
 import (
 	"os"
 	"strconv"
+	"time"
 )
 
 type MatchmakerConfiguration struct {
-	RedisServer     string
-	PollBatchSize   int
-	SleepInterval   int
-	QueueBufferSize int
+	RedisServer          string
+	PollBatchSize        int
+	SleepInterval        int
+	QueueBufferSize      int
+	QueueMessageLifespan time.Duration
 }
 
 const (
@@ -17,6 +19,7 @@ const (
 	envPollBatchSize   = "REDIS_POLL_BATCH_SIZE"
 	envSleepInterval   = "SLEEP_INTERVAL"
 	envQueueBufferSize = "QUEUE_BUFFER_SIZE"
+	envQueueLifespan   = "QUEUE_LIFESPAN_MILLIS"
 )
 
 func loadConfig() *MatchmakerConfiguration {
@@ -28,12 +31,14 @@ func loadConfig() *MatchmakerConfiguration {
 	pollBatchSize := loadEnvVariableOrDefaultInt(envPollBatchSize, 20)
 	sleepInterval := loadEnvVariableOrDefaultInt(envSleepInterval, 100)
 	queueBufferSize := loadEnvVariableOrDefaultInt(envQueueBufferSize, 10)
+	queueMessageLifeMilliseconds := loadEnvVariableOrDefaultInt(envQueueLifespan, 30000)
 
 	return &MatchmakerConfiguration{
-		RedisServer:     *server,
-		PollBatchSize:   pollBatchSize,
-		SleepInterval:   sleepInterval,
-		QueueBufferSize: queueBufferSize,
+		RedisServer:          *server,
+		PollBatchSize:        pollBatchSize,
+		SleepInterval:        sleepInterval,
+		QueueBufferSize:      queueBufferSize,
+		QueueMessageLifespan: time.Duration(int64(queueMessageLifeMilliseconds) * int64(time.Millisecond)),
 	}
 }
 

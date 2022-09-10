@@ -44,7 +44,9 @@ func TestPartitionMesssages_ValidityCheck(t *testing.T) {
 }
 
 func TestPartitionMesssages_ExpiryTest(t *testing.T) {
-	client := redisMatchmakerClient{}
+	client := redisMatchmakerClient{
+		queueLifespan: 30 * time.Second,
+	}
 	ctx := context.Background()
 
 	testMessages := []redis.XMessage{
@@ -71,7 +73,7 @@ func TestPartitionMesssages_ExpiryTest(t *testing.T) {
 		},
 	}
 
-	idsToDelete, expired, inQueue := client.partitionMesssages(ctx, testMessages, time.UnixMilli(2).Add(queueMessageLifespan))
+	idsToDelete, expired, inQueue := client.partitionMesssages(ctx, testMessages, time.UnixMilli(2).Add(client.queueLifespan))
 	assert.Equal(t, 2, len(expired))
 	assert.Equal(t, 1, len(inQueue))
 	assert.Contains(t, idsToDelete, "1-0")
