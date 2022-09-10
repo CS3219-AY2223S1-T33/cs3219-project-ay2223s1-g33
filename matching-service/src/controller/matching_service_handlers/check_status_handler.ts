@@ -5,12 +5,10 @@ import {
   QueueStatus,
 } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
-import { QueueServiceClient } from '../../proto/matching-service.grpc-client';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 class CheckQueueStatusHandler implements
   IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
-
   authService: IAuthenticationAgent;
 
   constructor(authService: IAuthenticationAgent) {
