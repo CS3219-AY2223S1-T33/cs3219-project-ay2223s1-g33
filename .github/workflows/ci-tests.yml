@@ -46,5 +46,8 @@ jobs:
         with:
           go-version: '1.19'
 
+      - name: 'Add dummy env file'
+        run: 'touch matchmaker/.env'
+
       - name: 'Run matchmaker test'
         run: 'cd matchmaker && make test'
