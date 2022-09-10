@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 0",
-    "lint": "eslint src/"
+    "lint": "eslint --cache src"
   },
   "keywords": [],
   "author": "",
@@ -37,9 +37,10 @@
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",
-    "validator": "^13.7.0",
     "pg": "^8.8.0",
+    "redis": "^4.3.1",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.3.9"
+    "typeorm": "^0.3.9",
+    "validator": "^13.7.0"
   }
 }
