@@ -56,3 +56,9 @@ services:
     build:
       context: ./matchmaker
       dockerfile: Dockerfile
+
+  redis:
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+
