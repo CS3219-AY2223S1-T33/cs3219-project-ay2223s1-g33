@@ -7,23 +7,25 @@ import {
   TokenUserData,
 } from './authentication_agent_types';
 import createTokenBlacklist from './token_blacklist';
+import { IRedisAuthAdapter } from '../redis_adapter/redis_auth_adapter';
 
 class AuthenticationAgent implements IAuthenticationAgent {
   signingSecret: string;
 
   tokenBlacklist: ITokenBlacklist;
 
-  constructor(signingSecret: string) {
+  constructor(signingSecret: string, redisAdapter: IRedisAuthAdapter) {
     this.signingSecret = signingSecret;
-    this.tokenBlacklist = createTokenBlacklist();
+    this.tokenBlacklist = createTokenBlacklist(redisAdapter);
   }
 
   createToken(userData: TokenUserData): string {
     const payload: TokenPayload = {
       user: userData,
-      uuid: AuthenticationAgent.generateSecureUUID(),
     };
-    const token = sign(payload, this.signingSecret);
+    const token = sign(payload, this.signingSecret, {
+      expiresIn: '3d',
+    });
 
     return token;
   }
@@ -55,8 +57,11 @@ class AuthenticationAgent implements IAuthenticationAgent {
   }
 }
 
-function createAuthenticationService(signingSecret: string): IAuthenticationAgent {
-  return new AuthenticationAgent(signingSecret);
+function createAuthenticationService(
+  signingSecret: string,
+  redisAdapter: IRedisAuthAdapter,
+): IAuthenticationAgent {
+  return new AuthenticationAgent(signingSecret, redisAdapter);
 }
 
 export default createAuthenticationService;

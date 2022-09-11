@@ -16,7 +16,6 @@ declare type TokenUserData = {
 
 declare type TokenPayload = {
   user: TokenUserData;
-  uuid: string;
 };
 
 export {

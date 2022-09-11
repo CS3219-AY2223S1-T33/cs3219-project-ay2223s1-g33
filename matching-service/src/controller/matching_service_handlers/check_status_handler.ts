@@ -6,15 +6,15 @@ import {
 } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
-import { IRedisAdapter } from '../../redis/redis_adapter';
+import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
 
 class CheckQueueStatusHandler implements
   IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
   authService: IAuthenticationAgent;
 
-  redisClient: IRedisAdapter;
+  redisClient: IRedisMatchingAdapter;
 
-  constructor(authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
+  constructor(authService: IAuthenticationAgent, redisClient: IRedisMatchingAdapter) {
     this.authService = authService;
     this.redisClient = redisClient;
   }
