@@ -9,7 +9,7 @@ import {
   Input,
   Stack,
   Text,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
@@ -22,14 +22,14 @@ import Link from "../components/ui/Link";
 import {
   LoginRequest,
   LoginResponse,
-  UserCredentials
+  UserCredentials,
 } from "../proto/user-bff-service";
 
 function Login() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
   const toast = useToast();
   const dispatch = useDispatch();
@@ -58,7 +58,13 @@ function Login() {
         }
 
         // Set cookie to axios instance
-        setCookies("session_token", sessionToken);
+        const now = new Date();
+        setCookies("session_token", sessionToken, {
+          path: "/",
+          expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
+          domain: "127.0.0.1",
+          secure: false,
+        });
 
         // Store user information on redux
         dispatch(login({ sessionToken, user }));
@@ -73,7 +79,7 @@ function Login() {
           duration: 5000,
           isClosable: true,
           position: "top",
-          description: err.message
+          description: err.message,
         });
       });
   };
@@ -86,7 +92,7 @@ function Login() {
       status: "error",
       duration: 5000,
       isClosable: true,
-      position: "top"
+      position: "top",
     });
   };
 
@@ -105,7 +111,7 @@ function Login() {
                 <Input
                   type="text"
                   {...register("email", {
-                    required: "Please enter your email."
+                    required: "Please enter your email.",
                   })}
                 />
                 <FormErrorMessage>
@@ -122,8 +128,8 @@ function Login() {
                     minLength: {
                       value: 8,
                       message:
-                        "Please make sure your password is at least 8 characters long."
-                    }
+                        "Please make sure your password is at least 8 characters long.",
+                    },
                   })}
                 />
                 <FormErrorMessage>
@@ -137,7 +143,7 @@ function Login() {
                 bg="blue.400"
                 color="white"
                 _hover={{
-                  bg: "blue.500"
+                  bg: "blue.500",
                 }}
                 type="submit"
               >

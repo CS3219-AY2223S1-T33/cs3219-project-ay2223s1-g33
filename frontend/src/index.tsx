@@ -1,7 +1,6 @@
 import { ChakraProvider, ColorModeScript, theme } from "@chakra-ui/react";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { CookiesProvider } from "react-cookie";
 import App from "./App";
@@ -16,13 +15,11 @@ root.render(
   <React.StrictMode>
     <ColorModeScript />
     <ChakraProvider theme={theme}>
-      <BrowserRouter>
-        <CookiesProvider>
-          <Provider store={store}>
-            <App />
-          </Provider>
-        </CookiesProvider>
-      </BrowserRouter>
+      <CookiesProvider>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </CookiesProvider>
     </ChakraProvider>
   </React.StrictMode>
 );
