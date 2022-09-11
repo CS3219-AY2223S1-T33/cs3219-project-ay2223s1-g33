@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "This is a template repository for CS3219 project.",
   "config": {
-    "proto_output": "./user-service/src/proto ./matching-service/proto ./frontend/src/proto",
+    "proto_output": "./user-service/src/proto ./matching-service/src/proto ./frontend/src/proto",
     "schema_output": "./user-service/src/db"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh",
+    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh && chmod 755 ./scripts/gen-gateway.sh",
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output",
-    "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output"
+    "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output",
+    "gen-gateway": "./scripts/gen-gateway.sh"
   },
   "repository": {
     "type": "git",

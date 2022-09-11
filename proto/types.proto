@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package common;
+option go_package = "cs3219-project-ay2223s1-g33/gateway";
 
 message User {
   uint64 user_id = 1;
@@ -11,4 +12,11 @@ message User {
 message PasswordUser {
   User user_info = 1;
   string password = 2;
+}
+
+enum QuestionDifficulty {
+  QUESTION_DIFFICULTY_UNUSED = 0;
+  QUESTION_DIFFICULTY_EASY = 1;
+  QUESTION_DIFFICULTY_MEDIUM = 2;
+  QUESTION_DIFFICULTY_HARD = 3;
 }
