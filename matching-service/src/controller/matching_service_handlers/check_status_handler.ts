@@ -20,9 +20,11 @@ class CheckQueueStatusHandler implements
 
   roomSecret: string;
 
-  constructor(jwt_room_secret: string,
-              authService: IAuthenticationAgent,
-              redisClient: IRedisAdapter) {
+  constructor(
+    jwt_room_secret: string,
+    authService: IAuthenticationAgent,
+    redisClient: IRedisAdapter)
+  {
     this.authService = authService;
     this.redisClient = redisClient;
     this.roomSecret = jwt_room_secret;
