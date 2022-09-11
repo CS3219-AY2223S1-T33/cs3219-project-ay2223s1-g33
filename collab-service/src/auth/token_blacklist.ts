@@ -17,7 +17,7 @@ class TokenBlacklist implements ITokenBlacklist {
   }
 
   async isTokenBlacklisted(token: string): Promise<boolean> {
-    return await this.redisAdapter.isTokenBlacklisted(token);
+    return this.redisAdapter.isTokenBlacklisted(token);
   }
 
   async removeToken(token: string): Promise<boolean> {

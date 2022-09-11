@@ -12,22 +12,18 @@ import {
 } from '../../auth/authentication_agent_types';
 import { IRedisAdapter } from '../../redis/redis_adapter';
 
-class CheckQueueStatusHandler implements
-  IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
+class CheckQueueStatusHandler
+implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
   authService: IAuthenticationAgent;
 
   redisClient: IRedisAdapter;
 
   roomSecret: string;
 
-  constructor(
-    jwt_room_secret: string,
-    authService: IAuthenticationAgent,
-    redisClient: IRedisAdapter)
-  {
+  constructor(roomSecret: string, authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
     this.authService = authService;
     this.redisClient = redisClient;
-    this.roomSecret = jwt_room_secret;
+    this.roomSecret = roomSecret;
   }
 
   async handle(request: CheckQueueStatusRequest): Promise<CheckQueueStatusResponse> {

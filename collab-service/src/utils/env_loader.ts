@@ -1,13 +1,5 @@
 import { config } from 'dotenv';
 
-type EnvironmentConfig = {
-  readonly REDIS_SERVER_URL: string,
-  readonly JWT_ROOM_SECRET: string,
-  readonly JWT_SIGNING_SECRET: string,
-  readonly HTTP_PORT: number,
-  readonly GRPC_PORT: number,
-};
-
 function requireExists(key: string): void {
   if (!(key in process.env)) {
     throw new Error(`${key} does not exist in environment variables`);
@@ -44,8 +36,7 @@ function requireInt(key: string, defaultValue?: number): number {
   }
 
   try {
-    const value = parseInt(variable, 10);
-    return value;
+    return parseInt(variable, 10);
   } catch {
     if (!defaultValue) {
       throw new Error(`${key} is not an integer in environment variables`);
@@ -54,7 +45,12 @@ function requireInt(key: string, defaultValue?: number): number {
   }
 }
 
-export default function loadEnvironment(): { GRPC_PORT: number; JWT_ROOM_SECRET: string; REDIS_SERVER_URL: string; JWT_SIGNING_SECRET: string; HTTP_PORT: number } {
+export default function loadEnvironment(): {
+  GRPC_PORT: number;
+  JWT_ROOM_SECRET: string;
+  REDIS_SERVER_URL: string;
+  JWT_SIGNING_SECRET: string;
+  HTTP_PORT: number } {
   config();
 
   return {

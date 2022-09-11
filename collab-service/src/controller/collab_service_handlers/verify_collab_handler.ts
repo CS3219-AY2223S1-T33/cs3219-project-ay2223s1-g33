@@ -1,14 +1,14 @@
+import { verify } from 'jsonwebtoken';
 import {
   VerifyRoomRequest,
   VerifyRoomResponse,
-  VerifyRoomErrorCode
+  VerifyRoomErrorCode,
 } from '../../proto/collab-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import {
   IAuthenticationAgent,
-  TokenRoomLoad
-} from "../../auth/authentication_agent_types";
-import { verify } from "jsonwebtoken";
+  TokenRoomLoad,
+} from '../../auth/authentication_agent_types';
 
 class VerifyCollabHandler implements
   IApiHandler<VerifyRoomRequest, VerifyRoomResponse> {
@@ -26,7 +26,7 @@ class VerifyCollabHandler implements
     if (tokenData === undefined) {
       return VerifyCollabHandler.buildErrorResponse(
         'Invalid token',
-        VerifyRoomErrorCode.VERIFY_ROOM_UNAUTHORIZED
+        VerifyRoomErrorCode.VERIFY_ROOM_UNAUTHORIZED,
       );
     }
 
@@ -35,12 +35,12 @@ class VerifyCollabHandler implements
     if (roomData === undefined) {
       return VerifyCollabHandler.buildErrorResponse(
         'Invalid room',
-        VerifyRoomErrorCode.VERIFY_ROOM_BAD_REQUEST
+        VerifyRoomErrorCode.VERIFY_ROOM_BAD_REQUEST,
       );
     }
     return VerifyCollabHandler.buildErrorResponse(
       'Good room',
-      VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE
+      VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
     );
   }
 
@@ -53,10 +53,11 @@ class VerifyCollabHandler implements
     }
   }
 
-  static buildErrorResponse(errorMessage: string, errorCode: VerifyRoomErrorCode): VerifyRoomResponse {
+  static buildErrorResponse(errorMessage: string, errorCode: VerifyRoomErrorCode):
+  VerifyRoomResponse {
     return {
       errorMessage,
-      errorCode
+      errorCode,
     };
   }
 }
