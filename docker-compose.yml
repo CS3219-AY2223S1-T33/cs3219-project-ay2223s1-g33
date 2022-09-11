@@ -49,7 +49,24 @@ services:
     volumes:
       - .:/app/matching-service/build
       - /app/matching-service/node_modules
-  
+
+  collab-service:
+    env_file: config_env/collab-service.env
+
+    build:
+      context: .
+      dockerfile: collab-service.dockerfile
+
+    ports:
+      - "8083:8083"
+
+    expose:
+      - "8083"
+
+    volumes:
+      - .:/app/collab-service/build
+      - /app/collab-service/node_modules
+
   matchmaker:
     env_file: config_env/matchmaker.env
 

@@ -7,15 +7,23 @@ import {
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
+import { IRoomSessionAgent } from '../../room_auth/room_session_agent_types';
 
-class CheckQueueStatusHandler implements
-  IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
-  authService: IAuthenticationAgent;
+class CheckQueueStatusHandler
+implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
+  userAuthService: IAuthenticationAgent;
+
+  roomAuthService: IRoomSessionAgent;
 
   redisClient: IRedisMatchingAdapter;
 
-  constructor(authService: IAuthenticationAgent, redisClient: IRedisMatchingAdapter) {
-    this.authService = authService;
+  constructor(
+    userAuthService: IAuthenticationAgent,
+    roomAuthService: IRoomSessionAgent,
+    redisClient: IRedisMatchingAdapter,
+  ) {
+    this.userAuthService = userAuthService;
+    this.roomAuthService = roomAuthService;
     this.redisClient = redisClient;
   }
 
@@ -28,7 +36,7 @@ class CheckQueueStatusHandler implements
       );
     }
 
-    const tokenData = await this.authService.verifyToken(validatedRequest.sessionToken);
+    const tokenData = await this.userAuthService.verifyToken(validatedRequest.sessionToken);
     if (tokenData === undefined) {
       return CheckQueueStatusHandler.buildErrorResponse(
         CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_UNAUTHORIZED,
@@ -50,7 +58,7 @@ class CheckQueueStatusHandler implements
 
     if (queueToken !== '') {
       await this.redisClient.deleteUserLock(tokenData.username);
-      roomToken = queueToken;
+      roomToken = this.roomAuthService.createToken(queueToken);
       queueStatus = QueueStatus.MATCHED;
     }
 
