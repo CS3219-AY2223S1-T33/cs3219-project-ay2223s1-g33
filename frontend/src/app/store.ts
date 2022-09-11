@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "../feature/user/userSlice";
+import matchingReducer from "../feature/matching/matchingSlice";
 
 const store = configureStore({
   reducer: {
     user: userReducer,
+    matching: matchingReducer,
   },
 });
 

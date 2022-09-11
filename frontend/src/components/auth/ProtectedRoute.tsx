@@ -1,16 +1,17 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
-import { RootState } from "../../app/store";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Home from "../../pages/Home";
+import Session from "../../pages/Session";
 
-interface Props {
-  children: JSX.Element;
-}
-
-function ProtectedRoute({ children }: Props) {
-  const token = useSelector((state: RootState) => state.user.sessionToken);
-
-  return token === "" ? <Navigate to="/login" /> : children;
+function ProtectedRoute() {
+  console.log("Protected Rendered");
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/session/:sessionId" element={<Session />} />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
 }
 
 export default ProtectedRoute;
