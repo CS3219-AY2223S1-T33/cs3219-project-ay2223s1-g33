@@ -2,7 +2,7 @@ import { config } from 'dotenv';
 
 type EnvironmentConfig = {
   readonly REDIS_SERVER_URL: string,
-  readonly JWT_SESSION_SECRET: string,
+  readonly JWT_ROOM_SECRET: string,
   readonly JWT_SIGNING_SECRET: string,
   readonly HTTP_PORT: number,
   readonly GRPC_PORT: number,
@@ -54,12 +54,12 @@ function requireInt(key: string, defaultValue?: number): number {
   }
 }
 
-export default function loadEnvironment(): { GRPC_PORT: number; JWT_SESSION_SECRET: string; REDIS_SERVER_URL: string; JWT_SIGNING_SECRET: string; HTTP_PORT: number } {
+export default function loadEnvironment(): { GRPC_PORT: number; JWT_ROOM_SECRET: string; REDIS_SERVER_URL: string; JWT_SIGNING_SECRET: string; HTTP_PORT: number } {
   config();
 
   return {
     JWT_SIGNING_SECRET: requireString('JWT_SIGNING_SECRET'),
-    JWT_SESSION_SECRET: requireString('JWT_SESSION_SECRET'),
+    JWT_ROOM_SECRET: requireString('JWT_ROOM_SECRET'),
     REDIS_SERVER_URL: requireString('REDIS_SERVER_URL'),
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8083),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),

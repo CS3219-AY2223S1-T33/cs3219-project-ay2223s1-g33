@@ -29,5 +29,5 @@ expressApp.get('/', (_: Request, resp: Response) => {
     .send('Welcome to Collaboration Service');
 });
 
-apiServer.registerServiceRoutes(new CollabServiceApi(envConfig.JWT_SESSION_SECRET, authService));
+apiServer.registerServiceRoutes(new CollabServiceApi(envConfig.JWT_ROOM_SECRET, authService));
 apiServer.bind();
