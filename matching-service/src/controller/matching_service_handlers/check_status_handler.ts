@@ -1,4 +1,3 @@
-import { sign } from 'jsonwebtoken';
 import {
   CheckQueueStatusErrorCode,
   CheckQueueStatusRequest,
@@ -6,24 +5,26 @@ import {
   QueueStatus,
 } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
-import {
-  IAuthenticationAgent,
-  TokenRoomLoad,
-} from '../../auth/authentication_agent_types';
+import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { IRoomSessionAgent } from '../../room_auth/room_session_agent_types';
 import { IRedisAdapter } from '../../redis/redis_adapter';
 
 class CheckQueueStatusHandler
 implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
-  authService: IAuthenticationAgent;
+  userAuthService: IAuthenticationAgent;
+
+  roomAuthService: IRoomSessionAgent;
 
   redisClient: IRedisAdapter;
 
-  roomSecret: string;
-
-  constructor(roomSecret: string, authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
-    this.authService = authService;
+  constructor(
+    userAuthService: IAuthenticationAgent,
+    roomAuthService: IRoomSessionAgent,
+    redisClient: IRedisAdapter,
+  ) {
+    this.userAuthService = userAuthService;
+    this.roomAuthService = roomAuthService;
     this.redisClient = redisClient;
-    this.roomSecret = roomSecret;
   }
 
   async handle(request: CheckQueueStatusRequest): Promise<CheckQueueStatusResponse> {
@@ -35,7 +36,7 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
       );
     }
 
-    const tokenData = await this.authService.verifyToken(validatedRequest.sessionToken);
+    const tokenData = await this.userAuthService.verifyToken(validatedRequest.sessionToken);
     if (tokenData === undefined) {
       return CheckQueueStatusHandler.buildErrorResponse(
         CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_UNAUTHORIZED,
@@ -57,7 +58,7 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
 
     if (queueToken !== '') {
       await this.redisClient.deleteUserLock(tokenData.username);
-      roomToken = this.createRoomToken(queueToken);
+      roomToken = this.roomAuthService.createToken(queueToken);
       queueStatus = QueueStatus.MATCHED;
     }
 
@@ -79,13 +80,6 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
     return {
       sessionToken,
     };
-  }
-
-  createRoomToken(queueToken: string): string {
-    const payload: TokenRoomLoad = {
-      room_id: queueToken,
-    };
-    return sign(payload, this.roomSecret);
   }
 
   static buildErrorResponse(

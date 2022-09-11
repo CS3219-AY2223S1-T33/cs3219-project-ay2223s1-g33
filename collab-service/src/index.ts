@@ -7,6 +7,8 @@ import { IAuthenticationAgent } from './auth/authentication_agent_types';
 import CollabServiceApi from './controller/collab_service_controller';
 import loadEnvironment from './utils/env_loader';
 import { createRedisAuthAdapter } from './redis_adapter/redis_auth_adapter';
+import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
+import createRoomSessionService from './room_auth/room_session_agent';
 
 const envConfig = loadEnvironment();
 
@@ -16,9 +18,13 @@ const redisConnection: RedisClientType = createClient({
 redisConnection.connect();
 const redisAuthAdapter = createRedisAuthAdapter(redisConnection);
 
-const authService: IAuthenticationAgent = createAuthenticationService(
+const userAuthService: IAuthenticationAgent = createAuthenticationService(
   envConfig.JWT_SIGNING_SECRET,
   redisAuthAdapter,
+);
+
+const roomAuthService: IRoomSessionAgent = createRoomSessionService(
+  envConfig.JWT_SIGNING_SECRET,
 );
 
 const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
@@ -29,5 +35,5 @@ expressApp.get('/', (_: Request, resp: Response) => {
     .send('Welcome to Collaboration Service');
 });
 
-apiServer.registerServiceRoutes(new CollabServiceApi(envConfig.JWT_ROOM_SECRET, authService));
+apiServer.registerServiceRoutes(new CollabServiceApi(userAuthService, roomAuthService));
 apiServer.bind();

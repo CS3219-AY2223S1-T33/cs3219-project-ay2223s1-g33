@@ -12,6 +12,7 @@ import { fromApiHandler } from '../api_server/api_server_helpers';
 import JoinQueueHandler from './matching_service_handlers/join_queue_handler';
 import CheckQueueStatusHandler from './matching_service_handlers/check_status_handler';
 import { IAuthenticationAgent } from '../auth/authentication_agent_types';
+import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { IRedisAdapter } from '../redis/redis_adapter';
 
 class MatchingServiceApi implements ApiService<IQueueService> {
@@ -21,15 +22,19 @@ class MatchingServiceApi implements ApiService<IQueueService> {
 
   serviceImplementation: IQueueService;
 
-  constructor(roomSecret: string, authService: IAuthenticationAgent, redisAdapter: IRedisAdapter) {
+  constructor(
+    userAuthService: IAuthenticationAgent,
+    roomAuthService: IRoomSessionAgent,
+    redisAdapter: IRedisAdapter,
+  ) {
     const handlerDefinitions: ServiceHandlerDefinition<IQueueService> = {
       joinQueue: fromApiHandler(
-        new JoinQueueHandler(authService, redisAdapter),
+        new JoinQueueHandler(userAuthService, redisAdapter),
         JoinQueueRequest,
         JoinQueueResponse,
       ),
       checkQueueStatus: fromApiHandler(
-        new CheckQueueStatusHandler(roomSecret, authService, redisAdapter),
+        new CheckQueueStatusHandler(userAuthService, roomAuthService, redisAdapter),
         CheckQueueStatusRequest,
         CheckQueueStatusResponse,
       ),
