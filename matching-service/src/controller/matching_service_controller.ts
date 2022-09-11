@@ -12,7 +12,7 @@ import { fromApiHandler } from '../api_server/api_server_helpers';
 import JoinQueueHandler from './matching_service_handlers/join_queue_handler';
 import CheckQueueStatusHandler from './matching_service_handlers/check_status_handler';
 import { IAuthenticationAgent } from '../auth/authentication_agent_types';
-import { IRedisAdapter } from '../redis/redis_adapter';
+import { IRedisMatchingAdapter } from '../redis_adapter/redis_matching_adapter';
 
 class MatchingServiceApi implements ApiService<IQueueService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IQueueService>;
@@ -21,7 +21,7 @@ class MatchingServiceApi implements ApiService<IQueueService> {
 
   serviceImplementation: IQueueService;
 
-  constructor(authService: IAuthenticationAgent, redisAdapter: IRedisAdapter) {
+  constructor(authService: IAuthenticationAgent, redisAdapter: IRedisMatchingAdapter) {
     const handlerDefinitions: ServiceHandlerDefinition<IQueueService> = {
       joinQueue: fromApiHandler(
         new JoinQueueHandler(authService, redisAdapter),

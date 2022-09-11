@@ -1,30 +1,32 @@
+import { IRedisAuthAdapter } from '../redis_adapter/redis_auth_adapter';
 import { ITokenBlacklist } from './authentication_agent_types';
 
 /*
 This class will be changed from a memory-based implementation to a Redis-based implementation.
 */
 class TokenBlacklist implements ITokenBlacklist {
-  blacklistSet: Set<string>;
+  redisAdapter: IRedisAuthAdapter;
 
-  constructor() {
-    this.blacklistSet = new Set<string>();
+  constructor(redisAdapter: IRedisAuthAdapter) {
+    this.redisAdapter = redisAdapter;
   }
 
   async addToken(token: string): Promise<boolean> {
-    this.blacklistSet.add(token);
+    await this.redisAdapter.addTokenBlacklist(token);
     return true;
   }
 
   async isTokenBlacklisted(token: string): Promise<boolean> {
-    return this.blacklistSet.has(token);
+    const isBlacklisted = await this.redisAdapter.isTokenBlacklisted(token);
+    return isBlacklisted;
   }
 
   async removeToken(token: string): Promise<boolean> {
-    this.blacklistSet.delete(token);
+    await this.redisAdapter.removeTokenBlacklist(token);
     return true;
   }
 }
 
-export default function createTokenBlacklist(): ITokenBlacklist {
-  return new TokenBlacklist();
+export default function createTokenBlacklist(redisAdapter: IRedisAuthAdapter): ITokenBlacklist {
+  return new TokenBlacklist(redisAdapter);
 }
