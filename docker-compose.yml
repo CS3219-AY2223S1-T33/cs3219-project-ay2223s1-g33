@@ -61,4 +61,6 @@ services:
     build:
       context: ./images
       dockerfile: redis.dockerfile
+    ports:
+      - "6379:6379"
 
