@@ -21,7 +21,7 @@ class MatchingServiceApi implements ApiService<IQueueService> {
 
   serviceImplementation: IQueueService;
 
-  constructor(authService: IAuthenticationAgent, redisAdapter: IRedisAdapter) {
+  constructor(jwt_room_secret: string, authService: IAuthenticationAgent, redisAdapter: IRedisAdapter) {
     const handlerDefinitions: ServiceHandlerDefinition<IQueueService> = {
       joinQueue: fromApiHandler(
         new JoinQueueHandler(authService, redisAdapter),
@@ -29,7 +29,7 @@ class MatchingServiceApi implements ApiService<IQueueService> {
         JoinQueueResponse,
       ),
       checkQueueStatus: fromApiHandler(
-        new CheckQueueStatusHandler(authService, redisAdapter),
+        new CheckQueueStatusHandler(jwt_room_secret, authService, redisAdapter),
         CheckQueueStatusRequest,
         CheckQueueStatusResponse,
       ),

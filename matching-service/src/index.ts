@@ -22,5 +22,5 @@ expressApp.get('/', (_: Request, resp: Response) => {
   resp.status(200).send('Welcome to Matching Service');
 });
 
-apiServer.registerServiceRoutes(new MatchingServiceApi(authService, redisAdapter));
+apiServer.registerServiceRoutes(new MatchingServiceApi(envConfig.JWT_ROOM_SECRET, authService, redisAdapter));
 apiServer.bind();

@@ -6,27 +6,19 @@ import {
 import { IApiHandler } from '../../api_server/api_server_types';
 import {
   IAuthenticationAgent,
-  TokenPayload,
-  TokenUserData
+  TokenRoomLoad
 } from "../../auth/authentication_agent_types";
 import { verify } from "jsonwebtoken";
 
-class VerifyCollabHandler implements IApiHandler<VerifyRoomRequest, VerifyRoomResponse> {
+class VerifyCollabHandler implements
+  IApiHandler<VerifyRoomRequest, VerifyRoomResponse> {
   roomSecret: string;
+
   authService: IAuthenticationAgent;
 
-  constructor(jwt_session_secret: string, authService: IAuthenticationAgent) {
-    this.roomSecret = jwt_session_secret;
+  constructor(jwt_room_secret: string, authService: IAuthenticationAgent) {
+    this.roomSecret = jwt_room_secret;
     this.authService = authService;
-  }
-
-  async verifyRoom(token: string): Promise<TokenUserData | undefined> {
-    try {
-      const decoded = <TokenPayload>verify(token, this.roomSecret);
-      return decoded.user;
-    } catch {
-      return undefined;
-    }
   }
 
   async handle(request: VerifyRoomRequest): Promise<VerifyRoomResponse> {
@@ -50,6 +42,15 @@ class VerifyCollabHandler implements IApiHandler<VerifyRoomRequest, VerifyRoomRe
       'Good room',
       VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE
     );
+  }
+
+  async verifyRoom(token: string): Promise<string | undefined> {
+    try {
+      const decoded = <TokenRoomLoad> verify(token, this.roomSecret);
+      return decoded.room_id;
+    } catch {
+      return undefined;
+    }
   }
 
   static buildErrorResponse(errorMessage: string, errorCode: VerifyRoomErrorCode): VerifyRoomResponse {

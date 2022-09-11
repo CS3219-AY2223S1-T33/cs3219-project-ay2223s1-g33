@@ -18,9 +18,14 @@ declare type TokenPayload = {
   user: TokenUserData;
 };
 
+declare type TokenRoomLoad = {
+  room_id: string;
+};
+
 export {
   IAuthenticationAgent,
   ITokenBlacklist,
   TokenUserData,
   TokenPayload,
+  TokenRoomLoad,
 };

@@ -5,8 +5,12 @@ import {
   QueueStatus,
 } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
-import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import {
+  IAuthenticationAgent,
+  TokenRoomLoad
+} from '../../auth/authentication_agent_types';
 import { IRedisAdapter } from '../../redis/redis_adapter';
+import { sign } from "jsonwebtoken";
 
 class CheckQueueStatusHandler implements
   IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
@@ -14,9 +18,12 @@ class CheckQueueStatusHandler implements
 
   redisClient: IRedisAdapter;
 
-  constructor(authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
+  roomSecret: string;
+
+  constructor(jwt_room_secret: string, authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
     this.authService = authService;
     this.redisClient = redisClient;
+    this.roomSecret = jwt_room_secret;
   }
 
   async handle(request: CheckQueueStatusRequest): Promise<CheckQueueStatusResponse> {
@@ -50,7 +57,8 @@ class CheckQueueStatusHandler implements
 
     if (queueToken !== '') {
       await this.redisClient.deleteUserLock(tokenData.username);
-      roomToken = queueToken;
+      roomToken = this.createRoomToken(queueToken);
+      console.log(roomToken)
       queueStatus = QueueStatus.MATCHED;
     }
 
@@ -72,6 +80,13 @@ class CheckQueueStatusHandler implements
     return {
       sessionToken,
     };
+  }
+
+  createRoomToken(queueToken: string): string {
+    const payload: TokenRoomLoad = {
+      room_id: queueToken,
+    };
+    return sign(payload, this.roomSecret);
   }
 
   static buildErrorResponse(
