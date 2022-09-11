@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package user_service;
+option go_package = "cs3219-project-ay2223s1-g33/gateway";
 
 import "types.proto";
 

@@ -8,9 +8,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh",
+    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh && chmod 755 ./scripts/gen-gateway.sh",
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output",
-    "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output"
+    "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output",
+    "gen-gateway": "./scripts/gen-gateway.sh"
   },
   "repository": {
     "type": "git",
