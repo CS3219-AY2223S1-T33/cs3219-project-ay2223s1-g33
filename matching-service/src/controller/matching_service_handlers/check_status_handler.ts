@@ -1,3 +1,4 @@
+import { sign } from 'jsonwebtoken';
 import {
   CheckQueueStatusErrorCode,
   CheckQueueStatusRequest,
@@ -7,10 +8,9 @@ import {
 import { IApiHandler } from '../../api_server/api_server_types';
 import {
   IAuthenticationAgent,
-  TokenRoomLoad
+  TokenRoomLoad,
 } from '../../auth/authentication_agent_types';
 import { IRedisAdapter } from '../../redis/redis_adapter';
-import { sign } from "jsonwebtoken";
 
 class CheckQueueStatusHandler implements
   IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
@@ -20,7 +20,9 @@ class CheckQueueStatusHandler implements
 
   roomSecret: string;
 
-  constructor(jwt_room_secret: string, authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
+  constructor(jwt_room_secret: string,
+              authService: IAuthenticationAgent,
+              redisClient: IRedisAdapter) {
     this.authService = authService;
     this.redisClient = redisClient;
     this.roomSecret = jwt_room_secret;
@@ -58,7 +60,6 @@ class CheckQueueStatusHandler implements
     if (queueToken !== '') {
       await this.redisClient.deleteUserLock(tokenData.username);
       roomToken = this.createRoomToken(queueToken);
-      console.log(roomToken)
       queueStatus = QueueStatus.MATCHED;
     }
 
