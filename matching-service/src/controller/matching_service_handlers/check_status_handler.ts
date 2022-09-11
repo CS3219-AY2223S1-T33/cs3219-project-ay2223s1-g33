@@ -6,8 +6,8 @@ import {
 } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
 import { IRoomSessionAgent } from '../../room_auth/room_session_agent_types';
-import { IRedisAdapter } from '../../redis/redis_adapter';
 
 class CheckQueueStatusHandler
 implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
@@ -15,12 +15,12 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
 
   roomAuthService: IRoomSessionAgent;
 
-  redisClient: IRedisAdapter;
+  redisClient: IRedisMatchingAdapter;
 
   constructor(
     userAuthService: IAuthenticationAgent,
     roomAuthService: IRoomSessionAgent,
-    redisClient: IRedisAdapter,
+    redisClient: IRedisMatchingAdapter,
   ) {
     this.userAuthService = userAuthService;
     this.roomAuthService = roomAuthService;

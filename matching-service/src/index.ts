@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { createClient, RedisClientType } from 'redis';
 
 import getApiServer from './api_server/api_server';
 import loadEnvironment from './utils/env_loader';
@@ -7,7 +8,6 @@ import createAuthenticationService from './auth/authentication_agent';
 import MatchingServiceApi from './controller/matching_service_controller';
 import { createRedisMatchingAdapter } from './redis_adapter/redis_matching_adapter';
 import { createRedisAuthAdapter } from './redis_adapter/redis_auth_adapter';
-import { createRedisAdapter } from './redis/redis_adapter';
 import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
 

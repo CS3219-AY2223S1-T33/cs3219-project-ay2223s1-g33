@@ -22,10 +22,8 @@ class MatchingServiceApi implements ApiService<IQueueService> {
 
   serviceImplementation: IQueueService;
 
-  constructor(userAuthService: IAuthenticationAgent,
-              roomAuthService: IRoomSessionAgent, redisAdapter: IRedisMatchingAdapter) {
   constructor(
-    serAuthService: IAuthenticationAgent,
+    userAuthService: IAuthenticationAgent,
     roomAuthService: IRoomSessionAgent,
     redisAdapter: IRedisMatchingAdapter,
   ) {
