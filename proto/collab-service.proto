@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package collaboration_service;
+option go_package = "cs3219-project-ay2223s1-g33/collaboration-service";
+
+enum VerifyRoomErrorCode {
+  VERIFY_ROOM_ERROR_NONE = 0;
+  VERIFY_ROOM_BAD_REQUEST = 100;
+  VERIFY_ROOM_INTERNAL_ERROR = 101;
+  VERIFY_ROOM_UNAUTHORIZED = 102;
+}
+
+message VerifyRoomRequest {
+  string session_token = 1;
+  string room_token = 2;
+}
+
+message VerifyRoomResponse {
+  string error_message = 1;
+  VerifyRoomErrorCode error_code = 2;
+}
+
+service CollabService {
+  rpc VerifyRoom(VerifyRoomRequest) returns (VerifyRoomResponse);
+}
