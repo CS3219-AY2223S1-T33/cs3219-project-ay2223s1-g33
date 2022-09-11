@@ -1,18 +1,23 @@
 import { JoinQueueErrorCode, JoinQueueRequest, JoinQueueResponse } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { IRedisAdapter } from '../../redis/redis_adapter';
 
 class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueResponse> {
   authService: IAuthenticationAgent;
 
-  constructor(authService: IAuthenticationAgent) {
+  redisAdapter: IRedisAdapter;
+
+  constructor(authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
     this.authService = authService;
+    this.redisAdapter = redisClient;
   }
 
   async handle(request: JoinQueueRequest): Promise<JoinQueueResponse> {
     const validatedRequest = JoinQueueHandler.validateRequest(request);
     if (validatedRequest instanceof Error) {
       return JoinQueueHandler.buildErrorResponse(
+        JoinQueueErrorCode.JOIN_QUEUE_BAD_REQUEST,
         validatedRequest.message,
       );
     }
@@ -20,11 +25,28 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
     const tokenData = await this.authService.verifyToken(validatedRequest.sessionToken);
     if (tokenData === undefined) {
       return JoinQueueHandler.buildErrorResponse(
+        JoinQueueErrorCode.JOIN_QUEUE_UNAUTHORIZED,
         'Invalid token',
       );
     }
 
-    // JoinQueue Implmenetation
+    const isQueueable = await this.redisAdapter.lockIfUnset(tokenData.username);
+    if (!isQueueable) {
+      return {
+        errorMessage: 'User already in queue',
+        errorCode: JoinQueueErrorCode.JOIN_QUEUE_ALREADY_IN_QUEUE,
+      };
+    }
+
+    const isQueueingSuccessful = await this.redisAdapter
+      .pushStream(tokenData.username, request.difficulty);
+
+    if (!isQueueingSuccessful) {
+      return {
+        errorMessage: 'Unable to queue',
+        errorCode: JoinQueueErrorCode.JOIN_QUEUE_INTERNAL_ERROR,
+      };
+    }
 
     return {
       errorMessage: '',
@@ -51,10 +73,13 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
     };
   }
 
-  static buildErrorResponse(errorMessage: string): JoinQueueResponse {
+  static buildErrorResponse(
+    errorCode: JoinQueueErrorCode,
+    errorMessage: string,
+  ): JoinQueueResponse {
     return {
       errorMessage,
-      errorCode: JoinQueueErrorCode.JOIN_QUEUE_ERROR_NONE,
+      errorCode,
     };
   }
 }

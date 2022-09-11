@@ -49,3 +49,18 @@ services:
     volumes:
       - .:/app/matching-service/build
       - /app/matching-service/node_modules
+  
+  matchmaker:
+    env_file: config_env/matchmaker.env
+
+    build:
+      context: ./matchmaker
+      dockerfile: Dockerfile
+
+  redis:
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    ports:
+      - "6379:6379"
+

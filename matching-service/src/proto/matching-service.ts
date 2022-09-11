@@ -79,9 +79,9 @@ export enum JoinQueueErrorCode {
      */
     JOIN_QUEUE_ERROR_NONE = 0,
     /**
-     * @generated from protobuf enum value: JOIN_QUEUE_MISSING_DIFFCULTY = 1;
+     * @generated from protobuf enum value: JOIN_QUEUE_ALREADY_IN_QUEUE = 1;
      */
-    JOIN_QUEUE_MISSING_DIFFCULTY = 1,
+    JOIN_QUEUE_ALREADY_IN_QUEUE = 1,
     /**
      * @generated from protobuf enum value: JOIN_QUEUE_BAD_REQUEST = 100;
      */
@@ -89,7 +89,11 @@ export enum JoinQueueErrorCode {
     /**
      * @generated from protobuf enum value: JOIN_QUEUE_INTERNAL_ERROR = 101;
      */
-    JOIN_QUEUE_INTERNAL_ERROR = 101
+    JOIN_QUEUE_INTERNAL_ERROR = 101,
+    /**
+     * @generated from protobuf enum value: JOIN_QUEUE_UNAUTHORIZED = 102;
+     */
+    JOIN_QUEUE_UNAUTHORIZED = 102
 }
 /**
  * @generated from protobuf enum matching_service.CheckQueueStatusErrorCode
@@ -100,13 +104,21 @@ export enum CheckQueueStatusErrorCode {
      */
     CHECK_QUEUE_STATUS_ERROR_NONE = 0,
     /**
-     * @generated from protobuf enum value: CHECK_QUEUE_STATUS_ERROR_REQUEST = 100;
+     * @generated from protobuf enum value: CHECK_QUEUE_STATUS_ERROR_NOT_IN_QUEUE = 1;
      */
-    CHECK_QUEUE_STATUS_ERROR_REQUEST = 100,
+    CHECK_QUEUE_STATUS_ERROR_NOT_IN_QUEUE = 1,
     /**
-     * @generated from protobuf enum value: CHECK_QUEUE_STATUS_ERRROR_INTERNAL_ERROR = 101;
+     * @generated from protobuf enum value: CHECK_QUEUE_STATUS_BAD_REQUEST = 100;
      */
-    CHECK_QUEUE_STATUS_ERRROR_INTERNAL_ERROR = 101
+    CHECK_QUEUE_STATUS_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: CHECK_QUEUE_STATUS_INTERNAL_ERROR = 101;
+     */
+    CHECK_QUEUE_STATUS_INTERNAL_ERROR = 101,
+    /**
+     * @generated from protobuf enum value: CHECK_QUEUE_STATUS_UNAUTHORIZED = 102;
+     */
+    CHECK_QUEUE_STATUS_UNAUTHORIZED = 102
 }
 /**
  * @generated from protobuf enum matching_service.QueueStatus

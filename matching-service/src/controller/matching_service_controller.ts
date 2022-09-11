@@ -1,4 +1,5 @@
 import { ServiceDefinition } from '@grpc/grpc-js';
+
 import { IQueueService, queueServiceDefinition } from '../proto/matching-service.grpc-server';
 import {
   JoinQueueRequest,
@@ -11,6 +12,7 @@ import { fromApiHandler } from '../api_server/api_server_helpers';
 import JoinQueueHandler from './matching_service_handlers/join_queue_handler';
 import CheckQueueStatusHandler from './matching_service_handlers/check_status_handler';
 import { IAuthenticationAgent } from '../auth/authentication_agent_types';
+import { IRedisAdapter } from '../redis/redis_adapter';
 
 class MatchingServiceApi implements ApiService<IQueueService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IQueueService>;
@@ -19,15 +21,15 @@ class MatchingServiceApi implements ApiService<IQueueService> {
 
   serviceImplementation: IQueueService;
 
-  constructor(authService: IAuthenticationAgent) {
+  constructor(authService: IAuthenticationAgent, redisAdapter: IRedisAdapter) {
     const handlerDefinitions: ServiceHandlerDefinition<IQueueService> = {
       joinQueue: fromApiHandler(
-        new JoinQueueHandler(authService),
+        new JoinQueueHandler(authService, redisAdapter),
         JoinQueueRequest,
         JoinQueueResponse,
       ),
       checkQueueStatus: fromApiHandler(
-        new CheckQueueStatusHandler(authService),
+        new CheckQueueStatusHandler(authService, redisAdapter),
         CheckQueueStatusRequest,
         CheckQueueStatusResponse,
       ),
