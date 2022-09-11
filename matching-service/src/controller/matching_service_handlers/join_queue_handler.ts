@@ -1,14 +1,14 @@
 import { JoinQueueErrorCode, JoinQueueRequest, JoinQueueResponse } from '../../proto/matching-service';
 import { IApiHandler } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
-import { IRedisAdapter } from '../../redis/redis_adapter';
+import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
 
 class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueResponse> {
   authService: IAuthenticationAgent;
 
-  redisAdapter: IRedisAdapter;
+  redisAdapter: IRedisMatchingAdapter;
 
-  constructor(authService: IAuthenticationAgent, redisClient: IRedisAdapter) {
+  constructor(authService: IAuthenticationAgent, redisClient: IRedisMatchingAdapter) {
     this.authService = authService;
     this.redisAdapter = redisClient;
   }
