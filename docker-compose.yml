@@ -74,6 +74,13 @@ services:
       context: ./matchmaker
       dockerfile: Dockerfile
 
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+
   redis:
     build:
       context: ./images

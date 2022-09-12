@@ -55,5 +55,5 @@ func run(config *GatewayConfiguration) error {
 	}
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(":3000", mux)
+	return http.ListenAndServe(":5000", mux)
 }
