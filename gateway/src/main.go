@@ -11,6 +11,8 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	gw "cs3219-project-ay2223s1-g33/gateway/gateway"
+
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -54,6 +56,8 @@ func run(config *GatewayConfiguration) error {
 		return err
 	}
 
+	corsMux := cors.Default().Handler(mux)
+
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(":5000", mux)
+	return http.ListenAndServe(":5000", corsMux)
 }
