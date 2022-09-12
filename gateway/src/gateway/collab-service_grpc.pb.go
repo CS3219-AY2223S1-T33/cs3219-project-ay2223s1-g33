@@ -4,7 +4,7 @@
 // - protoc             v3.21.5
 // source: collab-service.proto
 
-package collaboration_service
+package gateway
 
 import (
 	context "context"
