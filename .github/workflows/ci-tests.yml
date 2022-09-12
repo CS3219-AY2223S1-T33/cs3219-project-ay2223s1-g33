@@ -51,9 +51,3 @@ jobs:
 
       - name: 'Run matchmaker test'
         run: 'cd matchmaker && make test'
-
-      - name: 'Build Matchmaker'
-        run: 'cd matchmaker && make build'
-
-      - name: 'Build Gateway'
-        run: 'cd gateway && make build'
