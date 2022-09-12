@@ -1,13 +1,24 @@
-import { Button, Stack, Text, useBoolean } from "@chakra-ui/react";
-import { useDispatch } from "react-redux";
+import { Button, Stack, Text, useBoolean, useToast } from "@chakra-ui/react";
+import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useNavigate } from "react-router-dom";
+import axios from "../../axios";
 import { leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
+import {
+  CheckQueueStatusRequest,
+  CheckQueueStatusResponse,
+  QueueStatus,
+} from "../../proto/matching-service";
+import { RootState } from "../../app/store";
 
 // ! console.log() s ar e intentionally left here for backend implementation
 function Countdown() {
+  const sessionToken = useSelector(
+    (state: RootState) => state.user.sessionToken
+  );
+  const toast = useToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isPlaying, setIsPlaying] = useBoolean(true);
@@ -32,14 +43,41 @@ function Countdown() {
     }
 
     console.log(`API update call made`);
-    // Random number generator to simulate matching
-    const r = Math.random() * 100;
-    if (r > 85) {
-      console.log("Found buddy");
-      leaveQueueHandler();
-      // TODO Integration with the backend
-      navigate("/session/df22c77e-312b-4edf-8b52-b78425572506");
-    }
+    const checkRequest: CheckQueueStatusRequest = { sessionToken };
+    axios
+      .post<CheckQueueStatusResponse>("/queue/status", checkRequest)
+      .then((res) => {
+        const { errorCode, errorMessage, queueStatus, roomToken } = res.data;
+
+        if (errorCode) {
+          throw new Error(errorMessage);
+        }
+
+        switch (queueStatus) {
+          case QueueStatus.PENDING:
+            break;
+          case QueueStatus.MATCHED:
+            // Leave the queue and transit to session
+            leaveQueueHandler();
+            navigate(`/session/${roomToken}`);
+            break;
+          case QueueStatus.EXPIRED:
+            completeTimeHandler();
+            break;
+          default:
+            throw new Error("Invalid queueStatus");
+        }
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+          description: err.message,
+        });
+      });
   };
 
   return (

@@ -44,7 +44,7 @@ function Login() {
     const loginReq: LoginRequest = { credentials };
 
     axios
-      .post<LoginResponse>("/login", loginReq)
+      .post<LoginResponse>("/user/login", loginReq)
       .then((res) => {
         const { errorCode, errorMessage } = res.data;
         if (errorCode) {

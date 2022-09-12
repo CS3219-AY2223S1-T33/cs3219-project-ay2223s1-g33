@@ -1,4 +1,4 @@
-import axios from "axios";
+// import axios from "axios";
 import React, { useEffect } from "react";
 // import { Routes } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     // Left here as a sanity checker
     // Note this does not use the axios instance
-    axios.get("http://127.0.0.1:8081").then((res) => console.log(res.data));
+    // axios.get("http://127.0.0.1:8081").then((res) => console.log(res.data));
 
     // Always removes existing cookies until we properly implement persistence
     removeCookies("session_token");
