@@ -41,8 +41,8 @@ class MatchingServiceApi implements ApiService<IQueueService> {
     };
 
     const matchingQueueService: IQueueService = {
-      checkQueueStatus: handlerDefinitions.joinQueue.grpcRouteHandler,
-      joinQueue: handlerDefinitions.checkQueueStatus.grpcRouteHandler,
+      checkQueueStatus: handlerDefinitions.checkQueueStatus.grpcRouteHandler,
+      joinQueue: handlerDefinitions.joinQueue.grpcRouteHandler,
     };
 
     this.serviceHandlerDefinition = handlerDefinitions;
