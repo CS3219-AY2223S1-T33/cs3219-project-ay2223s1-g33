@@ -4,12 +4,12 @@ import React from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useNavigate } from "react-router-dom";
 import axios from "../../axios";
-import { leaveQueue } from "../../feature/matching/matchingSlice";
+import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 import {
   CheckQueueStatusRequest,
   CheckQueueStatusResponse,
-  QueueStatus,
+  QueueStatus
 } from "../../proto/matching-service";
 import { RootState } from "../../app/store";
 
@@ -25,7 +25,7 @@ function Countdown() {
 
   // Cleanup function for leaving the queue (may be extended for specific scenarios: timeout, matched)
   const leaveQueueHandler = () => {
-    // TODO API call to leave queue, may require some information from the redux store
+    // API call to leave queue, may require some information from the redux store
     console.log("Call API to leave the queue");
     setIsPlaying.off();
     dispatch(leaveQueue());
@@ -58,8 +58,9 @@ function Countdown() {
             break;
           case QueueStatus.MATCHED:
             // Leave the queue and transit to session
+            dispatch(enterRoom({ roomToken }));
             leaveQueueHandler();
-            navigate(`/session/${roomToken}`);
+            navigate(`/session`);
             break;
           case QueueStatus.EXPIRED:
             completeTimeHandler();
@@ -75,7 +76,7 @@ function Countdown() {
           duration: 5000,
           isClosable: true,
           position: "top",
-          description: err.message,
+          description: err.message
         });
       });
   };

@@ -12,19 +12,42 @@ import {
   ModalFooter,
   useDisclosure,
   HStack,
+  Code
 } from "@chakra-ui/react";
-import { useNavigate, useParams } from "react-router-dom";
-import React from "react";
+import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../app/store";
 
 function Session() {
+  const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const navigate = useNavigate();
-  const params = useParams();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  // This is a temporary state variable to track the websocket communication
+  // eslint-disable-next-line
+  const [logs, setLogs] = useState<string[]>([]);
 
   const leaveSessionHandler = () => {
     console.log("Leaving session");
     navigate("/");
   };
+
+  if (!roomToken) {
+    return (
+      <Flex
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        w="100vw"
+        h="100vh"
+      >
+        <Heading>Error: Expected Room Token</Heading>
+        <Button colorScheme="red" onClick={leaveSessionHandler}>
+          Leave Session
+        </Button>
+      </Flex>
+    );
+  }
 
   return (
     <>
@@ -36,9 +59,16 @@ function Session() {
         h="100vh"
       >
         <Heading>This is the session room</Heading>
-        <Text>{`Hardcoded ID: ${params.sessionId}`}</Text>
-        {/* <Button onClick={onOpen}>Open Modal</Button> */}
+        <Text size="xl">Token</Text>
+        <Code overflowWrap="break-word" w="65%">
+          {roomToken}
+        </Code>
         <Button onClick={onOpen}>Leave Session</Button>
+
+        <Heading mt={10}>WS Log</Heading>
+        {logs.map((l) => (
+          <Text>{l}</Text>
+        ))}
       </Flex>
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay />

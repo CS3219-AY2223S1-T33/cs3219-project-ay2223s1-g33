@@ -8,7 +8,7 @@ function ProtectedRoute() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/session/:sessionId" element={<Session />} />
+      <Route path="/session" element={<Session />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
