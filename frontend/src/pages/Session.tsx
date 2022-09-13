@@ -13,7 +13,7 @@ import {
   useDisclosure,
   HStack,
   Code,
-  Input
+  Input,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
@@ -26,7 +26,7 @@ const CONNECTION_MAP = {
   [ReadyState.OPEN]: "Open",
   [ReadyState.CLOSING]: "Closing",
   [ReadyState.CLOSED]: "Closed",
-  [ReadyState.UNINSTANTIATED]: "Uninstantiated"
+  [ReadyState.UNINSTANTIATED]: "Uninstantiated",
 };
 
 function Session() {

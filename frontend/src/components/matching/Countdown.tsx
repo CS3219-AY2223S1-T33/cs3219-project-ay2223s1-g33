@@ -9,7 +9,7 @@ import CountdownText from "./CountdownText";
 import {
   CheckQueueStatusRequest,
   CheckQueueStatusResponse,
-  QueueStatus
+  QueueStatus,
 } from "../../proto/matching-service";
 import { RootState } from "../../app/store";
 
@@ -76,7 +76,7 @@ function Countdown() {
           duration: 5000,
           isClosable: true,
           position: "top",
-          description: err.message
+          description: err.message,
         });
       });
   };
