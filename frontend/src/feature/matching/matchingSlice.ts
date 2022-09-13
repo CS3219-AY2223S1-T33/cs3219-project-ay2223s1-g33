@@ -5,11 +5,13 @@ interface MatchingState {
   inQueue: boolean;
   /** In order of `Easy`, `Medium`, `Hard` */
   diffSelected: [boolean, boolean, boolean];
+  roomToken?: string;
 }
 
 const initialState: MatchingState = {
   inQueue: false,
   diffSelected: [true, true, true],
+  roomToken: undefined,
 };
 
 export const matchingSlice = createSlice({
@@ -22,6 +24,10 @@ export const matchingSlice = createSlice({
     leaveQueue: (state) => {
       state.inQueue = false;
     },
+    enterRoom: (state, action: PayloadAction<{ roomToken: string }>) => {
+      const { roomToken } = action.payload;
+      state.roomToken = roomToken;
+    },
     toggleDifficulty: (state, action: PayloadAction<{ index: number }>) => {
       const { index } = action.payload;
       const newValue = !state.diffSelected[index];
@@ -30,6 +36,6 @@ export const matchingSlice = createSlice({
   },
 });
 
-export const { enterQueue, leaveQueue, toggleDifficulty } =
+export const { enterQueue, leaveQueue, toggleDifficulty, enterRoom } =
   matchingSlice.actions;
 export default matchingSlice.reducer;
