@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package tunnel_service;
+option go_package = "cs3219-project-ay2223s1-g33/gateway";
+
+message TunnelServiceRequest {
+  bytes data = 1;
+}
+
+message TunnelServiceResponse {
+  bytes data = 1;
+}
+
+service TunnelService {
+  rpc OpenStream(stream TunnelServiceRequest) returns (stream TunnelServiceResponse);
+}

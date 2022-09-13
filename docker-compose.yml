@@ -99,6 +99,18 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  tunnel-dummy:
+    platform: linux/amd64
+
+    build:
+      context: ./tunnel-placeholder
+      dockerfile: Dockerfile
+
+    ports:
+      - "4002:4002"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   redis:
     build:
       context: ./images
