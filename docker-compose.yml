@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   frontend:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: frontend.dockerfile
@@ -17,6 +18,7 @@ services:
       - /etc/nginx/
 
   user-service:
+    platform: linux/amd64
     env_file: config_env/user-service.env
 
     build:
@@ -37,6 +39,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   matching-service:
+    platform: linux/amd64
     env_file: config_env/matching-service.env
 
     build:
@@ -56,6 +59,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   collab-service:
+    platform: linux/amd64
     env_file: config_env/collab-service.env
 
     build:
@@ -73,6 +77,7 @@ services:
       - /app/collab-service/node_modules
 
   matchmaker:
+    platform: linux/amd64
     env_file: config_env/matchmaker.env
 
     build:
@@ -82,6 +87,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   gateway:
+    platform: linux/amd64
     env_file: config_env/gateway.env
 
     build:
@@ -89,7 +95,7 @@ services:
       dockerfile: Dockerfile
 
     ports:
-      - "5000:5000"
+      - "5001:5000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
