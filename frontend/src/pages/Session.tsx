@@ -12,24 +12,48 @@ import {
   ModalFooter,
   useDisclosure,
   HStack,
-  Code
+  Code,
+  Input
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 import { RootState } from "../app/store";
+
+const CONNECTION_MAP = {
+  [ReadyState.CONNECTING]: "Connecting",
+  [ReadyState.OPEN]: "Open",
+  [ReadyState.CLOSING]: "Closing",
+  [ReadyState.CLOSED]: "Closed",
+  [ReadyState.UNINSTANTIATED]: "Uninstantiated"
+};
 
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { sendMessage, lastMessage, readyState } = useWebSocket(
+    "ws://localhost:5001/ws"
+  );
   // This is a temporary state variable to track the websocket communication
-  // eslint-disable-next-line
-  const [logs, setLogs] = useState<string[]>([]);
+  const [inputVal, setInputVal] = useState("");
+
+  // Continually listens for new messages sent and updates them accordingly
+  useEffect(() => {
+    if (lastMessage !== null) {
+      // ! lastMessage.data comes in as a blob, hence we must convert it to text
+      lastMessage.data.text().then((x: any) => setInputVal(x));
+    }
+  }, [lastMessage]);
 
   const leaveSessionHandler = () => {
     console.log("Leaving session");
     navigate("/");
+  };
+
+  const sendHandler = () => {
+    sendMessage(inputVal);
   };
 
   if (!roomToken) {
@@ -65,10 +89,13 @@ function Session() {
         </Code>
         <Button onClick={onOpen}>Leave Session</Button>
 
-        <Heading mt={10}>WS Log</Heading>
-        {logs.map((l) => (
-          <Text>{l}</Text>
-        ))}
+        <Heading mt={10}>{`WS Status: ${CONNECTION_MAP[readyState]}`}</Heading>
+        <Input
+          type="text"
+          onChange={(e) => setInputVal(e.target.value)}
+          value={inputVal}
+        />
+        <Button onClick={sendHandler}>Send</Button>
       </Flex>
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay />
