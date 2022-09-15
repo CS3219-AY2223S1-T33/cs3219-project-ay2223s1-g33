@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package session_service;
+option go_package = "cs3219-project-ay2223s1-g33/proto";
+
+import "types.proto";
+
+enum ValidateTokenErrorCode {
+  VALIDATE_TOKEN_NO_ERROR = 0;
+  VALIDATE_TOKEN_ERROR_INVALID = 1;
+  VALIDATE_TOKEN_ERROR_EXPIRED = 2;
+  VALIDATE_TOKEN_ERROR_INTERNAL = 100;
+}
+
+enum AddBlacklistErrorCode {
+  ADD_BLACKLIST_NO_ERROR = 0;
+  ADD_BLACKLIST_ERROR_INTERNAL = 100;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  string email = 1;
+  ValidateTokenErrorCode error_code = 2;
+}
+
+message AddBlacklistRequest {
+  string token = 1;
+}
+
+message AddBlacklistResponse {
+  AddBlacklistErrorCode error_code = 1;
+}
+
+service SessionService {
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc AddBlacklist(AddBlacklistRequest) returns (AddBlacklistResponse);
+}
