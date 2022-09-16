@@ -24,13 +24,13 @@ export interface IQuestionService extends grpc.UntypedServiceImplementation {
      */
     createQuestion: grpc.handleUnaryCall<CreateQuestionRequest, CreateQuestionResponse>;
     /**
-     * @generated from protobuf rpc: EditUser(user_service.EditQuestionRequest) returns (user_service.EditQuestionResponse);
+     * @generated from protobuf rpc: EditQuestion(user_service.EditQuestionRequest) returns (user_service.EditQuestionResponse);
      */
-    editUser: grpc.handleUnaryCall<EditQuestionRequest, EditQuestionResponse>;
+    editQuestion: grpc.handleUnaryCall<EditQuestionRequest, EditQuestionResponse>;
     /**
-     * @generated from protobuf rpc: DeleteUser(user_service.DeleteQuestionRequest) returns (user_service.DeleteQuestionResponse);
+     * @generated from protobuf rpc: DeleteQuestion(user_service.DeleteQuestionRequest) returns (user_service.DeleteQuestionResponse);
      */
-    deleteUser: grpc.handleUnaryCall<DeleteQuestionRequest, DeleteQuestionResponse>;
+    deleteQuestion: grpc.handleUnaryCall<DeleteQuestionRequest, DeleteQuestionResponse>;
 }
 /**
  * @grpc/grpc-js definition for the protobuf service user_service.QuestionService.
@@ -64,9 +64,9 @@ export const questionServiceDefinition: grpc.ServiceDefinition<IQuestionService>
         responseSerialize: value => Buffer.from(CreateQuestionResponse.toBinary(value)),
         requestSerialize: value => Buffer.from(CreateQuestionRequest.toBinary(value))
     },
-    editUser: {
-        path: "/user_service.QuestionService/EditUser",
-        originalName: "EditUser",
+    editQuestion: {
+        path: "/user_service.QuestionService/EditQuestion",
+        originalName: "EditQuestion",
         requestStream: false,
         responseStream: false,
         responseDeserialize: bytes => EditQuestionResponse.fromBinary(bytes),
@@ -74,9 +74,9 @@ export const questionServiceDefinition: grpc.ServiceDefinition<IQuestionService>
         responseSerialize: value => Buffer.from(EditQuestionResponse.toBinary(value)),
         requestSerialize: value => Buffer.from(EditQuestionRequest.toBinary(value))
     },
-    deleteUser: {
-        path: "/user_service.QuestionService/DeleteUser",
-        originalName: "DeleteUser",
+    deleteQuestion: {
+        path: "/user_service.QuestionService/DeleteQuestion",
+        originalName: "DeleteQuestion",
         requestStream: false,
         responseStream: false,
         responseDeserialize: bytes => DeleteQuestionResponse.fromBinary(bytes),

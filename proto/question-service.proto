@@ -43,6 +43,6 @@ message DeleteQuestionResponse {
 service QuestionService {
   rpc GetQuestion(GetQuestionRequest) returns (GetQuestionResponse);
   rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
-  rpc EditUser(EditQuestionRequest) returns (EditQuestionResponse);
-  rpc DeleteUser(DeleteQuestionRequest) returns (DeleteQuestionResponse);
+  rpc EditQuestion(EditQuestionRequest) returns (EditQuestionResponse);
+  rpc DeleteQuestion(DeleteQuestionRequest) returns (DeleteQuestionResponse);
 }

@@ -501,6 +501,6 @@ export const DeleteQuestionResponse = new DeleteQuestionResponse$Type();
 export const QuestionService = new ServiceType("user_service.QuestionService", [
     { name: "GetQuestion", options: {}, I: GetQuestionRequest, O: GetQuestionResponse },
     { name: "CreateQuestion", options: {}, I: CreateQuestionRequest, O: CreateQuestionResponse },
-    { name: "EditUser", options: {}, I: EditQuestionRequest, O: EditQuestionResponse },
-    { name: "DeleteUser", options: {}, I: DeleteQuestionRequest, O: DeleteQuestionResponse }
+    { name: "EditQuestion", options: {}, I: EditQuestionRequest, O: EditQuestionResponse },
+    { name: "DeleteQuestion", options: {}, I: DeleteQuestionRequest, O: DeleteQuestionResponse }
 ]);

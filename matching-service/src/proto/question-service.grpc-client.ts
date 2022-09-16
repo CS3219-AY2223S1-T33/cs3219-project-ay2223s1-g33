@@ -33,19 +33,19 @@ export interface IQuestionServiceClient {
     createQuestion(input: CreateQuestionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateQuestionResponse) => void): grpc.ClientUnaryCall;
     createQuestion(input: CreateQuestionRequest, callback: (err: grpc.ServiceError | null, value?: CreateQuestionResponse) => void): grpc.ClientUnaryCall;
     /**
-     * @generated from protobuf rpc: EditUser(user_service.EditQuestionRequest) returns (user_service.EditQuestionResponse);
+     * @generated from protobuf rpc: EditQuestion(user_service.EditQuestionRequest) returns (user_service.EditQuestionResponse);
      */
-    editUser(input: EditQuestionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
-    editUser(input: EditQuestionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
-    editUser(input: EditQuestionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
-    editUser(input: EditQuestionRequest, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
+    editQuestion(input: EditQuestionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
+    editQuestion(input: EditQuestionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
+    editQuestion(input: EditQuestionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
+    editQuestion(input: EditQuestionRequest, callback: (err: grpc.ServiceError | null, value?: EditQuestionResponse) => void): grpc.ClientUnaryCall;
     /**
-     * @generated from protobuf rpc: DeleteUser(user_service.DeleteQuestionRequest) returns (user_service.DeleteQuestionResponse);
+     * @generated from protobuf rpc: DeleteQuestion(user_service.DeleteQuestionRequest) returns (user_service.DeleteQuestionResponse);
      */
-    deleteUser(input: DeleteQuestionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
-    deleteUser(input: DeleteQuestionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
-    deleteUser(input: DeleteQuestionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
-    deleteUser(input: DeleteQuestionRequest, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
+    deleteQuestion(input: DeleteQuestionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
+    deleteQuestion(input: DeleteQuestionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
+    deleteQuestion(input: DeleteQuestionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
+    deleteQuestion(input: DeleteQuestionRequest, callback: (err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service user_service.QuestionService
@@ -71,16 +71,16 @@ export class QuestionServiceClient extends grpc.Client implements IQuestionServi
         return this.makeUnaryRequest<CreateQuestionRequest, CreateQuestionResponse>(`/${QuestionService.typeName}/${method.name}`, (value: CreateQuestionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): CreateQuestionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: EditUser(user_service.EditQuestionRequest) returns (user_service.EditQuestionResponse);
+     * @generated from protobuf rpc: EditQuestion(user_service.EditQuestionRequest) returns (user_service.EditQuestionResponse);
      */
-    editUser(input: EditQuestionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditQuestionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditQuestionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: EditQuestionResponse) => void)): grpc.ClientUnaryCall {
+    editQuestion(input: EditQuestionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditQuestionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditQuestionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: EditQuestionResponse) => void)): grpc.ClientUnaryCall {
         const method = QuestionService.methods[2];
         return this.makeUnaryRequest<EditQuestionRequest, EditQuestionResponse>(`/${QuestionService.typeName}/${method.name}`, (value: EditQuestionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): EditQuestionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: DeleteUser(user_service.DeleteQuestionRequest) returns (user_service.DeleteQuestionResponse);
+     * @generated from protobuf rpc: DeleteQuestion(user_service.DeleteQuestionRequest) returns (user_service.DeleteQuestionResponse);
      */
-    deleteUser(input: DeleteQuestionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void)): grpc.ClientUnaryCall {
+    deleteQuestion(input: DeleteQuestionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteQuestionResponse) => void)): grpc.ClientUnaryCall {
         const method = QuestionService.methods[3];
         return this.makeUnaryRequest<DeleteQuestionRequest, DeleteQuestionResponse>(`/${QuestionService.typeName}/${method.name}`, (value: DeleteQuestionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteQuestionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
