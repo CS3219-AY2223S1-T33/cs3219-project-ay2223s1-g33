@@ -8,7 +8,11 @@ const returnValues = ['questionId', 'name', 'difficulty', 'content', 'solution']
 
 class QuestionStore implements IQuestionStore {
   async addQuestion(question: StoredQuestion): Promise<StoredQuestion> {
-    const { name } = question;
+    const { name, difficulty } = question;
+
+    if (difficulty === QuestionDifficulty.UNUSED) {
+      throw new Error('Question must have a difficulty');
+    }
 
     const isExist = await getDatabase()
       .getQuestionRepo()
