@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package user_service;
+option go_package = "cs3219-project-ay2223s1-g33/gateway";
+
+import "types.proto";
+
+message GetQuestionRequest {
+  common.Question question = 1;
+}
+
+message GetQuestionResponse {
+  common.Question question = 1;
+  string error_message = 2;
+}
+
+message CreateQuestionRequest {
+  common.Question question = 1;
+}
+
+message CreateQuestionResponse {
+  common.Question question = 1;
+  string error_message = 2;
+}
+
+message EditQuestionRequest {
+  common.Question question = 1;
+}
+
+message EditQuestionResponse {
+  common.Question question = 1;
+  string error_message = 2;
+}
+
+message DeleteQuestionRequest {
+  uint64 question_id = 1;
+}
+
+message DeleteQuestionResponse {
+  string error_message = 1;
+}
+
+service QuestionService {
+  rpc GetQuestion(GetQuestionRequest) returns (GetQuestionResponse);
+  rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
+  rpc EditUser(EditQuestionRequest) returns (EditQuestionResponse);
+  rpc DeleteUser(DeleteQuestionRequest) returns (DeleteQuestionResponse);
+}

@@ -20,3 +20,11 @@ enum QuestionDifficulty {
   QUESTION_DIFFICULTY_MEDIUM = 2;
   QUESTION_DIFFICULTY_HARD = 3;
 }
+
+message Question {
+  uint64 question_id = 1;
+  string name = 2;
+  QuestionDifficulty difficulty = 3;
+  string question = 4;
+  string solution = 5;
+}
