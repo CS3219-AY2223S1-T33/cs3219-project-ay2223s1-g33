@@ -8,11 +8,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import History from './History';
-import { QuestionDifficulty } from '../proto/types'
-import { Question } from '../proto/types'
+import { QuestionDifficulty, Question } from '../proto/types';
 
 @Entity('Question')
-export default class dbQuestion implements Question {
+export default class QuestionEntity implements Question {
   @PrimaryGeneratedColumn()
     questionId!: number;
 
@@ -32,8 +31,8 @@ export default class dbQuestion implements Question {
     histories?: History[];
 
   @CreateDateColumn()
-    createDateTime!: Date;
+    createDateTime?: Date;
 
   @UpdateDateColumn()
-    updateDateTime!: Date;
+    updateDateTime?: Date;
 }
