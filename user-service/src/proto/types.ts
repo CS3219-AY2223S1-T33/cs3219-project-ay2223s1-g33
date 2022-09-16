@@ -59,9 +59,9 @@ export interface Question {
      */
     difficulty: QuestionDifficulty;
     /**
-     * @generated from protobuf field: string question = 4;
+     * @generated from protobuf field: string content = 4;
      */
-    question: string;
+    content: string;
     /**
      * @generated from protobuf field: string solution = 5;
      */
@@ -210,12 +210,12 @@ class Question$Type extends MessageType<Question> {
             { no: 1, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] },
-            { no: 4, name: "question", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<Question>): Question {
-        const message = { questionId: 0, name: "", difficulty: 0, question: "", solution: "" };
+        const message = { questionId: 0, name: "", difficulty: 0, content: "", solution: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<Question>(this, message, value);
@@ -235,8 +235,8 @@ class Question$Type extends MessageType<Question> {
                 case /* common.QuestionDifficulty difficulty */ 3:
                     message.difficulty = reader.int32();
                     break;
-                case /* string question */ 4:
-                    message.question = reader.string();
+                case /* string content */ 4:
+                    message.content = reader.string();
                     break;
                 case /* string solution */ 5:
                     message.solution = reader.string();
@@ -262,9 +262,9 @@ class Question$Type extends MessageType<Question> {
         /* common.QuestionDifficulty difficulty = 3; */
         if (message.difficulty !== 0)
             writer.tag(3, WireType.Varint).int32(message.difficulty);
-        /* string question = 4; */
-        if (message.question !== "")
-            writer.tag(4, WireType.LengthDelimited).string(message.question);
+        /* string content = 4; */
+        if (message.content !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.content);
         /* string solution = 5; */
         if (message.solution !== "")
             writer.tag(5, WireType.LengthDelimited).string(message.solution);

@@ -15,14 +15,14 @@ export default class QuestionEntity implements Question {
   @PrimaryGeneratedColumn()
     questionId!: number;
 
-  @Column()
+  @Column({ unique: true })
     name!: string;
 
   @Column()
     difficulty!: QuestionDifficulty;
 
   @Column()
-    question!: string;
+    content!: string;
 
   @Column()
     solution!: string;
