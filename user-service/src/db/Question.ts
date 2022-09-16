@@ -1,5 +1,6 @@
 /* eslint import/no-cycle: 0 */
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
@@ -11,20 +12,21 @@ import History from './History';
 import { QuestionDifficulty, Question } from '../proto/types';
 
 @Entity('Question')
+@Check('difficulty > 0')
 export default class QuestionEntity implements Question {
   @PrimaryGeneratedColumn()
     questionId!: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: false })
     name!: string;
 
-  @Column()
+  @Column({ nullable: false })
     difficulty!: QuestionDifficulty;
 
-  @Column()
+  @Column({ nullable: false })
     content!: string;
 
-  @Column()
+  @Column({ nullable: false })
     solution!: string;
 
   @OneToMany(() => History, (history) => history.question)
