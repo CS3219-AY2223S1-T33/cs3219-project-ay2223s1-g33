@@ -1,9 +1,12 @@
 import { config } from 'dotenv';
 
 type EnvironmentConfig = {
-  readonly JWT_SIGNING_SECRET: string,
   readonly HTTP_PORT: number,
   readonly GRPC_PORT: number,
+  readonly DATABASE_DBHOST: string,
+  readonly DATABASE_USERNAME: string,
+  readonly DATABASE_PASSWORD: string,
+  readonly DATABASE_NAME: string,
 };
 
 function requireExists(key: string): void {
@@ -56,7 +59,10 @@ export default function loadEnvironment(): EnvironmentConfig {
   config();
 
   return {
-    JWT_SIGNING_SECRET: requireString('JWT_SIGNING_SECRET'),
+    DATABASE_DBHOST: requireString('DATABASE_DBHOST'),
+    DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
+    DATABASE_PASSWORD: requireString('DATABASE_PASSWORD'),
+    DATABASE_NAME: requireString('DATABASE_NAME'),
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8081),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),
   };
