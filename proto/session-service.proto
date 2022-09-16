@@ -3,7 +3,10 @@ syntax = "proto3";
 package session_service;
 option go_package = "cs3219-project-ay2223s1-g33/proto";
 
-import "types.proto";
+enum CreateTokenErrorCode {
+  CREATE_TOKEN_NO_ERROR = 0;
+  CREATE_TOKEN_ERROR_INTERNAL = 100;
+}
 
 enum ValidateTokenErrorCode {
   VALIDATE_TOKEN_NO_ERROR = 0;
@@ -15,6 +18,15 @@ enum ValidateTokenErrorCode {
 enum AddBlacklistErrorCode {
   ADD_BLACKLIST_NO_ERROR = 0;
   ADD_BLACKLIST_ERROR_INTERNAL = 100;
+}
+
+message CreateTokenRequest {
+  string email = 1;
+}
+
+message CreateTokenResponse {
+  string token = 1;
+  CreateTokenErrorCode error_code = 2;
 }
 
 message ValidateTokenRequest {
@@ -35,6 +47,7 @@ message AddBlacklistResponse {
 }
 
 service SessionService {
+  rpc CreateToken(CreateTokenRequest) returns (CreateTokenResponse);
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
   rpc AddBlacklist(AddBlacklistRequest) returns (AddBlacklistResponse);
 }
