@@ -8,45 +8,31 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import History from './History';
-
-export enum Diffculty {
-  EASY,
-  MEDIUM,
-  HARD,
-}
-
-export type Solution = {
-  input: string;
-  output: string;
-  explination: string;
-};
+import { QuestionDifficulty, Question } from '../proto/types';
 
 @Entity('Question')
-export default class Question {
+export default class QuestionEntity implements Question {
   @PrimaryGeneratedColumn()
-    id!: string;
+    questionId!: number;
 
   @Column()
-    diffculty!: Diffculty;
+    name!: string;
+
+  @Column()
+    difficulty!: QuestionDifficulty;
 
   @Column()
     question!: string;
 
-  @Column('simple-array')
-    solutions!: Solution[];
-
   @Column()
-    constrains?: string;
-
-  @Column()
-    hint?: string;
+    solution!: string;
 
   @OneToMany(() => History, (history) => history.question)
     histories?: History[];
 
   @CreateDateColumn()
-    createDateTime!: Date;
+    createDateTime?: Date;
 
   @UpdateDateColumn()
-    updateDateTime!: Date;
+    updateDateTime?: Date;
 }
