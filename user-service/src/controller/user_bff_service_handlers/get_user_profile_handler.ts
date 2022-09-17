@@ -1,8 +1,15 @@
 import { GetUserProfileRequest, GetUserProfileResponse } from '../../proto/user-bff-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+
+function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUserProfileResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
 
 class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUserProfileResponse> {
   rpcClient: UserServiceClient;
@@ -14,8 +21,10 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
     this.authService = authService;
   }
 
-  async handle(request: GetUserProfileRequest): Promise<GetUserProfileResponse> {
-    const validatedRequest = GetUserProfileHandler.validateRequest(request);
+  async handle(request: ApiRequest<GetUserProfileRequest>)
+    : Promise<ApiResponse<GetUserProfileResponse>> {
+    const requestObject = request.request;
+    const validatedRequest = GetUserProfileHandler.validateRequest(requestObject);
     if (validatedRequest instanceof Error) {
       return GetUserProfileHandler.buildErrorResponse(
         validatedRequest.message,
@@ -36,10 +45,10 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
       );
     }
 
-    return {
+    return getHeaderlessResponse({
       user: user.userInfo,
       errorMessage: '',
-    };
+    });
   }
 
   static validateRequest(request: GetUserProfileRequest): (GetUserProfileRequest | Error) {
@@ -76,10 +85,10 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
     });
   }
 
-  static buildErrorResponse(errorMessage: string): GetUserProfileResponse {
-    return {
+  static buildErrorResponse(errorMessage: string): ApiResponse<GetUserProfileResponse> {
+    return getHeaderlessResponse({
       errorMessage,
-    };
+    });
   }
 }
 

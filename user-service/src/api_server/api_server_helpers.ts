@@ -2,7 +2,12 @@ import {
   ServerUnaryCall, sendUnaryData, Metadata, handleUnaryCall,
 } from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
-import { IApiHandler, ApiCallHandler } from './api_server_types';
+import {
+  IApiHandler,
+  ApiCallHandler,
+  ApiResponse,
+  HTTPResponse,
+} from './api_server_types';
 import Logger from '../utils/logger';
 
 function getGrpcRouteHandler<RequestType, ResponseType>(
@@ -16,13 +21,24 @@ function getGrpcRouteHandler<RequestType, ResponseType>(
       Logger.warn(`Error on GRPC Route call: ${args}`);
     });
 
-    const response: ResponseType = await handler.handle(call.request);
+    const metadata = call.metadata.getMap();
+    const headers: { [key: string]: string } = {};
+    Object.keys(metadata).forEach((key: string) => {
+      headers[key] = metadata[key].toString();
+    });
+
+    const response: ApiResponse<ResponseType> = await handler.handle({
+      request: call.request,
+      headers,
+    });
 
     const responseHeaders = new Metadata();
-    responseHeaders.add('server-header', 'server header value');
-    call.sendMetadata(responseHeaders);
+    Object.keys(response.headers).forEach((key: string) => {
+      responseHeaders.add(key, response.headers[key]);
+    });
 
-    callback(null, response, undefined);
+    call.sendMetadata(responseHeaders);
+    callback(null, response.response, undefined);
   };
 }
 
@@ -30,13 +46,19 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
   respType: IMessageType<ResponseType>,
-): (object: any) => Promise<any> {
-  return async (requestJson: any): Promise<any> => {
+): (json: any, headers: { [key: string]: string }) => Promise<HTTPResponse> {
+  return async (requestJson: any, headers: { [key: string]: string }): Promise<HTTPResponse> => {
     const requestObject = reqType.fromJson(requestJson);
-    const responseObject: ResponseType = await handler.handle(requestObject);
-    return respType.toJson(responseObject, {
-      enumAsInteger: true,
+    const responseObject: ApiResponse<ResponseType> = await handler.handle({
+      request: requestObject,
+      headers,
     });
+    return {
+      jsonResponse: respType.toJson(responseObject.response, {
+        enumAsInteger: true,
+      }),
+      headers: responseObject.headers,
+    };
   };
 }
 
