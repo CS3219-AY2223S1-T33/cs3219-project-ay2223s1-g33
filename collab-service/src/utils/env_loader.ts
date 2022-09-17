@@ -6,6 +6,7 @@ type EnvironmentConfig = {
   readonly REDIS_SERVER_URL: string,
   readonly HTTP_PORT: number,
   readonly GRPC_PORT: number,
+  readonly GRPC_TUNNEL_PORT: number,
 };
 
 function requireExists(key: string): void {
@@ -62,5 +63,6 @@ export default function loadEnvironment(): EnvironmentConfig {
     REDIS_SERVER_URL: requireString('REDIS_SERVER_URL'),
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8083),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4002),
+    GRPC_TUNNEL_PORT: requireInt('GRPC_TUNNEL_PORT', 4003),
   };
 }
