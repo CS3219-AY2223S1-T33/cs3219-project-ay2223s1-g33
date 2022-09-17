@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	gw "cs3219-project-ay2223s1-g33/gateway/gateway"
+	gw "cs3219-project-ay2223s1-g33/gateway/proto"
 	"log"
 	"net/http"
 
