@@ -63,7 +63,7 @@ export default function loadEnvironment(): EnvironmentConfig {
     DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
     DATABASE_PASSWORD: requireString('DATABASE_PASSWORD'),
     DATABASE_NAME: requireString('DATABASE_NAME'),
-    HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8081),
-    GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),
+    HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8084),
+    GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4004),
   };
 }
