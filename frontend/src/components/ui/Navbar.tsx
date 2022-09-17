@@ -8,7 +8,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Text,
+  Text
 } from "@chakra-ui/react";
 import React from "react";
 import { useCookies } from "react-cookie";
@@ -52,6 +52,9 @@ function Navbar() {
               </MenuButton>
               <MenuList alignItems="center">
                 <MenuItem>Account Settings</MenuItem>
+                <MenuItem onClick={() => navigate("/session")}>
+                  Session
+                </MenuItem>
                 <MenuItem onClick={logoutHandler}>Logout</MenuItem>
               </MenuList>
             </Menu>
