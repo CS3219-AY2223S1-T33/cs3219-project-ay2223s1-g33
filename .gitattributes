@@ -5,3 +5,4 @@
 # to native line endings on checkout.
 *.sh text eol=lf
 *.ts text eol=lf
+*.cfg text eol=lf
