@@ -113,3 +113,4 @@ config_env/matching-service.env
 config_env/matchmaker.env
 config_env/collab-service.env
 config_env/gateway.env
+config_env/session-service.env
