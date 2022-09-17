@@ -75,3 +75,6 @@ jobs:
 
       - name: 'Run matchmaker test'
         run: 'cd matchmaker && make test'
+
+      - name: 'Run session service test'
+        run: 'cd session-service && make test'
