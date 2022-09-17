@@ -9,6 +9,7 @@ import (
 	redis "github.com/go-redis/redis/v9"
 )
 
+//go:generate mockgen -destination=../mocks/mock_redis_client.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/session-service/conn RedisBlacklistClient
 type RedisBlacklistClient interface {
 	Connect()
 	Close()
