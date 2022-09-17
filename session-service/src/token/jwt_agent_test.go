@@ -47,8 +47,8 @@ func TestJwtCreateToken(t *testing.T) {
 	casted, ok := token.Claims.(*JwtClaims)
 	assert.True(t, ok)
 	assert.Equal(t, realNow.Add(time.Hour).Unix(), casted.ExpiresAt.Unix())
-	assert.Equal(t, int64(1633831800), casted.NotBefore.Unix())
-	assert.Equal(t, int64(1633831800), casted.IssuedAt.Unix())
+	assert.Equal(t, baseTimestamp.Unix(), casted.NotBefore.Unix())
+	assert.Equal(t, baseTimestamp.Unix(), casted.IssuedAt.Unix())
 }
 
 func TestJwtValidateToken(t *testing.T) {
