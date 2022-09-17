@@ -19,6 +19,10 @@ class CollabSubscription implements Subscription<TunnelServiceRequest> {
     );
     this.call.write(response);
   }
+
+  isHandler(data: any) {
+    return this.call === data;
+  }
 }
 
 export default CollabSubscription;

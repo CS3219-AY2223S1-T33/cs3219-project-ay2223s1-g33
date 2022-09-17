@@ -19,6 +19,16 @@ class CollabTunnelPubSub implements TunnelPubSub<CollabTopic> {
     }
     return this.topics.get(topic);
   }
+
+  clean(data: any) {
+    this.topics.forEach((topic, key) => {
+      topic.clean(data);
+      if (topic.isEmpty()) {
+        Logger.info(`Topic ${key} removed`);
+        this.topics.delete(key);
+      }
+    });
+  }
 }
 
 export default CollabTunnelPubSub;

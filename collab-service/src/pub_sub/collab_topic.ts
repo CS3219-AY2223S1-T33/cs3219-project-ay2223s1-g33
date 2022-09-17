@@ -4,6 +4,8 @@ import { TunnelServiceRequest, TunnelServiceResponse } from '../proto/tunnel-ser
 import CollabSubscription from './collab_subscription';
 import Logger from '../utils/logger';
 
+const MAX_SUBSCRIBERS = 2;
+
 class CollabTopic implements
   Topic<ServerDuplexStreamImpl<TunnelServiceRequest, TunnelServiceResponse>, TunnelServiceRequest> {
   subscriptions: Map<string, CollabSubscription>;
@@ -18,7 +20,7 @@ class CollabTopic implements
   ) {
     const subExist = this.subscriptions.has(subscriptionName);
     if (!subExist) {
-      if (this.subscriptions.size === 2) {
+      if (this.subscriptions.size === MAX_SUBSCRIBERS) {
         // Stop appending subscriber
         throw new Error('Subscription is full');
       }
@@ -31,6 +33,19 @@ class CollabTopic implements
     this.subscriptions.forEach((sub) => {
       sub.push(request);
     });
+  }
+
+  clean(data: any) {
+    this.subscriptions.forEach((sub, key) => {
+      if (sub.isHandler(data)) {
+        Logger.info(`Subscription ${key} removed`);
+        this.subscriptions.delete(key);
+      }
+    });
+  }
+
+  isEmpty(): boolean {
+    return this.subscriptions.size === 0;
   }
 }
 

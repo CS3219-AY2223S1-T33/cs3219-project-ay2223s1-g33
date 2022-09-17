@@ -3,8 +3,10 @@ import { ITunnelService, tunnelServiceDefinition } from '../proto/tunnel-service
 import { TunnelServiceRequest } from '../proto/tunnel-service';
 import CollabTunnelPubSub from '../pub_sub/collab_tunnel_pubsub';
 
+// Central source of pubsub
 const pubSub = new CollabTunnelPubSub();
 
+// Fake username and roomId
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let count = -1;
 const allUsers = ['user1', 'user2'];
@@ -30,6 +32,7 @@ function pubSubOpenStream(call: any) {
   });
   // When stream ends
   call.on('end', () => {
+    pubSub.clean(call);
     call.end();
   });
 }
