@@ -1,6 +1,5 @@
 import {
   Flex,
-  Heading,
   Button,
   Text,
   ModalOverlay,
@@ -12,26 +11,25 @@ import {
   ModalFooter,
   useDisclosure,
   HStack,
-  Code,
-  Input,
+  Box,
+  Grid,
+  Textarea,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { useDispatch, useSelector } from "react-redux";
+import useWebSocket from "react-use-websocket";
+import InvalidSession from "./InvalidSession";
 import { RootState } from "../app/store";
-
-const CONNECTION_MAP = {
-  [ReadyState.CONNECTING]: "Connecting",
-  [ReadyState.OPEN]: "Open",
-  [ReadyState.CLOSING]: "Closing",
-  [ReadyState.CLOSED]: "Closed",
-  [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-};
+import EditorTabs from "../components/editor/EditorTabs";
+import { leaveRoom } from "../feature/matching/matchingSlice";
+import SessionNavbar from "../components/ui/navbar/SessionNavbar";
+import { CONNECTION_MAP } from "../constants";
 
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { sendMessage, lastMessage, readyState } = useWebSocket(
     "ws://localhost:5001/ws"
@@ -49,6 +47,7 @@ function Session() {
 
   const leaveSessionHandler = () => {
     console.log("Leaving session");
+    dispatch(leaveRoom());
     navigate("/");
   };
 
@@ -57,46 +56,45 @@ function Session() {
   };
 
   if (!roomToken) {
-    return (
-      <Flex
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        w="100vw"
-        h="100vh"
-      >
-        <Heading>Error: Expected Room Token</Heading>
-        <Button colorScheme="red" onClick={leaveSessionHandler}>
-          Leave Session
-        </Button>
-      </Flex>
-    );
+    return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
 
   return (
     <>
-      <Flex
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        w="100vw"
-        h="100vh"
-      >
-        <Heading>This is the session room</Heading>
-        <Text size="xl">Token</Text>
-        <Code overflowWrap="break-word" w="65%">
-          {roomToken}
-        </Code>
-        <Button onClick={onOpen}>Leave Session</Button>
+      {/* Navbar for session */}
+      <SessionNavbar
+        sendHandler={sendHandler}
+        onOpen={onOpen}
+        status={CONNECTION_MAP[readyState]}
+      />
 
-        <Heading mt={10}>{`WS Status: ${CONNECTION_MAP[readyState]}`}</Heading>
-        <Input
-          type="text"
-          onChange={(e) => setInputVal(e.target.value)}
-          value={inputVal}
-        />
-        <Button onClick={sendHandler}>Send</Button>
-      </Flex>
+      <Grid templateColumns="1fr 2fr" mx="auto">
+        <EditorTabs />
+        {/* Code Editor */}
+        <Grid templateRows="7% 7fr auto" h="91vh">
+          {/* Code Editor Settings */}
+          <Flex direction="row" bg="gray.100" px={12} py={2}>
+            Code Editor options
+          </Flex>
+          {/* Editor - I may find a more IDE-like component for this */}
+          <Textarea
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            resize="none"
+            h="100%"
+          />
+          {/* Test case window */}
+          <Grid templateRows="1fr 3fr 1fr">
+            <Text fontSize="lg">Testcases</Text>
+            <Box>Content</Box>
+            <Flex direction="row-reverse" px={12} pb={4}>
+              <Button onClick={sendHandler}>Submit code</Button>
+            </Flex>
+          </Grid>
+        </Grid>
+      </Grid>
+
+      {/* Modal for leaving the session */}
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay />
         <ModalContent>
@@ -119,6 +117,7 @@ function Session() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      {/* TODO: Modal when other user leaves the session */}
     </>
   );
 }

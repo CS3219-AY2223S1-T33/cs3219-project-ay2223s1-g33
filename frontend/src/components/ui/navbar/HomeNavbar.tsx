@@ -14,10 +14,10 @@ import React from "react";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { RootState } from "../../app/store";
-import { logout } from "../../feature/user/userSlice";
+import { RootState } from "../../../app/store";
+import { logout } from "../../../feature/user/userSlice";
 
-function Navbar() {
+function HomeNavbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   // eslint-disable-next-line
@@ -52,6 +52,9 @@ function Navbar() {
               </MenuButton>
               <MenuList alignItems="center">
                 <MenuItem>Account Settings</MenuItem>
+                <MenuItem onClick={() => navigate("/session")}>
+                  Session
+                </MenuItem>
                 <MenuItem onClick={logoutHandler}>Logout</MenuItem>
               </MenuList>
             </Menu>
@@ -62,4 +65,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default HomeNavbar;
