@@ -30,6 +30,7 @@ protoc \
     $FILES
 
 for P in ${OUTPUT_DIR[@]}; do
+    echo ""
     echo "-- Emitting ${P} --"
     CFG_FILE=$P/proto-emit.cfg
     if [ -f "$CFG_FILE" ]; then
@@ -43,7 +44,6 @@ for P in ${OUTPUT_DIR[@]}; do
                 echo "Emitting filtered set to ${CONFIG_OUT_DIR}"
                 FILTERS=(${EMIT_FILTER//,/ })
                 for F in ${FILTERS[@]}; do
-                    find $OUT_DIR -name "${F}*.ts"
                     find $OUT_DIR -name "${F}*.ts" -exec cp {} "$CONFIG_OUT_DIR" \;
                 done
             else
