@@ -1,6 +1,7 @@
 package token
 
 import (
+	"cs3219-project-ay2223s1-g33/session-service/util"
 	"fmt"
 	"time"
 
@@ -17,6 +18,7 @@ type JwtAgent interface {
 type jwtAgent struct {
 	secret        []byte
 	tokenValidity time.Duration
+	clock         util.Clock
 }
 
 type JwtClaims struct {
@@ -28,11 +30,12 @@ func CreateJwtAgent(signingSecret string, tokenValidity time.Duration) JwtAgent 
 	return &jwtAgent{
 		secret:        []byte(signingSecret),
 		tokenValidity: tokenValidity,
+		clock:         util.GetRealClock(),
 	}
 }
 
 func (agent *jwtAgent) CreateToken(data *TokenData) (string, error) {
-	timeNow := time.Now()
+	timeNow := agent.clock.Now()
 	tokenValidUntil := timeNow.Add(agent.tokenValidity)
 	token := jwt.NewWithClaims(jwtSigningMethod, JwtClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -66,7 +69,7 @@ func (agent *jwtAgent) VerifyToken(tokenString string) (*TokenData, error) {
 		if (validationErr.Errors & jwt.ValidationErrorSignatureInvalid) == jwt.ValidationErrorSignatureInvalid {
 			return nil, InvalidTokenError{}
 		}
-		return nil, err
+		return nil, InvalidTokenError{}
 	}
 
 	claims, ok := token.Claims.(*JwtClaims)

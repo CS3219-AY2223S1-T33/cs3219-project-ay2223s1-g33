@@ -12,5 +12,8 @@ build:
 generate:
 	$(MAKE) -C src generate
 
-run-built:
+test:
+	$(MAKE) -C src test
+
+run/dist:
 	./dist/session-service
