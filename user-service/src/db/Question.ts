@@ -1,5 +1,6 @@
 /* eslint import/no-cycle: 0 */
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
@@ -8,45 +9,32 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import History from './History';
-
-export enum Diffculty {
-  EASY,
-  MEDIUM,
-  HARD,
-}
-
-export type Solution = {
-  input: string;
-  output: string;
-  explination: string;
-};
+import { QuestionDifficulty, Question } from '../proto/types';
 
 @Entity('Question')
-export default class Question {
+@Check('difficulty > 0')
+export default class QuestionEntity implements Question {
   @PrimaryGeneratedColumn()
-    id!: string;
+    questionId!: number;
 
-  @Column()
-    diffculty!: Diffculty;
+  @Column({ unique: true, nullable: false })
+    name!: string;
 
-  @Column()
-    question!: string;
+  @Column({ nullable: false })
+    difficulty!: QuestionDifficulty;
 
-  @Column('simple-array')
-    solutions!: Solution[];
+  @Column({ nullable: false })
+    content!: string;
 
-  @Column()
-    constrains?: string;
-
-  @Column()
-    hint?: string;
+  @Column({ nullable: false })
+    solution!: string;
 
   @OneToMany(() => History, (history) => history.question)
     histories?: History[];
 
   @CreateDateColumn()
-    createDateTime!: Date;
+    createDateTime?: Date;
 
   @UpdateDateColumn()
-    updateDateTime!: Date;
+    updateDateTime?: Date;
 }

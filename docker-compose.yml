@@ -75,7 +75,26 @@ services:
     volumes:
       - .:/app/collab-service/build
       - /app/collab-service/node_modules
+  question-service:
+    platform: linux/amd64
+    env_file: config_env/question-service.env
 
+    build:
+      context: .
+      dockerfile: question-service.dockerfile
+
+    ports:
+      - "8084:8084"
+
+    expose:
+      - "8084"
+
+    volumes:
+      - .:/app/question-service/build
+      - /app/question-service/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   matchmaker:
     platform: linux/amd64
     env_file: config_env/matchmaker.env
