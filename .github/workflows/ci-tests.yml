@@ -71,7 +71,7 @@ jobs:
           go-version: '1.19'
 
       - name: 'Add dummy env files'
-        run: 'touch matchmaker/.env && touch gateway/.env'
+        run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
 
       - name: 'Run matchmaker test'
         run: 'cd matchmaker && make test'
