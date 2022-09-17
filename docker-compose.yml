@@ -86,6 +86,19 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  session-service:
+    platform: linux/amd64
+    env_file: config_env/session-service.env
+
+    build:
+      context: ./session-service
+      dockerfile: Dockerfile
+
+    ports:
+      - "4100:4100"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   gateway:
     platform: linux/amd64
     env_file: config_env/gateway.env
