@@ -111,7 +111,7 @@ func (client *redisBlacklistClient) RemoveToken(token string) error {
 }
 
 func getStartOfDay(now time.Time) time.Time {
-	return now.Truncate(24 * time.Hour)
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 }
 
 func getBlacklistKeyForDay(baseTimestamp time.Time) string {
