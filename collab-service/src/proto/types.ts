@@ -43,6 +43,31 @@ export interface PasswordUser {
     password: string;
 }
 /**
+ * @generated from protobuf message common.Question
+ */
+export interface Question {
+    /**
+     * @generated from protobuf field: uint64 question_id = 1;
+     */
+    questionId: number;
+    /**
+     * @generated from protobuf field: string name = 2;
+     */
+    name: string;
+    /**
+     * @generated from protobuf field: common.QuestionDifficulty difficulty = 3;
+     */
+    difficulty: QuestionDifficulty;
+    /**
+     * @generated from protobuf field: string content = 4;
+     */
+    content: string;
+    /**
+     * @generated from protobuf field: string solution = 5;
+     */
+    solution: string;
+}
+/**
  * @generated from protobuf enum common.QuestionDifficulty
  */
 export enum QuestionDifficulty {
@@ -178,3 +203,78 @@ class PasswordUser$Type extends MessageType<PasswordUser> {
  * @generated MessageType for protobuf message common.PasswordUser
  */
 export const PasswordUser = new PasswordUser$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Question$Type extends MessageType<Question> {
+    constructor() {
+        super("common.Question", [
+            { no: 1, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] },
+            { no: 4, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Question>): Question {
+        const message = { questionId: 0, name: "", difficulty: 0, content: "", solution: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<Question>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Question): Question {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint64 question_id */ 1:
+                    message.questionId = reader.uint64().toNumber();
+                    break;
+                case /* string name */ 2:
+                    message.name = reader.string();
+                    break;
+                case /* common.QuestionDifficulty difficulty */ 3:
+                    message.difficulty = reader.int32();
+                    break;
+                case /* string content */ 4:
+                    message.content = reader.string();
+                    break;
+                case /* string solution */ 5:
+                    message.solution = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Question, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint64 question_id = 1; */
+        if (message.questionId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.questionId);
+        /* string name = 2; */
+        if (message.name !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* common.QuestionDifficulty difficulty = 3; */
+        if (message.difficulty !== 0)
+            writer.tag(3, WireType.Varint).int32(message.difficulty);
+        /* string content = 4; */
+        if (message.content !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.content);
+        /* string solution = 5; */
+        if (message.solution !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.solution);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message common.Question
+ */
+export const Question = new Question$Type();

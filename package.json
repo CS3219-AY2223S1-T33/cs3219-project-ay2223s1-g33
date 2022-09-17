@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is a template repository for CS3219 project.",
   "config": {
-    "proto_output": "./user-service/src/proto ./matching-service/src/proto ./frontend/src/proto ./collaboration-service/src/proto ./question-service/src/proto ./db/proto",
+    "proto_output": "./user-service ./matching-service ./frontend/ ./collab-service ./db ./question-service",
     "schema_output": "./user-service/src/db ./question-service/src/db"
   },
   "scripts": {
@@ -11,7 +11,8 @@
     "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh && chmod 755 ./scripts/gen-gateway.sh",
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output",
     "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output",
-    "gen-gateway": "./scripts/gen-gateway.sh"
+    "gen-gateway": "./scripts/gen-gateway.sh",
+    "gen-proto-go": "./scripts/gen-proto-go.sh"
   },
   "repository": {
     "type": "git",

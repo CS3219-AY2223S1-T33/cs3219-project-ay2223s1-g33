@@ -28,6 +28,9 @@ export const matchingSlice = createSlice({
       const { roomToken } = action.payload;
       state.roomToken = roomToken;
     },
+    leaveRoom: (state) => {
+      state.roomToken = undefined;
+    },
     toggleDifficulty: (state, action: PayloadAction<{ index: number }>) => {
       const { index } = action.payload;
       const newValue = !state.diffSelected[index];
@@ -36,6 +39,11 @@ export const matchingSlice = createSlice({
   },
 });
 
-export const { enterQueue, leaveQueue, toggleDifficulty, enterRoom } =
-  matchingSlice.actions;
+export const {
+  enterQueue,
+  enterRoom,
+  leaveRoom,
+  leaveQueue,
+  toggleDifficulty,
+} = matchingSlice.actions;
 export default matchingSlice.reducer;

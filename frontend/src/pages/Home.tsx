@@ -2,7 +2,7 @@ import { Box, Grid, Heading } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
 // import QueueForm from "../components/form/QueueForm";
-import Navbar from "../components/ui/Navbar";
+import Navbar from "../components/ui/navbar/HomeNavbar";
 import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
 import TempQueueForm from "../components/form/TempQueueForm";
