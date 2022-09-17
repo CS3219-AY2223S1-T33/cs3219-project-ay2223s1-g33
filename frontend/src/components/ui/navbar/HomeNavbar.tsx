@@ -8,7 +8,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import React from "react";
 import { useCookies } from "react-cookie";

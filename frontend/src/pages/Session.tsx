@@ -13,7 +13,7 @@ import {
   HStack,
   Box,
   Grid,
-  Textarea
+  Textarea,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
