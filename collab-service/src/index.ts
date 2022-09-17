@@ -9,6 +9,7 @@ import loadEnvironment from './utils/env_loader';
 import { createRedisAuthAdapter } from './redis_adapter/redis_auth_adapter';
 import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
+import setServer from './tunnler/collab_service_tunneller';
 
 const envConfig = loadEnvironment();
 
@@ -37,3 +38,4 @@ expressApp.get('/', (_: Request, resp: Response) => {
 
 apiServer.registerServiceRoutes(new CollabServiceApi(userAuthService, roomAuthService));
 apiServer.bind();
+setServer();
