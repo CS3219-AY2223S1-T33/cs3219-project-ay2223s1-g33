@@ -40,6 +40,7 @@ for P in ${OUTPUT_DIR[@]}; do
         if [ ! -z "$EMIT_DIR" ]; then
             echo "Found valid proto-emit.cfg"
             CONFIG_OUT_DIR=$P/$EMIT_DIR
+            mkdir -p $CONFIG_OUT_DIR
             if [ ! -z "$EMIT_FILTER" ]; then
                 echo "Emitting filtered set to ${CONFIG_OUT_DIR}"
                 FILTERS=(${EMIT_FILTER//,/ })
