@@ -51,23 +51,14 @@ function Login() {
           throw new Error(errorMessage);
         }
 
-        const { user, sessionToken } = res.data;
+        const { user } = res.data;
 
         if (!user) {
           throw new Error("Something went wrong.");
         }
 
-        // Set cookie to axios instance
-        const now = new Date();
-        setCookies("session_token", sessionToken, {
-          path: "/",
-          expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
-          domain: "127.0.0.1",
-          secure: false,
-        });
-
         // Store user information on redux
-        dispatch(login({ sessionToken, user }));
+        dispatch(login({ user, sessionToken: "" }));
 
         // Redirect user on successful login
         navigate("/", { replace: true });
