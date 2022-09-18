@@ -3,15 +3,14 @@ package main
 import (
 	"context"
 	gw "cs3219-project-ay2223s1-g33/gateway/proto"
-	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) (http.Handler, error) {
@@ -28,8 +27,8 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 		},
 	})
 
-	forwardResponseOpts := runtime.WithForwardResponseOption(gatewayResponseModifier)
-	mux := runtime.NewServeMux(marshalerOpts, forwardResponseOpts)
+	outgoingHeaderOpts := runtime.WithOutgoingHeaderMatcher(gatewayOutgoingHeaderMatcher)
+	mux := runtime.NewServeMux(marshalerOpts, outgoingHeaderOpts)
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	log.Printf("Proxying to User-BFF on %s\n", config.UserBFFServer)
@@ -47,24 +46,9 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 	return mux, nil
 }
 
-func gatewayResponseModifier(ctx context.Context, response http.ResponseWriter, _ proto.Message) error {
-	md, ok := runtime.ServerMetadataFromContext(ctx)
-	if !ok {
-		return fmt.Errorf("Failed to extract ServerMetadata from context")
+func gatewayOutgoingHeaderMatcher(key string) (string, bool) {
+	if strings.ToLower(key) == "set-cookie" {
+		return key, true
 	}
-
-	mapCookieMetadata(md, response)
-	return nil
-}
-
-func mapCookieMetadata(md runtime.ServerMetadata, response http.ResponseWriter) {
-	values := md.HeaderMD.Get("Set-Cookie")
-	if len(values) == 0 {
-		return
-	}
-
-	md.HeaderMD.Delete("Set-Cookie")
-	for _, value := range values {
-		response.Header().Add("Set-Cookie", value)
-	}
+	return "", false
 }
