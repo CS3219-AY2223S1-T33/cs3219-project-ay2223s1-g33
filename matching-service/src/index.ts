@@ -3,11 +3,8 @@ import { createClient, RedisClientType } from 'redis';
 
 import getApiServer from './api_server/api_server';
 import loadEnvironment from './utils/env_loader';
-import { IAuthenticationAgent } from './auth/authentication_agent_types';
-import createAuthenticationService from './auth/authentication_agent';
 import MatchingServiceApi from './controller/matching_service_controller';
 import { createRedisMatchingAdapter } from './redis_adapter/redis_matching_adapter';
-import { createRedisAuthAdapter } from './redis_adapter/redis_auth_adapter';
 import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
 
@@ -19,12 +16,6 @@ const redisClient: RedisClientType = createClient({
 redisClient.connect();
 
 const redisMatchingAdapter = createRedisMatchingAdapter(redisClient);
-const redisAuthAdapter = createRedisAuthAdapter(redisClient);
-
-const userAuthService: IAuthenticationAgent = createAuthenticationService(
-  envConfig.JWT_SIGNING_SECRET,
-  redisAuthAdapter,
-);
 
 const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
 const expressApp = apiServer.getHttpServer();
@@ -38,6 +29,6 @@ expressApp.get('/', (_: Request, resp: Response) => {
 });
 
 apiServer.registerServiceRoutes(
-  new MatchingServiceApi(userAuthService, roomAuthService, redisMatchingAdapter),
+  new MatchingServiceApi(roomAuthService, redisMatchingAdapter),
 );
 apiServer.bind();
