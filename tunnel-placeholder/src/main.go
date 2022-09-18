@@ -78,6 +78,7 @@ func runAtoBPump() {
 			log.Println(err)
 			log.Fatal("Error occurred")
 		}
+		log.Printf("Got message from %s", msg.Username)
 		streamB.Send(&pb.TunnelServiceResponse{
 			Data: msg.Data,
 		})
@@ -94,6 +95,7 @@ func runBtoAPump() {
 		if err != nil {
 			log.Fatal("Error occurred")
 		}
+		log.Printf("Got message from %s", msg.Username)
 		streamA.Send(&pb.TunnelServiceResponse{
 			Data: msg.Data,
 		})
