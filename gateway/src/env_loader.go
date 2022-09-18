@@ -15,7 +15,7 @@ const (
 	envUserBFFServer  = "USER_BFF_SERVER"
 	envMatchingServer = "MATCHING_SERVER"
 	envCollabServer   = "COLLAB_SERVER"
-	envSessionServer  = "SESSIOSN_SERVER"
+	envSessionServer  = "SESSION_SERVER"
 )
 
 func loadConfig() *GatewayConfiguration {
