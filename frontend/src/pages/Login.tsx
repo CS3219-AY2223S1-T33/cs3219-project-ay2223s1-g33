@@ -57,8 +57,16 @@ function Login() {
           throw new Error("Something went wrong.");
         }
 
+        const now = new Date();
+        setCookies("session_token", "loggedin", {
+          path: "/",
+          expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
+          domain: "127.0.0.1",
+          secure: false,
+        });
+
         // Store user information on redux
-        dispatch(login({ user, sessionToken: "" }));
+        dispatch(login({ user, sessionToken: "loggedin" }));
 
         // Redirect user on successful login
         navigate("/", { replace: true });
