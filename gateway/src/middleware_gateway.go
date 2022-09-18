@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func registerGatewayRoutes(ctx context.Context, config *GatewayConfiguration) (http.Handler, error) {
+func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) (http.Handler, error) {
 	marshalerOpts := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
 		Marshaler: &runtime.JSONPb{
 			MarshalOptions: protojson.MarshalOptions{
@@ -53,27 +53,18 @@ func gatewayResponseModifier(ctx context.Context, response http.ResponseWriter, 
 		return fmt.Errorf("Failed to extract ServerMetadata from context")
 	}
 
-	cookieString, err := getCookieFromServerMetadata(md)
-	if err != nil {
-		return err
-	}
-
-	if cookieString != "" {
-		response.Header().Add("Set-Cookie", cookieString)
-	}
-
+	mapCookieMetadata(md, response)
 	return nil
 }
 
-func getCookieFromServerMetadata(md runtime.ServerMetadata) (string, error) {
-	cookieString := firstMetadataWithName(md, "Set-Cookie")
-	return cookieString, nil
-}
-
-func firstMetadataWithName(md runtime.ServerMetadata, name string) string {
-	values := md.HeaderMD.Get(name)
+func mapCookieMetadata(md runtime.ServerMetadata, response http.ResponseWriter) {
+	values := md.HeaderMD.Get("Set-Cookie")
 	if len(values) == 0 {
-		return ""
+		return
 	}
-	return values[0]
+
+	md.HeaderMD.Delete("Set-Cookie")
+	for _, value := range values {
+		response.Header().Add("Set-Cookie", value)
+	}
 }

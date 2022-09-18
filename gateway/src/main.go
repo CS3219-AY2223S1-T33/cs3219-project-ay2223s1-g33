@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"cs3219-project-ay2223s1-g33/gateway/auth"
 	"errors"
 	"log"
 	"net/http"
@@ -24,17 +25,23 @@ func run(config *GatewayConfiguration) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	gatewayMux, err := registerGatewayRoutes(ctx, config)
+	gatewayMux, err := AttachGatewayMiddleware(ctx, config)
 	if err != nil {
 		return errors.New("Failed to register gateway routes")
 	}
 
-	proxyMux, err := registerProxyRoutes(ctx, config, gatewayMux)
+	proxyMux, err := AttachProxyMiddleware(config, gatewayMux)
 	if err != nil {
 		return errors.New("Failed to register proxy routes")
 	}
 
-	corsMux := cors.Default().Handler(proxyMux)
+	authMux, disposeAuth, err := auth.AttachAuthMiddleware(config.SessionServer, proxyMux)
+	if err != nil {
+		return errors.New("Failed to register authentication layer")
+	}
+	defer disposeAuth.Dispose()
+
+	corsMux := cors.Default().Handler(authMux)
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	return http.ListenAndServe(":5000", corsMux)
