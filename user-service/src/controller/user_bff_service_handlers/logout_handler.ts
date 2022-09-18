@@ -3,6 +3,7 @@ import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_serve
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 const sessionCookieName = 'AUTH-SESSION';
+const gatewayHeaderToken = 'grpc-x-bearer-session-token';
 
 class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   authService: IAuthenticationAgent;
@@ -12,29 +13,15 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   }
 
   async handle(request: ApiRequest<LogoutRequest>): Promise<ApiResponse<LogoutResponse>> {
-    const requestObject = request.request;
-
-    const validatedRequest = LogoutHandler.validateRequest(requestObject);
-    if (validatedRequest instanceof Error) {
+    if (!(gatewayHeaderToken in request.headers)) {
       return LogoutHandler.buildErrorResponse(
-        LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST,
-        validatedRequest.message,
+        LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
+        'Bad request from gateway',
       );
     }
+    const token = request.headers[gatewayHeaderToken][0];
 
-    const isTokenValid = (
-      await this.authService
-        .verifyToken(validatedRequest.sessionToken)
-    ) !== undefined;
-
-    if (!isTokenValid) {
-      return LogoutHandler.buildErrorResponse(
-        LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST,
-        'Invalid token',
-      );
-    }
-
-    const success = await this.authService.invalidateToken(validatedRequest.sessionToken);
+    const success = await this.authService.invalidateToken(token);
     if (!success) {
       return LogoutHandler.buildErrorResponse(
         LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
@@ -50,18 +37,6 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
       headers: {
         'Set-Cookie': [`${sessionCookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`],
       },
-    };
-  }
-
-  static validateRequest(request: LogoutRequest): (LogoutRequest | Error) {
-    if (!request.sessionToken) {
-      return new Error('No token provided');
-    }
-
-    const sessionToken = request.sessionToken.trim();
-
-    return {
-      sessionToken,
     };
   }
 

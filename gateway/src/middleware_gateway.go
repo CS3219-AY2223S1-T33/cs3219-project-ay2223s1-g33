@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	gw "cs3219-project-ay2223s1-g33/gateway/proto"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -27,8 +28,9 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 		},
 	})
 
+	incomingHeaderOpts := runtime.WithIncomingHeaderMatcher(gatewayIncomingHeaderMatcher)
 	outgoingHeaderOpts := runtime.WithOutgoingHeaderMatcher(gatewayOutgoingHeaderMatcher)
-	mux := runtime.NewServeMux(marshalerOpts, outgoingHeaderOpts)
+	mux := runtime.NewServeMux(marshalerOpts, incomingHeaderOpts, outgoingHeaderOpts)
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	log.Printf("Proxying to User-BFF on %s\n", config.UserBFFServer)
@@ -44,6 +46,13 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 	}
 
 	return mux, nil
+}
+
+func gatewayIncomingHeaderMatcher(key string) (string, bool) {
+	if strings.HasPrefix(strings.ToLower(key), "x-") {
+		return fmt.Sprintf("grpc-%s", key), true
+	}
+	return runtime.DefaultHeaderMatcher(key)
 }
 
 func gatewayOutgoingHeaderMatcher(key string) (string, bool) {

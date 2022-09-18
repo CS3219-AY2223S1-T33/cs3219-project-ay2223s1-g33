@@ -27,6 +27,7 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 
 		// Sanitize the request
 		r.Header.Set("X-Bearer-Username", "")
+		r.Header.Set("X-Bearer-Session-Token", "")
 
 		// Authenticate
 		token, err := r.Cookie("AUTH-SESSION")
@@ -43,6 +44,7 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 		}
 
 		r.Header.Set("X-Bearer-Username", username)
+		r.Header.Set("X-Bearer-Session-Token", token.Value)
 		mux.ServeHTTP(w, r)
 	})
 	return handler, authAgent, nil

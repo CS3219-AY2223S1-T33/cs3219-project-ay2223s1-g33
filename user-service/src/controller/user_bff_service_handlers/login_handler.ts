@@ -54,7 +54,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    const token = this.authService.createToken({
+    const token = await this.authService.createToken({
       username: user.userInfo?.username,
     });
 

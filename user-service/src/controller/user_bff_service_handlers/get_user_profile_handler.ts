@@ -11,6 +11,8 @@ function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUse
   };
 }
 
+const gatewayHeaderUsername = 'grpc-x-bearer-username';
+
 class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUserProfileResponse> {
   rpcClient: UserServiceClient;
 
@@ -23,22 +25,13 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
 
   async handle(request: ApiRequest<GetUserProfileRequest>)
     : Promise<ApiResponse<GetUserProfileResponse>> {
-    const requestObject = request.request;
-    const validatedRequest = GetUserProfileHandler.validateRequest(requestObject);
-    if (validatedRequest instanceof Error) {
-      return GetUserProfileHandler.buildErrorResponse(
-        validatedRequest.message,
-      );
+    if (!(gatewayHeaderUsername in request.headers)) {
+      return GetUserProfileHandler.buildErrorResponse('Bad request from gateway');
     }
 
-    const tokenData = await this.authService.verifyToken(validatedRequest.sessionToken);
-    if (tokenData === undefined) {
-      return GetUserProfileHandler.buildErrorResponse(
-        'Invalid token',
-      );
-    }
+    const username = request.headers[gatewayHeaderUsername][0];
 
-    const user = await this.getUserByUsername(tokenData.username);
+    const user = await this.getUserByUsername(username);
     if (!user) {
       return GetUserProfileHandler.buildErrorResponse(
         'Internal Server Error',
@@ -49,18 +42,6 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
       user: user.userInfo,
       errorMessage: '',
     });
-  }
-
-  static validateRequest(request: GetUserProfileRequest): (GetUserProfileRequest | Error) {
-    if (!request.sessionToken) {
-      return new Error('No token provided');
-    }
-
-    const sessionToken = request.sessionToken.trim();
-
-    return {
-      sessionToken,
-    };
   }
 
   getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
