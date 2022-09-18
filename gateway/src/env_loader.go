@@ -8,23 +8,27 @@ type GatewayConfiguration struct {
 	UserBFFServer  string
 	MatchingServer string
 	CollabServer   string
+	SessionServer  string
 }
 
 const (
 	envUserBFFServer  = "USER_BFF_SERVER"
 	envMatchingServer = "MATCHING_SERVER"
 	envCollabServer   = "COLLAB_SERVER"
+	envSessionServer  = "SESSIOSN_SERVER"
 )
 
 func loadConfig() *GatewayConfiguration {
 	userBFFServer := loadEnvVariableOrDefaultString(envUserBFFServer, "localhost:4000")
 	matchingServer := loadEnvVariableOrDefaultString(envMatchingServer, "localhost:4001")
 	collabServer := loadEnvVariableOrDefaultString(envCollabServer, "localhost:4002")
+	sessionServer := loadEnvVariableOrDefaultString(envSessionServer, "localhost:4100")
 
 	return &GatewayConfiguration{
 		UserBFFServer:  userBFFServer,
 		MatchingServer: matchingServer,
 		CollabServer:   collabServer,
+		SessionServer:  sessionServer,
 	}
 }
 

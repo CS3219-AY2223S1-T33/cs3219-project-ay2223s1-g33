@@ -1,7 +1,14 @@
 import { GetUserRequest, GetUserResponse } from '../../proto/user-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage.d';
 import { convertStoredUserToPasswordUser } from '../../model/user_helper';
+
+function getHeaderlessResponse(resp: GetUserResponse): ApiResponse<GetUserResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
 
 class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
   userStore: IUserStore;
@@ -10,29 +17,30 @@ class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
     this.userStore = storage.getUserStore();
   }
 
-  async handle(request: GetUserRequest): Promise<GetUserResponse> {
-    if (request.user) {
-      if (request.user.username !== '') {
-        const user = await this.userStore.getUserByUsername(request.user.username);
-        return {
+  async handle(request: ApiRequest<GetUserRequest>): Promise<ApiResponse<GetUserResponse>> {
+    const requestObject = request.request;
+    if (requestObject.user) {
+      if (requestObject.user.username !== '') {
+        const user = await this.userStore.getUserByUsername(requestObject.user.username);
+        return getHeaderlessResponse({
           user: convertStoredUserToPasswordUser(user),
           errorMessage: '',
-        };
+        });
       }
 
-      if (request.user.userId > 0) {
-        const user = await this.userStore.getUser(request.user.userId);
-        return {
+      if (requestObject.user.userId > 0) {
+        const user = await this.userStore.getUser(requestObject.user.userId);
+        return getHeaderlessResponse({
           user: convertStoredUserToPasswordUser(user),
           errorMessage: '',
-        };
+        });
       }
     }
 
-    return {
+    return getHeaderlessResponse({
       user: undefined,
       errorMessage: 'Malformed request',
-    };
+    });
   }
 }
 

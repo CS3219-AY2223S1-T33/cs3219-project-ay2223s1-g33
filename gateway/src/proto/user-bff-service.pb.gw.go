@@ -2,11 +2,11 @@
 // source: user-bff-service.proto
 
 /*
-Package gateway is a reverse proxy.
+Package proto is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package gateway
+package proto
 
 import (
 	"context"

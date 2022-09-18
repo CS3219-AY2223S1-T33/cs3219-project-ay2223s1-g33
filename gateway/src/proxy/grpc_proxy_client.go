@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	pb "cs3219-project-ay2223s1-g33/gateway/gateway"
+	pb "cs3219-project-ay2223s1-g33/gateway/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

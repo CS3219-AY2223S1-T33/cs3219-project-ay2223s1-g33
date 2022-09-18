@@ -1,10 +1,17 @@
 import bcrypt from 'bcrypt';
 import Validator from 'validator';
 import { RegisterErrorCode, RegisterRequest, RegisterResponse } from '../../proto/user-bff-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser } from '../../proto/types';
 import { CreateUserResponse } from '../../proto/user-service';
+
+function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
 
 class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> {
   rpcClient: UserServiceClient;
@@ -13,8 +20,10 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
     this.rpcClient = rpcClient;
   }
 
-  async handle(request: RegisterRequest): Promise<RegisterResponse> {
-    const validatedRequest = RegisterHandler.validateRequest(request);
+  async handle(request: ApiRequest<RegisterRequest>): Promise<ApiResponse<RegisterResponse>> {
+    const requestObject = request.request;
+
+    const validatedRequest = RegisterHandler.validateRequest(requestObject);
     if (validatedRequest instanceof Error) {
       return RegisterHandler.buildErrorResponse(
         RegisterErrorCode.REGISTER_ERROR_BAD_REQUEST,
@@ -49,10 +58,10 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
       );
     }
 
-    return {
+    return getHeaderlessResponse({
       errorCode: RegisterErrorCode.REGISTER_ERROR_NONE,
       errorMessage: '',
-    };
+    });
   }
 
   static validateRequest(request: RegisterRequest): (ValidatedRequest | Error) {
@@ -97,11 +106,12 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
     });
   }
 
-  static buildErrorResponse(errorCode: RegisterErrorCode, errorMessage: string): RegisterResponse {
-    return {
+  static buildErrorResponse(errorCode: RegisterErrorCode, errorMessage: string)
+    : ApiResponse<RegisterResponse> {
+    return getHeaderlessResponse({
       errorCode,
       errorMessage,
-    };
+    });
   }
 }
 

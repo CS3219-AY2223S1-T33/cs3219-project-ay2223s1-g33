@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"cs3219-project-ay2223s1-g33/gateway/proxy"
 	"log"
 	"net/http"
@@ -9,7 +8,7 @@ import (
 
 const websocketRoute = "/ws"
 
-func registerProxyRoutes(ctx context.Context, config *GatewayConfiguration, mux http.Handler) (http.Handler, error) {
+func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http.Handler, error) {
 	proxyManager := proxy.CreateWebsocketProxyManager()
 	log.Printf("WS Proxy to Collab on %s\n", config.CollabServer)
 

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package collaboration_service;
-option go_package = "cs3219-project-ay2223s1-g33/gateway";
+option go_package = "cs3219-project-ay2223s1-g33/proto";
 
 enum VerifyRoomErrorCode {
   VERIFY_ROOM_ERROR_NONE = 0;
