@@ -41,7 +41,12 @@ func run(config *GatewayConfiguration) error {
 	}
 	defer disposeAuth.Dispose()
 
-	corsMux := cors.Default().Handler(authMux)
+	corsObj := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*"},
+		AllowCredentials: true,
+	})
+
+	corsMux := corsObj.Handler(authMux)
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	return http.ListenAndServe(":5000", corsMux)
