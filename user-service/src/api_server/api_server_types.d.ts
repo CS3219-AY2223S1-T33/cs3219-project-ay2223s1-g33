@@ -15,17 +15,17 @@ declare interface IApiServer {
 
 declare type ApiRequest<RequestType> = {
   request: RequestType;
-  headers: { [key: string]: string };
+  headers: { [key: string]: string[] };
 };
 
 declare type ApiResponse<ResponseType> = {
   response: ResponseType;
-  headers: { [key: string]: string };
+  headers: { [key: string]: string[] };
 };
 
 declare type HTTPResponse = {
   jsonResponse: any;
-  headers: { [key: string]: string };
+  headers: { [key: string]: string[] };
 };
 
 declare interface IApiHandler<RequestType, ResponseType> {
@@ -35,7 +35,7 @@ declare interface IApiHandler<RequestType, ResponseType> {
 declare type ApiCallHandler<RequestType, ResponseType> = {
   handler: IApiHandler<RequestType, ResponseType>;
   grpcRouteHandler: handleUnaryCall<RequestType, ResponseType>;
-  httpRouteHandler: (json: any, headers: { [key: string]: string }) => Promise<HTTPResponse>;
+  httpRouteHandler: (json: any, headers: { [key: string]: string[] }) => Promise<HTTPResponse>;
 };
 
 declare type ServiceHandlerDefinition<ServiceDefinition = UntypedServiceImplementation> = {

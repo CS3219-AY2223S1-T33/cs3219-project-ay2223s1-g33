@@ -22,10 +22,15 @@ function getGrpcRouteHandler<RequestType, ResponseType>(
     });
 
     const metadata = call.metadata.getMap();
-    const headers: { [key: string]: string } = {};
+    const headers: { [key: string]: string[] } = {};
     Object.keys(metadata).forEach((key: string) => {
-      headers[key] = metadata[key].toString();
+      headers[key] = [metadata[key].toString()];
     });
+
+    const cookies = call.metadata.get('Cookie').map((val) => val.toString());
+    if (cookies.length > 0) {
+      headers.Cookie = cookies;
+    }
 
     const response: ApiResponse<ResponseType> = await handler.handle({
       request: call.request,
@@ -34,7 +39,16 @@ function getGrpcRouteHandler<RequestType, ResponseType>(
 
     const responseHeaders = new Metadata();
     Object.keys(response.headers).forEach((key: string) => {
-      responseHeaders.add(key, response.headers[key]);
+      const values = response.headers[key];
+      if (values.length === 0) {
+        return;
+      }
+
+      if (key === 'Set-Cookie') {
+        values.forEach((value) => responseHeaders.add(key, value));
+      } else {
+        responseHeaders.add(key, response.headers[key][0]);
+      }
     });
 
     call.sendMetadata(responseHeaders);
@@ -46,8 +60,8 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
   respType: IMessageType<ResponseType>,
-): (json: any, headers: { [key: string]: string }) => Promise<HTTPResponse> {
-  return async (requestJson: any, headers: { [key: string]: string }): Promise<HTTPResponse> => {
+): (json: any, headers: { [key: string]: string[] }) => Promise<HTTPResponse> {
+  return async (requestJson: any, headers: { [key: string]: string[] }): Promise<HTTPResponse> => {
     const requestObject = reqType.fromJson(requestJson);
     const responseObject: ApiResponse<ResponseType> = await handler.handle({
       request: requestObject,

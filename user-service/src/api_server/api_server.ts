@@ -65,14 +65,12 @@ class ApiServer implements IApiServer {
     const httpRouter = express.Router();
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
       httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
-        const normalizedHeaders: { [key: string]: string } = {};
+        const normalizedHeaders: { [key: string]: string[] } = {};
 
         Object.keys(req.headers).forEach((headerName: string) => {
           const value = req.headers[headerName];
           if (typeof value === 'string') {
-            normalizedHeaders[headerName] = value;
-          } else {
-            normalizedHeaders[headerName] = (<string[]>value).join('; ');
+            normalizedHeaders[headerName] = [value];
           }
         });
 

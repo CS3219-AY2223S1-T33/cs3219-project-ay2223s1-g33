@@ -2,6 +2,8 @@ import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
+const sessionCookieName = 'AUTH-SESSION';
+
 class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   authService: IAuthenticationAgent;
 
@@ -46,7 +48,7 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
         errorMessage: '',
       },
       headers: {
-        'Set-Cookie': 'AUTH_SESSION=; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'Set-Cookie': [`${sessionCookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`],
       },
     };
   }
