@@ -1,7 +1,6 @@
 import { Button, Radio, RadioGroup, Stack, useToast } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../app/store";
+import { useDispatch } from "react-redux";
 import axios from "../../axios";
 import { enterQueue } from "../../feature/matching/matchingSlice";
 import {
@@ -31,9 +30,6 @@ const DIFFICULTY = [
  */
 function TempQueueForm() {
   const toast = useToast();
-  const sessionToken = useSelector(
-    (state: RootState) => state.user.sessionToken
-  );
   const dispatch = useDispatch();
   const [selectedDiff, setSelectedDiff] = useState("Easy");
 
@@ -41,7 +37,7 @@ function TempQueueForm() {
     // API call to enter queue
     const difficulty: QuestionDifficulty =
       DIFFICULTY.findIndex((d) => d.name === selectedDiff) + 1;
-    const joinQueueReq: JoinQueueRequest = { sessionToken, difficulty };
+    const joinQueueReq: JoinQueueRequest = { difficulty };
 
     // Not necessary since backend will check also (and should NOT trigger this at all)
     // Will probably show something meaningful
