@@ -45,15 +45,11 @@ export interface LoginResponse {
      */
     user?: User;
     /**
-     * @generated from protobuf field: string session_token = 2;
-     */
-    sessionToken: string;
-    /**
-     * @generated from protobuf field: user_bff_service.LoginErrorCode error_code = 3;
+     * @generated from protobuf field: user_bff_service.LoginErrorCode error_code = 2;
      */
     errorCode: LoginErrorCode;
     /**
-     * @generated from protobuf field: string error_message = 4;
+     * @generated from protobuf field: string error_message = 3;
      */
     errorMessage: string;
 }
@@ -87,10 +83,6 @@ export interface RegisterResponse {
  * @generated from protobuf message user_bff_service.LogoutRequest
  */
 export interface LogoutRequest {
-    /**
-     * @generated from protobuf field: string session_token = 1;
-     */
-    sessionToken: string;
 }
 /**
  * @generated from protobuf message user_bff_service.LogoutResponse
@@ -109,10 +101,6 @@ export interface LogoutResponse {
  * @generated from protobuf message user_bff_service.GetUserProfileRequest
  */
 export interface GetUserProfileRequest {
-    /**
-     * @generated from protobuf field: string session_token = 1;
-     */
-    sessionToken: string;
 }
 /**
  * @generated from protobuf message user_bff_service.GetUserProfileResponse
@@ -296,13 +284,12 @@ class LoginResponse$Type extends MessageType<LoginResponse> {
     constructor() {
         super("user_bff_service.LoginResponse", [
             { no: 1, name: "user", kind: "message", T: () => User },
-            { no: 2, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "error_code", kind: "enum", T: () => ["user_bff_service.LoginErrorCode", LoginErrorCode] },
-            { no: 4, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "error_code", kind: "enum", T: () => ["user_bff_service.LoginErrorCode", LoginErrorCode] },
+            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<LoginResponse>): LoginResponse {
-        const message = { sessionToken: "", errorCode: 0, errorMessage: "" };
+        const message = { errorCode: 0, errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<LoginResponse>(this, message, value);
@@ -316,13 +303,10 @@ class LoginResponse$Type extends MessageType<LoginResponse> {
                 case /* common.User user */ 1:
                     message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
                     break;
-                case /* string session_token */ 2:
-                    message.sessionToken = reader.string();
-                    break;
-                case /* user_bff_service.LoginErrorCode error_code */ 3:
+                case /* user_bff_service.LoginErrorCode error_code */ 2:
                     message.errorCode = reader.int32();
                     break;
-                case /* string error_message */ 4:
+                case /* string error_message */ 3:
                     message.errorMessage = reader.string();
                     break;
                 default:
@@ -340,15 +324,12 @@ class LoginResponse$Type extends MessageType<LoginResponse> {
         /* common.User user = 1; */
         if (message.user)
             User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* string session_token = 2; */
-        if (message.sessionToken !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.sessionToken);
-        /* user_bff_service.LoginErrorCode error_code = 3; */
+        /* user_bff_service.LoginErrorCode error_code = 2; */
         if (message.errorCode !== 0)
-            writer.tag(3, WireType.Varint).int32(message.errorCode);
-        /* string error_message = 4; */
+            writer.tag(2, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 3; */
         if (message.errorMessage !== "")
-            writer.tag(4, WireType.LengthDelimited).string(message.errorMessage);
+            writer.tag(3, WireType.LengthDelimited).string(message.errorMessage);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -470,40 +451,19 @@ export const RegisterResponse = new RegisterResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class LogoutRequest$Type extends MessageType<LogoutRequest> {
     constructor() {
-        super("user_bff_service.LogoutRequest", [
-            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
+        super("user_bff_service.LogoutRequest", []);
     }
     create(value?: PartialMessage<LogoutRequest>): LogoutRequest {
-        const message = { sessionToken: "" };
+        const message = {};
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<LogoutRequest>(this, message, value);
         return message;
     }
     internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LogoutRequest): LogoutRequest {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string session_token */ 1:
-                    message.sessionToken = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
+        return target ?? this.create();
     }
     internalBinaryWrite(message: LogoutRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string session_token = 1; */
-        if (message.sessionToken !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -571,40 +531,19 @@ export const LogoutResponse = new LogoutResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class GetUserProfileRequest$Type extends MessageType<GetUserProfileRequest> {
     constructor() {
-        super("user_bff_service.GetUserProfileRequest", [
-            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
+        super("user_bff_service.GetUserProfileRequest", []);
     }
     create(value?: PartialMessage<GetUserProfileRequest>): GetUserProfileRequest {
-        const message = { sessionToken: "" };
+        const message = {};
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<GetUserProfileRequest>(this, message, value);
         return message;
     }
     internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserProfileRequest): GetUserProfileRequest {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string session_token */ 1:
-                    message.sessionToken = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
+        return target ?? this.create();
     }
     internalBinaryWrite(message: GetUserProfileRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string session_token = 1; */
-        if (message.sessionToken !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
