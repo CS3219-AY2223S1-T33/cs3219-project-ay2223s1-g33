@@ -63,7 +63,6 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
         errorCode: LoginErrorCode.LOGIN_ERROR_NONE,
         user: user.userInfo,
         errorMessage: '',
-        sessionToken: token,
       },
       headers: {
         'Set-Cookie': [`${sessionCookieName}=${token}; HttpOnly`],
@@ -130,7 +129,6 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       response: {
         errorCode,
         errorMessage,
-        sessionToken: '',
       },
     };
   }
