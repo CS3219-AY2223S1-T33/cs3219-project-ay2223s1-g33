@@ -11,8 +11,7 @@ import {
   Button,
   useBoolean,
   Text,
-  FormErrorMessage,
-  useToast,
+  FormErrorMessage
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import React from "react";
@@ -20,24 +19,26 @@ import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm,
+  useForm
 } from "react-hook-form";
 import axios from "../axios";
 import Link from "../components/ui/Link";
 import {
   RegisterRequest,
   RegisterResponse,
-  UserCredentials,
+  UserCredentials
 } from "../proto/user-bff-service";
+import useFixedToast from "../utils/hooks/useFixedToast";
 
 function Register() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm();
 
-  const toast = useToast();
+  // const toast = useToast();
+  const toast = useFixedToast();
   const [showPassword, setShowPassword] = useBoolean();
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
@@ -58,37 +59,20 @@ function Register() {
           throw new Error(resData.errorMessage);
         }
 
-        toast({
-          title: "Success!",
-          description: "Yay! Click on the link below to login.",
-          status: "success",
-          position: "top",
-          isClosable: true,
-          duration: 5000,
-        });
+        toast.sendSuccessMessage("Yay! Click on the link below to login.");
       })
       .catch((err) => {
-        toast({
-          title: "Error",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-          description: err.message,
-        });
+        toast.sendErrorMessage(err.message);
       });
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
-    toast({
-      title: "Oops!",
-      description:
-        "Please check if you have filled everything in correctly before submitting",
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-      position: "top",
-    });
+    toast.sendErrorMessage(
+      "Please check if you have filled everything in correctly before submitting",
+      {
+        title: "Oops!"
+      }
+    );
   };
 
   return (
@@ -105,7 +89,7 @@ function Register() {
                 <Input
                   type="text"
                   {...register("nickname", {
-                    required: "Please enter your nickname.",
+                    required: "Please enter your nickname."
                   })}
                 />
                 <FormErrorMessage>
@@ -118,7 +102,7 @@ function Register() {
                 <Input
                   type="email"
                   {...register("email", {
-                    required: "Please enter your email.",
+                    required: "Please enter your email."
                   })}
                 />
                 <FormErrorMessage>
@@ -136,8 +120,8 @@ function Register() {
                       minLength: {
                         value: 8,
                         message:
-                          "Please make sure your password is at least 8 characters long.",
-                      },
+                          "Please make sure your password is at least 8 characters long."
+                      }
                     })}
                   />
                   <InputRightElement h="full">
@@ -158,7 +142,7 @@ function Register() {
                   bg="blue.400"
                   color="white"
                   _hover={{
-                    bg: "blue.500",
+                    bg: "blue.500"
                   }}
                   type="submit"
                 >

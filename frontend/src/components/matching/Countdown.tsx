@@ -1,4 +1,4 @@
-import { Button, Stack, Text, useBoolean, useToast } from "@chakra-ui/react";
+import { Button, Stack, Text, useBoolean } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
@@ -8,12 +8,14 @@ import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 import {
   CheckQueueStatusResponse,
-  QueueStatus,
+  QueueStatus
 } from "../../proto/matching-service";
+import useFixedToast from "../../utils/hooks/useFixedToast";
 
 // ! console.log() s ar e intentionally left here for backend implementation
 function Countdown() {
-  const toast = useToast();
+  // const toast = useToast();
+  const toast = useFixedToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isPlaying, setIsPlaying] = useBoolean(true);
@@ -43,7 +45,7 @@ function Countdown() {
         "/api/queue/status",
         {},
         {
-          withCredentials: true,
+          withCredentials: true
         }
       )
       .then((res) => {
@@ -70,14 +72,7 @@ function Countdown() {
         }
       })
       .catch((err) => {
-        toast({
-          title: "Error",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-          description: err.message,
-        });
+        toast.sendErrorMessage(err.message);
       });
   };
 

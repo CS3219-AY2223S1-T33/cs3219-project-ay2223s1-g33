@@ -8,8 +8,8 @@ import {
   Heading,
   Input,
   Stack,
-  Text,
-  useToast
+  Text
+  // useToast
 } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
@@ -24,6 +24,7 @@ import {
   LoginResponse,
   UserCredentials
 } from "../proto/user-bff-service";
+import useFixedToast from "../utils/hooks/useFixedToast";
 
 function Login() {
   const {
@@ -31,7 +32,7 @@ function Login() {
     handleSubmit,
     formState: { errors }
   } = useForm();
-  const toast = useToast();
+  const toast = useFixedToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -74,27 +75,17 @@ function Login() {
         navigate("/", { replace: true });
       })
       .catch((err) => {
-        toast({
-          title: "Error",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-          description: err.message
-        });
+        toast.sendErrorMessage(err.message);
       });
   };
 
   const invalidFormHandler = () => {
-    toast({
-      title: "Oops!",
-      description:
-        "Please check if you have filled everything in correctly before submitting",
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-      position: "top"
-    });
+    toast.sendErrorMessage(
+      "Please check if you have filled everything in correctly before submitting",
+      {
+        title: "Oops!"
+      }
+    );
   };
 
   return (
@@ -125,12 +116,7 @@ function Login() {
                 <Input
                   type="password"
                   {...register("password", {
-                    required: "Please enter your password.",
-                    minLength: {
-                      value: 8,
-                      message:
-                        "Please make sure your password is at least 8 characters long."
-                    }
+                    required: "Please enter your password."
                   })}
                 />
                 <FormErrorMessage>
