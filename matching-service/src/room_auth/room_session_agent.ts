@@ -1,8 +1,8 @@
 import { sign, verify } from 'jsonwebtoken';
 import {
   IRoomSessionAgent,
+  TokenRoomLoad,
 } from './room_session_agent_types';
-import { TokenRoomLoad } from '../auth/authentication_agent_types';
 
 class RoomSessionAgent implements IRoomSessionAgent {
   roomSecret: string;

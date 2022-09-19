@@ -1,8 +1,17 @@
 import { GetUserProfileRequest, GetUserProfileResponse } from '../../proto/user-bff-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+
+function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUserProfileResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
+
+const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
 class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUserProfileResponse> {
   rpcClient: UserServiceClient;
@@ -14,44 +23,25 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
     this.authService = authService;
   }
 
-  async handle(request: GetUserProfileRequest): Promise<GetUserProfileResponse> {
-    const validatedRequest = GetUserProfileHandler.validateRequest(request);
-    if (validatedRequest instanceof Error) {
-      return GetUserProfileHandler.buildErrorResponse(
-        validatedRequest.message,
-      );
+  async handle(request: ApiRequest<GetUserProfileRequest>)
+    : Promise<ApiResponse<GetUserProfileResponse>> {
+    if (!(gatewayHeaderUsername in request.headers)) {
+      return GetUserProfileHandler.buildErrorResponse('Bad request from gateway');
     }
 
-    const tokenData = await this.authService.verifyToken(validatedRequest.sessionToken);
-    if (tokenData === undefined) {
-      return GetUserProfileHandler.buildErrorResponse(
-        'Invalid token',
-      );
-    }
+    const username = request.headers[gatewayHeaderUsername][0];
 
-    const user = await this.getUserByUsername(tokenData.username);
+    const user = await this.getUserByUsername(username);
     if (!user) {
       return GetUserProfileHandler.buildErrorResponse(
         'Internal Server Error',
       );
     }
 
-    return {
+    return getHeaderlessResponse({
       user: user.userInfo,
       errorMessage: '',
-    };
-  }
-
-  static validateRequest(request: GetUserProfileRequest): (GetUserProfileRequest | Error) {
-    if (!request.sessionToken) {
-      return new Error('No token provided');
-    }
-
-    const sessionToken = request.sessionToken.trim();
-
-    return {
-      sessionToken,
-    };
+    });
   }
 
   getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
@@ -76,10 +66,10 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
     });
   }
 
-  static buildErrorResponse(errorMessage: string): GetUserProfileResponse {
-    return {
+  static buildErrorResponse(errorMessage: string): ApiResponse<GetUserProfileResponse> {
+    return getHeaderlessResponse({
       errorMessage,
-    };
+    });
   }
 }
 

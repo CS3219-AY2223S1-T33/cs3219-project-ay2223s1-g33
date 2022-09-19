@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	pb "cs3219-project-ay2223s1-g33/gateway/gateway"
+	pb "cs3219-project-ay2223s1-g33/gateway/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -21,16 +21,19 @@ type ProxyWorker interface {
 }
 
 type proxyWorker struct {
-	server        string
+	server          string
+	sessionUsername string
+
 	conn          *grpc.ClientConn
 	stream        pb.TunnelService_OpenStreamClient
 	upstream      io.Writer
 	closeListener func()
 }
 
-func CreateProxyClient(server string) ProxyWorker {
+func CreateProxyClient(server string, sessionUsername string) ProxyWorker {
 	return &proxyWorker{
-		server: server,
+		server:          server,
+		sessionUsername: sessionUsername,
 	}
 }
 
@@ -68,7 +71,8 @@ func (worker *proxyWorker) Write(data []byte) (n int, err error) {
 	}
 
 	err = worker.stream.Send(&pb.TunnelServiceRequest{
-		Data: data,
+		Username: worker.sessionUsername,
+		Data:     data,
 	})
 	if err != nil {
 		return 0, err
@@ -90,7 +94,6 @@ func (worker *proxyWorker) handleConnection() {
 	for {
 		message, err := worker.stream.Recv()
 		if err == io.EOF {
-			log.Println("HERE?")
 			return
 		}
 		if err != nil {

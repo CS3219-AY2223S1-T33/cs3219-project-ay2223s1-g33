@@ -1,10 +1,12 @@
 import bcrypt from 'bcrypt';
 import Validator from 'validator';
 import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bff-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+
+const sessionCookieName = 'AUTH-SESSION';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: UserServiceClient;
@@ -16,8 +18,10 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     this.authService = authService;
   }
 
-  async handle(request: LoginRequest): Promise<LoginResponse> {
-    const validatedRequest = LoginHandler.validateRequest(request);
+  async handle(request: ApiRequest<LoginRequest>): Promise<ApiResponse<LoginResponse>> {
+    const requestObject = request.request;
+
+    const validatedRequest = LoginHandler.validateRequest(requestObject);
     if (validatedRequest instanceof Error) {
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_BAD_REQUEST,
@@ -50,13 +54,19 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
+    const token = await this.authService.createToken({
+      username: user.userInfo?.username,
+    });
+
     return {
-      errorCode: LoginErrorCode.LOGIN_ERROR_NONE,
-      user: user.userInfo,
-      errorMessage: '',
-      sessionToken: this.authService.createToken({
-        username: user.userInfo?.username,
-      }),
+      response: {
+        errorCode: LoginErrorCode.LOGIN_ERROR_NONE,
+        user: user.userInfo,
+        errorMessage: '',
+      },
+      headers: {
+        'Set-Cookie': [`${sessionCookieName}=${token}; Path=/`],
+      },
     };
   }
 
@@ -112,11 +122,14 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     });
   }
 
-  static buildErrorResponse(errorCode: LoginErrorCode, errorMessage: string): LoginResponse {
+  static buildErrorResponse(errorCode: LoginErrorCode, errorMessage: string)
+    : ApiResponse<LoginResponse> {
     return {
-      errorCode,
-      errorMessage,
-      sessionToken: '',
+      headers: {},
+      response: {
+        errorCode,
+        errorMessage,
+      },
     };
   }
 }

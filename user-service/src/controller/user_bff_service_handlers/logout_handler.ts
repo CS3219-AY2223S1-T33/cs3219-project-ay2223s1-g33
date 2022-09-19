@@ -1,6 +1,9 @@
 import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user-bff-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+
+const sessionCookieName = 'AUTH-SESSION';
+const gatewayHeaderToken = 'grpc-x-bearer-session-token';
 
 class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   authService: IAuthenticationAgent;
@@ -9,28 +12,16 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
     this.authService = authService;
   }
 
-  async handle(request: LogoutRequest): Promise<LogoutResponse> {
-    const validatedRequest = LogoutHandler.validateRequest(request);
-    if (validatedRequest instanceof Error) {
+  async handle(request: ApiRequest<LogoutRequest>): Promise<ApiResponse<LogoutResponse>> {
+    if (!(gatewayHeaderToken in request.headers)) {
       return LogoutHandler.buildErrorResponse(
-        LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST,
-        validatedRequest.message,
+        LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
+        'Bad request from gateway',
       );
     }
+    const token = request.headers[gatewayHeaderToken][0];
 
-    const isTokenValid = (
-      await this.authService
-        .verifyToken(validatedRequest.sessionToken)
-    ) !== undefined;
-
-    if (!isTokenValid) {
-      return LogoutHandler.buildErrorResponse(
-        LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST,
-        'Invalid token',
-      );
-    }
-
-    const success = await this.authService.invalidateToken(validatedRequest.sessionToken);
+    const success = await this.authService.invalidateToken(token);
     if (!success) {
       return LogoutHandler.buildErrorResponse(
         LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
@@ -39,27 +30,24 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
     }
 
     return {
-      errorCode: LogoutErrorCode.LOGOUT_ERROR_NONE,
-      errorMessage: '',
+      response: {
+        errorCode: LogoutErrorCode.LOGOUT_ERROR_NONE,
+        errorMessage: '',
+      },
+      headers: {
+        'Set-Cookie': [`${sessionCookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`],
+      },
     };
   }
 
-  static validateRequest(request: LogoutRequest): (LogoutRequest | Error) {
-    if (!request.sessionToken) {
-      return new Error('No token provided');
-    }
-
-    const sessionToken = request.sessionToken.trim();
-
+  static buildErrorResponse(errorCode: LogoutErrorCode, errorMessage: string)
+    : ApiResponse<LogoutResponse> {
     return {
-      sessionToken,
-    };
-  }
-
-  static buildErrorResponse(errorCode: LogoutErrorCode, errorMessage: string): LogoutResponse {
-    return {
-      errorCode,
-      errorMessage,
+      response: {
+        errorCode,
+        errorMessage,
+      },
+      headers: {},
     };
   }
 }

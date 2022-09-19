@@ -48,7 +48,7 @@ function Register() {
 
     // Send registration request to the server
     axios
-      .post<RegisterResponse>("/user/register", registerRequest)
+      .post<RegisterResponse>("/api/user/register", registerRequest)
       .then((res) => {
         const { data: resData } = res;
 

@@ -4,51 +4,42 @@ import {
   CheckQueueStatusResponse,
   QueueStatus,
 } from '../../proto/matching-service';
-import { IApiHandler } from '../../api_server/api_server_types';
-import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
 import { IRoomSessionAgent } from '../../room_auth/room_session_agent_types';
 
+const gatewayHeaderUsername = 'grpc-x-bearer-username';
+
 class CheckQueueStatusHandler
 implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
-  userAuthService: IAuthenticationAgent;
-
   roomAuthService: IRoomSessionAgent;
 
   redisClient: IRedisMatchingAdapter;
 
   constructor(
-    userAuthService: IAuthenticationAgent,
     roomAuthService: IRoomSessionAgent,
     redisClient: IRedisMatchingAdapter,
   ) {
-    this.userAuthService = userAuthService;
     this.roomAuthService = roomAuthService;
     this.redisClient = redisClient;
   }
 
-  async handle(request: CheckQueueStatusRequest): Promise<CheckQueueStatusResponse> {
-    const validatedRequest = CheckQueueStatusHandler.validateRequest(request);
-    if (validatedRequest instanceof Error) {
+  async handle(request: ApiRequest<CheckQueueStatusRequest>) :
+  Promise<ApiResponse<CheckQueueStatusResponse>> {
+    if (!(gatewayHeaderUsername in request.headers)) {
       return CheckQueueStatusHandler.buildErrorResponse(
-        CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_BAD_REQUEST,
-        validatedRequest.message,
+        CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_INTERNAL_ERROR,
+        'Bad request from gateway',
       );
     }
 
-    const tokenData = await this.userAuthService.verifyToken(validatedRequest.sessionToken);
-    if (tokenData === undefined) {
-      return CheckQueueStatusHandler.buildErrorResponse(
-        CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_UNAUTHORIZED,
-        'Invalid token',
-      );
-    }
+    const username = request.headers[gatewayHeaderUsername][0];
 
     // Get Queue Status
     let queueStatus = QueueStatus.PENDING;
     let roomToken = '';
 
-    const queueToken = await this.redisClient.getUserLock(tokenData.username);
+    const queueToken = await this.redisClient.getUserLock(username);
     if (queueToken === null) {
       return CheckQueueStatusHandler.buildErrorResponse(
         CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_ERROR_NOT_IN_QUEUE,
@@ -57,40 +48,34 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
     }
 
     if (queueToken !== '') {
-      await this.redisClient.deleteUserLock(tokenData.username);
+      await this.redisClient.deleteUserLock(username);
       roomToken = this.roomAuthService.createToken(queueToken);
       queueStatus = QueueStatus.MATCHED;
     }
 
     return {
-      queueStatus,
-      roomToken,
-      errorMessage: '',
-      errorCode: CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_ERROR_NONE,
-    };
-  }
-
-  static validateRequest(request: CheckQueueStatusRequest): (CheckQueueStatusRequest | Error) {
-    if (!request.sessionToken) {
-      return new Error('No token provided');
-    }
-
-    const sessionToken = request.sessionToken.trim();
-
-    return {
-      sessionToken,
+      headers: {},
+      response: {
+        queueStatus,
+        roomToken,
+        errorMessage: '',
+        errorCode: CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_ERROR_NONE,
+      },
     };
   }
 
   static buildErrorResponse(
     errorCode: CheckQueueStatusErrorCode,
     errorMessage: string,
-  ): CheckQueueStatusResponse {
+  ): ApiResponse<CheckQueueStatusResponse> {
     return {
-      errorMessage,
-      queueStatus: QueueStatus.INVALID,
-      roomToken: '',
-      errorCode,
+      headers: {},
+      response: {
+        errorMessage,
+        queueStatus: QueueStatus.INVALID,
+        roomToken: '',
+        errorCode,
+      },
     };
   }
 }

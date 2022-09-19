@@ -2,11 +2,11 @@
 // source: matching-service.proto
 
 /*
-Package gateway is a reverse proxy.
+Package proto is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package gateway
+package proto
 
 import (
 	"context"
@@ -113,7 +113,7 @@ func RegisterQueueServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/matching_service.QueueService/JoinQueue", runtime.WithHTTPPathPattern("/queue/join"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/matching_service.QueueService/JoinQueue", runtime.WithHTTPPathPattern("/api/queue/join"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -138,7 +138,7 @@ func RegisterQueueServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/matching_service.QueueService/CheckQueueStatus", runtime.WithHTTPPathPattern("/queue/status"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/matching_service.QueueService/CheckQueueStatus", runtime.WithHTTPPathPattern("/api/queue/status"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -202,7 +202,7 @@ func RegisterQueueServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/matching_service.QueueService/JoinQueue", runtime.WithHTTPPathPattern("/queue/join"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/matching_service.QueueService/JoinQueue", runtime.WithHTTPPathPattern("/api/queue/join"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -224,7 +224,7 @@ func RegisterQueueServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/matching_service.QueueService/CheckQueueStatus", runtime.WithHTTPPathPattern("/queue/status"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/matching_service.QueueService/CheckQueueStatus", runtime.WithHTTPPathPattern("/api/queue/status"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -244,9 +244,9 @@ func RegisterQueueServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 }
 
 var (
-	pattern_QueueService_JoinQueue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"queue", "join"}, ""))
+	pattern_QueueService_JoinQueue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "queue", "join"}, ""))
 
-	pattern_QueueService_CheckQueueStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"queue", "status"}, ""))
+	pattern_QueueService_CheckQueueStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "queue", "status"}, ""))
 )
 
 var (
