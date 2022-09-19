@@ -45,7 +45,7 @@ function Login() {
 
     axios
       .post<LoginResponse>("/api/user/login", loginReq, {
-        withCredentials: true
+        withCredentials: true,
       })
       .then((res) => {
         const { errorCode, errorMessage } = res.data;

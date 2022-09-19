@@ -20,7 +20,7 @@ function Editor({ yText, provider, undoManager, nickname }: Props) {
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333"
+        colorLight: "#6eeb8333",
       });
       providerSet = true;
     }
@@ -34,7 +34,7 @@ function Editor({ yText, provider, undoManager, nickname }: Props) {
       height="100%"
       extensions={[
         javascript({ jsx: true }),
-        yCollab(yText, provider.awareness, { undoManager })
+        yCollab(yText, provider.awareness, { undoManager }),
       ]}
     />
   );
