@@ -10,12 +10,13 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 type ProxyWorker interface {
-	SetUpstream(upstream io.Writer)
+	SetUpstream(upstream io.WriteCloser)
 	SetCloseListener(func())
-	Start() (io.Writer, error)
+	Start() (io.WriteCloser, error)
 	Write(data []byte) (n int, err error)
 	Close() error
 }
@@ -23,21 +24,23 @@ type ProxyWorker interface {
 type proxyWorker struct {
 	server          string
 	sessionUsername string
+	roomId          string
 
 	conn          *grpc.ClientConn
-	stream        pb.TunnelService_OpenStreamClient
-	upstream      io.Writer
+	stream        pb.CollabTunnelService_OpenStreamClient
+	upstream      io.WriteCloser
 	closeListener func()
 }
 
-func CreateProxyClient(server string, sessionUsername string) ProxyWorker {
+func CreateProxyClient(server string, roomId string, sessionUsername string) ProxyWorker {
 	return &proxyWorker{
 		server:          server,
 		sessionUsername: sessionUsername,
+		roomId:          roomId,
 	}
 }
 
-func (worker *proxyWorker) SetUpstream(upstream io.Writer) {
+func (worker *proxyWorker) SetUpstream(upstream io.WriteCloser) {
 	worker.upstream = upstream
 }
 
@@ -45,7 +48,7 @@ func (worker *proxyWorker) SetCloseListener(listener func()) {
 	worker.closeListener = listener
 }
 
-func (worker *proxyWorker) Start() (io.Writer, error) {
+func (worker *proxyWorker) Start() (io.WriteCloser, error) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	conn, err := grpc.Dial(worker.server, opts...)
 	if err != nil {
@@ -53,8 +56,13 @@ func (worker *proxyWorker) Start() (io.Writer, error) {
 	}
 	worker.conn = conn
 
-	client := pb.NewTunnelServiceClient(conn)
-	ctx := context.Background()
+	client := pb.NewCollabTunnelServiceClient(conn)
+	headers := metadata.Pairs(
+		"roomToken", worker.roomId,
+		"username", worker.sessionUsername,
+	)
+
+	ctx := metadata.NewOutgoingContext(context.Background(), headers)
 	stream, err := client.OpenStream(ctx)
 	if err != nil {
 		return nil, err
@@ -70,9 +78,8 @@ func (worker *proxyWorker) Write(data []byte) (n int, err error) {
 		return 0, errors.New("Connection not established")
 	}
 
-	err = worker.stream.Send(&pb.TunnelServiceRequest{
-		Username: worker.sessionUsername,
-		Data:     data,
+	err = worker.stream.Send(&pb.CollabTunnelRequest{
+		Data: data,
 	})
 	if err != nil {
 		return 0, err
@@ -102,6 +109,12 @@ func (worker *proxyWorker) handleConnection() {
 		}
 
 		if worker.upstream != nil {
+			if message.Flags & int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
+				int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) {
+				log.Println("Unauthorized room token detected")
+				worker.upstream.Close()
+				worker.Close()
+			}
 			worker.upstream.Write(message.Data)
 		}
 	}

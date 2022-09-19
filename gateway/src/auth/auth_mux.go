@@ -52,6 +52,6 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 }
 
 func writeUnauthorizedResponse(w http.ResponseWriter) {
-	w.WriteHeader(400)
+	w.WriteHeader(403)
 	w.Write([]byte("Unauthorized"))
 }
