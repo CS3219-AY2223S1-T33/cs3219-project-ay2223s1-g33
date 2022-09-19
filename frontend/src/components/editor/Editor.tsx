@@ -4,38 +4,38 @@ import * as Y from "yjs";
 import React, { useEffect } from "react";
 import { WebsocketProvider } from "y-websocket";
 import { yCollab } from "y-codemirror.next";
-import { useSelector } from "react-redux";
-import { RootState } from "../../app/store";
 
-const yDoc = new Y.Doc();
-// First 2 params builds the room session: ws://localhost:5001/ + ws
-const provider = new WebsocketProvider("ws://localhost:5001/", "ws", yDoc);
-const yText = yDoc.getText("codemirror");
-const undoManager = new Y.UndoManager(yText);
+let providerSet = false;
 
-function Editor() {
-  const username = useSelector((state: RootState) => state.user.user?.username);
+type Props = {
+  yText: Y.Text;
+  provider: WebsocketProvider;
+  undoManager: Y.UndoManager;
+  nickname: string;
+};
 
+function Editor({ yText, provider, undoManager, nickname }: Props) {
   useEffect(() => {
-    provider.awareness.setLocalStateField("user", {
-      name: username ?? "Anonymous user",
-      color: "#1be7ff",
-      colorLight: "#1be7ff33"
-    });
+    if (!providerSet) {
+      provider.awareness.setLocalStateField("user", {
+        name: nickname,
+        color: "#6eeb83",
+        colorLight: "#6eeb8333"
+      });
+      providerSet = true;
+    }
 
     return () => {};
   }, []);
 
   return (
     <CodeMirror
-      value={`console.log("Hello World")`}
+      value=""
       height="100%"
       extensions={[
         javascript({ jsx: true }),
         yCollab(yText, provider.awareness, { undoManager })
       ]}
-      // extensions={[javascript({ jsx: true })], yCollab(ytext, provider.awareness, {undoManager})}
-      // onChange={codeChangeHandler}
     />
   );
 }
