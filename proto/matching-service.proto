@@ -10,7 +10,6 @@ enum JoinQueueErrorCode {
   JOIN_QUEUE_ALREADY_IN_QUEUE = 1;
   JOIN_QUEUE_BAD_REQUEST = 100;
   JOIN_QUEUE_INTERNAL_ERROR = 101;
-  JOIN_QUEUE_UNAUTHORIZED = 102;
 }
 
 enum CheckQueueStatusErrorCode {
@@ -18,7 +17,6 @@ enum CheckQueueStatusErrorCode {
   CHECK_QUEUE_STATUS_ERROR_NOT_IN_QUEUE = 1;
   CHECK_QUEUE_STATUS_BAD_REQUEST = 100;
   CHECK_QUEUE_STATUS_INTERNAL_ERROR = 101;
-  CHECK_QUEUE_STATUS_UNAUTHORIZED = 102;
 }
 
 enum QueueStatus {
@@ -29,8 +27,7 @@ enum QueueStatus {
 }
 
 message JoinQueueRequest {
-  string session_token = 1;
-  common.QuestionDifficulty difficulty = 2;
+  common.QuestionDifficulty difficulty = 1;
 }
 
 message JoinQueueResponse {
@@ -39,7 +36,6 @@ message JoinQueueResponse {
 }
 
 message CheckQueueStatusRequest {
-  string session_token = 1;
 }
 
 message CheckQueueStatusResponse {
