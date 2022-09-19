@@ -12,7 +12,7 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid
+  Grid,
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";

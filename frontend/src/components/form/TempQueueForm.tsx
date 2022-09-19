@@ -5,7 +5,7 @@ import axios from "../../axios";
 import { enterQueue } from "../../feature/matching/matchingSlice";
 import {
   JoinQueueResponse,
-  JoinQueueRequest
+  JoinQueueRequest,
 } from "../../proto/matching-service";
 import { QuestionDifficulty } from "../../proto/types";
 import useFixedToast from "../../utils/hooks/useFixedToast";
@@ -13,16 +13,16 @@ import useFixedToast from "../../utils/hooks/useFixedToast";
 const DIFFICULTY = [
   {
     name: "Easy",
-    colorScheme: "green"
+    colorScheme: "green",
   },
   {
     name: "Medium",
-    colorScheme: "orange"
+    colorScheme: "orange",
   },
   {
     name: "Hard",
-    colorScheme: "red"
-  }
+    colorScheme: "red",
+  },
 ];
 
 /**
@@ -31,7 +31,6 @@ const DIFFICULTY = [
  */
 function TempQueueForm() {
   const toast = useFixedToast();
-  // const toast = useToast();
   const dispatch = useDispatch();
   const [selectedDiff, setSelectedDiff] = useState("Easy");
 
@@ -48,7 +47,7 @@ function TempQueueForm() {
     }
     axios
       .post<JoinQueueResponse>("/api/queue/join", joinQueueReq, {
-        withCredentials: true
+        withCredentials: true,
       })
       .then((res) => {
         const { errorCode, errorMessage } = res.data;

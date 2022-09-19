@@ -8,13 +8,13 @@ import {
   Heading,
   Input,
   Stack,
-  Text
+  Text,
   // useToast
 } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useCookies } from "react-cookie";
+// import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { login } from "../feature/user/userSlice";
 import axios from "../axios";
@@ -22,7 +22,7 @@ import Link from "../components/ui/Link";
 import {
   LoginRequest,
   LoginResponse,
-  UserCredentials
+  UserCredentials,
 } from "../proto/user-bff-service";
 import useFixedToast from "../utils/hooks/useFixedToast";
 
@@ -30,14 +30,11 @@ function Login() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
   const toast = useFixedToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // eslint-disable-next-line
-  const [cookie, setCookies] = useCookies(["session_token"]);
 
   const validFormHandler = (data: any) => {
     const { email, password } = data;
@@ -46,7 +43,7 @@ function Login() {
 
     axios
       .post<LoginResponse>("/api/user/login", loginReq, {
-        withCredentials: true
+        withCredentials: true,
       })
       .then((res) => {
         const { errorCode, errorMessage } = res.data;
@@ -59,14 +56,6 @@ function Login() {
         if (!user) {
           throw new Error("Something went wrong.");
         }
-
-        const now = new Date();
-        setCookies("session_token", "loggedin", {
-          path: "/",
-          expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
-          domain: "127.0.0.1",
-          secure: false
-        });
 
         // Store user information on redux
         dispatch(login({ user }));
@@ -83,7 +72,7 @@ function Login() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
@@ -103,7 +92,7 @@ function Login() {
                 <Input
                   type="text"
                   {...register("email", {
-                    required: "Please enter your email."
+                    required: "Please enter your email.",
                   })}
                 />
                 <FormErrorMessage>
@@ -116,7 +105,7 @@ function Login() {
                 <Input
                   type="password"
                   {...register("password", {
-                    required: "Please enter your password."
+                    required: "Please enter your password.",
                   })}
                 />
                 <FormErrorMessage>
@@ -130,7 +119,7 @@ function Login() {
                 bg="blue.400"
                 color="white"
                 _hover={{
-                  bg: "blue.500"
+                  bg: "blue.500",
                 }}
                 type="submit"
               >
