@@ -12,7 +12,7 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid,
+  Grid
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +44,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       // First 2 params builds the room session: ws://localhost:5001/ + ws
@@ -52,7 +52,7 @@ function Session() {
         "ws://localhost:5001/api/",
         "roomws",
         tempyDoc,
-        { params }
+        { params, disableBc: true }
       );
 
       // If the connection is terminated, it should not attempt to reconnect
