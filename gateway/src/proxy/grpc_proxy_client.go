@@ -14,9 +14,9 @@ import (
 )
 
 type ProxyWorker interface {
-	SetUpstream(upstream io.Writer)
+	SetUpstream(upstream io.WriteCloser)
 	SetCloseListener(func())
-	Start() (io.Writer, error)
+	Start() (io.WriteCloser, error)
 	Write(data []byte) (n int, err error)
 	Close() error
 }
@@ -28,7 +28,7 @@ type proxyWorker struct {
 
 	conn          *grpc.ClientConn
 	stream        pb.CollabTunnelService_OpenStreamClient
-	upstream      io.Writer
+	upstream      io.WriteCloser
 	closeListener func()
 }
 
@@ -40,7 +40,7 @@ func CreateProxyClient(server string, roomId string, sessionUsername string) Pro
 	}
 }
 
-func (worker *proxyWorker) SetUpstream(upstream io.Writer) {
+func (worker *proxyWorker) SetUpstream(upstream io.WriteCloser) {
 	worker.upstream = upstream
 }
 
@@ -48,7 +48,7 @@ func (worker *proxyWorker) SetCloseListener(listener func()) {
 	worker.closeListener = listener
 }
 
-func (worker *proxyWorker) Start() (io.Writer, error) {
+func (worker *proxyWorker) Start() (io.WriteCloser, error) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	conn, err := grpc.Dial(worker.server, opts...)
 	if err != nil {
@@ -58,7 +58,7 @@ func (worker *proxyWorker) Start() (io.Writer, error) {
 
 	client := pb.NewCollabTunnelServiceClient(conn)
 	headers := metadata.Pairs(
-		"roomId", worker.roomId,
+		"roomToken", worker.roomId,
 		"username", worker.sessionUsername,
 	)
 
@@ -109,6 +109,12 @@ func (worker *proxyWorker) handleConnection() {
 		}
 
 		if worker.upstream != nil {
+			if message.Flags|int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
+				int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) {
+				log.Println("Unauthorized room token detected")
+				worker.upstream.Close()
+				worker.Close()
+			}
 			worker.upstream.Write(message.Data)
 		}
 	}
