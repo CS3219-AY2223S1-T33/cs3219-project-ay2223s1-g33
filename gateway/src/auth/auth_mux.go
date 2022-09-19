@@ -4,6 +4,7 @@ import (
 	"cs3219-project-ay2223s1-g33/gateway/util"
 	"log"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -20,7 +21,7 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.EscapedPath()
-		if path == loginRoute || path == registerRoute {
+		if path == loginRoute || path == registerRoute || path == "/" || strings.HasPrefix(path, "/static") {
 			mux.ServeHTTP(w, r)
 			return
 		}

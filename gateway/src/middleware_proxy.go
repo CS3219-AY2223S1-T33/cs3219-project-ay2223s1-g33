@@ -14,7 +14,7 @@ func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet && r.URL.EscapedPath() == websocketRoute {
-			downstreamClient := proxy.CreateProxyClient(config.CollabServer)
+			downstreamClient := proxy.CreateProxyClient(config.CollabServer, r.Header.Get("X-Bearer-Username"))
 			downstreamWriter, err := downstreamClient.Start()
 			if err != nil {
 				log.Println(err)
@@ -39,7 +39,6 @@ func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http
 				downstreamClient.Close()
 			})
 			wsConn.ConnectTunnel()
-
 		} else {
 			mux.ServeHTTP(w, r)
 		}

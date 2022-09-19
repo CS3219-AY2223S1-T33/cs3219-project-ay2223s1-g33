@@ -35,7 +35,7 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
         errorMessage: '',
       },
       headers: {
-        'Set-Cookie': [`${sessionCookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`],
+        'Set-Cookie': [`${sessionCookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`],
       },
     };
   }

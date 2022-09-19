@@ -65,7 +65,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
         errorMessage: '',
       },
       headers: {
-        'Set-Cookie': [`${sessionCookieName}=${token}; HttpOnly`],
+        'Set-Cookie': [`${sessionCookieName}=${token}; Path=/`],
       },
     };
   }

@@ -5,6 +5,8 @@ option go_package = "cs3219-project-ay2223s1-g33/proto";
 
 message TunnelServiceRequest {
   bytes data = 1;
+  string username = 2;
+  int32 flags = 3;
 }
 
 message TunnelServiceResponse {
