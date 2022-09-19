@@ -1,13 +1,13 @@
 import { ServerDuplexStreamImpl } from '@grpc/grpc-js/build/src/server-call';
-import { Topic } from './tunnel_pubsub_types';
-import { TunnelServiceRequest, TunnelServiceResponse } from '../proto/tunnel-service';
+import { Topic } from './collab_tunnel_pubsub_types';
+import { CollabTunnelRequest, CollabTunnelResponse } from '../proto/collab-service';
 import CollabSubscription from './collab_subscription';
 import Logger from '../utils/logger';
 
 const MAX_SUBSCRIBERS = 2;
 
 class CollabTopic implements
-  Topic<ServerDuplexStreamImpl<TunnelServiceRequest, TunnelServiceResponse>, TunnelServiceRequest> {
+  Topic<ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>, CollabTunnelRequest> {
   subscriptions: Map<string, CollabSubscription>;
 
   constructor() {
@@ -16,7 +16,7 @@ class CollabTopic implements
 
   createSubscription(
     subscriptionName: string,
-    call: ServerDuplexStreamImpl<TunnelServiceRequest, TunnelServiceResponse>,
+    call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
     const subExist = this.subscriptions.has(subscriptionName);
     if (!subExist) {
@@ -29,7 +29,7 @@ class CollabTopic implements
     }
   }
 
-  push(request: TunnelServiceRequest) {
+  push(request: CollabTunnelRequest) {
     this.subscriptions.forEach((sub) => {
       sub.push(request);
     });
@@ -38,7 +38,7 @@ class CollabTopic implements
   clean(data: any) {
     this.subscriptions.forEach((sub, key) => {
       if (sub.isHandler(data)) {
-        Logger.info(`Subscription ${key} removed`);
+        Logger.info(`Subscription ${key} removed.`);
         this.subscriptions.delete(key);
       }
     });

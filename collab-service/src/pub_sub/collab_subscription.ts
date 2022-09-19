@@ -1,18 +1,18 @@
 import { ServerDuplexStreamImpl } from '@grpc/grpc-js/build/src/server-call';
 import assert from 'assert';
-import { Subscription } from './tunnel_pubsub_types';
-import { TunnelServiceRequest, TunnelServiceResponse } from '../proto/tunnel-service';
+import { Subscription } from './collab_tunnel_pubsub_types';
+import { CollabTunnelRequest, CollabTunnelResponse } from '../proto/collab-service';
 
-class CollabSubscription implements Subscription<TunnelServiceRequest> {
-  call: ServerDuplexStreamImpl<TunnelServiceRequest, TunnelServiceResponse>;
+class CollabSubscription implements Subscription<CollabTunnelRequest> {
+  call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>;
 
-  constructor(call: ServerDuplexStreamImpl<TunnelServiceRequest, TunnelServiceResponse>) {
+  constructor(call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>) {
     this.call = call;
   }
 
-  push(request: TunnelServiceRequest) {
+  push(request: CollabTunnelRequest) {
     assert(this.call);
-    const response = TunnelServiceResponse.create(
+    const response = CollabTunnelResponse.create(
       {
         data: request.data,
       },

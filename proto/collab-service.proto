@@ -19,7 +19,19 @@ message VerifyRoomResponse {
   string error_message = 1;
   VerifyRoomErrorCode error_code = 2;
 }
+message CollabTunnelRequest {
+  bytes data = 1;
+  int32 flags = 2;
+}
+
+message CollabTunnelResponse {
+  bytes data = 1;
+}
 
 service CollabService {
   rpc VerifyRoom(VerifyRoomRequest) returns (VerifyRoomResponse);
+}
+
+service CollabTunnelService {
+  rpc OpenStream(stream CollabTunnelRequest) returns (stream CollabTunnelResponse);
 }

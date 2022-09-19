@@ -68,9 +68,11 @@ services:
 
     ports:
       - "8083:8083"
+      - "4003:4003"
 
     expose:
       - "8083"
+      - "4003"
 
     volumes:
       - .:/app/collab-service/build

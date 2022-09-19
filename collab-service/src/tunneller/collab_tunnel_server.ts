@@ -1,36 +1,24 @@
 import { ServiceDefinition, UntypedServiceImplementation } from '@grpc/grpc-js';
-import { ITunnelService, tunnelServiceDefinition } from '../proto/tunnel-service.grpc-server';
-import { TunnelServiceRequest } from '../proto/tunnel-service';
+import { ICollabTunnelService, collabTunnelServiceDefinition } from '../proto/collab-service.grpc-server';
+import { CollabTunnelRequest } from '../proto/collab-service';
 import CollabTunnelPubSub from '../pub_sub/collab_tunnel_pubsub';
 
 // Central source of pubsub
 const pubSub = new CollabTunnelPubSub();
 
-// Fake username and roomId
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-let count = -1;
-const allUsers = ['user1', 'user2'];
-const fakeRoomId = ['12345678', '12345678'];
-
 function pubSubOpenStream(call: any) {
-  // When data is detected
-  call.on('data', (request: TunnelServiceRequest) => {
-    // Access fake username & room_id
-    count += 1;
-    count %= 2;
-    const username = allUsers[count];
-    const roomId = fakeRoomId[count];
+  // When stream opens
+  const roomId = call.metadata.get('roomId')[0];
+  const username = call.metadata.get('username')[0];
+  const cTopic = pubSub.createTopic(roomId);
+  cTopic?.createSubscription(username, call);
 
-    const cTopic = pubSub.createTopic(roomId);
-    try {
-      cTopic?.createSubscription(username, call);
-      cTopic?.push(request);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
-    }
+  // When data is detected
+  call.on('data', (request: CollabTunnelRequest) => {
+    cTopic?.push(request);
   });
-  // When stream ends
+
+  // When stream closes
   call.on('end', () => {
     pubSub.clean(call);
     call.end();
@@ -38,12 +26,12 @@ function pubSubOpenStream(call: any) {
 }
 
 class CollabTunnelStream {
-  public serviceDefinition: ServiceDefinition<ITunnelService>;
+  public serviceDefinition: ServiceDefinition<ICollabTunnelService>;
 
   public serviceImplementation: UntypedServiceImplementation;
 
   constructor() {
-    this.serviceDefinition = tunnelServiceDefinition;
+    this.serviceDefinition = collabTunnelServiceDefinition;
     this.serviceImplementation = {
       OpenStream: pubSubOpenStream,
     };

@@ -40,6 +40,32 @@ export interface VerifyRoomResponse {
     errorCode: VerifyRoomErrorCode;
 }
 /**
+ * @generated from protobuf message collaboration_service.CollabTunnelRequest
+ */
+export interface CollabTunnelRequest {
+    /**
+     * @generated from protobuf field: bytes data = 1;
+     */
+    data: Uint8Array;
+    /**
+     * @generated from protobuf field: string username = 2;
+     */
+    username: string;
+    /**
+     * @generated from protobuf field: int32 flags = 3;
+     */
+    flags: number;
+}
+/**
+ * @generated from protobuf message collaboration_service.CollabTunnelResponse
+ */
+export interface CollabTunnelResponse {
+    /**
+     * @generated from protobuf field: bytes data = 1;
+     */
+    data: Uint8Array;
+}
+/**
  * @generated from protobuf enum collaboration_service.VerifyRoomErrorCode
  */
 export enum VerifyRoomErrorCode {
@@ -168,9 +194,123 @@ class VerifyRoomResponse$Type extends MessageType<VerifyRoomResponse> {
  * @generated MessageType for protobuf message collaboration_service.VerifyRoomResponse
  */
 export const VerifyRoomResponse = new VerifyRoomResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class CollabTunnelRequest$Type extends MessageType<CollabTunnelRequest> {
+    constructor() {
+        super("collaboration_service.CollabTunnelRequest", [
+            { no: 1, name: "data", kind: "scalar", T: 12 /*ScalarType.BYTES*/ },
+            { no: 2, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "flags", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
+        ]);
+    }
+    create(value?: PartialMessage<CollabTunnelRequest>): CollabTunnelRequest {
+        const message = { data: new Uint8Array(0), username: "", flags: 0 };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<CollabTunnelRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CollabTunnelRequest): CollabTunnelRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* bytes data */ 1:
+                    message.data = reader.bytes();
+                    break;
+                case /* string username */ 2:
+                    message.username = reader.string();
+                    break;
+                case /* int32 flags */ 3:
+                    message.flags = reader.int32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: CollabTunnelRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* bytes data = 1; */
+        if (message.data.length)
+            writer.tag(1, WireType.LengthDelimited).bytes(message.data);
+        /* string username = 2; */
+        if (message.username !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.username);
+        /* int32 flags = 3; */
+        if (message.flags !== 0)
+            writer.tag(3, WireType.Varint).int32(message.flags);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message collaboration_service.CollabTunnelRequest
+ */
+export const CollabTunnelRequest = new CollabTunnelRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class CollabTunnelResponse$Type extends MessageType<CollabTunnelResponse> {
+    constructor() {
+        super("collaboration_service.CollabTunnelResponse", [
+            { no: 1, name: "data", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+        ]);
+    }
+    create(value?: PartialMessage<CollabTunnelResponse>): CollabTunnelResponse {
+        const message = { data: new Uint8Array(0) };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<CollabTunnelResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CollabTunnelResponse): CollabTunnelResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* bytes data */ 1:
+                    message.data = reader.bytes();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: CollabTunnelResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* bytes data = 1; */
+        if (message.data.length)
+            writer.tag(1, WireType.LengthDelimited).bytes(message.data);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message collaboration_service.CollabTunnelResponse
+ */
+export const CollabTunnelResponse = new CollabTunnelResponse$Type();
 /**
  * @generated ServiceType for protobuf service collaboration_service.CollabService
  */
 export const CollabService = new ServiceType("collaboration_service.CollabService", [
     { name: "VerifyRoom", options: {}, I: VerifyRoomRequest, O: VerifyRoomResponse }
+]);
+/**
+ * @generated ServiceType for protobuf service collaboration_service.CollabTunnelService
+ */
+export const CollabTunnelService = new ServiceType("collaboration_service.CollabTunnelService", [
+    { name: "OpenStream", serverStreaming: true, clientStreaming: true, options: {}, I: CollabTunnelRequest, O: CollabTunnelResponse }
 ]);

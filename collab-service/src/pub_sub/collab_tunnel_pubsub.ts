@@ -1,4 +1,4 @@
-import { TunnelPubSub } from './tunnel_pubsub_types';
+import { TunnelPubSub } from './collab_tunnel_pubsub_types';
 import Logger from '../utils/logger';
 import CollabTopic from './collab_topic';
 
@@ -24,7 +24,7 @@ class CollabTunnelPubSub implements TunnelPubSub<CollabTopic> {
     this.topics.forEach((topic, key) => {
       topic.clean(data);
       if (topic.isEmpty()) {
-        Logger.info(`Topic ${key} removed`);
+        Logger.info(`Topic ${key} removed.`);
         this.topics.delete(key);
       }
     });
