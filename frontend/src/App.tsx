@@ -1,34 +1,57 @@
 // import axios from "axios";
-import React, { useEffect } from "react";
 // import { Routes } from "react-router-dom";
+import React, { useEffect } from "react";
 import { useCookies } from "react-cookie";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { RootState } from "./app/store";
 import UnprotectedRoute from "./components/auth/UnprotectedRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import axios from "./axios";
+import { GetUserProfileResponse } from "./proto/user-bff-service";
+import { login } from "./feature/user/userSlice";
+import useFixedToast from "./utils/hooks/useFixedToast";
+
+// Workaround to double useEffect calls for React.StrictMode
+let firstMount = true;
 
 function App() {
-  const sessionToken = useSelector(
-    (state: RootState) => state.user.sessionToken
-  );
-  // console.log(sessionToken);
+  const toast = useFixedToast();
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user.user);
 
   // eslint-disable-next-line
-  const [cookies, setCookies, removeCookies] = useCookies(["session_token"]);
+  const [cookies, setCookies, removeCookies] = useCookies(["AUTH-SESSION"]);
 
   useEffect(() => {
-    // Left here as a sanity checker
-    // Note this does not use the axios instance
-    // axios.get("http://127.0.0.1:8081").then((res) => console.log(res.data));
+    if (cookies["AUTH-SESSION"] && firstMount) {
+      console.log("Auth session exists");
+      firstMount = false;
+      axios
+        .post<GetUserProfileResponse>(
+          "/api/user/profile",
+          {},
+          { withCredentials: true }
+        )
+        .then((res) => {
+          const { errorMessage, user: fetchedUser } = res.data;
 
-    // Always removes existing cookies until we properly implement persistence
-    removeCookies("session_token");
+          if (!fetchedUser) {
+            throw new Error(errorMessage);
+          }
+
+          dispatch(login({ user: fetchedUser }));
+        })
+        .catch((err) => {
+          toast.sendErrorMessage("Please log in again");
+          console.error(err.message);
+        });
+    }
   }, []);
 
   return (
     <BrowserRouter>
-      {sessionToken !== "" ? <ProtectedRoute /> : <UnprotectedRoute />}
+      {user ? <ProtectedRoute /> : <UnprotectedRoute />}
     </BrowserRouter>
   );
 }

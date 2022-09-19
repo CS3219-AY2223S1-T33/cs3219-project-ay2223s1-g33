@@ -12,7 +12,6 @@ import {
   useBoolean,
   Text,
   FormErrorMessage,
-  useToast,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import React from "react";
@@ -29,6 +28,7 @@ import {
   RegisterResponse,
   UserCredentials,
 } from "../proto/user-bff-service";
+import useFixedToast from "../utils/hooks/useFixedToast";
 
 function Register() {
   const {
@@ -37,7 +37,7 @@ function Register() {
     formState: { errors },
   } = useForm();
 
-  const toast = useToast();
+  const toast = useFixedToast();
   const [showPassword, setShowPassword] = useBoolean();
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
@@ -58,37 +58,20 @@ function Register() {
           throw new Error(resData.errorMessage);
         }
 
-        toast({
-          title: "Success!",
-          description: "Yay! Click on the link below to login.",
-          status: "success",
-          position: "top",
-          isClosable: true,
-          duration: 5000,
-        });
+        toast.sendSuccessMessage("Yay! Click on the link below to login.");
       })
       .catch((err) => {
-        toast({
-          title: "Error",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-          description: err.message,
-        });
+        toast.sendErrorMessage(err.message);
       });
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
-    toast({
-      title: "Oops!",
-      description:
-        "Please check if you have filled everything in correctly before submitting",
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-      position: "top",
-    });
+    toast.sendErrorMessage(
+      "Please check if you have filled everything in correctly before submitting",
+      {
+        title: "Oops!",
+      }
+    );
   };
 
   return (

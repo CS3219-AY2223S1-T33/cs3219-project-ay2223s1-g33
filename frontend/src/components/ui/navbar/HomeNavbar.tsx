@@ -10,12 +10,14 @@ import {
   MenuList,
   Text,
 } from "@chakra-ui/react";
+import axios from "axios";
 import React from "react";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../../app/store";
 import { logout } from "../../../feature/user/userSlice";
+import { LogoutResponse } from "../../../proto/user-bff-service";
 
 function HomeNavbar() {
   const navigate = useNavigate();
@@ -24,10 +26,24 @@ function HomeNavbar() {
   const [cookies, setCookies, removeCookies] = useCookies(["session_token"]);
 
   const logoutHandler = () => {
-    removeCookies("session_token");
-    dispatch(logout());
-    navigate("/login", { replace: true });
+    // removeCookies("session_token");
+    axios
+      .post<LogoutResponse>("/api/user/logout", {}, { withCredentials: true })
+      .then((res) => {
+        const { errorCode, errorMessage } = res.data;
+        if (errorCode) {
+          throw new Error(errorMessage);
+        }
+      })
+      .catch((err) => {
+        console.error(err.message);
+      })
+      .finally(() => {
+        dispatch(logout());
+        navigate("/login", { replace: true });
+      });
   };
+
   const user = useSelector((state: RootState) => state.user.user);
   if (!user) {
     return null;

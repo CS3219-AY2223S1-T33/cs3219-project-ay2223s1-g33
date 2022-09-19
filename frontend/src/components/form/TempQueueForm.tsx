@@ -1,4 +1,4 @@
-import { Button, Radio, RadioGroup, Stack, useToast } from "@chakra-ui/react";
+import { Button, Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import axios from "../../axios";
@@ -8,6 +8,7 @@ import {
   JoinQueueRequest,
 } from "../../proto/matching-service";
 import { QuestionDifficulty } from "../../proto/types";
+import useFixedToast from "../../utils/hooks/useFixedToast";
 
 const DIFFICULTY = [
   {
@@ -29,7 +30,7 @@ const DIFFICULTY = [
  *  Once we are able to support multiple difficulties, this component will be deprecated.
  */
 function TempQueueForm() {
-  const toast = useToast();
+  const toast = useFixedToast();
   const dispatch = useDispatch();
   const [selectedDiff, setSelectedDiff] = useState("Easy");
 
@@ -59,14 +60,7 @@ function TempQueueForm() {
         dispatch(enterQueue());
       })
       .catch((err) => {
-        toast({
-          title: "Error",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-          description: err.message,
-        });
+        toast.sendErrorMessage(err.message);
       });
   };
 

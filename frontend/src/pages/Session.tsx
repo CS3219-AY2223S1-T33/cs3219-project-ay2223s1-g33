@@ -52,7 +52,7 @@ function Session() {
         "ws://localhost:5001/api/",
         "roomws",
         tempyDoc,
-        { params }
+        { params, disableBc: true }
       );
 
       // If the connection is terminated, it should not attempt to reconnect

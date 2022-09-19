@@ -9,12 +9,12 @@ import {
   Input,
   Stack,
   Text,
-  useToast,
+  // useToast
 } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useCookies } from "react-cookie";
+// import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { login } from "../feature/user/userSlice";
 import axios from "../axios";
@@ -24,6 +24,7 @@ import {
   LoginResponse,
   UserCredentials,
 } from "../proto/user-bff-service";
+import useFixedToast from "../utils/hooks/useFixedToast";
 
 function Login() {
   const {
@@ -31,12 +32,9 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const toast = useToast();
+  const toast = useFixedToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // eslint-disable-next-line
-  const [cookie, setCookies] = useCookies(["session_token"]);
 
   const validFormHandler = (data: any) => {
     const { email, password } = data;
@@ -59,42 +57,24 @@ function Login() {
           throw new Error("Something went wrong.");
         }
 
-        const now = new Date();
-        setCookies("session_token", "loggedin", {
-          path: "/",
-          expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
-          domain: "127.0.0.1",
-          secure: false,
-        });
-
         // Store user information on redux
-        dispatch(login({ user, sessionToken: "loggedin" }));
+        dispatch(login({ user }));
 
         // Redirect user on successful login
         navigate("/", { replace: true });
       })
       .catch((err) => {
-        toast({
-          title: "Error",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-          description: err.message,
-        });
+        toast.sendErrorMessage(err.message);
       });
   };
 
   const invalidFormHandler = () => {
-    toast({
-      title: "Oops!",
-      description:
-        "Please check if you have filled everything in correctly before submitting",
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-      position: "top",
-    });
+    toast.sendErrorMessage(
+      "Please check if you have filled everything in correctly before submitting",
+      {
+        title: "Oops!",
+      }
+    );
   };
 
   return (
@@ -126,11 +106,6 @@ function Login() {
                   type="password"
                   {...register("password", {
                     required: "Please enter your password.",
-                    minLength: {
-                      value: 8,
-                      message:
-                        "Please make sure your password is at least 8 characters long.",
-                    },
                   })}
                 />
                 <FormErrorMessage>
