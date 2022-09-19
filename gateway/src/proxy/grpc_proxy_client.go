@@ -58,7 +58,7 @@ func (worker *proxyWorker) Start() (io.WriteCloser, error) {
 
 	client := pb.NewCollabTunnelServiceClient(conn)
 	headers := metadata.Pairs(
-		"roomId", worker.roomId,
+		"roomToken", worker.roomId,
 		"username", worker.sessionUsername,
 	)
 

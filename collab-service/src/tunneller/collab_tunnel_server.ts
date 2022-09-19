@@ -28,10 +28,10 @@ function buildErrorResponse(errorCode: VerifyRoomErrorCode): CollabTunnelRespons
 
 async function pubSubOpenStream(call: any) {
   // When stream opens
-  const roomId = call.metadata.get('roomId')[0];
+  const roomToken = call.metadata.get('roomToken')[0];
   const username = call.metadata.get('username')[0];
-  const isValid = await roomService.verifyToken(roomId);
-  if (!isValid) {
+  const roomId = await roomService.verifyToken(roomToken);
+  if (!roomId) {
     // Kill stream when invalid
     const errMsg = buildErrorResponse(VerifyRoomErrorCode.VERIFY_ROOM_UNAUTHORIZED);
     call.write(errMsg);
