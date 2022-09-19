@@ -28,10 +28,11 @@ import Editor from "../components/editor/Editor";
 
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
-  const nickname = useSelector((state: RootState) => state.user.user?.username);
+  const nickname = useSelector((state: RootState) => state.user.user?.nickname);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const [yDoc, setYDoc] = useState<Y.Doc>();
   const [provider, setProvider] = useState<WebsocketProvider>();
   const [yText, setYText] = useState<Y.Text>();
@@ -79,10 +80,13 @@ function Session() {
 
   const collabDefined = yText && provider && undoManager;
 
+  // Naive way of handling websocket states - to be improved
+  const isWSOpen = provider ? provider.wsconnected : false;
+
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar onOpen={onOpen} status="Open" />
+      <SessionNavbar onOpen={onOpen} status={isWSOpen ? "Open" : "Closed"} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs />
