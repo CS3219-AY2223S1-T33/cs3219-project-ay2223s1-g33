@@ -21,7 +21,7 @@ const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
 const expressApp = apiServer.getHttpServer();
 
 const roomAuthService: IRoomSessionAgent = createRoomSessionService(
-  envConfig.JWT_SIGNING_SECRET,
+  envConfig.JWT_ROOM_SECRET,
 );
 
 expressApp.get('/', (_: Request, resp: Response) => {
