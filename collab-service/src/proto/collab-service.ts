@@ -48,11 +48,7 @@ export interface CollabTunnelRequest {
      */
     data: Uint8Array;
     /**
-     * @generated from protobuf field: string username = 2;
-     */
-    username: string;
-    /**
-     * @generated from protobuf field: int32 flags = 3;
+     * @generated from protobuf field: int32 flags = 2;
      */
     flags: number;
 }
@@ -199,12 +195,11 @@ class CollabTunnelRequest$Type extends MessageType<CollabTunnelRequest> {
     constructor() {
         super("collaboration_service.CollabTunnelRequest", [
             { no: 1, name: "data", kind: "scalar", T: 12 /*ScalarType.BYTES*/ },
-            { no: 2, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "flags", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
+            { no: 2, name: "flags", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
         ]);
     }
     create(value?: PartialMessage<CollabTunnelRequest>): CollabTunnelRequest {
-        const message = { data: new Uint8Array(0), username: "", flags: 0 };
+        const message = { data: new Uint8Array(0), flags: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<CollabTunnelRequest>(this, message, value);
@@ -218,10 +213,7 @@ class CollabTunnelRequest$Type extends MessageType<CollabTunnelRequest> {
                 case /* bytes data */ 1:
                     message.data = reader.bytes();
                     break;
-                case /* string username */ 2:
-                    message.username = reader.string();
-                    break;
-                case /* int32 flags */ 3:
+                case /* int32 flags */ 2:
                     message.flags = reader.int32();
                     break;
                 default:
@@ -239,12 +231,9 @@ class CollabTunnelRequest$Type extends MessageType<CollabTunnelRequest> {
         /* bytes data = 1; */
         if (message.data.length)
             writer.tag(1, WireType.LengthDelimited).bytes(message.data);
-        /* string username = 2; */
-        if (message.username !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.username);
-        /* int32 flags = 3; */
+        /* int32 flags = 2; */
         if (message.flags !== 0)
-            writer.tag(3, WireType.Varint).int32(message.flags);
+            writer.tag(2, WireType.Varint).int32(message.flags);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
