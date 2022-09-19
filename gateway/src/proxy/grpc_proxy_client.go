@@ -109,7 +109,7 @@ func (worker *proxyWorker) handleConnection() {
 		}
 
 		if worker.upstream != nil {
-			if message.Flags|int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
+			if message.Flags & int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
 				int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) {
 				log.Println("Unauthorized room token detected")
 				worker.upstream.Close()
