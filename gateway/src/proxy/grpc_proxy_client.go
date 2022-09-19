@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 type ProxyWorker interface {
@@ -23,17 +24,19 @@ type ProxyWorker interface {
 type proxyWorker struct {
 	server          string
 	sessionUsername string
+	roomId          string
 
 	conn          *grpc.ClientConn
-	stream        pb.TunnelService_OpenStreamClient
+	stream        pb.CollabTunnelService_OpenStreamClient
 	upstream      io.Writer
 	closeListener func()
 }
 
-func CreateProxyClient(server string, sessionUsername string) ProxyWorker {
+func CreateProxyClient(server string, roomId string, sessionUsername string) ProxyWorker {
 	return &proxyWorker{
 		server:          server,
 		sessionUsername: sessionUsername,
+		roomId:          roomId,
 	}
 }
 
@@ -53,8 +56,13 @@ func (worker *proxyWorker) Start() (io.Writer, error) {
 	}
 	worker.conn = conn
 
-	client := pb.NewTunnelServiceClient(conn)
-	ctx := context.Background()
+	client := pb.NewCollabTunnelServiceClient(conn)
+	headers := metadata.Pairs(
+		"roomId", worker.roomId,
+		"username", worker.sessionUsername,
+	)
+
+	ctx := metadata.NewOutgoingContext(context.Background(), headers)
 	stream, err := client.OpenStream(ctx)
 	if err != nil {
 		return nil, err
@@ -70,9 +78,8 @@ func (worker *proxyWorker) Write(data []byte) (n int, err error) {
 		return 0, errors.New("Connection not established")
 	}
 
-	err = worker.stream.Send(&pb.TunnelServiceRequest{
-		Username: worker.sessionUsername,
-		Data:     data,
+	err = worker.stream.Send(&pb.CollabTunnelRequest{
+		Data: data,
 	})
 	if err != nil {
 		return 0, err
