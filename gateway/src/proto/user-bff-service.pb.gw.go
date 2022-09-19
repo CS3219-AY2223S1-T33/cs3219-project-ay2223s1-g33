@@ -181,7 +181,7 @@ func RegisterUserBFFServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/Login", runtime.WithHTTPPathPattern("/user/login"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/Login", runtime.WithHTTPPathPattern("/api/user/login"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -206,7 +206,7 @@ func RegisterUserBFFServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/Register", runtime.WithHTTPPathPattern("/user/register"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/Register", runtime.WithHTTPPathPattern("/api/user/register"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -231,7 +231,7 @@ func RegisterUserBFFServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/Logout", runtime.WithHTTPPathPattern("/user/logout"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/Logout", runtime.WithHTTPPathPattern("/api/user/logout"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -256,7 +256,7 @@ func RegisterUserBFFServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/GetUserProfile", runtime.WithHTTPPathPattern("/user/profile"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_bff_service.UserBFFService/GetUserProfile", runtime.WithHTTPPathPattern("/api/user/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -320,7 +320,7 @@ func RegisterUserBFFServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/Login", runtime.WithHTTPPathPattern("/user/login"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/Login", runtime.WithHTTPPathPattern("/api/user/login"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -342,7 +342,7 @@ func RegisterUserBFFServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/Register", runtime.WithHTTPPathPattern("/user/register"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/Register", runtime.WithHTTPPathPattern("/api/user/register"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -364,7 +364,7 @@ func RegisterUserBFFServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/Logout", runtime.WithHTTPPathPattern("/user/logout"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/Logout", runtime.WithHTTPPathPattern("/api/user/logout"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -386,7 +386,7 @@ func RegisterUserBFFServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/GetUserProfile", runtime.WithHTTPPathPattern("/user/profile"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_bff_service.UserBFFService/GetUserProfile", runtime.WithHTTPPathPattern("/api/user/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -406,13 +406,13 @@ func RegisterUserBFFServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_UserBFFService_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "login"}, ""))
+	pattern_UserBFFService_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "login"}, ""))
 
-	pattern_UserBFFService_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "register"}, ""))
+	pattern_UserBFFService_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "register"}, ""))
 
-	pattern_UserBFFService_Logout_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "logout"}, ""))
+	pattern_UserBFFService_Logout_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "logout"}, ""))
 
-	pattern_UserBFFService_GetUserProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "profile"}, ""))
+	pattern_UserBFFService_GetUserProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "profile"}, ""))
 )
 
 var (

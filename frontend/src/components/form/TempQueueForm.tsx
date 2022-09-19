@@ -45,7 +45,7 @@ function TempQueueForm() {
       console.error("No difficulty selected");
     }
     axios
-      .post<JoinQueueResponse>("/queue/join", joinQueueReq, {
+      .post<JoinQueueResponse>("/api/queue/join", joinQueueReq, {
         withCredentials: true,
       })
       .then((res) => {

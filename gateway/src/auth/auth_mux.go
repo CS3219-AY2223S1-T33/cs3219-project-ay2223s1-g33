@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	loginRoute    = "/user/login"
-	registerRoute = "/user/register"
+	loginRoute    = "/api/user/login"
+	registerRoute = "/api/user/register"
 )
 
 func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Handler, util.Disposable, error) {

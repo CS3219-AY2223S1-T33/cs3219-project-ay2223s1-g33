@@ -32,7 +32,7 @@ function Session() {
   const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { sendMessage, lastMessage, readyState } = useWebSocket(
-    "ws://localhost:5001/ws"
+    "ws://localhost:5001/api/roomws"
   );
   // This is a temporary state variable to track the websocket communication
   const [inputVal, setInputVal] = useState("");

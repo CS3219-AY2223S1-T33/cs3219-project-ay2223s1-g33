@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const websocketRoute = "/ws"
+const websocketRoute = "/api/roomws"
 
 func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http.Handler, error) {
 	proxyManager := proxy.CreateWebsocketProxyManager()
