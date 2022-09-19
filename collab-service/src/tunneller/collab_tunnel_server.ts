@@ -1,21 +1,48 @@
 import { ServiceDefinition, UntypedServiceImplementation } from '@grpc/grpc-js';
-import { ICollabTunnelService, collabTunnelServiceDefinition } from '../proto/collab-service.grpc-server';
-import { CollabTunnelRequest } from '../proto/collab-service';
+import {
+  collabTunnelServiceDefinition,
+  ICollabTunnelService,
+} from '../proto/collab-service.grpc-server';
+import {
+  CollabTunnelRequest,
+  CollabTunnelResponse,
+  VerifyRoomErrorCode,
+} from '../proto/collab-service';
 import CollabTunnelPubSub from '../pub_sub/collab_tunnel_pubsub';
+import loadEnvironment from '../utils/env_loader';
+import createRoomSessionService from '../room_auth/room_session_agent';
+
+const envConfig = loadEnvironment();
 
 // Central source of pubsub
 const pubSub = new CollabTunnelPubSub();
+const roomService = createRoomSessionService(envConfig.JWT_ROOM_SECRET);
 
-function pubSubOpenStream(call: any) {
+function buildErrorResponse(errorCode: VerifyRoomErrorCode): CollabTunnelResponse {
+  const emptyByte = new Uint8Array(0);
+  return {
+    data: emptyByte,
+    flags: errorCode,
+  };
+}
+
+async function pubSubOpenStream(call: any) {
   // When stream opens
   const roomId = call.metadata.get('roomId')[0];
   const username = call.metadata.get('username')[0];
+  const isValid = await roomService.verifyToken(roomId);
+  if (!isValid) {
+    // Kill stream when invalid
+    const errMsg = buildErrorResponse(VerifyRoomErrorCode.VERIFY_ROOM_UNAUTHORIZED);
+    call.write(errMsg);
+    call.end();
+    return;
+  }
   const cTopic = pubSub.createTopic(roomId);
-  cTopic?.createSubscription(username, call);
 
   // When data is detected
   call.on('data', (request: CollabTunnelRequest) => {
-    cTopic?.push(request);
+    cTopic?.push(request, username);
   });
 
   // When stream closes

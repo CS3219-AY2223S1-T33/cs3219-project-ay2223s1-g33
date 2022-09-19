@@ -29,9 +29,12 @@ class CollabTopic implements
     }
   }
 
-  push(request: CollabTunnelRequest) {
-    this.subscriptions.forEach((sub) => {
-      sub.push(request);
+  push(request: CollabTunnelRequest, sender: string) {
+    this.subscriptions.forEach((sub, user) => {
+      // Only send to recipient
+      if (sender !== user) {
+        sub.push(request);
+      }
     });
   }
 

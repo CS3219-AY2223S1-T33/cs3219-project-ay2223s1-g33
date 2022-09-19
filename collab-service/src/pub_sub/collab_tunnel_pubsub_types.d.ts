@@ -5,7 +5,7 @@ declare interface TunnelPubSub<T> {
 
 declare interface Topic<T, V> {
   createSubscription(subscriptionName: string, call: T);
-  push(request: V);
+  push(request: V, sender: string);
   clean(data: any);
   isEmpty(): boolean;
 }
