@@ -35,10 +35,11 @@ async function pubSubOpenStream(call: any) {
     // Kill stream when invalid
     const errMsg = buildErrorResponse(VerifyRoomErrorCode.VERIFY_ROOM_UNAUTHORIZED);
     call.write(errMsg);
-    call.end();
-    return;
+    // call.end();
+    // return;
   }
   const cTopic = pubSub.createTopic(roomId);
+  cTopic?.createSubscription(username, call);
 
   // When data is detected
   call.on('data', (request: CollabTunnelRequest) => {
