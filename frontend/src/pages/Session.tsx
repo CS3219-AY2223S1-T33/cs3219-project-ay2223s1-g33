@@ -12,7 +12,7 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid,
+  Grid
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,7 @@ import { leaveRoom } from "../feature/matching/matchingSlice";
 import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 
+let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const nickname = useSelector((state: RootState) => state.user.user?.nickname);
@@ -39,7 +40,7 @@ function Session() {
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
   useEffect(() => {
-    if (!yDoc) {
+    if (!isInit) {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
 
@@ -61,6 +62,7 @@ function Session() {
       setProvider(tempprovider);
       setYText(tempyText);
       setundoManager(tempundoManager);
+      isInit = true;
     }
     return () => {};
   }, []);
@@ -71,6 +73,9 @@ function Session() {
     yDoc?.destroy();
     // Clears the room session token
     dispatch(leaveRoom());
+
+    // Just in case for rejoins
+    isInit = false;
     navigate("/");
   };
 
