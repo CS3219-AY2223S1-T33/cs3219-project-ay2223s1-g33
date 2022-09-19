@@ -41,14 +41,15 @@ func run(config *GatewayConfiguration) error {
 	}
 	defer disposeAuth.Dispose()
 
-	staticMux := AttachStaticServe(config, authMux)
+	staticMux := AttachStaticServe(config.StaticServer)
+	prefixRouter := AttachPrefixRouter("/api", authMux, staticMux)
 
 	corsObj := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*"},
 		AllowCredentials: true,
 	})
 
-	corsMux := corsObj.Handler(staticMux)
+	corsMux := corsObj.Handler(prefixRouter)
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	return http.ListenAndServe(":5000", corsMux)
