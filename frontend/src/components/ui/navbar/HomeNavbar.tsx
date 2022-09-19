@@ -52,9 +52,6 @@ function HomeNavbar() {
               </MenuButton>
               <MenuList alignItems="center">
                 <MenuItem>Account Settings</MenuItem>
-                <MenuItem onClick={() => navigate("/session")}>
-                  Session
-                </MenuItem>
                 <MenuItem onClick={logoutHandler}>Logout</MenuItem>
               </MenuList>
             </Menu>

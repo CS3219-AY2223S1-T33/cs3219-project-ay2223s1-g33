@@ -12,61 +12,86 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid,
-  Textarea,
+  Grid
 } from "@chakra-ui/react";
+import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useWebSocket from "react-use-websocket";
+import { WebsocketProvider } from "y-websocket";
 import InvalidSession from "./InvalidSession";
 import { RootState } from "../app/store";
 import EditorTabs from "../components/editor/EditorTabs";
 import { leaveRoom } from "../feature/matching/matchingSlice";
 import SessionNavbar from "../components/ui/navbar/SessionNavbar";
-import { CONNECTION_MAP } from "../constants";
+import Editor from "../components/editor/Editor";
 
+let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
+  const nickname = useSelector((state: RootState) => state.user.user?.nickname);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { sendMessage, lastMessage, readyState } = useWebSocket(
-    "ws://localhost:5001/api/roomws"
-  );
-  // This is a temporary state variable to track the websocket communication
-  const [inputVal, setInputVal] = useState("");
 
-  // Continually listens for new messages sent and updates them accordingly
+  const [yDoc, setYDoc] = useState<Y.Doc>();
+  const [provider, setProvider] = useState<WebsocketProvider>();
+  const [yText, setYText] = useState<Y.Text>();
+  const [undoManager, setundoManager] = useState<Y.UndoManager>();
+
   useEffect(() => {
-    if (lastMessage !== null) {
-      // ! lastMessage.data comes in as a blob, hence we must convert it to text
-      lastMessage.data.text().then((x: any) => setInputVal(x));
+    if (!isInit) {
+      // Yjs initialisation
+      const tempyDoc = new Y.Doc();
+
+      // First 2 params builds the room session: ws://localhost:5001/ + ws
+      const tempprovider = new WebsocketProvider(
+        "ws://localhost:5001/api/",
+        "roomws",
+        tempyDoc
+      );
+
+      // If the connection is terminated, it should not attempt to reconnect
+      tempprovider.shouldConnect = false;
+
+      const tempyText = tempyDoc.getText("codemirror");
+      const tempundoManager = new Y.UndoManager(tempyText);
+
+      // Sets the initialised values to the react state
+      setYDoc(tempyDoc);
+      setProvider(tempprovider);
+      setYText(tempyText);
+      setundoManager(tempundoManager);
+      isInit = true;
     }
-  }, [lastMessage]);
+    return () => {};
+  }, []);
 
   const leaveSessionHandler = () => {
-    console.log("Leaving session");
+    // Destroy websocket and yDoc instance
+    provider?.destroy();
+    yDoc?.destroy();
+    // Clears the room session token
     dispatch(leaveRoom());
+
+    // Just in case for rejoins
+    isInit = false;
     navigate("/");
   };
 
-  const sendHandler = () => {
-    sendMessage(inputVal);
-  };
-
-  if (!roomToken) {
+  if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
+
+  const collabDefined = yText && provider && undoManager;
+
+  // Naive way of handling websocket states - to be improved
+  const isWSOpen = provider ? provider.wsconnected : false;
 
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar
-        sendHandler={sendHandler}
-        onOpen={onOpen}
-        status={CONNECTION_MAP[readyState]}
-      />
+      <SessionNavbar onOpen={onOpen} status={isWSOpen ? "Open" : "Closed"} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs />
@@ -77,18 +102,20 @@ function Session() {
             Code Editor options
           </Flex>
           {/* Editor - I may find a more IDE-like component for this */}
-          <Textarea
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            resize="none"
-            h="100%"
-          />
+          {collabDefined && (
+            <Editor
+              yText={yText}
+              provider={provider}
+              undoManager={undoManager}
+              nickname={nickname}
+            />
+          )}
           {/* Test case window */}
           <Grid templateRows="1fr 3fr 1fr">
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
-              <Button onClick={sendHandler}>Submit code</Button>
+              <Button onClick={() => console.log("WIP")}>Submit code</Button>
             </Flex>
           </Grid>
         </Grid>
@@ -117,7 +144,7 @@ function Session() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {/* TODO: Modal when other user leaves the session */}
+      {/* TODO: Popup when other user leaves the session */}
     </>
   );
 }

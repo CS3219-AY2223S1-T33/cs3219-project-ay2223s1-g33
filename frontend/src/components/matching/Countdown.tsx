@@ -39,9 +39,13 @@ function Countdown() {
 
     console.log(`API update call made`);
     axios
-      .post<CheckQueueStatusResponse>("/api/queue/status", {}, {
-        withCredentials: true,
-      })
+      .post<CheckQueueStatusResponse>(
+        "/api/queue/status",
+        {},
+        {
+          withCredentials: true,
+        }
+      )
       .then((res) => {
         const { errorCode, errorMessage, queueStatus, roomToken } = res.data;
 
