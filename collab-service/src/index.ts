@@ -9,6 +9,8 @@ import loadEnvironment from './utils/env_loader';
 import { createRedisAuthAdapter } from './redis_adapter/redis_auth_adapter';
 import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
+import createStreamServer from './stream_server/stream_server';
+import CollabTunnelStream from './tunneller/collab_tunnel_server';
 
 const envConfig = loadEnvironment();
 
@@ -37,3 +39,7 @@ expressApp.get('/', (_: Request, resp: Response) => {
 
 apiServer.registerServiceRoutes(new CollabServiceApi(userAuthService, roomAuthService));
 apiServer.bind();
+
+const streamServer = createStreamServer(envConfig.GRPC_TUNNEL_PORT);
+streamServer.registerServiceRoutes(new CollabTunnelStream());
+streamServer.bind();

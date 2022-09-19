@@ -14,11 +14,11 @@ type WebsocketProxyManager interface {
 }
 
 type WebsocketConnection interface {
-	SetDownstream(io.Writer)
+	SetDownstream(io.WriteCloser)
 	SetCloseListener(func())
 	ConnectTunnel() error
 	Write(data []byte) (n int, err error)
-	Close()
+	Close() error
 }
 
 type websocketProxy struct {
@@ -28,7 +28,7 @@ type websocketProxy struct {
 type websocketConnection struct {
 	socket         *websocket.Conn
 	writeBuffer    chan []byte
-	downstream     io.Writer
+	downstream     io.WriteCloser
 	closeListener  func()
 	hasPumpStarted bool
 }
@@ -72,7 +72,7 @@ func (proxy *websocketProxy) UpgradeProtocol(writer http.ResponseWriter, req *ht
 	}, nil
 }
 
-func (conn *websocketConnection) SetDownstream(writer io.Writer) {
+func (conn *websocketConnection) SetDownstream(writer io.WriteCloser) {
 	conn.downstream = writer
 }
 
@@ -85,8 +85,8 @@ func (conn *websocketConnection) Write(data []byte) (n int, err error) {
 	return 0, nil
 }
 
-func (conn *websocketConnection) Close() {
-	conn.socket.Close()
+func (conn *websocketConnection) Close() error {
+	return conn.socket.Close()
 }
 
 func (conn *websocketConnection) ConnectTunnel() error {
