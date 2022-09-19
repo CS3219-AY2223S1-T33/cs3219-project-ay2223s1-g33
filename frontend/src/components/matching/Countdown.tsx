@@ -7,7 +7,6 @@ import axios from "../../axios";
 import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 import {
-  CheckQueueStatusRequest,
   CheckQueueStatusResponse,
   QueueStatus,
 } from "../../proto/matching-service";
@@ -39,9 +38,8 @@ function Countdown() {
     }
 
     console.log(`API update call made`);
-    const checkRequest: CheckQueueStatusRequest = {};
     axios
-      .post<CheckQueueStatusResponse>("/queue/status", checkRequest, {
+      .post<CheckQueueStatusResponse>("/queue/status", {}, {
         withCredentials: true,
       })
       .then((res) => {
