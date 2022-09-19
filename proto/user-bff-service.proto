@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package user_bff_service;
-option go_package = "cs3219-project-ay2223s1-g33/gateway";
+option go_package = "cs3219-project-ay2223s1-g33/proto";
 
 import "types.proto";
 
@@ -37,9 +37,8 @@ message LoginRequest {
 
 message LoginResponse {
   common.User user = 1;
-  string session_token = 2;
-  LoginErrorCode error_code = 3;
-  string error_message = 4;
+  LoginErrorCode error_code = 2;
+  string error_message = 3;
 }
 
 message RegisterRequest {
@@ -53,7 +52,6 @@ message RegisterResponse {
 }
 
 message LogoutRequest {
-  string session_token = 1;
 }
 
 message LogoutResponse {
@@ -62,7 +60,6 @@ message LogoutResponse {
 }
 
 message GetUserProfileRequest {
-  string session_token = 1;
 }
 
 message GetUserProfileResponse {

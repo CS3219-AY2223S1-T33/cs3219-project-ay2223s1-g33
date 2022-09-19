@@ -44,22 +44,23 @@ function Login() {
     const loginReq: LoginRequest = { credentials };
 
     axios
-      .post<LoginResponse>("/user/login", loginReq)
+      .post<LoginResponse>("/api/user/login", loginReq, {
+        withCredentials: true,
+      })
       .then((res) => {
         const { errorCode, errorMessage } = res.data;
         if (errorCode) {
           throw new Error(errorMessage);
         }
 
-        const { user, sessionToken } = res.data;
+        const { user } = res.data;
 
         if (!user) {
           throw new Error("Something went wrong.");
         }
 
-        // Set cookie to axios instance
         const now = new Date();
-        setCookies("session_token", sessionToken, {
+        setCookies("session_token", "loggedin", {
           path: "/",
           expires: new Date(now.setDate(now.getTime() + 1000 * 86400)),
           domain: "127.0.0.1",
@@ -67,7 +68,7 @@ function Login() {
         });
 
         // Store user information on redux
-        dispatch(login({ sessionToken, user }));
+        dispatch(login({ user, sessionToken: "loggedin" }));
 
         // Redirect user on successful login
         navigate("/", { replace: true });

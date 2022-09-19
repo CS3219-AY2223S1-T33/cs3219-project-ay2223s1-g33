@@ -107,5 +107,6 @@ node_modules/
 user-service/dist
 user-service/.env
 /.idea/
+config_env/user-service.env
 .DS_Store
 config_env/*.env

@@ -1,5 +1,5 @@
 import { Button, Stack, Text, useBoolean, useToast } from "@chakra-ui/react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import React from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useNavigate } from "react-router-dom";
@@ -7,17 +7,12 @@ import axios from "../../axios";
 import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 import {
-  CheckQueueStatusRequest,
   CheckQueueStatusResponse,
   QueueStatus,
 } from "../../proto/matching-service";
-import { RootState } from "../../app/store";
 
 // ! console.log() s ar e intentionally left here for backend implementation
 function Countdown() {
-  const sessionToken = useSelector(
-    (state: RootState) => state.user.sessionToken
-  );
   const toast = useToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -43,9 +38,14 @@ function Countdown() {
     }
 
     console.log(`API update call made`);
-    const checkRequest: CheckQueueStatusRequest = { sessionToken };
     axios
-      .post<CheckQueueStatusResponse>("/queue/status", checkRequest)
+      .post<CheckQueueStatusResponse>(
+        "/api/queue/status",
+        {},
+        {
+          withCredentials: true,
+        }
+      )
       .then((res) => {
         const { errorCode, errorMessage, queueStatus, roomToken } = res.data;
 

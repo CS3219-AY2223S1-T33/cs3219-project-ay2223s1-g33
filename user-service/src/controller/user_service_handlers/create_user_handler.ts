@@ -1,11 +1,18 @@
 import { CreateUserRequest, CreateUserResponse } from '../../proto/user-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage.d';
 import {
   convertPasswordUserToStoredUser,
   convertStoredUserToPasswordUser,
 } from '../../model/user_helper';
 import { StoredUser } from '../../model/user_store_model';
+
+function getHeaderlessResponse(resp: CreateUserResponse): ApiResponse<CreateUserResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
 
 class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResponse> {
   userStore: IUserStore;
@@ -14,38 +21,39 @@ class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResp
     this.userStore = storage.getUserStore();
   }
 
-  async handle(request: CreateUserRequest): Promise<CreateUserResponse> {
-    if (!request.user) {
-      return {
+  async handle(request: ApiRequest<CreateUserRequest>): Promise<ApiResponse<CreateUserResponse>> {
+    const requestObject = request.request;
+    if (!requestObject.user) {
+      return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',
-      };
+      });
     }
 
-    const userModel = convertPasswordUserToStoredUser(request.user);
+    const userModel = convertPasswordUserToStoredUser(requestObject.user);
     if (!userModel) {
-      return {
+      return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',
-      };
+      });
     }
 
     let user: StoredUser | undefined;
     try {
       user = await this.userStore.addUser(userModel);
     } catch (err) {
-      return {
+      return getHeaderlessResponse({
         user: undefined,
         errorMessage: `${err}`,
-      };
+      });
     }
 
     const resultUserModel = convertStoredUserToPasswordUser(user);
 
-    return {
+    return getHeaderlessResponse({
       user: resultUserModel,
       errorMessage: '',
-    };
+    });
   }
 }
 

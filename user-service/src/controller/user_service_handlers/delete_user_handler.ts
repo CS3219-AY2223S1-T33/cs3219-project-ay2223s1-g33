@@ -1,6 +1,13 @@
 import { DeleteUserRequest, DeleteUserResponse } from '../../proto/user-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage.d';
+
+function getHeaderlessResponse(resp: DeleteUserResponse): ApiResponse<DeleteUserResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
 
 class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResponse> {
   userStore: IUserStore;
@@ -9,18 +16,20 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
     this.userStore = storage.getUserStore();
   }
 
-  async handle(request: DeleteUserRequest): Promise<DeleteUserResponse> {
-    if (request.userId <= 0) {
-      return {
+  async handle(request: ApiRequest<DeleteUserRequest>): Promise<ApiResponse<DeleteUserResponse>> {
+    const requestObject = request.request;
+
+    if (requestObject.userId <= 0) {
+      return getHeaderlessResponse({
         errorMessage: 'Malformed request',
-      };
+      });
     }
 
-    await this.userStore.removeUser(request.userId);
+    await this.userStore.removeUser(requestObject.userId);
 
-    return {
+    return getHeaderlessResponse({
       errorMessage: '',
-    };
+    });
   }
 }
 

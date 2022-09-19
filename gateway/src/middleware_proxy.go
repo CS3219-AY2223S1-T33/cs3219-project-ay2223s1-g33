@@ -1,21 +1,20 @@
 package main
 
 import (
-	"context"
 	"cs3219-project-ay2223s1-g33/gateway/proxy"
 	"log"
 	"net/http"
 )
 
-const websocketRoute = "/ws"
+const websocketRoute = "/api/roomws"
 
-func registerProxyRoutes(ctx context.Context, config *GatewayConfiguration, mux http.Handler) (http.Handler, error) {
+func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http.Handler, error) {
 	proxyManager := proxy.CreateWebsocketProxyManager()
 	log.Printf("WS Proxy to Collab on %s\n", config.CollabServer)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet && r.URL.EscapedPath() == websocketRoute {
-			downstreamClient := proxy.CreateProxyClient(config.CollabServer)
+			downstreamClient := proxy.CreateProxyClient(config.CollabServer, r.Header.Get("X-Bearer-Username"))
 			downstreamWriter, err := downstreamClient.Start()
 			if err != nil {
 				log.Println(err)
@@ -40,7 +39,6 @@ func registerProxyRoutes(ctx context.Context, config *GatewayConfiguration, mux 
 				downstreamClient.Close()
 			})
 			wsConn.ConnectTunnel()
-
 		} else {
 			mux.ServeHTTP(w, r)
 		}

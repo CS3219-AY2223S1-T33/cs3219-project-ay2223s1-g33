@@ -1,67 +1,69 @@
-import { sign, verify } from 'jsonwebtoken';
-import { randomUUID } from 'crypto';
+import { ChannelCredentials } from '@grpc/grpc-js';
 import {
   IAuthenticationAgent,
-  ITokenBlacklist,
-  TokenPayload,
   TokenUserData,
 } from './authentication_agent_types';
-import createTokenBlacklist from './token_blacklist';
-import { IRedisAuthAdapter } from '../redis_adapter/redis_auth_adapter';
+import { SessionServiceClient } from '../proto/session-service.grpc-client';
+import { AddBlacklistErrorCode, CreateTokenErrorCode } from '../proto/session-service';
 
 class AuthenticationAgent implements IAuthenticationAgent {
-  signingSecret: string;
+  sessionServiceUrl: string;
 
-  tokenBlacklist: ITokenBlacklist;
+  grpcClient: SessionServiceClient;
 
-  constructor(signingSecret: string, redisAdapter: IRedisAuthAdapter) {
-    this.signingSecret = signingSecret;
-    this.tokenBlacklist = createTokenBlacklist(redisAdapter);
+  constructor(sessionServiceUrl: string) {
+    this.sessionServiceUrl = sessionServiceUrl;
+    this.grpcClient = new SessionServiceClient(
+      this.sessionServiceUrl,
+      ChannelCredentials.createInsecure(),
+      {},
+      {},
+    );
   }
 
-  createToken(userData: TokenUserData): string {
-    const payload: TokenPayload = {
-      user: userData,
-    };
-    const token = sign(payload, this.signingSecret, {
-      expiresIn: '3d',
+  createToken(userData: TokenUserData): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.grpcClient.createToken({
+        email: userData.username,
+      }, (err, value) => {
+        if (!value) {
+          reject(err);
+          return;
+        }
+
+        if (value.errorCode !== CreateTokenErrorCode.CREATE_TOKEN_NO_ERROR) {
+          reject(new Error('Cannot create session token'));
+          return;
+        }
+
+        resolve(value.token);
+      });
     });
-
-    return token;
   }
 
-  async verifyToken(token: string): Promise<TokenUserData | undefined> {
-    try {
-      const decoded = <TokenPayload> verify(token, this.signingSecret);
-      const isBlacklisted = await this.tokenBlacklist.isTokenBlacklisted(token);
-      if (isBlacklisted) {
-        return undefined;
-      }
-      return decoded.user;
-    } catch {
-      return undefined;
-    }
-  }
+  invalidateToken(token: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.grpcClient.addBlacklist({
+        token,
+      }, (err, value) => {
+        if (!value) {
+          reject(err);
+          return;
+        }
 
-  async invalidateToken(token: string): Promise<boolean> {
-    if (!this.verifyToken(token)) {
-      return false;
-    }
+        if (value.errorCode !== AddBlacklistErrorCode.ADD_BLACKLIST_NO_ERROR) {
+          reject(new Error('Cannot invalidate token'));
+          return;
+        }
 
-    await this.tokenBlacklist.addToken(token);
-    return true;
-  }
-
-  static generateSecureUUID(): string {
-    return randomUUID();
+        resolve(true);
+      });
+    });
   }
 }
 
-function createAuthenticationService(
-  signingSecret: string,
-  redisAdapter: IRedisAuthAdapter,
-): IAuthenticationAgent {
-  return new AuthenticationAgent(signingSecret, redisAdapter);
+function createAuthenticationService(sessionServiceUrl: string): IAuthenticationAgent {
+  return new AuthenticationAgent(sessionServiceUrl);
 }
 
 export default createAuthenticationService;

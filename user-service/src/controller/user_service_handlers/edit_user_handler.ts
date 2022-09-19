@@ -1,7 +1,14 @@
 import { EditUserRequest, EditUserResponse } from '../../proto/user-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage.d';
 import { convertPasswordUserToStoredUser } from '../../model/user_helper';
+
+function getHeaderlessResponse(resp: EditUserResponse): ApiResponse<EditUserResponse> {
+  return {
+    response: resp,
+    headers: {},
+  };
+}
 
 class EditUserHandler implements IApiHandler<EditUserRequest, EditUserResponse> {
   userStore: IUserStore;
@@ -10,35 +17,36 @@ class EditUserHandler implements IApiHandler<EditUserRequest, EditUserResponse> 
     this.userStore = storage.getUserStore();
   }
 
-  async handle(request: EditUserRequest): Promise<EditUserResponse> {
-    if (!request.user) {
-      return {
+  async handle(request: ApiRequest<EditUserRequest>): Promise<ApiResponse<EditUserResponse>> {
+    const requestObject = request.request;
+    if (!requestObject.user) {
+      return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',
-      };
+      });
     }
 
-    const userModel = convertPasswordUserToStoredUser(request.user);
+    const userModel = convertPasswordUserToStoredUser(requestObject.user);
     if (!userModel) {
-      return {
+      return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',
-      };
+      });
     }
 
     try {
       await this.userStore.replaceUser(userModel);
     } catch (err) {
-      return {
+      return getHeaderlessResponse({
         user: undefined,
         errorMessage: `${err}`,
-      };
+      });
     }
 
-    return {
-      user: request.user,
+    return getHeaderlessResponse({
+      user: requestObject.user,
       errorMessage: '',
-    };
+    });
   }
 }
 
