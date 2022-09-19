@@ -39,7 +39,7 @@ function Countdown() {
 
     console.log(`API update call made`);
     axios
-      .post<CheckQueueStatusResponse>("/queue/status", {}, {
+      .post<CheckQueueStatusResponse>("/api/queue/status", {}, {
         withCredentials: true,
       })
       .then((res) => {
