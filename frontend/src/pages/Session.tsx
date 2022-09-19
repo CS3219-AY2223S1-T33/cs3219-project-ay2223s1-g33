@@ -43,12 +43,16 @@ function Session() {
     if (!isInit) {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
+      const params: { [x: string]: string } = {
+        room: roomToken === undefined ? '' : roomToken
+      };
 
       // First 2 params builds the room session: ws://localhost:5001/ + ws
       const tempprovider = new WebsocketProvider(
         "ws://localhost:5001/api/",
         "roomws",
-        tempyDoc
+        tempyDoc,
+        { params },
       );
 
       // If the connection is terminated, it should not attempt to reconnect
