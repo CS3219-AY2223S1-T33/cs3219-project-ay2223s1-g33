@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"strconv"
 )
@@ -20,20 +21,20 @@ const (
 	envRefreshSecret = "REFRESH_SIGNING_SECRET"
 )
 
-func loadConfig() *SessionServiceConfig {
+func loadConfig() (*SessionServiceConfig, error) {
 	server := loadEnvVariableOrDefaultString(envRedisServer, nil)
 	if server == nil {
-		return nil
+		return nil, errors.New("Redis Server not set")
 	}
 
 	sessionSecret := loadEnvVariableOrDefaultString(envSessionSecret, nil)
 	if sessionSecret == nil {
-		return nil
+		return nil, errors.New("Session Secret not set")
 	}
 
 	refreshSecret := loadEnvVariableOrDefaultString(envRefreshSecret, nil)
 	if refreshSecret == nil {
-		return nil
+		return nil, errors.New("Refresh Secret not set")
 	}
 
 	port := loadEnvVariableOrDefaultInt(envPort, 4100)
@@ -43,7 +44,7 @@ func loadConfig() *SessionServiceConfig {
 		Port:          port,
 		SessionSecret: *sessionSecret,
 		RefreshSecret: *refreshSecret,
-	}
+	}, nil
 }
 
 func loadEnvVariableOrDefaultString(envKey string, defaultValue *string) *string {

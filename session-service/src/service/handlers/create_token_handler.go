@@ -8,12 +8,14 @@ import (
 )
 
 type createTokenHandler struct {
-	tokenAgent token.TokenAgent
+	tokenAgent   token.TokenAgent
+	refreshAgent token.TokenAgent
 }
 
-func CreateCreateTokenHandler(tokenAgent token.TokenAgent) server.ApiHandler[pb.CreateTokenRequest, pb.CreateTokenResponse] {
+func NewCreateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) server.ApiHandler[pb.CreateTokenRequest, pb.CreateTokenResponse] {
 	return &createTokenHandler{
-		tokenAgent: tokenAgent,
+		tokenAgent:   sessionAgent,
+		refreshAgent: refreshAgent,
 	}
 }
 

@@ -14,28 +14,25 @@ const RefreshTokenLifespan = 3 * 24 * time.Hour // 3 days
 
 func main() {
 	log.Println("Starting Session Service")
-	config := loadConfig()
-	if config == nil {
-		log.Fatalln("Server is not configured correctly")
+	config, err := loadConfig()
+	if err != nil || config == nil {
+		log.Fatalf("Server is not configured correctly: %s \n", err)
 	}
 
 	redisClient := blacklist.NewRedisBlacklistClient(config.RedisServer, SessionTokenLifespan, RefreshTokenLifespan)
-	err := redisClient.Connect()
+	err = redisClient.Connect()
 	if err != nil {
 		log.Fatalln("Cannot connect to Redis")
 	}
 
-	tokenAgent := getTokenAgent(config, redisClient.GetSessionBlacklist())
+	sessionTokenAgent := token.CreateTokenAgent(config.SessionSecret, SessionTokenLifespan, redisClient.GetSessionBlacklist())
+	refreshTokenAgent := token.CreateTokenAgent(config.RefreshSecret, RefreshTokenLifespan, redisClient.GetRefreshBlacklist())
 	apiServer := server.CreateApiServer(config.Port)
-	sessionService := service.CreateSessionService(tokenAgent)
+	sessionService := service.CreateSessionService(sessionTokenAgent, refreshTokenAgent)
 	err = apiServer.RegisterService(sessionService)
 	if err != nil {
 		log.Fatalln("Could not register Session Service")
 	}
 
 	apiServer.Start()
-}
-
-func getTokenAgent(config *SessionServiceConfig, redisBlacklist blacklist.RedisBlacklist) token.TokenAgent {
-	return token.CreateTokenAgent(config.SessionSecret, SessionTokenLifespan, redisBlacklist)
 }

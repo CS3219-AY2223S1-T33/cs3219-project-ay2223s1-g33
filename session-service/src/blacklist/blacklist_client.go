@@ -55,6 +55,7 @@ func (client *blacklistClient) Connect() error {
 
 	client.redisClient = redis.NewClient(connOptions)
 	client.sessionBlacklist = newSessionBlacklist(client.redisClient, client.sessionExpiryDuration)
+	client.refreshBlacklist = newRefreshBlacklist(client.redisClient, client.refreshExpiryDuration)
 
 	return nil
 }

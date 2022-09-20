@@ -9,17 +9,19 @@ import (
 )
 
 type validateTokenHandler struct {
-	tokenAgent token.TokenAgent
+	sessionAgent token.TokenAgent
+	refreshAgent token.TokenAgent
 }
 
-func CreateValidateTokenHandler(tokenAgent token.TokenAgent) server.ApiHandler[pb.ValidateTokenRequest, pb.ValidateTokenResponse] {
+func NewValidateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) server.ApiHandler[pb.ValidateTokenRequest, pb.ValidateTokenResponse] {
 	return &validateTokenHandler{
-		tokenAgent: tokenAgent,
+		sessionAgent: sessionAgent,
+		refreshAgent: refreshAgent,
 	}
 }
 
 func (handler *validateTokenHandler) Handle(req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
-	tokenData, err := handler.tokenAgent.ValidateToken(req.GetToken())
+	tokenData, err := handler.sessionAgent.ValidateToken(req.GetToken())
 
 	if err != nil {
 		var responseCode pb.ValidateTokenErrorCode
