@@ -31,9 +31,9 @@ func TestTokenAgent(t *testing.T) {
 	assert.NotEmpty(t, createdToken)
 
 	gomock.InOrder(
-		blacklist.EXPECT().IsTokenBlacklisted(gomock.Eq(createdToken)).Return(false, nil),
-		blacklist.EXPECT().IsTokenBlacklisted(gomock.Eq(createdToken)).Return(true, nil),
-		blacklist.EXPECT().IsTokenBlacklisted(gomock.Eq(createdToken)).Return(false, testErr),
+		blacklist.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(false, nil),
+		blacklist.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(true, nil),
+		blacklist.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(false, testErr),
 	)
 
 	data, err := tokenAgent.ValidateToken(createdToken)
@@ -46,9 +46,9 @@ func TestTokenAgent(t *testing.T) {
 	_, err = tokenAgent.ValidateToken(createdToken)
 	assert.Equal(t, testErr, err)
 
-	blacklist.EXPECT().AddToken(gomock.Eq(createdToken))
+	blacklist.EXPECT().AddToken(gomock.Any())
 	tokenAgent.BlacklistToken(createdToken)
 
-	blacklist.EXPECT().RemoveToken(gomock.Eq(createdToken))
+	blacklist.EXPECT().RemoveToken(gomock.Any())
 	tokenAgent.UnblacklistToken(createdToken)
 }
