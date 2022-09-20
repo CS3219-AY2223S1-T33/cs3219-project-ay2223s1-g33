@@ -10,7 +10,7 @@ import (
 
 const (
 	refreshKeyLifespanTolerance    = 24 * time.Hour
-	redisRefreshBlacklistKeyFormat = "auth-jwt-blacklist-%d"
+	redisRefreshBlacklistKeyFormat = "auth-refresh-blacklist-%d"
 )
 
 type refreshBlacklist struct {

@@ -50,9 +50,21 @@ func (agent *tokenAgent) ValidateToken(token string) (*TokenData, error) {
 }
 
 func (agent *tokenAgent) BlacklistToken(token string) error {
-	return agent.blacklist.AddToken(token)
+	tokenData, issuedAt, err := agent.jwtAgent.VerifyToken(token)
+	if err != nil {
+		return err
+	}
+
+	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
+	return agent.blacklist.AddToken(blacklistKey)
 }
 
 func (agent *tokenAgent) UnblacklistToken(token string) error {
-	return agent.blacklist.RemoveToken(token)
+	tokenData, issuedAt, err := agent.jwtAgent.VerifyToken(token)
+	if err != nil {
+		return err
+	}
+
+	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
+	return agent.blacklist.RemoveToken(blacklistKey)
 }
