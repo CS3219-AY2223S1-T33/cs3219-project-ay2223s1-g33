@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cs3219-project-ay2223s1-g33/session-service/conn"
+	"cs3219-project-ay2223s1-g33/session-service/blacklist"
 	"cs3219-project-ay2223s1-g33/session-service/server"
 	"cs3219-project-ay2223s1-g33/session-service/service"
 	"cs3219-project-ay2223s1-g33/session-service/token"
@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-const TokenLifespan = 3 * 24 * time.Hour // 3 days
+const SessionTokenLifespan = 15 * time.Minute   // 15 minutes
+const RefreshTokenLifespan = 3 * 24 * time.Hour // 3 days
 
 func main() {
 	log.Println("Starting Session Service")
@@ -18,13 +19,16 @@ func main() {
 		log.Fatalln("Server is not configured correctly")
 	}
 
-	redisClient := conn.NewRedisBlacklistClient(config.RedisServer, TokenLifespan)
-	redisClient.Connect()
-	tokenAgent := getTokenAgent(config, redisClient)
+	redisClient := blacklist.NewRedisBlacklistClient(config.RedisServer, SessionTokenLifespan, RefreshTokenLifespan)
+	err := redisClient.Connect()
+	if err != nil {
+		log.Fatalln("Cannot connect to Redis")
+	}
 
+	tokenAgent := getTokenAgent(config, redisClient.GetSessionBlacklist())
 	apiServer := server.CreateApiServer(config.Port)
 	sessionService := service.CreateSessionService(tokenAgent)
-	err := apiServer.RegisterService(sessionService)
+	err = apiServer.RegisterService(sessionService)
 	if err != nil {
 		log.Fatalln("Could not register Session Service")
 	}
@@ -32,6 +36,6 @@ func main() {
 	apiServer.Start()
 }
 
-func getTokenAgent(config *SessionServiceConfig, redisBlacklist conn.RedisBlacklistClient) token.TokenAgent {
-	return token.CreateTokenAgent(config.SigningSecret, TokenLifespan, redisBlacklist)
+func getTokenAgent(config *SessionServiceConfig, redisBlacklist blacklist.RedisBlacklist) token.TokenAgent {
+	return token.CreateTokenAgent(config.SessionSecret, SessionTokenLifespan, redisBlacklist)
 }

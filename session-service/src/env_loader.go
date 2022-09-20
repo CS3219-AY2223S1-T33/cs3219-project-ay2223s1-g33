@@ -9,13 +9,15 @@ type SessionServiceConfig struct {
 	RedisServer string
 	Port        int
 
-	SigningSecret string
+	SessionSecret string
+	RefreshSecret string
 }
 
 const (
 	envRedisServer   = "REDIS_SERVER"
 	envPort          = "SERVER_PORT"
-	envSigningSecret = "JWT_SIGNING_SECRET"
+	envSessionSecret = "SESSION_SIGNING_SECRET"
+	envRefreshSecret = "REFRESH_SIGNING_SECRET"
 )
 
 func loadConfig() *SessionServiceConfig {
@@ -24,8 +26,13 @@ func loadConfig() *SessionServiceConfig {
 		return nil
 	}
 
-	signingSecret := loadEnvVariableOrDefaultString(envSigningSecret, nil)
-	if signingSecret == nil {
+	sessionSecret := loadEnvVariableOrDefaultString(envSessionSecret, nil)
+	if sessionSecret == nil {
+		return nil
+	}
+
+	refreshSecret := loadEnvVariableOrDefaultString(envRefreshSecret, nil)
+	if refreshSecret == nil {
 		return nil
 	}
 
@@ -34,7 +41,8 @@ func loadConfig() *SessionServiceConfig {
 	return &SessionServiceConfig{
 		RedisServer:   *server,
 		Port:          port,
-		SigningSecret: *signingSecret,
+		SessionSecret: *sessionSecret,
+		RefreshSecret: *refreshSecret,
 	}
 }
 
