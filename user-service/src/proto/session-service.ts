@@ -27,11 +27,15 @@ export interface CreateTokenRequest {
  */
 export interface CreateTokenResponse {
     /**
-     * @generated from protobuf field: string token = 1;
+     * @generated from protobuf field: string session_token = 1;
      */
-    token: string;
+    sessionToken: string;
     /**
-     * @generated from protobuf field: session_service.CreateTokenErrorCode error_code = 2;
+     * @generated from protobuf field: string refresh_token = 2;
+     */
+    refreshToken: string;
+    /**
+     * @generated from protobuf field: session_service.CreateTokenErrorCode error_code = 3;
      */
     errorCode: CreateTokenErrorCode;
 }
@@ -40,9 +44,13 @@ export interface CreateTokenResponse {
  */
 export interface ValidateTokenRequest {
     /**
-     * @generated from protobuf field: string token = 1;
+     * @generated from protobuf field: string session_token = 1;
      */
-    token: string;
+    sessionToken: string;
+    /**
+     * @generated from protobuf field: string refresh_token = 2;
+     */
+    refreshToken: string;
 }
 /**
  * @generated from protobuf message session_service.ValidateTokenResponse
@@ -53,7 +61,11 @@ export interface ValidateTokenResponse {
      */
     email: string;
     /**
-     * @generated from protobuf field: session_service.ValidateTokenErrorCode error_code = 2;
+     * @generated from protobuf field: string new_session_token = 2;
+     */
+    newSessionToken: string;
+    /**
+     * @generated from protobuf field: session_service.ValidateTokenErrorCode error_code = 3;
      */
     errorCode: ValidateTokenErrorCode;
 }
@@ -62,9 +74,13 @@ export interface ValidateTokenResponse {
  */
 export interface AddBlacklistRequest {
     /**
-     * @generated from protobuf field: string token = 1;
+     * @generated from protobuf field: string session_token = 1;
      */
-    token: string;
+    sessionToken: string;
+    /**
+     * @generated from protobuf field: string refresh_token = 2;
+     */
+    refreshToken: string;
 }
 /**
  * @generated from protobuf message session_service.AddBlacklistResponse
@@ -173,12 +189,13 @@ export const CreateTokenRequest = new CreateTokenRequest$Type();
 class CreateTokenResponse$Type extends MessageType<CreateTokenResponse> {
     constructor() {
         super("session_service.CreateTokenResponse", [
-            { no: 1, name: "token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "error_code", kind: "enum", T: () => ["session_service.CreateTokenErrorCode", CreateTokenErrorCode] }
+            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "refresh_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "error_code", kind: "enum", T: () => ["session_service.CreateTokenErrorCode", CreateTokenErrorCode] }
         ]);
     }
     create(value?: PartialMessage<CreateTokenResponse>): CreateTokenResponse {
-        const message = { token: "", errorCode: 0 };
+        const message = { sessionToken: "", refreshToken: "", errorCode: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<CreateTokenResponse>(this, message, value);
@@ -189,10 +206,13 @@ class CreateTokenResponse$Type extends MessageType<CreateTokenResponse> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string token */ 1:
-                    message.token = reader.string();
+                case /* string session_token */ 1:
+                    message.sessionToken = reader.string();
                     break;
-                case /* session_service.CreateTokenErrorCode error_code */ 2:
+                case /* string refresh_token */ 2:
+                    message.refreshToken = reader.string();
+                    break;
+                case /* session_service.CreateTokenErrorCode error_code */ 3:
                     message.errorCode = reader.int32();
                     break;
                 default:
@@ -207,12 +227,15 @@ class CreateTokenResponse$Type extends MessageType<CreateTokenResponse> {
         return message;
     }
     internalBinaryWrite(message: CreateTokenResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string token = 1; */
-        if (message.token !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.token);
-        /* session_service.CreateTokenErrorCode error_code = 2; */
+        /* string session_token = 1; */
+        if (message.sessionToken !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
+        /* string refresh_token = 2; */
+        if (message.refreshToken !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.refreshToken);
+        /* session_service.CreateTokenErrorCode error_code = 3; */
         if (message.errorCode !== 0)
-            writer.tag(2, WireType.Varint).int32(message.errorCode);
+            writer.tag(3, WireType.Varint).int32(message.errorCode);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -227,11 +250,12 @@ export const CreateTokenResponse = new CreateTokenResponse$Type();
 class ValidateTokenRequest$Type extends MessageType<ValidateTokenRequest> {
     constructor() {
         super("session_service.ValidateTokenRequest", [
-            { no: 1, name: "token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "refresh_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<ValidateTokenRequest>): ValidateTokenRequest {
-        const message = { token: "" };
+        const message = { sessionToken: "", refreshToken: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<ValidateTokenRequest>(this, message, value);
@@ -242,8 +266,11 @@ class ValidateTokenRequest$Type extends MessageType<ValidateTokenRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string token */ 1:
-                    message.token = reader.string();
+                case /* string session_token */ 1:
+                    message.sessionToken = reader.string();
+                    break;
+                case /* string refresh_token */ 2:
+                    message.refreshToken = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -257,9 +284,12 @@ class ValidateTokenRequest$Type extends MessageType<ValidateTokenRequest> {
         return message;
     }
     internalBinaryWrite(message: ValidateTokenRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string token = 1; */
-        if (message.token !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.token);
+        /* string session_token = 1; */
+        if (message.sessionToken !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
+        /* string refresh_token = 2; */
+        if (message.refreshToken !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.refreshToken);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -275,11 +305,12 @@ class ValidateTokenResponse$Type extends MessageType<ValidateTokenResponse> {
     constructor() {
         super("session_service.ValidateTokenResponse", [
             { no: 1, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "error_code", kind: "enum", T: () => ["session_service.ValidateTokenErrorCode", ValidateTokenErrorCode] }
+            { no: 2, name: "new_session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "error_code", kind: "enum", T: () => ["session_service.ValidateTokenErrorCode", ValidateTokenErrorCode] }
         ]);
     }
     create(value?: PartialMessage<ValidateTokenResponse>): ValidateTokenResponse {
-        const message = { email: "", errorCode: 0 };
+        const message = { email: "", newSessionToken: "", errorCode: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<ValidateTokenResponse>(this, message, value);
@@ -293,7 +324,10 @@ class ValidateTokenResponse$Type extends MessageType<ValidateTokenResponse> {
                 case /* string email */ 1:
                     message.email = reader.string();
                     break;
-                case /* session_service.ValidateTokenErrorCode error_code */ 2:
+                case /* string new_session_token */ 2:
+                    message.newSessionToken = reader.string();
+                    break;
+                case /* session_service.ValidateTokenErrorCode error_code */ 3:
                     message.errorCode = reader.int32();
                     break;
                 default:
@@ -311,9 +345,12 @@ class ValidateTokenResponse$Type extends MessageType<ValidateTokenResponse> {
         /* string email = 1; */
         if (message.email !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.email);
-        /* session_service.ValidateTokenErrorCode error_code = 2; */
+        /* string new_session_token = 2; */
+        if (message.newSessionToken !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.newSessionToken);
+        /* session_service.ValidateTokenErrorCode error_code = 3; */
         if (message.errorCode !== 0)
-            writer.tag(2, WireType.Varint).int32(message.errorCode);
+            writer.tag(3, WireType.Varint).int32(message.errorCode);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -328,11 +365,12 @@ export const ValidateTokenResponse = new ValidateTokenResponse$Type();
 class AddBlacklistRequest$Type extends MessageType<AddBlacklistRequest> {
     constructor() {
         super("session_service.AddBlacklistRequest", [
-            { no: 1, name: "token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "refresh_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<AddBlacklistRequest>): AddBlacklistRequest {
-        const message = { token: "" };
+        const message = { sessionToken: "", refreshToken: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<AddBlacklistRequest>(this, message, value);
@@ -343,8 +381,11 @@ class AddBlacklistRequest$Type extends MessageType<AddBlacklistRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string token */ 1:
-                    message.token = reader.string();
+                case /* string session_token */ 1:
+                    message.sessionToken = reader.string();
+                    break;
+                case /* string refresh_token */ 2:
+                    message.refreshToken = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -358,9 +399,12 @@ class AddBlacklistRequest$Type extends MessageType<AddBlacklistRequest> {
         return message;
     }
     internalBinaryWrite(message: AddBlacklistRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string token = 1; */
-        if (message.token !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.token);
+        /* string session_token = 1; */
+        if (message.sessionToken !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.sessionToken);
+        /* string refresh_token = 2; */
+        if (message.refreshToken !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.refreshToken);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
