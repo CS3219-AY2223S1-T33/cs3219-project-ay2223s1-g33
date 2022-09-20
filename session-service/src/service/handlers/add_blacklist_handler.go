@@ -19,9 +19,17 @@ func NewAddBlacklistHandler(sessionAgent token.TokenAgent, refreshAgent token.To
 }
 
 func (handler *addBlacklistHandler) Handle(req *pb.AddBlacklistRequest) (*pb.AddBlacklistResponse, error) {
-	token := req.Token
-	err := handler.sessionAgent.BlacklistToken(token)
+	sessionToken := req.GetSessionToken()
+	refreshToken := req.GetRefreshToken()
 
+	err := handler.refreshAgent.BlacklistToken(refreshToken)
+	if err != nil {
+		return &pb.AddBlacklistResponse{
+			ErrorCode: pb.AddBlacklistErrorCode_ADD_BLACKLIST_ERROR_INTERNAL,
+		}, nil
+	}
+
+	err = handler.sessionAgent.BlacklistToken(sessionToken)
 	if err != nil {
 		return &pb.AddBlacklistResponse{
 			ErrorCode: pb.AddBlacklistErrorCode_ADD_BLACKLIST_ERROR_INTERNAL,
