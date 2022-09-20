@@ -18,8 +18,8 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
         'Bad request from gateway',
       );
     }
-    const sessionToken = request.headers[Constants.COOKIE_SESSION_TOKEN][0];
-    const refreshToken = request.headers[Constants.COOKIE_REFRESH_TOKEN][0];
+    const sessionToken = request.headers[Constants.GATEWAY_HEADER_SESSION_TOKEN][0];
+    const refreshToken = request.headers[Constants.GATEWAY_HEADER_REFRESH_TOKEN][0];
 
     const success = await this.authService.invalidateToken({
       sessionToken,
