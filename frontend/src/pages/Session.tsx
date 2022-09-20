@@ -12,7 +12,7 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid,
+  Grid
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -44,12 +44,12 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       // First 2 params builds the room session: ws://localhost:5001/ + ws
       const tempprovider = new WebsocketProvider(
-        "ws://localhost:5001/api/",
+        `ws://${window.location.host}/api/`,
         "roomws",
         tempyDoc,
         { params, disableBc: true }
