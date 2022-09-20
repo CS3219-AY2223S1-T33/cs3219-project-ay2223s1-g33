@@ -1,9 +1,7 @@
 import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user-bff-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
-
-const sessionCookieName = 'AUTH-SESSION';
-const gatewayHeaderToken = 'grpc-x-bearer-session-token';
+import Constants from '../../utils/constants';
 
 class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   authService: IAuthenticationAgent;
@@ -13,15 +11,21 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   }
 
   async handle(request: ApiRequest<LogoutRequest>): Promise<ApiResponse<LogoutResponse>> {
-    if (!(gatewayHeaderToken in request.headers)) {
+    if (!(Constants.GATEWAY_HEADER_REFRESH_TOKEN in request.headers)
+      || !(Constants.GATEWAY_HEADER_SESSION_TOKEN in request.headers)) {
       return LogoutHandler.buildErrorResponse(
         LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
         'Bad request from gateway',
       );
     }
-    const token = request.headers[gatewayHeaderToken][0];
+    const sessionToken = request.headers[Constants.COOKIE_SESSION_TOKEN][0];
+    const refreshToken = request.headers[Constants.COOKIE_REFRESH_TOKEN][0];
 
-    const success = await this.authService.invalidateToken(token);
+    const success = await this.authService.invalidateToken({
+      sessionToken,
+      refreshToken,
+    });
+
     if (!success) {
       return LogoutHandler.buildErrorResponse(
         LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
@@ -35,7 +39,10 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
         errorMessage: '',
       },
       headers: {
-        'Set-Cookie': [`${sessionCookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`],
+        'Set-Cookie': [
+          `${Constants.COOKIE_SESSION_TOKEN}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`,
+          `${Constants.COOKIE_REFRESH_TOKEN}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly`,
+        ],
       },
     };
   }

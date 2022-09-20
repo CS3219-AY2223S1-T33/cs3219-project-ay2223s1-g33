@@ -5,8 +5,7 @@ import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_serve
 import { UserServiceClient } from '../../proto/user-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
-
-const sessionCookieName = 'AUTH-SESSION';
+import Constants from '../../utils/constants';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: UserServiceClient;
@@ -65,7 +64,10 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
         errorMessage: '',
       },
       headers: {
-        'Set-Cookie': [`${sessionCookieName}=${token}; Path=/`],
+        'Set-Cookie': [
+          `${Constants.COOKIE_SESSION_TOKEN}=${token.sessionToken}; Path=/`,
+          `${Constants.COOKIE_REFRESH_TOKEN}=${token.refreshToken}; Path=/; HttpOnly`,
+        ],
       },
     };
   }
