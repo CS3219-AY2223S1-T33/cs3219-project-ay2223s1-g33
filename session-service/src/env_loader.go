@@ -4,21 +4,32 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"time"
 )
 
 type SessionServiceConfig struct {
 	RedisServer string
 	Port        int
 
-	SessionSecret string
-	RefreshSecret string
+	SessionSecret        string
+	RefreshSecret        string
+	SessionTokenLifespan time.Duration
+	RefreshTokenLifespan time.Duration
 }
 
 const (
-	envRedisServer   = "REDIS_SERVER"
-	envPort          = "SERVER_PORT"
-	envSessionSecret = "SESSION_SIGNING_SECRET"
-	envRefreshSecret = "REFRESH_SIGNING_SECRET"
+	envRedisServer     = "REDIS_SERVER"
+	envPort            = "SERVER_PORT"
+	envSessionSecret   = "SESSION_SIGNING_SECRET"
+	envRefreshSecret   = "REFRESH_SIGNING_SECRET"
+	envSessionLifespan = "SESSION_LIFESPAN_MINS"
+	envRefreshLifespan = "REFRESH_LIFESPAN_MINS"
+)
+
+const (
+	defaultPort                 = 4100
+	defaultSessionTokenLifespan = 15          // 15 minutes
+	defaultRefreshTokenLifespan = 3 * 24 * 60 // 3 days
 )
 
 func loadConfig() (*SessionServiceConfig, error) {
@@ -37,13 +48,18 @@ func loadConfig() (*SessionServiceConfig, error) {
 		return nil, errors.New("Refresh Secret not set")
 	}
 
+	sessionTokenLifespan := loadEnvVariableOrDefaultInt(envSessionLifespan, defaultSessionTokenLifespan)
+	refreshTokenLifespan := loadEnvVariableOrDefaultInt(envRefreshLifespan, defaultRefreshTokenLifespan)
+
 	port := loadEnvVariableOrDefaultInt(envPort, 4100)
 
 	return &SessionServiceConfig{
-		RedisServer:   *server,
-		Port:          port,
-		SessionSecret: *sessionSecret,
-		RefreshSecret: *refreshSecret,
+		RedisServer:          *server,
+		Port:                 port,
+		SessionSecret:        *sessionSecret,
+		RefreshSecret:        *refreshSecret,
+		SessionTokenLifespan: time.Duration(int64(sessionTokenLifespan) * int64(time.Minute)),
+		RefreshTokenLifespan: time.Duration(int64(refreshTokenLifespan) * int64(time.Minute)),
 	}, nil
 }
 
