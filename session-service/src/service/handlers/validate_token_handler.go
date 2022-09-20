@@ -26,7 +26,7 @@ func NewValidateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.T
 func (handler *validateTokenHandler) Handle(req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
 	tokenData, err := handler.sessionAgent.ValidateToken(req.GetSessionToken())
 
-	if err != nil && errors.Is(err, &expiredErr) {
+	if err != nil && errors.As(err, &expiredErr) {
 		return handler.refreshToken(req)
 	}
 
@@ -55,9 +55,9 @@ func (handler *validateTokenHandler) refreshToken(req *pb.ValidateTokenRequest) 
 	refreshTokenData, err := handler.refreshAgent.ValidateToken(req.GetRefreshToken())
 	if err != nil {
 		var responseCode pb.ValidateTokenErrorCode
-		if errors.Is(err, &invalidErr) {
+		if errors.As(err, &invalidErr) {
 			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INVALID
-		} else if errors.Is(err, &expiredErr) {
+		} else if errors.As(err, &expiredErr) {
 			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_EXPIRED
 		} else {
 			log.Println(err)

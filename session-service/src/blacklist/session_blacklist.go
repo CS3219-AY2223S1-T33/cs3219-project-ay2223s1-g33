@@ -97,7 +97,7 @@ func forEachPeriod(baseTimestamp time.Time, stepSize time.Duration, maximumGap t
 		}
 	}
 
-	for currentTimestamp := baseTimestamp; shouldContinue(currentTimestamp); baseTimestamp = baseTimestamp.Add(stepSize) {
+	for currentTimestamp := baseTimestamp; shouldContinue(currentTimestamp); currentTimestamp = currentTimestamp.Add(stepSize) {
 		consumer(currentTimestamp)
 	}
 }
