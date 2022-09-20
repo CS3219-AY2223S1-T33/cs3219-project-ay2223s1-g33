@@ -1,0 +1,154 @@
+version: '3.8'
+services:
+  frontend:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: frontend.dockerfile
+
+    restart: always
+
+    ports:
+      - "80:80"
+
+    expose:
+      - 3000
+
+    volumes:
+      - /etc/nginx/
+
+  user-service:
+    platform: linux/amd64
+    env_file: config_env/user-service.env
+
+    build:
+      context: .
+      dockerfile: user-service.dockerfile
+
+    ports:
+      - "8081:8081"
+
+    expose:
+      - "8081"
+
+    volumes:
+      - .:/app/user-service/build
+      - /app/user-service/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  matching-service:
+    platform: linux/amd64
+    env_file: config_env/matching-service.env
+
+    build:
+      context: .
+      dockerfile: matching-service.dockerfile
+
+    ports:
+      - "8082:8082"
+
+    expose:
+      - "8082"
+
+    volumes:
+      - .:/app/matching-service/build
+      - /app/matching-service/node_modules
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  collab-service:
+    platform: linux/amd64
+    env_file: config_env/collab-service.env
+
+    build:
+      context: .
+      dockerfile: collab-service.dockerfile
+
+    ports:
+      - "8083:8083"
+      - "4003:4003"
+
+    expose:
+      - "8083"
+      - "4003"
+
+    volumes:
+      - .:/app/collab-service/build
+      - /app/collab-service/node_modules
+  question-service:
+    platform: linux/amd64
+    env_file: config_env/question-service.env
+
+    build:
+      context: .
+      dockerfile: question-service.dockerfile
+
+    ports:
+      - "8084:8084"
+
+    expose:
+      - "8084"
+
+    volumes:
+      - .:/app/question-service/build
+      - /app/question-service/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  matchmaker:
+    platform: linux/amd64
+    env_file: config_env/matchmaker.env
+
+    build:
+      context: ./matchmaker
+      dockerfile: Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  session-service:
+    platform: linux/amd64
+    env_file: config_env/session-service.env
+
+    build:
+      context: ./session-service
+      dockerfile: Dockerfile
+
+    ports:
+      - "4100:4100"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  gateway:
+    platform: linux/amd64
+    env_file: config_env/gateway.env
+
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+
+    ports:
+      - "5001:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  tunnel-dummy:
+    platform: linux/amd64
+
+    build:
+      context: ./tunnel-placeholder
+      dockerfile: Dockerfile
+
+    ports:
+      - "4002:4002"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  redis:
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    ports:
+      - "6379:6379"
+

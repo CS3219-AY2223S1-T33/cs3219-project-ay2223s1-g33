@@ -1,0 +1,29 @@
+type: google.api.Service
+config_version: 3
+
+http:
+  rules:
+    - selector: user_bff_service.UserBFFService.Login
+      post: /api/user/login
+      body: "*"
+
+    - selector: user_bff_service.UserBFFService.Register
+      post: /api/user/register
+      body: "*"
+
+    - selector: user_bff_service.UserBFFService.Logout
+      post: /api/user/logout
+      body: "*"
+
+    - selector: user_bff_service.UserBFFService.GetUserProfile
+      post: /api/user/profile
+      body: "*"
+
+    - selector: matching_service.QueueService.JoinQueue
+      post: /api/queue/join
+      body: "*"
+
+    - selector: matching_service.QueueService.CheckQueueStatus
+      post: /api/queue/status
+      body: "*"
+    

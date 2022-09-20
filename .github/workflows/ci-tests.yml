@@ -1,0 +1,80 @@
+name: ci-tests
+on: [push, pull_request]
+
+jobs:
+  test-node:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@main
+
+      - name: Set up repository
+        uses: actions/checkout@main
+        with:
+          ref: main
+
+      - name: Merge to main branch
+        run: git checkout --progress --force ${{ github.sha }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 'Restore Root Cache'
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: root-cache
+
+      - name: 'Restore User Service Cache'
+        uses: actions/cache@v3
+        with:
+          path: user-service/node_modules
+          key: user-service-cache
+
+      - name: 'Restore Matching Service Cache'
+        uses: actions/cache@v3
+        with:
+          path: user-service/node_modules
+          key: matching-service-cache
+
+      - name: 'Restore Collab Service Cache'
+        uses: actions/cache@v3
+        with:
+          path: collab-service/node_modules
+          key: collab-service-cache
+
+      - name: 'Setup CI script'
+        run: chmod 755 ./scripts/run-ci.sh
+
+      - name: 'Setup CI script'
+        run: chmod 755 ./scripts/run-ci-setup.sh
+
+      - name: 'Setup sub-module NPM'
+        run: ./scripts/run-ci-setup.sh
+
+      - name: Run repository-wide tests
+        run: ./scripts/run-ci.sh
+  test-go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@main
+      
+      - name: Merge to main branch
+        run: git checkout --progress --force ${{ github.sha }}
+
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+
+      - name: 'Add dummy env files'
+        run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
+
+      - name: 'Run matchmaker test'
+        run: 'cd matchmaker && make test'
+
+      - name: 'Run session service test'
+        run: 'cd session-service && make test'

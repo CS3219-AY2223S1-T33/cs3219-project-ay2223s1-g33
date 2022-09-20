@@ -1,0 +1,31 @@
+{
+  "name": "cs3219-project-ay2223s1-g33-tools",
+  "version": "1.0.0",
+  "description": "This is a template repository for CS3219 project.",
+  "config": {
+    "proto_output_ts": "./user-service ./matching-service ./frontend/ ./collab-service ./db ./question-service",
+    "proto_output_go": "./session-service ./gateway",
+    "schema_output": "./user-service/src/db ./question-service/src/db"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh && chmod 755 ./scripts/gen-gateway.sh",
+    "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output_ts",
+    "gen-proto-go": "./scripts/gen-proto-go.sh proto $npm_package_config_proto_output_go",
+    "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output",
+    "gen-gateway": "./scripts/gen-gateway.sh proto ./gateway"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33/issues"
+  },
+  "homepage": "https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33#readme",
+  "dependencies": {
+    "@protobuf-ts/plugin": "^2.8.0"
+  }
+}
