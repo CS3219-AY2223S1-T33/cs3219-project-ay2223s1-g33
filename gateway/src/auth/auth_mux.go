@@ -2,6 +2,7 @@ package auth
 
 import (
 	"cs3219-project-ay2223s1-g33/gateway/util"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -10,6 +11,12 @@ import (
 const (
 	loginRoute    = "/api/user/login"
 	registerRoute = "/api/user/register"
+
+	headerUsername         = "X-Bearer-Username"
+	headerSessionToken     = "X-Bearer-Session-Token"
+	headerRefreshToken     = "X-Bearer-Refresh-Token"
+	cookieNameSessionToken = "AUTH-SESSION"
+	cookieNameRefreshToken = "AUTH-REFRESH"
 )
 
 func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Handler, util.Disposable, error) {
@@ -27,25 +34,42 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 		}
 
 		// Sanitize the request
-		r.Header.Set("X-Bearer-Username", "")
-		r.Header.Set("X-Bearer-Session-Token", "")
+		r.Header.Set(headerUsername, "")
+		r.Header.Set(headerSessionToken, "")
+		r.Header.Set(headerRefreshToken, "")
 
 		// Authenticate
-		token, err := r.Cookie("AUTH-SESSION")
+		sessionToken, err := r.Cookie(cookieNameSessionToken)
+		if err != nil {
+			writeUnauthorizedResponse(w)
+			return
+		}
+
+		refreshToken, err := r.Cookie(cookieNameRefreshToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
 
 		log.Println("Authenticating with server")
-		username, err := authAgent.ValidateToken(token.Value)
+		username, newSessionToken, err := authAgent.ValidateToken(sessionToken.Value, refreshToken.Value)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
 
-		r.Header.Set("X-Bearer-Username", username)
-		r.Header.Set("X-Bearer-Session-Token", token.Value)
+		r.Header.Set(headerUsername, username)
+		r.Header.Set(headerSessionToken, sessionToken.Value)
+		r.Header.Set(headerRefreshToken, refreshToken.Value)
+
+		if newSessionToken != "" {
+			w.Header().Add("Set-Cookie", fmt.Sprintf(
+				"%s=%s; Path=/",
+				cookieNameSessionToken,
+				newSessionToken,
+			))
+		}
+
 		mux.ServeHTTP(w, r)
 	})
 	return handler, authAgent, nil

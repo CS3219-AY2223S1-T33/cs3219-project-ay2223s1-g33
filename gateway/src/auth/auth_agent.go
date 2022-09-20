@@ -10,7 +10,11 @@ import (
 )
 
 type AuthAgent interface {
-	ValidateToken(token string) (username string, err error)
+	ValidateToken(sessionToken string, refreshToken string) (
+		username string,
+		newSessionToken string,
+		err error,
+	)
 	Dispose()
 }
 
@@ -35,26 +39,31 @@ func CreateAuthAgent(sessionServer string) (AuthAgent, error) {
 	}, nil
 }
 
-func (agent *authAgent) ValidateToken(token string) (string, error) {
+func (agent *authAgent) ValidateToken(sessionToken string, refreshToken string) (
+	username string,
+	newSessionToken string,
+	err error,
+) {
 	ctx := context.Background()
 	resp, err := agent.sessionClient.ValidateToken(ctx, &pb.ValidateTokenRequest{
-		Token: token,
+		SessionToken: sessionToken,
+		RefreshToken: refreshToken,
 	})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if resp == nil || resp.ErrorCode != pb.ValidateTokenErrorCode_VALIDATE_TOKEN_NO_ERROR {
 		if resp.ErrorCode == pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_EXPIRED {
-			return "", errors.New("Expired Token")
+			return "", "", errors.New("Expired Token")
 		}
 		if resp.ErrorCode == pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INVALID {
-			return "", errors.New("Invalid Token")
+			return "", "", errors.New("Invalid Token")
 		}
-		return "", errors.New("Internal Error")
+		return "", "", errors.New("Internal Error")
 	}
 
-	return resp.Email, nil
+	return resp.GetEmail(), resp.GetNewSessionToken(), nil
 }
 
 func (agent *authAgent) Dispose() {
