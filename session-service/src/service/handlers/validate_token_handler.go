@@ -9,26 +9,30 @@ import (
 )
 
 type validateTokenHandler struct {
-	tokenAgent token.TokenAgent
+	sessionAgent token.TokenAgent
+	refreshAgent token.TokenAgent
 }
 
-func CreateValidateTokenHandler(tokenAgent token.TokenAgent) server.ApiHandler[pb.ValidateTokenRequest, pb.ValidateTokenResponse] {
+var expiredErr token.ExpiredTokenError
+var invalidErr token.InvalidTokenError
+
+func NewValidateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) server.ApiHandler[pb.ValidateTokenRequest, pb.ValidateTokenResponse] {
 	return &validateTokenHandler{
-		tokenAgent: tokenAgent,
+		sessionAgent: sessionAgent,
+		refreshAgent: refreshAgent,
 	}
 }
 
 func (handler *validateTokenHandler) Handle(req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
-	tokenData, err := handler.tokenAgent.ValidateToken(req.GetToken())
+	tokenData, err := handler.sessionAgent.ValidateToken(req.GetSessionToken())
+
+	if err != nil && errors.As(err, &expiredErr) {
+		return handler.refreshToken(req)
+	}
 
 	if err != nil {
 		var responseCode pb.ValidateTokenErrorCode
-		var expiredErr token.ExpiredTokenError
-		var invalidErr token.InvalidTokenError
-
 		switch {
-		case errors.As(err, &expiredErr):
-			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_EXPIRED
 		case errors.As(err, &invalidErr):
 			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INVALID
 		default:
@@ -44,5 +48,37 @@ func (handler *validateTokenHandler) Handle(req *pb.ValidateTokenRequest) (*pb.V
 	return &pb.ValidateTokenResponse{
 		Email:     tokenData.Email,
 		ErrorCode: pb.ValidateTokenErrorCode_VALIDATE_TOKEN_NO_ERROR,
+	}, nil
+}
+
+func (handler *validateTokenHandler) refreshToken(req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+	refreshTokenData, err := handler.refreshAgent.ValidateToken(req.GetRefreshToken())
+	if err != nil {
+		var responseCode pb.ValidateTokenErrorCode
+		if errors.As(err, &invalidErr) {
+			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INVALID
+		} else if errors.As(err, &expiredErr) {
+			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_EXPIRED
+		} else {
+			log.Println(err)
+			responseCode = pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INTERNAL
+		}
+
+		return &pb.ValidateTokenResponse{
+			ErrorCode: responseCode,
+		}, nil
+	}
+
+	newSessionToken, err := handler.sessionAgent.CreateToken(refreshTokenData)
+	if err != nil {
+		return &pb.ValidateTokenResponse{
+			ErrorCode: pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INTERNAL,
+		}, nil
+	}
+
+	return &pb.ValidateTokenResponse{
+		Email:           refreshTokenData.Email,
+		NewSessionToken: newSessionToken,
+		ErrorCode:       pb.ValidateTokenErrorCode_VALIDATE_TOKEN_NO_ERROR,
 	}, nil
 }

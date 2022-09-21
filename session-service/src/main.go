@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cs3219-project-ay2223s1-g33/session-service/conn"
+	"cs3219-project-ay2223s1-g33/session-service/blacklist"
 	"cs3219-project-ay2223s1-g33/session-service/server"
 	"cs3219-project-ay2223s1-g33/session-service/service"
 	"cs3219-project-ay2223s1-g33/session-service/token"
@@ -9,29 +9,30 @@ import (
 	"time"
 )
 
-const TokenLifespan = 3 * 24 * time.Hour // 3 days
-
 func main() {
-	log.Println("Starting Session Service")
-	config := loadConfig()
-	if config == nil {
-		log.Fatalln("Server is not configured correctly")
+	log.Printf("Starting Session Service [V%d.%d.%d]\n", VersionMajor, VersionMinor, VersionRevision)
+	config, err := loadConfig()
+	if err != nil || config == nil {
+		log.Fatalf("Server is not configured correctly: %s \n", err)
 	}
 
-	redisClient := conn.NewRedisBlacklistClient(config.RedisServer, TokenLifespan)
-	redisClient.Connect()
-	tokenAgent := getTokenAgent(config, redisClient)
+	log.Printf("Session Token Lifespan: %d minutes\n", config.SessionTokenLifespan/time.Minute)
+	log.Printf("Refresh Token Lifespan: %d minutes\n", config.RefreshTokenLifespan/time.Minute)
 
+	redisClient := blacklist.NewRedisBlacklistClient(config.RedisServer, config.SessionTokenLifespan, config.RefreshTokenLifespan)
+	err = redisClient.Connect()
+	if err != nil {
+		log.Fatalln("Cannot connect to Redis")
+	}
+
+	sessionTokenAgent := token.CreateTokenAgent(config.SessionSecret, config.SessionTokenLifespan, redisClient.GetSessionBlacklist())
+	refreshTokenAgent := token.CreateTokenAgent(config.RefreshSecret, config.RefreshTokenLifespan, redisClient.GetRefreshBlacklist())
 	apiServer := server.CreateApiServer(config.Port)
-	sessionService := service.CreateSessionService(tokenAgent)
-	err := apiServer.RegisterService(sessionService)
+	sessionService := service.CreateSessionService(sessionTokenAgent, refreshTokenAgent)
+	err = apiServer.RegisterService(sessionService)
 	if err != nil {
 		log.Fatalln("Could not register Session Service")
 	}
 
 	apiServer.Start()
-}
-
-func getTokenAgent(config *SessionServiceConfig, redisBlacklist conn.RedisBlacklistClient) token.TokenAgent {
-	return token.CreateTokenAgent(config.SigningSecret, TokenLifespan, redisBlacklist)
 }

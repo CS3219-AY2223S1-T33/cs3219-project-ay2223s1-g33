@@ -75,9 +75,10 @@ func TestJwtValidateToken(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, createdToken)
 
-	decodedData, err := jwtAgent.VerifyToken(createdToken)
+	decodedData, issuedAt, err := jwtAgent.VerifyToken(createdToken)
 	assert.Nil(t, err)
 	assert.Equal(t, testEmail, decodedData.Email)
+	assert.Equal(t, baseTimestamp.Unix(), issuedAt)
 }
 
 func TestJwtBadToken(t *testing.T) {
@@ -104,9 +105,9 @@ func TestJwtBadToken(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, createdToken)
 
-	_, err = jwtAgent.VerifyToken(createdToken)
+	_, _, err = jwtAgent.VerifyToken(createdToken)
 	assert.IsType(t, ExpiredTokenError{}, err)
 
-	_, err = jwtAgent.VerifyToken("gibberish.token.something")
+	_, _, err = jwtAgent.VerifyToken("gibberish.token.something")
 	assert.IsType(t, InvalidTokenError{}, err)
 }

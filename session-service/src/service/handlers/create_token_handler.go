@@ -8,20 +8,31 @@ import (
 )
 
 type createTokenHandler struct {
-	tokenAgent token.TokenAgent
+	sessionAgent token.TokenAgent
+	refreshAgent token.TokenAgent
 }
 
-func CreateCreateTokenHandler(tokenAgent token.TokenAgent) server.ApiHandler[pb.CreateTokenRequest, pb.CreateTokenResponse] {
+func NewCreateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) server.ApiHandler[pb.CreateTokenRequest, pb.CreateTokenResponse] {
 	return &createTokenHandler{
-		tokenAgent: tokenAgent,
+		sessionAgent: sessionAgent,
+		refreshAgent: refreshAgent,
 	}
 }
 
 func (handler *createTokenHandler) Handle(req *pb.CreateTokenRequest) (*pb.CreateTokenResponse, error) {
-	token, err := handler.tokenAgent.CreateToken(&token.TokenData{
+	tokenData := &token.TokenData{
 		Email: req.GetEmail(),
-	})
+	}
 
+	sessionToken, err := handler.sessionAgent.CreateToken(tokenData)
+	if err != nil {
+		log.Println(err)
+		return &pb.CreateTokenResponse{
+			ErrorCode: pb.CreateTokenErrorCode_CREATE_TOKEN_ERROR_INTERNAL,
+		}, nil
+	}
+
+	refreshToken, err := handler.refreshAgent.CreateToken(tokenData)
 	if err != nil {
 		log.Println(err)
 		return &pb.CreateTokenResponse{
@@ -30,7 +41,8 @@ func (handler *createTokenHandler) Handle(req *pb.CreateTokenRequest) (*pb.Creat
 	}
 
 	return &pb.CreateTokenResponse{
-		Token:     token,
-		ErrorCode: pb.CreateTokenErrorCode_CREATE_TOKEN_NO_ERROR,
+		SessionToken: sessionToken,
+		RefreshToken: refreshToken,
+		ErrorCode:    pb.CreateTokenErrorCode_CREATE_TOKEN_NO_ERROR,
 	}, nil
 }

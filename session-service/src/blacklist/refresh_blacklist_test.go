@@ -1,4 +1,4 @@
-package conn
+package blacklist
 
 import (
 	"fmt"
@@ -43,5 +43,5 @@ func TestStartOfDayRounding(t *testing.T) {
 func TestRedisKey(t *testing.T) {
 	date := time.Date(2021, 10, 4, 0, 0, 0, 0, time.UTC)
 	key := getBlacklistKeyForDay(date)
-	assert.Equal(t, fmt.Sprintf(redisBlacklistKeyFormat, date.Unix()), key)
+	assert.Equal(t, fmt.Sprintf(redisRefreshBlacklistKeyFormat, date.Unix()), key)
 }

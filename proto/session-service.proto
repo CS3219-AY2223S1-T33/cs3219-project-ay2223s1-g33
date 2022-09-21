@@ -25,21 +25,25 @@ message CreateTokenRequest {
 }
 
 message CreateTokenResponse {
-  string token = 1;
-  CreateTokenErrorCode error_code = 2;
+  string session_token = 1;
+  string refresh_token = 2;
+  CreateTokenErrorCode error_code = 3;
 }
 
 message ValidateTokenRequest {
-  string token = 1;
+  string session_token = 1;
+  string refresh_token = 2;
 }
 
 message ValidateTokenResponse {
   string email = 1;
-  ValidateTokenErrorCode error_code = 2;
+  string new_session_token = 2;
+  ValidateTokenErrorCode error_code = 3;
 }
 
 message AddBlacklistRequest {
-  string token = 1;
+  string session_token = 1;
+  string refresh_token = 2;
 }
 
 message AddBlacklistResponse {
