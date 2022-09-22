@@ -18,7 +18,9 @@ import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { WebsocketProvider } from "y-websocket";
+// eslint-disable-next-line
+import { WebsocketProvider } from "y-websocket-peerprep";
+// import { WebsocketProvider } from "y-websocket";
 import InvalidSession from "./InvalidSession";
 import { RootState } from "../app/store";
 import EditorTabs from "../components/editor/EditorTabs";
@@ -54,6 +56,8 @@ function Session() {
         tempyDoc,
         { params, disableBc: true }
       );
+
+      // tempprovider.on("");
 
       // If the connection is terminated, it should not attempt to reconnect
       tempprovider.shouldConnect = false;
