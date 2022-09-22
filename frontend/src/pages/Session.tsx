@@ -57,7 +57,13 @@ function Session() {
         { params, disableBc: true }
       );
 
-      // tempprovider.on("");
+      tempprovider.on("user_join", (joinedNickname: { nickname: string }) => {
+        console.log(`From WSPRovider: ${joinedNickname.nickname} joined`);
+      });
+
+      tempprovider.on("user_leave", (leftNickname: { nickname: string }) => {
+        console.log(`From WSProvider: ${leftNickname.nickname} left`);
+      });
 
       // If the connection is terminated, it should not attempt to reconnect
       tempprovider.shouldConnect = false;
@@ -76,6 +82,7 @@ function Session() {
   }, []);
 
   const leaveSessionHandler = () => {
+    // TODO Sends disconnect message
     // Destroy websocket and yDoc instance
     provider?.destroy();
     yDoc?.destroy();
@@ -123,6 +130,13 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
+              {/* Buttons purely for custom y-websocket testing */}
+              <Button onClick={() => provider?.sendJoinMessage(nickname)}>
+                Send User Joined
+              </Button>
+              <Button onClick={() => provider?.sendDisconnectMessage(nickname)}>
+                Send User Left
+              </Button>
               <Button onClick={() => console.log("WIP")}>Submit code</Button>
             </Flex>
           </Grid>

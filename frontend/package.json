@@ -32,6 +32,7 @@
     "typescript": "^4.8.2",
     "web-vitals": "^2.1.4",
     "y-codemirror.next": "^0.3.2",
+    "y-websocket-peerprep": "file:y-websocket-peerprep-1.4.5.tgz",
     "yjs": "13.5.41"
   },
   "scripts": {
