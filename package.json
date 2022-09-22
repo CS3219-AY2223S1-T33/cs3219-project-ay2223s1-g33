@@ -13,7 +13,8 @@
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output_ts",
     "gen-proto-go": "./scripts/gen-proto-go.sh proto $npm_package_config_proto_output_go",
     "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output",
-    "gen-gateway": "./scripts/gen-gateway.sh proto ./gateway"
+    "gen-gateway": "./scripts/gen-gateway.sh proto ./gateway",
+    "gen-y-websocket": "./scripts/gen-y-websocket.sh"
   },
   "repository": {
     "type": "git",
