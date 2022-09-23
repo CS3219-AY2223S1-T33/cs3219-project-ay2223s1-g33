@@ -21,6 +21,10 @@ export const messageQueryAwareness = 3
 export const messageAwareness = 1
 export const messageAuth = 2
 
+// Custom events for peerPrep
+export const USER_JOIN = 4
+export const USER_LEAVE = 5
+
 /**
  *                       encoder,          decoder,          provider,          emitSynced, messageType
  * @type {Array<function(encoding.Encoder, decoding.Decoder, WebsocketProvider, boolean,    number):void>}
@@ -92,6 +96,22 @@ messageHandlers[messageAuth] = (
     provider.doc,
     (_ydoc, reason) => permissionDeniedHandler(provider, reason)
   )
+}
+
+// Custom messageHandlers for peerPrep
+// * Implementation may be iffy since there is no reference code for this
+messageHandlers[USER_JOIN] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+  console.log('[Rcv]: Other user has joined')
+  const nickname = decoding.readVarString(decoder)
+  console.log('nickname: ', nickname)
+  provider.emit('user_join', [{ nickname }])
+}
+
+messageHandlers[USER_LEAVE] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+  console.log('[Rcv]: Other user has left')
+  const nickname = decoding.readVarString(decoder)
+  console.log('nickname: ', nickname)
+  provider.emit('user_leave', [{ nickname }])
 }
 
 // @todo - this should depend on awareness.outdatedTime
@@ -367,7 +387,7 @@ export class WebsocketProvider extends Observable {
       if (
         this.wsconnected &&
         messageReconnectTimeout <
-          time.getUnixTime() - this.wsLastMessageReceived
+        time.getUnixTime() - this.wsLastMessageReceived
       ) {
         // no message received in a long time - not even your own awareness
         // updates (which are updated every 15 seconds)
@@ -484,5 +504,22 @@ export class WebsocketProvider extends Observable {
       setupWS(this)
       this.connectBc()
     }
+  }
+
+  // Custom functions for Peerprep
+  /** Referenced from {@link _updateHandler} */
+  sendJoinMessage (/** @type {string} */ nickname) {
+    const encoder = encoding.createEncoder()
+    encoding.writeVarUint(encoder, USER_JOIN)
+    encoding.writeVarString(encoder, nickname)
+    broadcastMessage(this, encoding.toUint8Array(encoder))
+  }
+
+  /** Referenced from {@link _updateHandler} */
+  sendDisconnectMessage (/** @type {string} */ nickname) {
+    const encoder = encoding.createEncoder()
+    encoding.writeVarUint(encoder, USER_LEAVE)
+    encoding.writeVarString(encoder, nickname)
+    broadcastMessage(this, encoding.toUint8Array(encoder))
   }
 }

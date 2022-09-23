@@ -16,6 +16,14 @@ const SUCCESS_TOAST: UseToastOptions = {
   position: "top",
 };
 
+const ALERT_TOAST: UseToastOptions = {
+  title: "Alert",
+  status: "warning",
+  duration: 5000,
+  isClosable: true,
+  position: "top",
+};
+
 const useFixedToast = () => {
   const toast = useToast();
 
@@ -30,7 +38,11 @@ const useFixedToast = () => {
     toast({ ...SUCCESS_TOAST, ...options, description });
   };
 
-  return { sendErrorMessage, sendSuccessMessage };
+  const sendAlertMessage = (description: string, options?: UseToastOptions) => {
+    toast({ ...ALERT_TOAST, ...options, description });
+  };
+
+  return { sendAlertMessage, sendErrorMessage, sendSuccessMessage };
 };
 
 export default useFixedToast;
