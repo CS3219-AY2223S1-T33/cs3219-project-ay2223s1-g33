@@ -18,15 +18,17 @@ import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// eslint-disable-next-line
 import { WebsocketProvider } from "y-websocket-peerprep";
-// import { WebsocketProvider } from "y-websocket";
 import InvalidSession from "./InvalidSession";
 import { RootState } from "../app/store";
 import EditorTabs from "../components/editor/EditorTabs";
 import { leaveRoom } from "../feature/matching/matchingSlice";
 import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
+import useFixedToast from "../utils/hooks/useFixedToast";
+
+type Status = { status: "disconnected" | "connecting" | "connected" };
+type Nickname = { nickname: string };
 
 let isInit = false;
 function Session() {
@@ -35,6 +37,7 @@ function Session() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useFixedToast();
 
   const [yDoc, setYDoc] = useState<Y.Doc>();
   const [provider, setProvider] = useState<WebsocketProvider>();
@@ -57,12 +60,27 @@ function Session() {
         { params, disableBc: true }
       );
 
-      tempprovider.on("user_join", (joinedNickname: { nickname: string }) => {
-        console.log(`From WSPRovider: ${joinedNickname.nickname} joined`);
+      // TODO Implement invalid room event
+      tempprovider.on("status", (joinStatus: Status) => {
+        const { status } = joinStatus;
+        if (status === "connected" && nickname) {
+          console.log("Sending join message...");
+          tempprovider.sendJoinMessage(nickname);
+        }
       });
 
-      tempprovider.on("user_leave", (leftNickname: { nickname: string }) => {
-        console.log(`From WSProvider: ${leftNickname.nickname} left`);
+      tempprovider.on("user_join", (joinedNickname: Nickname) => {
+        // console.log(`From WSProvider: ${joinedNickname.nickname} joined`);
+        toast.sendSuccessMessage("", {
+          title: `${joinedNickname.nickname} has joined the room!`
+        });
+      });
+
+      tempprovider.on("user_leave", (leftNickname: Nickname) => {
+        // console.log(`From WSProvider: ${leftNickname.nickname} left`);
+        toast.sendAlertMessage("", {
+          title: `${leftNickname.nickname} has left the room.`
+        });
       });
 
       // If the connection is terminated, it should not attempt to reconnect
@@ -78,11 +96,14 @@ function Session() {
       setundoManager(tempundoManager);
       isInit = true;
     }
+
     return () => {};
   }, []);
 
   const leaveSessionHandler = () => {
-    // TODO Sends disconnect message
+    if (nickname) {
+      provider?.sendDisconnectMessage(nickname);
+    }
     // Destroy websocket and yDoc instance
     provider?.destroy();
     yDoc?.destroy();
@@ -131,12 +152,12 @@ function Session() {
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
               {/* Buttons purely for custom y-websocket testing */}
-              <Button onClick={() => provider?.sendJoinMessage(nickname)}>
+              {/* <Button onClick={() => provider?.sendJoinMessage(nickname)}>
                 Send User Joined
               </Button>
               <Button onClick={() => provider?.sendDisconnectMessage(nickname)}>
                 Send User Left
-              </Button>
+              </Button> */}
               <Button onClick={() => console.log("WIP")}>Submit code</Button>
             </Flex>
           </Grid>
@@ -166,7 +187,6 @@ function Session() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {/* TODO: Popup when other user leaves the session */}
     </>
   );
 }

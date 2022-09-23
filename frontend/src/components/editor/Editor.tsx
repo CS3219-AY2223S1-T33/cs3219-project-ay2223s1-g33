@@ -2,9 +2,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import * as Y from "yjs";
 import React, { useEffect } from "react";
-// eslint-disable-next-line
 import { WebsocketProvider } from "y-websocket-peerprep";
-// import { WebsocketProvider } from "y-websocket";
 import { yCollab } from "y-codemirror.next";
 
 let providerSet = false;
