@@ -12,7 +12,7 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid
+  Grid,
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +49,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken
+        room: roomToken === undefined ? "" : roomToken,
       };
 
       // First 2 params builds the room session: ws://localhost:5001/ + ws
@@ -72,14 +72,14 @@ function Session() {
       tempprovider.on("user_join", (joinedNickname: Nickname) => {
         // console.log(`From WSProvider: ${joinedNickname.nickname} joined`);
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`
+          title: `${joinedNickname.nickname} has joined the room!`,
         });
       });
 
       tempprovider.on("user_leave", (leftNickname: Nickname) => {
         // console.log(`From WSProvider: ${leftNickname.nickname} left`);
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`
+          title: `${leftNickname.nickname} has left the room.`,
         });
       });
 
