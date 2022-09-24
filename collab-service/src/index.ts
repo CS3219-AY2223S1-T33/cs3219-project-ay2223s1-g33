@@ -11,7 +11,7 @@ import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
 import createStreamServer from './stream_server/stream_server';
 // import CollabTunnelStream from './tunneller/collab_tunnel_server';
-import CollabPubSubStream from './tunneller/collab_redis_pubsub';
+import CollabTunnelPubSub from './tunneller/collab_tunnel_redis';
 
 const envConfig = loadEnvironment();
 
@@ -43,5 +43,5 @@ apiServer.bind();
 
 const streamServer = createStreamServer(envConfig.GRPC_TUNNEL_PORT);
 // streamServer.registerServiceRoutes(new CollabTunnelStream());
-streamServer.registerServiceRoutes(new CollabPubSubStream());
+streamServer.registerServiceRoutes(new CollabTunnelPubSub());
 streamServer.bind();

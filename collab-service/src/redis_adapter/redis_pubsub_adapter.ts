@@ -1,99 +1,84 @@
 import { RedisClientType } from 'redis';
 import { ServerDuplexStreamImpl } from '@grpc/grpc-js/build/src/server-call';
 import Logger from '../utils/logger';
-import { CollabTunnelRequest, CollabTunnelResponse } from '../proto/collab-service';
+import {
+  CollabTunnelRequest,
+  CollabTunnelResponse,
+  VerifyRoomErrorCode,
+} from '../proto/collab-service';
+import TunnelPubSub from './redis_pubsub_types';
 
-declare interface TunnelPubSub {
-  createTopic(topic: string): Promise<void>;
+class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
+  redisPub: RedisClientType;
 
-  // eslint-disable-next-line max-len
-  createSubscription(topic: string, call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>): Promise<void>;
+  redisSub: RedisClientType;
 
-  push(topic: string, request: CollabTunnelRequest): Promise<void>;
-}
+  username: string;
 
-class RedisPubSubAdapter implements TunnelPubSub {
-  redisPubSub: RedisClientType;
+  topic: string;
 
-  constructor(redisClient: RedisClientType) {
-    this.redisPubSub = redisClient;
+  constructor(
+    redisPub: RedisClientType,
+    redisSub: RedisClientType,
+    username: string,
+    roomId: string,
+  ) {
+    this.redisPub = redisPub;
+    this.redisSub = redisSub;
+    this.username = username;
+    this.topic = roomId;
   }
 
-  async createTopic(topic: string): Promise<void> {
-    await this.redisPubSub.publish(`roomTopic-${topic}`, 'Startup');
-    Logger.info(`Topic ${topic} created.`);
-  }
-
-  // eslint-disable-next-line max-len,@typescript-eslint/no-unused-vars
-  async createSubscription(topic: string, call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>): Promise<void> {
-    await this.redisPubSub.subscribe(`roomTopic-${topic}`, (channel, message) => {
-      // eslint-disable-next-line no-console
-      Logger.info(`Received data :${message}`);
+  async registerEvent(
+    call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>,
+  ): Promise<void> {
+    await this.redisSub.subscribe(`pubsub-${this.topic}`, (message) => {
+      const messageJson = JSON.parse(message);
+      const {
+        sender,
+        data,
+      } = messageJson;
+      const response = CollabTunnelResponse.create(
+        {
+          data: Buffer.from(data),
+          flags: VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
+        },
+      );
+      if (sender !== this.username) {
+        // eslint-disable-next-line no-console
+        console.log(`Received by ${this.username}`);
+        call.write(response);
+      }
     });
-    Logger.info(`Subscription ${topic} created.`);
+    Logger.info(`Event ${this.topic} registered by ${this.username}`);
   }
 
-  async push(topic: string, request: CollabTunnelRequest): Promise<void> {
-    await this.redisPubSub.publish(`roomTopic-${topic}`, JSON.stringify(request));
+  async push(request: CollabTunnelRequest): Promise<void> {
+    const messageJson = {
+      sender: this.username,
+      data: request.data,
+    };
+    await this.redisPub.publish(`pubsub-${this.topic}`, JSON.stringify(messageJson));
+    // eslint-disable-next-line no-console
+    console.log(`Sent by ${this.username}`);
   }
 
-  // async clean(topic: string): Promise<boolean> {
-  //   this.redisClient.removeListener(`roomTopic-${topic}`);
-  //   return true;
-  // }
-
-  //
-  // async pushStream(username: string, difficulty: number): Promise<boolean> {
-  //   const queueId = await this.redisClient.xAdd(
-  //     MATCHMAKER_QUEUE_KEY,
-  //     '*',
-  //     RedisPubSubAdapter.createQueueItem(username, difficulty),
-  //   );
-  //   if (queueId === '') {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // async getUserLock(username: string): Promise<string | null> {
-  //   const key = getMatchmakerUserKey(username);
-  //   const result = await this.redisClient.get(key);
-  //   return result;
-  // }
-  //
-  // async deleteUserLock(username: string): Promise<boolean> {
-  //   const key = getMatchmakerUserKey(username);
-  //   const result = await this.redisClient.del(key);
-  //   if (result === 0) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // async lockIfUnset(username: string): Promise<boolean> {
-  //   const key = getMatchmakerUserKey(username);
-  //   const result = await this.redisClient.set(key, '', {
-  //     NX: true,
-  //     GET: true,
-  //     EX: MATCHMAKER_LOCK_EXPIRY,
-  //   });
-  //
-  //   if (result !== null) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  //
-  // static createQueueItem(username: string, difficulty: number): Record<string, string> {
-  //   return {
-  //     user: username,
-  //     diff: difficulty.toString(),
-  //   };
-  // }
+  async clean(
+    call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>,
+  ): Promise<void> {
+    await this.redisSub.unsubscribe(`pubsub-${this.topic}`);
+    call.end();
+    Logger.info(`User ${this.username} unregistered event ${this.topic}`);
+  }
 }
 
-function createRedisPubSubAdapter(redisClient: RedisClientType): TunnelPubSub {
-  return new RedisPubSubAdapter(redisClient);
+function createRedisPubSubAdapter(
+  redisPub: RedisClientType,
+  redisSub: RedisClientType,
+  username: string,
+  roomId: string,
+) : TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
+  return new RedisPubSubAdapter(redisPub, redisSub, username, roomId);
 }
 
 export {

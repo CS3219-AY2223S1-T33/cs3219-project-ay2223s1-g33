@@ -1,5 +1,5 @@
 import { ServiceDefinition, UntypedServiceImplementation } from '@grpc/grpc-js';
-import { createClient } from 'redis';
+import { createClient, RedisClientType } from 'redis';
 import {
   collabTunnelServiceDefinition,
   ICollabTunnelService,
@@ -11,7 +11,7 @@ import {
 } from '../proto/collab-service';
 import loadEnvironment from '../utils/env_loader';
 import createRoomSessionService from '../room_auth/room_session_agent';
-// import Logger from '../utils/logger';
+import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter';
 
 const envConfig = loadEnvironment();
 const roomService = createRoomSessionService(envConfig.JWT_ROOM_SECRET);
@@ -24,13 +24,13 @@ function buildErrorResponse(errorCode: VerifyRoomErrorCode): CollabTunnelRespons
   };
 }
 
-const pub = createClient({
+const pub: RedisClientType = createClient({
+  url: envConfig.REDIS_SERVER_URL,
+});
+const sub: RedisClientType = createClient({
   url: envConfig.REDIS_SERVER_URL,
 });
 pub.connect();
-const sub = createClient({
-  url: envConfig.REDIS_SERVER_URL,
-});
 sub.connect();
 
 async function pubSubOpenStream(call: any) {
@@ -46,36 +46,21 @@ async function pubSubOpenStream(call: any) {
     return;
   }
 
-  // @ts-ignore
-  sub.subscribe(`chat-${roomId}`, (message) => {
-    const data = JSON.parse(message);
-    const response = CollabTunnelResponse.create(
-      {
-        data: Buffer.from(data.data.data),
-        flags: VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
-      },
-    );
-    console.log(`recipient-${username}`);
-    console.log(response);
-    call.write(response);
-  });
+  const redisPubSubAdapter = createRedisPubSubAdapter(pub, sub, username, roomId);
+  await redisPubSubAdapter.registerEvent(call);
 
   // When data is detected
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   call.on('data', (request: CollabTunnelRequest) => {
-    // pub.push(roomId, request);
-    pub.publish(`chat-${roomId}`, JSON.stringify(request));
-    console.log(`sender-${username}`);
-    console.log(request);
+    redisPubSubAdapter.push(request);
   });
 
   // When stream closes
   call.on('end', () => {
-    call.end();
+    redisPubSubAdapter.clean(call);
   });
 }
 
-class CollabPubSubStream {
+class CollabTunnelPubSub {
   public serviceDefinition: ServiceDefinition<ICollabTunnelService>;
 
   public serviceImplementation: UntypedServiceImplementation;
@@ -88,4 +73,4 @@ class CollabPubSubStream {
   }
 }
 
-export default CollabPubSubStream;
+export default CollabTunnelPubSub;
