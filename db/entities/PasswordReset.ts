@@ -9,7 +9,7 @@ import {
 import User from './User';
 
 @Entity('PasswordReset')
-export default class PasswordReset {
+export default class PasswordResetEntity {
   @PrimaryGeneratedColumn()
     id!: string;
 
