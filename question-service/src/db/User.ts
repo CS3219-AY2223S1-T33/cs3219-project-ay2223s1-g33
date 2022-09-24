@@ -1,3 +1,4 @@
+import { User } from '../proto/types';
 /* eslint import/no-cycle: 0 */
 import {
   Column,
@@ -14,7 +15,7 @@ import PasswordReset from './PasswordReset';
 import History from './History';
 
 @Entity('User')
-export default class User {
+export default class UserEntity implements User {
   @PrimaryGeneratedColumn()
     userId!: number;
 

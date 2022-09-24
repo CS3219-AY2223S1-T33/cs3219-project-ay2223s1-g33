@@ -1,5 +1,5 @@
 /* eslint class-methods-use-this: 0 */
-import { getDatabase, Question } from '../db';
+import { getDatabase, QuestionEntity } from '../db';
 import { StoredQuestion } from '../model/question_store_model';
 import { QuestionDifficulty } from '../proto/types';
 import { IQuestionStore } from './storage';
@@ -22,12 +22,12 @@ class QuestionStore implements IQuestionStore {
       throw new Error('Question with same name already exists');
     }
 
-    const insertResult: Question = (
+    const insertResult: QuestionEntity = (
       await getDatabase()
         .getQuestionRepo()
         .createQueryBuilder()
         .insert()
-        .into(Question)
+        .into(QuestionEntity)
         .values([question])
         .returning(returnValues)
         .execute()
@@ -43,7 +43,7 @@ class QuestionStore implements IQuestionStore {
       .getDataSource()
       .createQueryBuilder()
       .delete()
-      .from(Question)
+      .from(QuestionEntity)
       .where('questionId = :questionId', { questionId })
       .execute();
   }
@@ -62,14 +62,14 @@ class QuestionStore implements IQuestionStore {
     await getDatabase()
       .getDataSource()
       .createQueryBuilder()
-      .update(Question)
+      .update(QuestionEntity)
       .set(question)
       .where('questionId = :questionId', { questionId })
       .execute();
   }
 
   async getQuestion(questionId: number): Promise<StoredQuestion | undefined> {
-    const selectResult: Question | null = await getDatabase()
+    const selectResult: QuestionEntity | null = await getDatabase()
       .getQuestionRepo()
       .createQueryBuilder('question')
       .where('question.questionId = :questionId', { questionId })
@@ -85,7 +85,7 @@ class QuestionStore implements IQuestionStore {
   }
 
   async getQuestionByName(name: string): Promise<StoredQuestion | undefined> {
-    const selectResult: Question | null = await getDatabase()
+    const selectResult: QuestionEntity | null = await getDatabase()
       .getQuestionRepo()
       .createQueryBuilder('question')
       .where('question.name = :name', { name })
@@ -102,7 +102,7 @@ class QuestionStore implements IQuestionStore {
 
   async getRandomQuestionByDifficulty(diffciulty: QuestionDifficulty):
   Promise<StoredQuestion | undefined> {
-    const selectResult: Question | null = await getDatabase()
+    const selectResult: QuestionEntity | null = await getDatabase()
       .getQuestionRepo()
       .createQueryBuilder('question')
       .where('question.difficulty = :diffciulty', { diffciulty })
@@ -120,7 +120,7 @@ class QuestionStore implements IQuestionStore {
   }
 
   async getAllQuestion(): Promise<StoredQuestion[]> {
-    const selectResult: Question[] = await getDatabase()
+    const selectResult: QuestionEntity[] = await getDatabase()
       .getQuestionRepo()
       .createQueryBuilder('question')
       .getMany();

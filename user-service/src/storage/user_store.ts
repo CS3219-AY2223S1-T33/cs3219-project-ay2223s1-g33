@@ -1,5 +1,5 @@
 /* eslint class-methods-use-this: 0 */
-import { getDatabase, User } from '../db';
+import { getDatabase, UserEntity } from '../db';
 import { StoredUser } from '../model/user_store_model';
 import { IUserStore } from './storage';
 
@@ -16,12 +16,12 @@ class UserStore implements IUserStore {
       throw new Error('User with same username already exists');
     }
 
-    const insertResult: User = (
+    const insertResult: UserEntity = (
       await getDatabase()
         .getDataSource()
         .createQueryBuilder()
         .insert()
-        .into(User)
+        .into(UserEntity)
         .values([{ username, password, nickname }])
         .returning(returnValues)
         .execute()
@@ -38,7 +38,7 @@ class UserStore implements IUserStore {
       .getDataSource()
       .createQueryBuilder()
       .delete()
-      .from(User)
+      .from(UserEntity)
       .where('userId = :userId', { userId })
       .execute();
   }
@@ -59,7 +59,7 @@ class UserStore implements IUserStore {
     await getDatabase()
       .getDataSource()
       .createQueryBuilder()
-      .update(User)
+      .update(UserEntity)
       .set({
         username,
         password,
@@ -70,7 +70,7 @@ class UserStore implements IUserStore {
   }
 
   async getUser(userId: number): Promise<StoredUser | undefined> {
-    const selectResult: User | null = await getDatabase()
+    const selectResult: UserEntity | null = await getDatabase()
       .getUserRepo()
       .createQueryBuilder('user')
       .where('user.userId = :userId', { userId })
@@ -86,7 +86,7 @@ class UserStore implements IUserStore {
   }
 
   async getUserByUsername(username: string): Promise<StoredUser | undefined> {
-    const selectResult: User | null = await getDatabase()
+    const selectResult: UserEntity | null = await getDatabase()
       .getUserRepo()
       .createQueryBuilder('user')
       .where('user.username = :username', { username })
@@ -102,7 +102,7 @@ class UserStore implements IUserStore {
   }
 
   async getAllUsers(): Promise<StoredUser[]> {
-    const selectResult: User[] = await getDatabase()
+    const selectResult: UserEntity[] = await getDatabase()
       .getUserRepo()
       .createQueryBuilder('user')
       .getMany();

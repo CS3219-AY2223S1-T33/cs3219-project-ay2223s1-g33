@@ -10,7 +10,7 @@ import {
 import Question from './Question';
 
 @Entity('History')
-export default class History {
+export default class HistoryEntity {
   @PrimaryGeneratedColumn()
     id!: string;
 

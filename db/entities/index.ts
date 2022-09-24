@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import { DataSource, Repository } from 'typeorm';
 import { config } from 'dotenv';
 
-import User from './User';
-import Question from './Question';
-import History from './History';
-import PasswordReset from './PasswordReset';
+import UserEntity from './User';
+import QuestionEntity from './Question';
+import HistoryEntity  from './History';
+import PasswordResetEntity  from './PasswordReset';
 
 type DataSourceConfig = {
   DATABASE_DBHOST: string,
@@ -16,10 +16,10 @@ type DataSourceConfig = {
 
 interface IDatabase {
   getDataSource(): DataSource;
-  getUserRepo(): Repository<User>;
-  getHistoryRepo(): Repository<History>;
-  getPasswordRepo(): Repository<PasswordReset>;
-  getQuestionRepo(): Repository<Question>;
+  getUserRepo(): Repository<UserEntity>;
+  getHistoryRepo(): Repository<HistoryEntity>;
+  getPasswordRepo(): Repository<PasswordResetEntity>;
+  getQuestionRepo(): Repository<QuestionEntity>;
 }
 
 function loadEnvironmentConfig(): DataSourceConfig {
@@ -48,20 +48,20 @@ class Database implements IDatabase {
     return this.dataSource;
   }
 
-  getUserRepo(): Repository<User> {
-    return this.dataSource.getRepository(User);
+  getUserRepo(): Repository<UserEntity> {
+    return this.dataSource.getRepository(UserEntity);
   }
 
-  getHistoryRepo(): Repository<History> {
-    return this.dataSource.getRepository(History);
+  getHistoryRepo(): Repository<HistoryEntity> {
+    return this.dataSource.getRepository(HistoryEntity);
   }
 
-  getPasswordRepo(): Repository<PasswordReset> {
-    return this.dataSource.getRepository(PasswordReset);
+  getPasswordRepo(): Repository<PasswordResetEntity> {
+    return this.dataSource.getRepository(PasswordResetEntity);
   }
 
-  getQuestionRepo(): Repository<Question> {
-    return this.dataSource.getRepository(Question);
+  getQuestionRepo(): Repository<QuestionEntity> {
+    return this.dataSource.getRepository(QuestionEntity);
   }
 
   private createDataSource(): DataSource {
@@ -74,7 +74,7 @@ class Database implements IDatabase {
       database: this.dbConfig.DATABASE_NAME,
       synchronize: false,
       logging: false,
-      entities: [User, Question, History, PasswordReset],
+      entities: [UserEntity, QuestionEntity, HistoryEntity, PasswordResetEntity],
       subscribers: [],
       migrations: [],
     });
@@ -112,8 +112,8 @@ function getDatabase(): IDatabase {
 
 export {
   getDatabase,
-  User,
-  History,
-  Question,
-  PasswordReset,
+  UserEntity,
+  HistoryEntity,
+  QuestionEntity,
+  PasswordResetEntity,
 };
