@@ -10,15 +10,16 @@ import { createRedisAuthAdapter } from './redis_adapter/redis_auth_adapter';
 import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
 import createStreamServer from './stream_server/stream_server';
-import CollabTunnelStream from './tunneller/collab_tunnel_server';
+// import CollabTunnelStream from './tunneller/collab_tunnel_server';
+import CollabPubSubStream from './tunneller/collab_redis_pubsub';
 
 const envConfig = loadEnvironment();
 
-const redisConnection: RedisClientType = createClient({
+const redisClientConnection: RedisClientType = createClient({
   url: envConfig.REDIS_SERVER_URL,
 });
-redisConnection.connect();
-const redisAuthAdapter = createRedisAuthAdapter(redisConnection);
+redisClientConnection.connect();
+const redisAuthAdapter = createRedisAuthAdapter(redisClientConnection);
 
 const userAuthService: IAuthenticationAgent = createAuthenticationService(
   envConfig.JWT_SIGNING_SECRET,
@@ -41,5 +42,6 @@ apiServer.registerServiceRoutes(new CollabServiceApi(userAuthService, roomAuthSe
 apiServer.bind();
 
 const streamServer = createStreamServer(envConfig.GRPC_TUNNEL_PORT);
-streamServer.registerServiceRoutes(new CollabTunnelStream());
+// streamServer.registerServiceRoutes(new CollabTunnelStream());
+streamServer.registerServiceRoutes(new CollabPubSubStream());
 streamServer.bind();
