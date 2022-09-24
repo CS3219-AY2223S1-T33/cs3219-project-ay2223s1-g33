@@ -4,8 +4,8 @@ import { config } from 'dotenv';
 
 import UserEntity from './User';
 import QuestionEntity from './Question';
-import HistoryEntity  from './History';
-import PasswordResetEntity  from './PasswordReset';
+import HistoryEntity from './History';
+import PasswordResetEntity from './PasswordReset';
 
 type DataSourceConfig = {
   DATABASE_DBHOST: string,

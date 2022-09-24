@@ -1,4 +1,3 @@
-import { User } from '../proto/types';
 /* eslint import/no-cycle: 0 */
 import {
   Column,
@@ -10,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
+import { User } from '../proto/types';
 import PasswordReset from './PasswordReset';
 import History from './History';
 
