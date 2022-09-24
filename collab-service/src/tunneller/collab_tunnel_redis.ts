@@ -4,34 +4,25 @@ import {
   collabTunnelServiceDefinition,
   ICollabTunnelService,
 } from '../proto/collab-service.grpc-server';
-import {
-  CollabTunnelRequest,
-  CollabTunnelResponse,
-  VerifyRoomErrorCode,
-} from '../proto/collab-service';
-import loadEnvironment from '../utils/env_loader';
-import createRoomSessionService from '../room_auth/room_session_agent';
+import buildErrorResponse from '../controller/collab_response';
 import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter';
+import createRoomSessionService from '../room_auth/room_session_agent';
+import loadEnvironment from '../utils/env_loader';
 
 const envConfig = loadEnvironment();
-const roomService = createRoomSessionService(envConfig.JWT_ROOM_SECRET);
-
-function buildErrorResponse(errorCode: VerifyRoomErrorCode): CollabTunnelResponse {
-  const emptyByte = new Uint8Array(0);
-  return {
-    data: emptyByte,
-    flags: errorCode,
-  };
-}
 
 const pub: RedisClientType = createClient({
   url: envConfig.REDIS_SERVER_URL,
 });
+
 const sub: RedisClientType = createClient({
   url: envConfig.REDIS_SERVER_URL,
 });
+
 pub.connect();
 sub.connect();
+
+const roomService = createRoomSessionService(envConfig.JWT_ROOM_SECRET);
 
 async function pubSubOpenStream(call: any) {
   // When stream opens
@@ -40,7 +31,7 @@ async function pubSubOpenStream(call: any) {
   const roomId = await roomService.verifyToken(roomToken);
   if (!roomId) {
     // Kill stream when invalid
-    const errMsg = buildErrorResponse(VerifyRoomErrorCode.VERIFY_ROOM_UNAUTHORIZED);
+    const errMsg = buildErrorResponse();
     call.write(errMsg);
     call.end();
     return;
@@ -50,7 +41,7 @@ async function pubSubOpenStream(call: any) {
   await redisPubSubAdapter.registerEvent(call);
 
   // When data is detected
-  call.on('data', (request: CollabTunnelRequest) => {
+  call.on('data', (request: any) => {
     redisPubSubAdapter.push(request);
   });
 

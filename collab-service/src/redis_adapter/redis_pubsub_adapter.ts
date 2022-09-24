@@ -45,8 +45,6 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunn
         },
       );
       if (sender !== this.username) {
-        // eslint-disable-next-line no-console
-        console.log(`Received by ${this.username}`);
         call.write(response);
       }
     });
@@ -59,8 +57,6 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunn
       data: request.data,
     };
     await this.redisPub.publish(`pubsub-${this.topic}`, JSON.stringify(messageJson));
-    // eslint-disable-next-line no-console
-    console.log(`Sent by ${this.username}`);
   }
 
   async clean(
