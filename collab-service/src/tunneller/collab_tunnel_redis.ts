@@ -10,7 +10,8 @@ import createRoomSessionService from '../room_auth/room_session_agent';
 import loadEnvironment from '../utils/env_loader';
 import getQuestionByDifficulty from '../adapter/question_handler';
 import setQuestionRedis from '../redis_adapter/redis_question_adapter';
-import { CollabTunnelResponse } from '../proto/collab-service';
+import { CollabTunnelRequest } from '../proto/collab-service';
+import { subscribeCall, createPushStruct } from './collab_tunnel_helper';
 
 const envConfig = loadEnvironment();
 
@@ -31,8 +32,8 @@ async function pubSubOpenStream(
   call: any,
 ) {
   // When stream opens
-  const roomToken = call.metadata.get('roomToken')[0].toString();
-  const username = call.metadata.get('username')[0].toString();
+  const roomToken: string = call.metadata.get('roomToken')[0].toString();
+  const username: string = call.metadata.get('username')[0].toString();
   const data = await roomService.verifyToken(roomToken);
   if (!data) {
     // Kill stream when invalid
@@ -47,12 +48,13 @@ async function pubSubOpenStream(
 
   const redisPubSubAdapter = createRedisPubSubAdapter(pub, sub, username, roomId);
 
-  const writeFunc = (response: CollabTunnelResponse) => call.write(response);
+  const writeFunc = (response: string) => subscribeCall(call, response, username);
   await redisPubSubAdapter.registerEvent(writeFunc);
 
   // When data is detected
-  call.on('data', (request: any) => {
-    redisPubSubAdapter.push(request);
+  call.on('data', (request: CollabTunnelRequest) => {
+    const messageJson = createPushStruct(username, request);
+    redisPubSubAdapter.push(messageJson);
   });
 
   // When stream closes

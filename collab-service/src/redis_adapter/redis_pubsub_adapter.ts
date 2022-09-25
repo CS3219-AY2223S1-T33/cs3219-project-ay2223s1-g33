@@ -1,13 +1,9 @@
 import { RedisClientType } from 'redis';
 import Logger from '../utils/logger';
-import {
-  CollabTunnelRequest,
-  CollabTunnelResponse,
-  VerifyRoomErrorCode,
-} from '../proto/collab-service';
 import TunnelPubSub from './redis_pubsub_types';
 
-class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
+class RedisPubSubAdapter implements TunnelPubSub<{ sender: string, data: Uint8Array },
+string> {
   redisPub: RedisClientType;
 
   redisSub: RedisClientType;
@@ -29,33 +25,16 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunn
   }
 
   async registerEvent(
-    call: (res: CollabTunnelResponse) => void,
+    call: (res: string) => void,
   ): Promise<void> {
-    await this.redisSub.subscribe(`pubsub-${this.topic}`, (message) => {
-      const messageJson = JSON.parse(message);
-      const {
-        sender,
-        data,
-      } = messageJson;
-      const res = CollabTunnelResponse.create(
-        {
-          data: Buffer.from(data),
-          flags: VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
-        },
-      );
-      if (sender !== this.username) {
-        call(res);
-      }
+    await this.redisSub.subscribe(`pubsub-${this.topic}`, (res) => {
+      call(res);
     });
     Logger.info(`Event ${this.topic} registered by ${this.username}`);
   }
 
-  async push(request: CollabTunnelRequest): Promise<void> {
-    const messageJson = {
-      sender: this.username,
-      data: request.data,
-    };
-    await this.redisPub.publish(`pubsub-${this.topic}`, JSON.stringify(messageJson));
+  async push(request: { sender: string, data: Uint8Array }): Promise<void> {
+    await this.redisPub.publish(`pubsub-${this.topic}`, JSON.stringify(request));
   }
 
   async clean(
@@ -72,7 +51,7 @@ function createRedisPubSubAdapter(
   redisSub: RedisClientType,
   username: string,
   roomId: string,
-) : TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
+) : TunnelPubSub<{ sender: string, data: Uint8Array }, string> {
   return new RedisPubSubAdapter(redisPub, redisSub, username, roomId);
 }
 
