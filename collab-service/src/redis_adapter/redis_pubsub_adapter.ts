@@ -29,7 +29,7 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
   }
 
   async registerEvent(
-    call: any,
+    call: Function,
   ): Promise<void> {
     await this.redisSub.subscribe(`pubsub-${this.topic}`, (message) => {
       const messageJson = JSON.parse(message);
@@ -44,7 +44,7 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
         },
       );
       if (sender !== this.username) {
-        call.write(response);
+        call(response);
       }
     });
     Logger.info(`Event ${this.topic} registered by ${this.username}`);
@@ -59,10 +59,10 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
   }
 
   async clean(
-    call: any,
+    call: Function,
   ): Promise<void> {
     await this.redisSub.unsubscribe(`pubsub-${this.topic}`);
-    call.end();
+    call();
     Logger.info(`User ${this.username} unregistered event ${this.topic}`);
   }
 }
