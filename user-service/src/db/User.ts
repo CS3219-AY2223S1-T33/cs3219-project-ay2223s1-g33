@@ -9,12 +9,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
+import { User } from '../proto/types';
 import PasswordReset from './PasswordReset';
 import History from './History';
 
 @Entity('User')
-export default class User {
+export default class UserEntity implements User {
   @PrimaryGeneratedColumn()
     userId!: number;
 
