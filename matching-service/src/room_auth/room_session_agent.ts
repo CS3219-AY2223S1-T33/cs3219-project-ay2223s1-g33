@@ -11,9 +11,10 @@ class RoomSessionAgent implements IRoomSessionAgent {
     this.roomSecret = roomSecret;
   }
 
-  createToken(queueToken: string): string {
+  createToken(roomId: string, difficulty: number): string {
     const payload: TokenRoomLoad = {
-      room_id: queueToken,
+      difficulty,
+      room_id: roomId,
     };
     return sign(payload, this.roomSecret);
   }

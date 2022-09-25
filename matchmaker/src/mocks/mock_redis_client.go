@@ -88,15 +88,15 @@ func (mr *MockRedisMatchmakerClientMockRecorder) UploadFailures(arg0 interface{}
 }
 
 // UploadMatch mocks base method.
-func (m *MockRedisMatchmakerClient) UploadMatch(arg0, arg1 string) error {
+func (m *MockRedisMatchmakerClient) UploadMatch(arg0, arg1 string, arg2 int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadMatch", arg0, arg1)
+	ret := m.ctrl.Call(m, "UploadMatch", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UploadMatch indicates an expected call of UploadMatch.
-func (mr *MockRedisMatchmakerClientMockRecorder) UploadMatch(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockRedisMatchmakerClientMockRecorder) UploadMatch(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadMatch", reflect.TypeOf((*MockRedisMatchmakerClient)(nil).UploadMatch), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadMatch", reflect.TypeOf((*MockRedisMatchmakerClient)(nil).UploadMatch), arg0, arg1, arg2)
 }
