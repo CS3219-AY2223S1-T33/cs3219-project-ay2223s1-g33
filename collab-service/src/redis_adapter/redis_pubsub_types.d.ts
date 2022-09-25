@@ -1,6 +1,6 @@
-declare interface TunnelPubSub<T, V> {
+declare interface TunnelPubSub<T> {
   registerEvent(
-    call: (res: V) => void,
+    call: (res: T) => void,
   ): Promise<void>;
 
   push(request: T): Promise<void>;

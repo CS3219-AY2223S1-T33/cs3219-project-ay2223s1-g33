@@ -24,10 +24,11 @@ function subscribeCall(call: any, message: string, username: string) {
 
 // Wrap Request into Response struct
 function createPushStruct(username: string, request: CollabTunnelRequest) {
-  return {
+  const messageJson = {
     sender: username,
     data: request.data,
   };
+  return JSON.stringify(messageJson);
 }
 
 export {

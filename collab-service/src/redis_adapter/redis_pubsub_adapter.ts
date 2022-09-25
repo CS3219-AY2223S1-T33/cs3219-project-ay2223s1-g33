@@ -2,8 +2,7 @@ import { RedisClientType } from 'redis';
 import Logger from '../utils/logger';
 import TunnelPubSub from './redis_pubsub_types';
 
-class RedisPubSubAdapter implements TunnelPubSub<{ sender: string, data: Uint8Array },
-string> {
+class RedisPubSubAdapter implements TunnelPubSub<string> {
   redisPub: RedisClientType;
 
   redisSub: RedisClientType;
@@ -33,8 +32,8 @@ string> {
     Logger.info(`Event ${this.topic} registered by ${this.username}`);
   }
 
-  async push(request: { sender: string, data: Uint8Array }): Promise<void> {
-    await this.redisPub.publish(`pubsub-${this.topic}`, JSON.stringify(request));
+  async push(request: string): Promise<void> {
+    await this.redisPub.publish(`pubsub-${this.topic}`, request);
   }
 
   async clean(
@@ -51,7 +50,7 @@ function createRedisPubSubAdapter(
   redisSub: RedisClientType,
   username: string,
   roomId: string,
-) : TunnelPubSub<{ sender: string, data: Uint8Array }, string> {
+) : TunnelPubSub<string> {
   return new RedisPubSubAdapter(redisPub, redisSub, username, roomId);
 }
 
