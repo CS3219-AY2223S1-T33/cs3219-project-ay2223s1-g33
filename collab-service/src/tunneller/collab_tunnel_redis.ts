@@ -9,7 +9,7 @@ import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter'
 import createRoomSessionService from '../room_auth/room_session_agent';
 import loadEnvironment from '../utils/env_loader';
 import getQuestionByDifficulty from '../adapter/question_handler';
-import setQuestionRedis from '../redis_adapter/redis_mapping_adapter';
+import setQuestionRedis from '../redis_adapter/redis_question_adapter';
 
 const envConfig = loadEnvironment();
 
