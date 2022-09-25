@@ -1,12 +1,12 @@
-declare interface TunnelPubSub<T, V> {
+declare interface TunnelPubSub<T> {
   registerEvent(
-    call: ServerDuplexStreamImpl<T, V>,
+    call: any,
   ): Promise<void>;
 
   push(request: T): Promise<void>;
 
   clean(
-    call: ServerDuplexStreamImpl<T, V>,
+    call: any,
   ): Promise<void>;
 }
 

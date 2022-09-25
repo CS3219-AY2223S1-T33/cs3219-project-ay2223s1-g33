@@ -1,5 +1,4 @@
 import { RedisClientType } from 'redis';
-import { ServerDuplexStreamImpl } from '@grpc/grpc-js/build/src/server-call';
 import Logger from '../utils/logger';
 import {
   CollabTunnelRequest,
@@ -8,7 +7,7 @@ import {
 } from '../proto/collab-service';
 import TunnelPubSub from './redis_pubsub_types';
 
-class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
+class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
   redisPub: RedisClientType;
 
   redisSub: RedisClientType;
@@ -30,7 +29,7 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunn
   }
 
   async registerEvent(
-    call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>,
+    call: any,
   ): Promise<void> {
     await this.redisSub.subscribe(`pubsub-${this.topic}`, (message) => {
       const messageJson = JSON.parse(message);
@@ -60,7 +59,7 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunn
   }
 
   async clean(
-    call: ServerDuplexStreamImpl<CollabTunnelRequest, CollabTunnelResponse>,
+    call: any,
   ): Promise<void> {
     await this.redisSub.unsubscribe(`pubsub-${this.topic}`);
     call.end();
@@ -73,7 +72,7 @@ function createRedisPubSubAdapter(
   redisSub: RedisClientType,
   username: string,
   roomId: string,
-) : TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
+) : TunnelPubSub<CollabTunnelRequest> {
   return new RedisPubSubAdapter(redisPub, redisSub, username, roomId);
 }
 
