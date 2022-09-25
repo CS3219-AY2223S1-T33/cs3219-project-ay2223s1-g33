@@ -1,9 +1,15 @@
 import { RedisClientType } from 'redis';
 
+type MatchResult = {
+  matched: boolean;
+  difficulty: number;
+  roomId: string;
+};
+
 interface IRedisMatchingAdapter {
   pushStream(username: string, difficulty: number): Promise<boolean>;
   lockIfUnset(username: string): Promise<boolean>;
-  getUserLock(username: string): Promise<string | null>;
+  getUserLock(username: string): Promise<MatchResult | null>;
   deleteUserLock(username: string): Promise<boolean>;
 }
 
@@ -30,10 +36,36 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
     return true;
   }
 
-  async getUserLock(username: string): Promise<string | null> {
+  async getUserLock(username: string): Promise<MatchResult | null> {
     const key = getMatchmakerUserKey(username);
     const result = await this.redisClient.get(key);
-    return result;
+    if (result === null) {
+      return result;
+    }
+
+    if (result === '') {
+      return {
+        matched: false,
+        difficulty: 0,
+        roomId: '',
+      };
+    }
+
+    const tokenParts = result.split(';');
+    if (tokenParts.length < 2) {
+      return null;
+    }
+
+    const difficulty = parseInt(tokenParts[0], 10);
+    if (Number.isNaN(difficulty)) {
+      return null;
+    }
+
+    return {
+      matched: true,
+      difficulty,
+      roomId: tokenParts[1],
+    };
   }
 
   async deleteUserLock(username: string): Promise<boolean> {
@@ -74,4 +106,5 @@ function createRedisMatchingAdapter(redisClient: RedisClientType): IRedisMatchin
 export {
   IRedisMatchingAdapter,
   createRedisMatchingAdapter,
+  MatchResult,
 };

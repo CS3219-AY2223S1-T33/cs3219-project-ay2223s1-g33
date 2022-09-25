@@ -1,8 +1,9 @@
 declare interface IRoomSessionAgent {
-  createToken(payload: string): string;
+  createToken(roomId: string, difficulty: number): string;
   verifyToken(token: string): Promise<string | undefined>;
 }
 declare type TokenRoomLoad = {
+  difficulty: number;
   room_id: string;
 };
 

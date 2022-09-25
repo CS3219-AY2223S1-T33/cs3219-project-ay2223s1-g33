@@ -11,9 +11,10 @@ import (
 )
 
 type MatchmakerMatch struct {
-	userA *string
-	userB *string
-	token *string
+	userA      *string
+	userB      *string
+	token      *string
+	difficulty int
 }
 
 type MatchWorker interface {
@@ -31,6 +32,12 @@ type bufferObject struct {
 	expiryTime time.Time
 	user       *string
 }
+
+const (
+	DIFFICULTY_EASY   = 1
+	DIFFICULTY_MEDIUM = 2
+	DIFFICULTY_HARD   = 3
+)
 
 func NewMatchWorker(
 	redisClient conn.RedisMatchmakerClient,
@@ -72,18 +79,18 @@ func (worker *matchWorker) createMatchingContext() (executor func() *MatchmakerM
 
 		select {
 		case queuer := <-worker.queues.EasyQueue:
-			easyBuffer, match = worker.matchmake(easyBuffer, queuer)
+			easyBuffer, match = worker.matchmake(easyBuffer, queuer, DIFFICULTY_EASY)
 		case queuer := <-worker.queues.MediumQueue:
-			medBuffer, match = worker.matchmake(medBuffer, queuer)
+			medBuffer, match = worker.matchmake(medBuffer, queuer, DIFFICULTY_MEDIUM)
 		case queuer := <-worker.queues.HardQueue:
-			hardBuffer, match = worker.matchmake(hardBuffer, queuer)
+			hardBuffer, match = worker.matchmake(hardBuffer, queuer, DIFFICULTY_HARD)
 		case <-ctx.Done():
 		}
 		return match
 	}
 }
 
-func (worker *matchWorker) matchmake(buffer *bufferObject, incoming *string) (*bufferObject, *MatchmakerMatch) {
+func (worker *matchWorker) matchmake(buffer *bufferObject, incoming *string, difficulty int) (*bufferObject, *MatchmakerMatch) {
 	if buffer == nil {
 		expiryTime := time.Now().Add(worker.queueMessageLifespan)
 		return &bufferObject{
@@ -94,9 +101,10 @@ func (worker *matchWorker) matchmake(buffer *bufferObject, incoming *string) (*b
 
 	matchId := uuid.New().String()
 	return nil, &MatchmakerMatch{
-		userA: buffer.user,
-		userB: incoming,
-		token: &matchId,
+		userA:      buffer.user,
+		userB:      incoming,
+		token:      &matchId,
+		difficulty: difficulty,
 	}
 }
 
@@ -126,13 +134,13 @@ func (worker *matchWorker) uploadMatch(match *MatchmakerMatch) {
 
 	log.Printf("Uploading match for (%s, %s)\n", *match.userA, *match.userB)
 
-	err := worker.redisClient.UploadMatch(*match.userA, *match.token)
+	err := worker.redisClient.UploadMatch(*match.userA, *match.token, match.difficulty)
 	if err != nil {
 		log.Println("Failed to upload match result")
 		return
 	}
 
-	err = worker.redisClient.UploadMatch(*match.userB, *match.token)
+	err = worker.redisClient.UploadMatch(*match.userB, *match.token, match.difficulty)
 	if err != nil {
 		log.Println("Failed to upload match result")
 	}
