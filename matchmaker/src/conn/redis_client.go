@@ -17,7 +17,7 @@ type RedisMatchmakerClient interface {
 	Connect()
 	Close()
 	PollQueue(count int) (result []*common.QueueItem, expired []*common.QueueItem)
-	UploadMatch(username string, matchId string) error
+	UploadMatch(username string, matchId string, difficulty int) error
 	UploadFailures(username []string) error
 }
 
@@ -28,10 +28,11 @@ type redisMatchmakerClient struct {
 }
 
 const (
-	queueKey         = "matchmaker-stream"
-	usernameKey      = "user"
-	difficultyKey    = "diff"
-	matchKeyTemplate = "matchmaker-%s"
+	queueKey           = "matchmaker-stream"
+	usernameKey        = "user"
+	difficultyKey      = "diff"
+	matchKeyTemplate   = "matchmaker-%s"
+	matchValueTemplate = "%d;%s"
 )
 
 func NewRedisMatchmakerClient(server string, queueLifespan time.Duration) RedisMatchmakerClient {
@@ -93,11 +94,12 @@ func (client *redisMatchmakerClient) PollQueue(count int) (result []*common.Queu
 	return inQueue, expired
 }
 
-func (client *redisMatchmakerClient) UploadMatch(username string, matchId string) error {
+func (client *redisMatchmakerClient) UploadMatch(username string, matchId string, difficulty int) error {
 	key := fmt.Sprintf(matchKeyTemplate, username)
 	ctx := context.Background()
 
-	err := client.redisClient.Set(ctx, key, matchId, client.queueLifespan).Err()
+	value := fmt.Sprintf(matchValueTemplate, difficulty, matchId)
+	err := client.redisClient.Set(ctx, key, value, client.queueLifespan).Err()
 	return err
 }
 

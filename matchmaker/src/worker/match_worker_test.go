@@ -88,17 +88,18 @@ func TestUploadMatch(t *testing.T) {
 	}
 
 	gomock.InOrder(
-		redisClient.EXPECT().UploadMatch("A", "ASDF"),
-		redisClient.EXPECT().UploadMatch("B", "ASDF"),
-		redisClient.EXPECT().UploadMatch("A", "ASDF").Return(errors.New("Test error")),
-		redisClient.EXPECT().UploadMatch("A", "ASDF"),
-		redisClient.EXPECT().UploadMatch("B", "ASDF").Return(errors.New("Test error")),
+		redisClient.EXPECT().UploadMatch("A", "ASDF", 1),
+		redisClient.EXPECT().UploadMatch("B", "ASDF", 1),
+		redisClient.EXPECT().UploadMatch("A", "ASDF", 1).Return(errors.New("Test error")),
+		redisClient.EXPECT().UploadMatch("A", "ASDF", 1),
+		redisClient.EXPECT().UploadMatch("B", "ASDF", 1).Return(errors.New("Test error")),
 	)
 
 	match := &MatchmakerMatch{
-		userA: pointerStringOf("A"),
-		userB: pointerStringOf("B"),
-		token: pointerStringOf("ASDF"),
+		userA:      pointerStringOf("A"),
+		userB:      pointerStringOf("B"),
+		token:      pointerStringOf("ASDF"),
+		difficulty: 1,
 	}
 
 	worker.uploadMatch(nil)
