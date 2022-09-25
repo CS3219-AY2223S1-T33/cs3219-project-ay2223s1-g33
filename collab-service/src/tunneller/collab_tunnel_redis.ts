@@ -4,10 +4,12 @@ import {
   collabTunnelServiceDefinition,
   ICollabTunnelService,
 } from '../proto/collab-service.grpc-server';
-import buildErrorResponse from '../controller/collab_response';
+import buildErrorResponse from '../controller/room_handler';
 import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter';
 import createRoomSessionService from '../room_auth/room_session_agent';
 import loadEnvironment from '../utils/env_loader';
+import { Question, QuestionDifficulty } from '../proto/types';
+import getQuestionByDifficulty from '../controller/question_handler';
 
 const envConfig = loadEnvironment();
 
@@ -24,6 +26,14 @@ sub.connect();
 
 const roomService = createRoomSessionService(envConfig.JWT_ROOM_SECRET);
 
+async function setQuestionRedis(key: string, question: Question | undefined) {
+  // @ts-ignore
+  await pub.set(`qns-${key}`, JSON.stringify(question), {
+    EX: 300,
+    NX: true,
+  });
+}
+
 async function pubSubOpenStream(call: any) {
   // When stream opens
   const roomToken = call.metadata.get('roomToken')[0];
@@ -36,6 +46,10 @@ async function pubSubOpenStream(call: any) {
     call.end();
     return;
   }
+
+  // Assume HARD
+  const question = await getQuestionByDifficulty(QuestionDifficulty.HARD);
+  await setQuestionRedis(roomId, question);
 
   const redisPubSubAdapter = createRedisPubSubAdapter(pub, sub, username, roomId);
   await redisPubSubAdapter.registerEvent(call);
