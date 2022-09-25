@@ -19,6 +19,7 @@ declare type TokenPayload = {
 };
 
 declare type TokenRoomLoad = {
+  difficulty: number;
   room_id: string;
 };
 

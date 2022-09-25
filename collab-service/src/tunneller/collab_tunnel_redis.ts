@@ -8,7 +8,7 @@ import buildErrorResponse from '../controller/room_handler';
 import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter';
 import createRoomSessionService from '../room_auth/room_session_agent';
 import loadEnvironment from '../utils/env_loader';
-import { Question, QuestionDifficulty } from '../proto/types';
+import { Question } from '../proto/types';
 import getQuestionByDifficulty from '../controller/question_handler';
 
 const envConfig = loadEnvironment();
@@ -38,17 +38,16 @@ async function pubSubOpenStream(call: any) {
   // When stream opens
   const roomToken = call.metadata.get('roomToken')[0];
   const username = call.metadata.get('username')[0];
-  const roomId = await roomService.verifyToken(roomToken);
-  if (!roomId) {
+  const data = await roomService.verifyToken(roomToken);
+  if (!data) {
     // Kill stream when invalid
     const errMsg = buildErrorResponse();
     call.write(errMsg);
     call.end();
     return;
   }
-
-  // Assume HARD
-  const question = await getQuestionByDifficulty(QuestionDifficulty.HARD);
+  const { roomId, difficulty } = data;
+  const question = await getQuestionByDifficulty(difficulty);
   await setQuestionRedis(roomId, question);
 
   const redisPubSubAdapter = createRedisPubSubAdapter(pub, sub, username, roomId);
