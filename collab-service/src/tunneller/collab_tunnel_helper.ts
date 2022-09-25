@@ -5,7 +5,7 @@ import {
 } from '../proto/collab-service';
 
 // Unwrap Response struct and write response to client
-function subscribeCall(call: any, message: string, username: string) {
+function subscriptionListener(call: any, message: string, username: string) {
   const messageJson = JSON.parse(message);
   const {
     sender,
@@ -32,6 +32,6 @@ function createPushStruct(username: string, request: CollabTunnelRequest) {
 }
 
 export {
-  subscribeCall,
+  subscriptionListener,
   createPushStruct,
 };

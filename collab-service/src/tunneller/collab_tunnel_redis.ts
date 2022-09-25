@@ -11,7 +11,7 @@ import loadEnvironment from '../utils/env_loader';
 import getQuestionByDifficulty from '../adapter/question_handler';
 import setQuestionRedis from '../redis_adapter/redis_question_adapter';
 import { CollabTunnelRequest } from '../proto/collab-service';
-import { subscribeCall, createPushStruct } from './collab_tunnel_helper';
+import { subscriptionListener, createPushStruct } from './collab_tunnel_helper';
 
 const envConfig = loadEnvironment();
 
@@ -48,7 +48,7 @@ async function pubSubOpenStream(
 
   const redisPubSubAdapter = createRedisPubSubAdapter(pub, sub, username, roomId);
 
-  const writeFunc = (response: string) => subscribeCall(call, response, username);
+  const writeFunc = (response: string) => subscriptionListener(call, response, username);
   await redisPubSubAdapter.registerEvent(writeFunc);
 
   // When data is detected
