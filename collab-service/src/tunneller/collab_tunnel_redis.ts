@@ -1,4 +1,4 @@
-import { ServiceDefinition, UntypedServiceImplementation } from '@grpc/grpc-js';
+import { ServiceDefinition } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
 import {
   collabTunnelServiceDefinition,
@@ -65,13 +65,15 @@ async function pubSubOpenStream(
 class CollabTunnelPubSub {
   public serviceDefinition: ServiceDefinition<ICollabTunnelService>;
 
-  public serviceImplementation: UntypedServiceImplementation;
+  public serviceImplementation: ICollabTunnelService;
 
   constructor() {
-    this.serviceDefinition = collabTunnelServiceDefinition;
-    this.serviceImplementation = {
-      OpenStream: pubSubOpenStream,
+    const collabService: ICollabTunnelService = {
+      openStream: pubSubOpenStream,
     };
+
+    this.serviceDefinition = collabTunnelServiceDefinition;
+    this.serviceImplementation = collabService;
   }
 }
 

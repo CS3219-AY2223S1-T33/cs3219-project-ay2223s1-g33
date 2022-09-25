@@ -7,7 +7,7 @@ import {
 } from '../proto/collab-service';
 import TunnelPubSub from './redis_pubsub_types';
 
-class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
+class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
   redisPub: RedisClientType;
 
   redisSub: RedisClientType;
@@ -29,7 +29,7 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
   }
 
   async registerEvent(
-    call: Function,
+    call: (res: CollabTunnelResponse) => void,
   ): Promise<void> {
     await this.redisSub.subscribe(`pubsub-${this.topic}`, (message) => {
       const messageJson = JSON.parse(message);
@@ -37,14 +37,14 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
         sender,
         data,
       } = messageJson;
-      const response = CollabTunnelResponse.create(
+      const res = CollabTunnelResponse.create(
         {
           data: Buffer.from(data),
           flags: VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
         },
       );
       if (sender !== this.username) {
-        call(response);
+        call(res);
       }
     });
     Logger.info(`Event ${this.topic} registered by ${this.username}`);
@@ -59,7 +59,7 @@ class RedisPubSubAdapter implements TunnelPubSub<CollabTunnelRequest> {
   }
 
   async clean(
-    call: Function,
+    call: () => void,
   ): Promise<void> {
     await this.redisSub.unsubscribe(`pubsub-${this.topic}`);
     call();
@@ -72,7 +72,7 @@ function createRedisPubSubAdapter(
   redisSub: RedisClientType,
   username: string,
   roomId: string,
-) : TunnelPubSub<CollabTunnelRequest> {
+) : TunnelPubSub<CollabTunnelRequest, CollabTunnelResponse> {
   return new RedisPubSubAdapter(redisPub, redisSub, username, roomId);
 }
 
