@@ -3,7 +3,7 @@ import {
   ServerCredentials,
 } from '@grpc/grpc-js';
 import Logger from '../utils/logger';
-import CollabTunnelStream from '../tunneller/collab_tunnel_server';
+import CollabTunnelPubSub from '../tunneller/collab_tunnel_redis';
 
 const hostAddress = '0.0.0.0';
 
@@ -32,7 +32,7 @@ class StreamServer {
     );
   }
 
-  registerServiceRoutes(stream : CollabTunnelStream): void {
+  registerServiceRoutes(stream : CollabTunnelPubSub): void {
     this.grpcServer.addService(stream.serviceDefinition, stream.serviceImplementation);
   }
 }

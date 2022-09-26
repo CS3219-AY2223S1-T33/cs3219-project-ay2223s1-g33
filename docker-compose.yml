@@ -67,16 +67,15 @@ services:
       dockerfile: collab-service.dockerfile
 
     ports:
-      - "8083:8083"
       - "4003:4003"
 
     expose:
-      - "8083"
       - "4003"
 
     volumes:
       - .:/app/collab-service/build
       - /app/collab-service/node_modules
+
   question-service:
     platform: linux/amd64
     env_file: config_env/question-service.env
@@ -87,6 +86,7 @@ services:
 
     ports:
       - "8084:8084"
+      - "4004:4004"
 
     expose:
       - "8084"
@@ -97,6 +97,7 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
   matchmaker:
     platform: linux/amd64
     env_file: config_env/matchmaker.env

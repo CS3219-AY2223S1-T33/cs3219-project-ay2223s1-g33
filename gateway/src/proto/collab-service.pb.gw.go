@@ -31,77 +31,68 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_CollabService_VerifyRoom_0(ctx context.Context, marshaler runtime.Marshaler, client CollabServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq VerifyRoomRequest
+func request_CollabTunnelService_OpenStream_0(ctx context.Context, marshaler runtime.Marshaler, client CollabTunnelServiceClient, req *http.Request, pathParams map[string]string) (CollabTunnelService_OpenStreamClient, runtime.ServerMetadata, error) {
 	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	stream, err := client.OpenStream(ctx)
+	if err != nil {
+		grpclog.Infof("Failed to start streaming: %v", err)
+		return nil, metadata, err
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	dec := marshaler.NewDecoder(req.Body)
+	handleSend := func() error {
+		var protoReq CollabTunnelRequest
+		err := dec.Decode(&protoReq)
+		if err == io.EOF {
+			return err
+		}
+		if err != nil {
+			grpclog.Infof("Failed to decode request: %v", err)
+			return err
+		}
+		if err := stream.Send(&protoReq); err != nil {
+			grpclog.Infof("Failed to send request: %v", err)
+			return err
+		}
+		return nil
 	}
-
-	msg, err := client.VerifyRoom(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
+	go func() {
+		for {
+			if err := handleSend(); err != nil {
+				break
+			}
+		}
+		if err := stream.CloseSend(); err != nil {
+			grpclog.Infof("Failed to terminate client stream: %v", err)
+		}
+	}()
+	header, err := stream.Header()
+	if err != nil {
+		grpclog.Infof("Failed to get header from client: %v", err)
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
 }
 
-func local_request_CollabService_VerifyRoom_0(ctx context.Context, marshaler runtime.Marshaler, server CollabServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq VerifyRoomRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.VerifyRoom(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-// RegisterCollabServiceHandlerServer registers the http handlers for service CollabService to "mux".
-// UnaryRPC     :call CollabServiceServer directly.
+// RegisterCollabTunnelServiceHandlerServer registers the http handlers for service CollabTunnelService to "mux".
+// UnaryRPC     :call CollabTunnelServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCollabServiceHandlerFromEndpoint instead.
-func RegisterCollabServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CollabServiceServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCollabTunnelServiceHandlerFromEndpoint instead.
+func RegisterCollabTunnelServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CollabTunnelServiceServer) error {
 
-	mux.Handle("POST", pattern_CollabService_VerifyRoom_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/collaboration_service.CollabService/VerifyRoom", runtime.WithHTTPPathPattern("/collaboration_service.CollabService/VerifyRoom"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_CollabService_VerifyRoom_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_CollabService_VerifyRoom_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
+	mux.Handle("POST", pattern_CollabTunnelService_OpenStream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil
 }
 
-// RegisterCollabServiceHandlerFromEndpoint is same as RegisterCollabServiceHandler but
+// RegisterCollabTunnelServiceHandlerFromEndpoint is same as RegisterCollabTunnelServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterCollabServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterCollabTunnelServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -121,41 +112,41 @@ func RegisterCollabServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.
 		}()
 	}()
 
-	return RegisterCollabServiceHandler(ctx, mux, conn)
+	return RegisterCollabTunnelServiceHandler(ctx, mux, conn)
 }
 
-// RegisterCollabServiceHandler registers the http handlers for service CollabService to "mux".
+// RegisterCollabTunnelServiceHandler registers the http handlers for service CollabTunnelService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterCollabServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterCollabServiceHandlerClient(ctx, mux, NewCollabServiceClient(conn))
+func RegisterCollabTunnelServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterCollabTunnelServiceHandlerClient(ctx, mux, NewCollabTunnelServiceClient(conn))
 }
 
-// RegisterCollabServiceHandlerClient registers the http handlers for service CollabService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "CollabServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "CollabServiceClient"
+// RegisterCollabTunnelServiceHandlerClient registers the http handlers for service CollabTunnelService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "CollabTunnelServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "CollabTunnelServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "CollabServiceClient" to call the correct interceptors.
-func RegisterCollabServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client CollabServiceClient) error {
+// "CollabTunnelServiceClient" to call the correct interceptors.
+func RegisterCollabTunnelServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client CollabTunnelServiceClient) error {
 
-	mux.Handle("POST", pattern_CollabService_VerifyRoom_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CollabTunnelService_OpenStream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/collaboration_service.CollabService/VerifyRoom", runtime.WithHTTPPathPattern("/collaboration_service.CollabService/VerifyRoom"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/collaboration_service.CollabTunnelService/OpenStream", runtime.WithHTTPPathPattern("/collaboration_service.CollabTunnelService/OpenStream"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_CollabService_VerifyRoom_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_CollabTunnelService_OpenStream_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_CollabService_VerifyRoom_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CollabTunnelService_OpenStream_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -163,9 +154,9 @@ func RegisterCollabServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_CollabService_VerifyRoom_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"collaboration_service.CollabService", "VerifyRoom"}, ""))
+	pattern_CollabTunnelService_OpenStream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"collaboration_service.CollabTunnelService", "OpenStream"}, ""))
 )
 
 var (
-	forward_CollabService_VerifyRoom_0 = runtime.ForwardResponseMessage
+	forward_CollabTunnelService_OpenStream_0 = runtime.ForwardResponseStream
 )

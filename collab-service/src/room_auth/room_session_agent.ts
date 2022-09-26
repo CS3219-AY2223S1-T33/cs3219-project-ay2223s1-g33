@@ -1,8 +1,5 @@
-import { sign, verify } from 'jsonwebtoken';
-import {
-  IRoomSessionAgent,
-} from './room_session_agent_types';
-import { TokenRoomLoad } from '../auth/authentication_agent_types';
+import { verify } from 'jsonwebtoken';
+import { IRoomSessionAgent, TokenRoomLoad } from './room_session_agent_types';
 
 class RoomSessionAgent implements IRoomSessionAgent {
   roomSecret: string;
@@ -11,17 +8,13 @@ class RoomSessionAgent implements IRoomSessionAgent {
     this.roomSecret = roomSecret;
   }
 
-  createToken(queueToken: string): string {
-    const payload: TokenRoomLoad = {
-      room_id: queueToken,
-    };
-    return sign(payload, this.roomSecret);
-  }
-
-  async verifyToken(token: string): Promise<string | undefined> {
+  async verifyToken(token: string): Promise<{ difficulty: number; roomId: string } | undefined> {
     try {
       const decoded = <TokenRoomLoad> verify(token, this.roomSecret);
-      return decoded.room_id;
+      return {
+        difficulty: decoded.difficulty,
+        roomId: decoded.room_id,
+      };
     } catch {
       return undefined;
     }
