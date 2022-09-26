@@ -1,4 +1,4 @@
-import { ServiceDefinition } from '@grpc/grpc-js';
+import { ServiceDefinition, ServerDuplexStream } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
 import {
   collabTunnelServiceDefinition,
@@ -10,8 +10,8 @@ import createRoomSessionService from '../room_auth/room_session_agent';
 import loadEnvironment from '../utils/env_loader';
 import getQuestionByDifficulty from '../adapter/question_handler';
 import setQuestionRedis from '../redis_adapter/redis_question_adapter';
-import { CollabTunnelRequest } from '../proto/collab-service';
-import { subscriptionListener, createPushStruct } from './collab_tunnel_helper';
+import { CollabTunnelRequest, CollabTunnelResponse, VerifyRoomErrorCode } from '../proto/collab-service';
+import { CollabTunnelSerializer, TunnelMessage } from './collab_tunnel_serializer';
 
 const envConfig = loadEnvironment();
 
@@ -28,8 +28,26 @@ sub.connect();
 
 const roomService = createRoomSessionService(envConfig.JWT_ROOM_SECRET);
 
-async function pubSubOpenStream(
-  call: any,
+function createCallWriter(
+  call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+  username: string,
+): (data: TunnelMessage) => void {
+  return (message: TunnelMessage): void => {
+    const res = CollabTunnelResponse.create(
+      {
+        data: Buffer.from(message.data),
+        flags: VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
+      },
+    );
+
+    if (message.sender !== username) {
+      call.write(res);
+    }
+  };
+}
+
+async function pubSubOpenStreamHandler(
+  call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
 ) {
   // When stream opens
   const roomToken: string = call.metadata.get('roomToken')[0].toString();
@@ -42,19 +60,27 @@ async function pubSubOpenStream(
     call.end();
     return;
   }
+
   const { roomId, difficulty } = data;
   const question = await getQuestionByDifficulty(difficulty);
   await setQuestionRedis(roomId, question, pub);
 
-  const redisPubSubAdapter = createRedisPubSubAdapter(pub, sub, username, roomId);
+  const redisPubSubAdapter = createRedisPubSubAdapter(
+    pub,
+    sub,
+    username,
+    roomId,
+    new CollabTunnelSerializer(),
+  );
 
-  const writeFunc = (response: string) => subscriptionListener(call, response, username);
-  await redisPubSubAdapter.registerEvent(writeFunc);
+  await redisPubSubAdapter.addOnMessageListener(createCallWriter(call, username));
 
   // When data is detected
   call.on('data', (request: CollabTunnelRequest) => {
-    const messageJson = createPushStruct(username, request);
-    redisPubSubAdapter.push(messageJson);
+    redisPubSubAdapter.pushMessage({
+      data: request.data,
+      sender: username,
+    });
   });
 
   // When stream closes
@@ -71,7 +97,7 @@ class CollabTunnelPubSub {
 
   constructor() {
     const collabService: ICollabTunnelService = {
-      openStream: pubSubOpenStream,
+      openStream: pubSubOpenStreamHandler,
     };
 
     this.serviceDefinition = collabTunnelServiceDefinition;

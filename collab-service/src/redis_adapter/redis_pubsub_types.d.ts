@@ -1,13 +1,21 @@
 declare interface TunnelPubSub<T> {
-  registerEvent(
+  addOnMessageListener(
     call: (res: T) => void,
   ): Promise<void>;
 
-  push(request: T): Promise<void>;
+  pushMessage(request: T): Promise<void>;
 
   clean(
     call: () => void,
   ): Promise<void>;
 }
 
-export default TunnelPubSub;
+declare interface TunnelSerializer<T> {
+  serialize(data: T): string;
+  deserialize(flattenedData: string): (T | undefined);
+}
+
+export {
+  TunnelPubSub,
+  TunnelSerializer,
+};

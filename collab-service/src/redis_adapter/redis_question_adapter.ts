@@ -6,7 +6,6 @@ async function setQuestionRedis(
   question: Question | undefined,
   publisher: RedisClientType,
 ) {
-  // @ts-ignore
   await publisher.set(`qns-${key}`, JSON.stringify(question), {
     EX: 300,
     NX: true,

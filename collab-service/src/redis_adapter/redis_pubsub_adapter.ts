@@ -1,8 +1,8 @@
 import { RedisClientType } from 'redis';
 import Logger from '../utils/logger';
-import TunnelPubSub from './redis_pubsub_types';
+import { TunnelPubSub, TunnelSerializer } from './redis_pubsub_types';
 
-class RedisPubSubAdapter implements TunnelPubSub<string> {
+class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
   redisPub: RedisClientType;
 
   redisSub: RedisClientType;
@@ -11,29 +11,38 @@ class RedisPubSubAdapter implements TunnelPubSub<string> {
 
   topic: string;
 
+  serializer: TunnelSerializer<T>;
+
   constructor(
     redisPub: RedisClientType,
     redisSub: RedisClientType,
     username: string,
     roomId: string,
+    serializer: TunnelSerializer<T>,
   ) {
     this.redisPub = redisPub;
     this.redisSub = redisSub;
     this.username = username;
     this.topic = roomId;
+    this.serializer = serializer;
   }
 
-  async registerEvent(
-    call: (res: string) => void,
+  async addOnMessageListener(
+    call: (res: T) => void,
   ): Promise<void> {
     await this.redisSub.subscribe(`pubsub-${this.topic}`, (res) => {
-      call(res);
+      const received = this.serializer.deserialize(res);
+      if (received === undefined) {
+        Logger.warn(`User ${this.username} received an invalid pub-sub struct`);
+        return;
+      }
+      call(received);
     });
     Logger.info(`Event ${this.topic} registered by ${this.username}`);
   }
 
-  async push(request: string): Promise<void> {
-    await this.redisPub.publish(`pubsub-${this.topic}`, request);
+  async pushMessage(request: T): Promise<void> {
+    await this.redisPub.publish(`pubsub-${this.topic}`, this.serializer.serialize(request));
   }
 
   async clean(
@@ -45,13 +54,14 @@ class RedisPubSubAdapter implements TunnelPubSub<string> {
   }
 }
 
-function createRedisPubSubAdapter(
+function createRedisPubSubAdapter<T>(
   redisPub: RedisClientType,
   redisSub: RedisClientType,
   username: string,
   roomId: string,
-) : TunnelPubSub<string> {
-  return new RedisPubSubAdapter(redisPub, redisSub, username, roomId);
+  serializer: TunnelSerializer<T>,
+) : TunnelPubSub<T> {
+  return new RedisPubSubAdapter(redisPub, redisSub, username, roomId, serializer);
 }
 
 export {
