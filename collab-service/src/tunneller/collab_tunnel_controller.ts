@@ -92,6 +92,10 @@ export default class CollabTunnelController {
 
     // When stream closes
     call.on('end', () => {
+      redisPubSubAdapter.pushMessage({
+        data: createDisconnectMessage(username),
+        sender: username,
+      });
 
       const endFunc = () => call.end();
       redisPubSubAdapter.clean(endFunc);
