@@ -47,6 +47,7 @@ func (handler *validateTokenHandler) Handle(req *pb.ValidateTokenRequest) (*pb.V
 
 	return &pb.ValidateTokenResponse{
 		Email:     tokenData.Email,
+		Nickname:  tokenData.Nickname,
 		ErrorCode: pb.ValidateTokenErrorCode_VALIDATE_TOKEN_NO_ERROR,
 	}, nil
 }
