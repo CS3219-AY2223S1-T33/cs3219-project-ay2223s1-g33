@@ -12,6 +12,10 @@ import { createDisconnectMessage } from '../room/disconnect_message_builder';
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
 
+const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
+const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
+const PROXY_HEADER_ROOM_TOKEN = 'X-Gateway-Proxy-Room-Token';
+
 function createCallWriter(
   call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   username: string,
@@ -57,8 +61,10 @@ export default class CollabTunnelController {
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
     // When stream opens
-    const roomToken: string = call.metadata.get('roomToken')[0].toString();
-    const username: string = call.metadata.get('username')[0].toString();
+    const roomToken: string = call.metadata.get(PROXY_HEADER_ROOM_TOKEN)[0].toString();
+    const username: string = call.metadata.get(PROXY_HEADER_USERNAME)[0].toString();
+    const nickname: string = call.metadata.get(PROXY_HEADER_NICKNAME)[0].toString();
+
     const data = await this.roomTokenAgent.verifyToken(roomToken);
     if (!data) {
       // Kill stream when invalid
@@ -93,7 +99,7 @@ export default class CollabTunnelController {
     // When stream closes
     call.on('end', () => {
       redisPubSubAdapter.pushMessage({
-        data: createDisconnectMessage(username),
+        data: createDisconnectMessage(nickname),
         sender: username,
       });
 
