@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cs3219-project-ay2223s1-g33/gateway/auth"
 	"cs3219-project-ay2223s1-g33/gateway/proxy"
 	"log"
 	"net/http"
@@ -14,15 +15,16 @@ func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet && r.URL.EscapedPath() == websocketRoute {
-			roomId := r.URL.Query().Get("room")
-			if roomId == "" {
+			roomToken := r.URL.Query().Get("room")
+			if roomToken == "" {
 				w.WriteHeader(400)
 				w.Write([]byte("No room token provided"))
 				return
 			}
-			username := r.Header.Get("X-Bearer-Username")
+			username := r.Header.Get(auth.AuthHeaderUsername)
+			nickname := r.Header.Get(auth.AuthHeaderNickname)
 
-			downstreamClient := proxy.CreateProxyClient(config.CollabServer, roomId, username)
+			downstreamClient := proxy.CreateProxyClient(config.CollabServer, roomToken, username, nickname)
 			downstreamWriter, err := downstreamClient.Start()
 			if err != nil {
 				log.Println(err)

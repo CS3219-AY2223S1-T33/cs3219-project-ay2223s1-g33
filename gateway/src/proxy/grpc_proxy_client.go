@@ -24,7 +24,8 @@ type ProxyWorker interface {
 type proxyWorker struct {
 	server          string
 	sessionUsername string
-	roomId          string
+	sessionNickname string
+	roomToken       string
 
 	conn          *grpc.ClientConn
 	stream        pb.CollabTunnelService_OpenStreamClient
@@ -32,11 +33,17 @@ type proxyWorker struct {
 	closeListener func()
 }
 
-func CreateProxyClient(server string, roomId string, sessionUsername string) ProxyWorker {
+func CreateProxyClient(
+	server string,
+	roomToken string,
+	sessionUsername string,
+	sessionNickname string,
+) ProxyWorker {
 	return &proxyWorker{
 		server:          server,
 		sessionUsername: sessionUsername,
-		roomId:          roomId,
+		sessionNickname: sessionNickname,
+		roomToken:       roomToken,
 	}
 }
 
@@ -58,8 +65,9 @@ func (worker *proxyWorker) Start() (io.WriteCloser, error) {
 
 	client := pb.NewCollabTunnelServiceClient(conn)
 	headers := metadata.Pairs(
-		"roomToken", worker.roomId,
-		"username", worker.sessionUsername,
+		ProxyHeaderRoomToken, worker.roomToken,
+		ProxyHeaderUsername, worker.sessionUsername,
+		ProxyHeaderNickanme, worker.sessionNickname,
 	)
 
 	ctx := metadata.NewOutgoingContext(context.Background(), headers)
@@ -109,7 +117,7 @@ func (worker *proxyWorker) handleConnection() {
 		}
 
 		if worker.upstream != nil {
-			if message.Flags & int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
+			if message.Flags&int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
 				int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) {
 				log.Println("Unauthorized room token detected")
 				worker.upstream.Close()

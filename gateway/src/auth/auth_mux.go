@@ -11,13 +11,6 @@ import (
 const (
 	loginRoute    = "/api/user/login"
 	registerRoute = "/api/user/register"
-
-	headerUsername         = "X-Bearer-Username"
-	headerNickname         = "X-Bearer-Nickname"
-	headerSessionToken     = "X-Bearer-Session-Token"
-	headerRefreshToken     = "X-Bearer-Refresh-Token"
-	cookieNameSessionToken = "AUTH-SESSION"
-	cookieNameRefreshToken = "AUTH-REFRESH"
 )
 
 func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Handler, util.Disposable, error) {
@@ -37,14 +30,14 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 		sanitizeRequest(r)
 
 		// Authenticate
-		sessionTokenCookie, err := r.Cookie(cookieNameSessionToken)
+		sessionTokenCookie, err := r.Cookie(AuthCookieNameSessionToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
 		sessionToken := sessionTokenCookie.Value
 
-		refreshTokenCookie, err := r.Cookie(cookieNameRefreshToken)
+		refreshTokenCookie, err := r.Cookie(AuthCookieNameRefreshToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
@@ -61,7 +54,7 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 		if newSessionToken != "" {
 			w.Header().Add("Set-Cookie", fmt.Sprintf(
 				"%s=%s; Path=/",
-				cookieNameSessionToken,
+				AuthCookieNameSessionToken,
 				newSessionToken,
 			))
 			sessionToken = newSessionToken
@@ -74,10 +67,10 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 }
 
 func sanitizeRequest(req *http.Request) {
-	req.Header.Set(headerUsername, "")
-	req.Header.Set(headerNickname, "")
-	req.Header.Set(headerSessionToken, "")
-	req.Header.Set(headerRefreshToken, "")
+	req.Header.Set(AuthHeaderUsername, "")
+	req.Header.Set(AuthHeaderNickname, "")
+	req.Header.Set(AuthHeaderSessionToken, "")
+	req.Header.Set(AuthHeaderRefreshToken, "")
 }
 
 func addAuthHeaders(
@@ -87,10 +80,10 @@ func addAuthHeaders(
 	sessionToken string,
 	refreshToken string,
 ) {
-	req.Header.Set(headerUsername, username)
-	req.Header.Set(headerNickname, nickname)
-	req.Header.Set(headerSessionToken, sessionToken)
-	req.Header.Set(headerRefreshToken, refreshToken)
+	req.Header.Set(AuthHeaderUsername, username)
+	req.Header.Set(AuthHeaderNickname, nickname)
+	req.Header.Set(AuthHeaderSessionToken, sessionToken)
+	req.Header.Set(AuthHeaderRefreshToken, refreshToken)
 }
 
 func writeUnauthorizedResponse(w http.ResponseWriter) {
