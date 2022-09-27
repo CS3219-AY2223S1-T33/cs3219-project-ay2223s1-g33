@@ -22,6 +22,7 @@ enum AddBlacklistErrorCode {
 
 message CreateTokenRequest {
   string email = 1;
+  string nickname = 2;
 }
 
 message CreateTokenResponse {
@@ -37,8 +38,9 @@ message ValidateTokenRequest {
 
 message ValidateTokenResponse {
   string email = 1;
-  string new_session_token = 2;
-  ValidateTokenErrorCode error_code = 3;
+  string nickname = 2;
+  string new_session_token = 3;
+  ValidateTokenErrorCode error_code = 4;
 }
 
 message AddBlacklistRequest {

@@ -21,6 +21,10 @@ export interface CreateTokenRequest {
      * @generated from protobuf field: string email = 1;
      */
     email: string;
+    /**
+     * @generated from protobuf field: string nickname = 2;
+     */
+    nickname: string;
 }
 /**
  * @generated from protobuf message session_service.CreateTokenResponse
@@ -61,11 +65,15 @@ export interface ValidateTokenResponse {
      */
     email: string;
     /**
-     * @generated from protobuf field: string new_session_token = 2;
+     * @generated from protobuf field: string nickname = 2;
+     */
+    nickname: string;
+    /**
+     * @generated from protobuf field: string new_session_token = 3;
      */
     newSessionToken: string;
     /**
-     * @generated from protobuf field: session_service.ValidateTokenErrorCode error_code = 3;
+     * @generated from protobuf field: session_service.ValidateTokenErrorCode error_code = 4;
      */
     errorCode: ValidateTokenErrorCode;
 }
@@ -142,11 +150,12 @@ export enum AddBlacklistErrorCode {
 class CreateTokenRequest$Type extends MessageType<CreateTokenRequest> {
     constructor() {
         super("session_service.CreateTokenRequest", [
-            { no: 1, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "nickname", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<CreateTokenRequest>): CreateTokenRequest {
-        const message = { email: "" };
+        const message = { email: "", nickname: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<CreateTokenRequest>(this, message, value);
@@ -159,6 +168,9 @@ class CreateTokenRequest$Type extends MessageType<CreateTokenRequest> {
             switch (fieldNo) {
                 case /* string email */ 1:
                     message.email = reader.string();
+                    break;
+                case /* string nickname */ 2:
+                    message.nickname = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -175,6 +187,9 @@ class CreateTokenRequest$Type extends MessageType<CreateTokenRequest> {
         /* string email = 1; */
         if (message.email !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.email);
+        /* string nickname = 2; */
+        if (message.nickname !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.nickname);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -305,12 +320,13 @@ class ValidateTokenResponse$Type extends MessageType<ValidateTokenResponse> {
     constructor() {
         super("session_service.ValidateTokenResponse", [
             { no: 1, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "new_session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "error_code", kind: "enum", T: () => ["session_service.ValidateTokenErrorCode", ValidateTokenErrorCode] }
+            { no: 2, name: "nickname", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "new_session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "error_code", kind: "enum", T: () => ["session_service.ValidateTokenErrorCode", ValidateTokenErrorCode] }
         ]);
     }
     create(value?: PartialMessage<ValidateTokenResponse>): ValidateTokenResponse {
-        const message = { email: "", newSessionToken: "", errorCode: 0 };
+        const message = { email: "", nickname: "", newSessionToken: "", errorCode: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<ValidateTokenResponse>(this, message, value);
@@ -324,10 +340,13 @@ class ValidateTokenResponse$Type extends MessageType<ValidateTokenResponse> {
                 case /* string email */ 1:
                     message.email = reader.string();
                     break;
-                case /* string new_session_token */ 2:
+                case /* string nickname */ 2:
+                    message.nickname = reader.string();
+                    break;
+                case /* string new_session_token */ 3:
                     message.newSessionToken = reader.string();
                     break;
-                case /* session_service.ValidateTokenErrorCode error_code */ 3:
+                case /* session_service.ValidateTokenErrorCode error_code */ 4:
                     message.errorCode = reader.int32();
                     break;
                 default:
@@ -345,12 +364,15 @@ class ValidateTokenResponse$Type extends MessageType<ValidateTokenResponse> {
         /* string email = 1; */
         if (message.email !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.email);
-        /* string new_session_token = 2; */
+        /* string nickname = 2; */
+        if (message.nickname !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.nickname);
+        /* string new_session_token = 3; */
         if (message.newSessionToken !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.newSessionToken);
-        /* session_service.ValidateTokenErrorCode error_code = 3; */
+            writer.tag(3, WireType.LengthDelimited).string(message.newSessionToken);
+        /* session_service.ValidateTokenErrorCode error_code = 4; */
         if (message.errorCode !== 0)
-            writer.tag(3, WireType.Varint).int32(message.errorCode);
+            writer.tag(4, WireType.Varint).int32(message.errorCode);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
