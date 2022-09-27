@@ -53,7 +53,7 @@ export default class CollabTunnelController {
     this.topicPool = createRedisTopicPool(sub);
   }
 
-  async pubSubOpenStreamHandler(
+  async handleOpenStream(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
     // When stream opens

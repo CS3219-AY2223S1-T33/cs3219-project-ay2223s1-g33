@@ -3,7 +3,7 @@ import {
   ServerCredentials,
 } from '@grpc/grpc-js';
 import Logger from '../utils/logger';
-import CollabTunnelPubSub from '../tunneller/collab_tunnel_handler';
+import CollabTunnelPubSub from '../tunneller/collab_service_router';
 
 const hostAddress = '0.0.0.0';
 

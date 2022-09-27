@@ -1,13 +1,10 @@
 import { config } from 'dotenv';
 
 type EnvironmentConfig = {
-  readonly JWT_SIGNING_SECRET: string,
-  readonly JWT_ROOM_SECRET: string,
-  readonly REDIS_SERVER_URL: string,
-  readonly QUESTION_SERVER_URL: string,
-  readonly HTTP_PORT: number,
-  readonly GRPC_PORT: number,
-  readonly GRPC_TUNNEL_PORT: number,
+  readonly JWT_ROOM_SECRET: string;
+  readonly REDIS_SERVER_URL: string;
+  readonly QUESTION_SERVER_URL: string;
+  readonly GRPC_PORT: number;
 };
 
 function requireExists(key: string): void {
@@ -59,12 +56,9 @@ export default function loadEnvironment(): EnvironmentConfig {
   config();
 
   return {
-    JWT_SIGNING_SECRET: requireString('JWT_SIGNING_SECRET'),
     JWT_ROOM_SECRET: requireString('JWT_ROOM_SECRET'),
     REDIS_SERVER_URL: requireString('REDIS_SERVER_URL'),
     QUESTION_SERVER_URL: requireString('QUESTION_SERVER_URL'),
-    HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8083),
-    GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4002),
-    GRPC_TUNNEL_PORT: requireInt('GRPC_TUNNEL_PORT', 4003),
+    GRPC_PORT: requireInt('GRPC_PORT', 4003),
   };
 }

@@ -5,14 +5,14 @@ import {
 } from '../proto/collab-service.grpc-server';
 import CollabTunnelController from './collab_tunnel_controller';
 
-class CollabTunnelPubSub {
+class CollabTunnelHandler {
   public serviceDefinition: ServiceDefinition<ICollabTunnelService>;
 
   public serviceImplementation: ICollabTunnelService;
 
   constructor(controller: CollabTunnelController) {
     const collabService: ICollabTunnelService = {
-      openStream: (call) => controller.pubSubOpenStreamHandler(call),
+      openStream: (call) => controller.handleOpenStream(call),
     };
 
     this.serviceDefinition = collabTunnelServiceDefinition;
@@ -20,4 +20,4 @@ class CollabTunnelPubSub {
   }
 }
 
-export default CollabTunnelPubSub;
+export default CollabTunnelHandler;
