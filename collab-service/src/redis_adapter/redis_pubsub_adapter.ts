@@ -1,11 +1,12 @@
 import { RedisClientType } from 'redis';
 import Logger from '../utils/logger';
 import { TunnelPubSub, TunnelSerializer } from './redis_pubsub_types';
+import { RedisTopicPool } from './redis_topic_pool';
 
 class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
   redisPub: RedisClientType;
 
-  redisSub: RedisClientType;
+  redisTopicPool: RedisTopicPool;
 
   username: string;
 
@@ -13,32 +14,41 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
 
   serializer: TunnelSerializer<T>;
 
+  handler: ((msg: string) => void) | undefined;
+
   constructor(
     redisPub: RedisClientType,
-    redisSub: RedisClientType,
+    redisTopicPool: RedisTopicPool,
     username: string,
     roomId: string,
     serializer: TunnelSerializer<T>,
   ) {
     this.redisPub = redisPub;
-    this.redisSub = redisSub;
+    this.redisTopicPool = redisTopicPool;
     this.username = username;
     this.topic = roomId;
     this.serializer = serializer;
+    this.handler = undefined;
   }
 
   async addOnMessageListener(
     call: (res: T) => void,
   ): Promise<void> {
-    await this.redisSub.subscribe(`pubsub-${this.topic}`, (res) => {
+    if (this.handler !== undefined) {
+      return;
+    }
+
+    Logger.info(`Event ${this.topic} registered by ${this.username}`);
+    this.handler = (res) => {
       const received = this.serializer.deserialize(res);
       if (received === undefined) {
         Logger.warn(`User ${this.username} received an invalid pub-sub struct`);
         return;
       }
       call(received);
-    });
-    Logger.info(`Event ${this.topic} registered by ${this.username}`);
+    };
+
+    this.redisTopicPool.registerTopic(`pubsub-${this.topic}`, this.handler);
   }
 
   async pushMessage(request: T): Promise<void> {
@@ -48,20 +58,23 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
   async clean(
     call: () => void,
   ): Promise<void> {
-    await this.redisSub.unsubscribe(`pubsub-${this.topic}`);
-    call();
+    if (this.handler === undefined) {
+      return;
+    }
     Logger.info(`User ${this.username} unregistered event ${this.topic}`);
+    call();
+    await this.redisTopicPool.unregisterTopic(`pubsub-${this.topic}`, this.handler);
   }
 }
 
 function createRedisPubSubAdapter<T>(
   redisPub: RedisClientType,
-  redisSub: RedisClientType,
+  redisTopicPool: RedisTopicPool,
   username: string,
   roomId: string,
   serializer: TunnelSerializer<T>,
 ) : TunnelPubSub<T> {
-  return new RedisPubSubAdapter(redisPub, redisSub, username, roomId, serializer);
+  return new RedisPubSubAdapter(redisPub, redisTopicPool, username, roomId, serializer);
 }
 
 export {
