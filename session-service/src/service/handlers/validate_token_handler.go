@@ -78,6 +78,7 @@ func (handler *validateTokenHandler) refreshToken(req *pb.ValidateTokenRequest) 
 
 	return &pb.ValidateTokenResponse{
 		Email:           refreshTokenData.Email,
+		Nickname:        refreshTokenData.Nickname,
 		NewSessionToken: newSessionToken,
 		ErrorCode:       pb.ValidateTokenErrorCode_VALIDATE_TOKEN_NO_ERROR,
 	}, nil
