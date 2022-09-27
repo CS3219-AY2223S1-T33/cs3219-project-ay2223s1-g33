@@ -5,6 +5,7 @@ declare interface IAuthenticationAgent {
 
 declare type TokenUserData = {
   username: string;
+  nickname: string;
 };
 
 declare type TokenPair = {
