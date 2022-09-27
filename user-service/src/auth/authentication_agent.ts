@@ -26,6 +26,7 @@ class AuthenticationAgent implements IAuthenticationAgent {
     return new Promise((resolve, reject) => {
       this.grpcClient.createToken({
         email: userData.username,
+        nickname: userData.nickname,
       }, (err, value) => {
         if (!value) {
           reject(err);

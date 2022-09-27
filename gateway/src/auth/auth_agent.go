@@ -12,6 +12,7 @@ import (
 type AuthAgent interface {
 	ValidateToken(sessionToken string, refreshToken string) (
 		username string,
+		nickname string,
 		newSessionToken string,
 		err error,
 	)
@@ -41,6 +42,7 @@ func CreateAuthAgent(sessionServer string) (AuthAgent, error) {
 
 func (agent *authAgent) ValidateToken(sessionToken string, refreshToken string) (
 	username string,
+	nickname string,
 	newSessionToken string,
 	err error,
 ) {
@@ -50,20 +52,20 @@ func (agent *authAgent) ValidateToken(sessionToken string, refreshToken string) 
 		RefreshToken: refreshToken,
 	})
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
 	if resp == nil || resp.ErrorCode != pb.ValidateTokenErrorCode_VALIDATE_TOKEN_NO_ERROR {
 		if resp.ErrorCode == pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_EXPIRED {
-			return "", "", errors.New("Expired Token")
+			return "", "", "", errors.New("Expired Token")
 		}
 		if resp.ErrorCode == pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INVALID {
-			return "", "", errors.New("Invalid Token")
+			return "", "", "", errors.New("Invalid Token")
 		}
-		return "", "", errors.New("Internal Error")
+		return "", "", "", errors.New("Internal Error")
 	}
 
-	return resp.GetEmail(), resp.GetNewSessionToken(), nil
+	return resp.GetEmail(), resp.GetNickname(), resp.GetNewSessionToken(), nil
 }
 
 func (agent *authAgent) Dispose() {
