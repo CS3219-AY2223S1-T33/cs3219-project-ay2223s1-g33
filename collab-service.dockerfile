@@ -2,6 +2,7 @@
 FROM node:alpine
 
 RUN mkdir -p /app/collab-service
+RUN mkdir -p /app/collab-service/src/proto
 WORKDIR /app
 
 # Patch alpine to run bash and grpc
@@ -10,7 +11,6 @@ RUN apk add --no-cache bash && apk add libc6-compat
 # Generate protobuff & database schema
 COPY proto proto/
 COPY scripts scripts/
-COPY collab-service/src collab-service/src
 COPY package.json package-lock.json ./
 
 # Install protobuff dependencies
@@ -24,6 +24,7 @@ COPY collab-service/package.json .
 COPY collab-service/package-lock.json .
 RUN npm install
 
+COPY collab-service/src collab-service/src
 COPY collab-service .
 
 # Build project
