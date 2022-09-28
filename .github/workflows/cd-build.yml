@@ -1,0 +1,68 @@
+name: Deploy Docker Images on Amazon ECR
+
+on:
+  push:
+    branches:
+      - test-setup
+
+env:
+  AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: cs3219           # set this to your Amazon ECR repository name
+
+jobs:
+  deploy:
+    name: Deploy Images
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+
+      - name: 'Add dummy env files'
+        run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
+
+      - name: 'Build Matchmaker'
+        run: 'cd matchmaker && make build'
+
+      - name: 'Build Gateway'
+        run: 'cd gateway && make build'
+
+      - name: 'Build Session Service'
+        run: 'cd session-service && make build'
+        
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
+
+      - name: Build, tag, and push images to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+
+          docker build -t frontend -f $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
+
+          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
