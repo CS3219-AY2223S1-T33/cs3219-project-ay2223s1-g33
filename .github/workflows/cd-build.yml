@@ -68,7 +68,7 @@ jobs:
           # docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
 
           # question-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG-f ./question-service/Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
 
           # matching-service 
