@@ -36,8 +36,8 @@ jobs:
       - name: 'Build Session Service'
         run: 'cd session-service && make build'
 
-      # - name: Build y-socket
-      #   run: 'npm run gen-y-websocket'
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
@@ -63,24 +63,24 @@ jobs:
           # node services
 
           # frontend
-          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile .
-          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
 
-          # # question-service
-          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
-          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
+          # question-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
 
-          # # matching-service 
-          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
-          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
+          # matching-service 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
 
-          # # collab-service
-          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
-          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
+          # collab-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
 
-          # # user-service
-          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
-          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
+          # user-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
 
           # go services
 
@@ -96,8 +96,9 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
 
-          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
+          # redis
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:redis-$IMAGE_TAG -f ./images/redis.dockerfile ./images
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:redis-$IMAGE_TAG
+
 
           
