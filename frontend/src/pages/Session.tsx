@@ -12,7 +12,7 @@ import {
   useDisclosure,
   HStack,
   Box,
-  Grid,
+  Grid
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -36,56 +36,80 @@ function Session() {
   const nickname = useSelector((state: RootState) => state.user.user?.nickname);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isLeaveModalOpen,
+    onOpen: onOpenLeaveModal,
+    onClose: onCloseLeaveModal
+  } = useDisclosure();
+  const {
+    isOpen: isDisconnectModalOpen,
+    onOpen: onOpenDisconnectModal,
+    onClose: onCloseDisconnectModal
+  } = useDisclosure();
   const toast = useFixedToast();
 
   const [yDoc, setYDoc] = useState<Y.Doc>();
   const [provider, setProvider] = useState<WebsocketProvider>();
   const [yText, setYText] = useState<Y.Text>();
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
+  const [wsOpen, setWsOpen] = useState("Not Connected");
 
   useEffect(() => {
+    // Helper function to configure websocket with yDoc and custom events
+    const buildWSProvider = (yd: Y.Doc, params: { [x: string]: string }) => {
+      // First 2 params builds the room session: ws://localhost:5001/ + ws
+      const ws = new WebsocketProvider(
+        `ws://${window.location.host}/api/`,
+        "roomws",
+        yd,
+        { params, disableBc: true }
+      );
+
+      ws.on("status", (joinStatus: Status) => {
+        const { status } = joinStatus;
+        switch (status) {
+          case "connected":
+            if (nickname) {
+              console.log("Sending join message with nickname:", nickname);
+              ws.sendJoinMessage(nickname);
+            }
+            setWsOpen("Connected");
+            break;
+          case "connecting":
+            setWsOpen("Connecting");
+            break;
+          default:
+            setWsOpen("Disconnected");
+            // Opens a modal to show that they got disconnected
+            // leaveSessionHandler() will handle the cleanup of ws and yJS
+            onOpenDisconnectModal();
+            break;
+        }
+      });
+
+      ws.on("user_join", (joinedNickname: Nickname) => {
+        toast.sendSuccessMessage("", {
+          title: `${joinedNickname.nickname} has joined the room!`
+        });
+      });
+
+      ws.on("user_leave", (leftNickname: Nickname) => {
+        toast.sendAlertMessage("", {
+          title: `${leftNickname.nickname} has left the room.`
+        });
+      });
+
+      return ws;
+    };
+
     if (!isInit) {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
-      // First 2 params builds the room session: ws://localhost:5001/ + ws
-      const tempprovider = new WebsocketProvider(
-        `ws://${window.location.host}/api/`,
-        "roomws",
-        tempyDoc,
-        { params, disableBc: true }
-      );
-
-      // TODO Implement invalid room event
-      tempprovider.on("status", (joinStatus: Status) => {
-        const { status } = joinStatus;
-        if (status === "connected" && nickname) {
-          console.log("Sending join message...");
-          tempprovider.sendJoinMessage(nickname);
-        }
-      });
-
-      tempprovider.on("user_join", (joinedNickname: Nickname) => {
-        // console.log(`From WSProvider: ${joinedNickname.nickname} joined`);
-        toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`,
-        });
-      });
-
-      tempprovider.on("user_leave", (leftNickname: Nickname) => {
-        // console.log(`From WSProvider: ${leftNickname.nickname} left`);
-        toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`,
-        });
-      });
-
-      // If the connection is terminated, it should not attempt to reconnect
-      tempprovider.shouldConnect = false;
-
+      const tempprovider = buildWSProvider(tempyDoc, params);
       const tempyText = tempyDoc.getText("codemirror");
       const tempundoManager = new Y.UndoManager(tempyText);
 
@@ -101,10 +125,7 @@ function Session() {
   }, []);
 
   const leaveSessionHandler = () => {
-    if (nickname) {
-      provider?.sendDisconnectMessage(nickname);
-    }
-    // Destroy websocket and yDoc instance
+    console.log("End session");
     provider?.destroy();
     yDoc?.destroy();
     // Clears the room session token
@@ -121,13 +142,10 @@ function Session() {
 
   const collabDefined = yText && provider && undoManager;
 
-  // Naive way of handling websocket states - to be improved
-  const isWSOpen = provider ? provider.wsconnected : false;
-
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar onOpen={onOpen} status={isWSOpen ? "Open" : "Closed"} />
+      <SessionNavbar onOpen={onOpenLeaveModal} status={wsOpen} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs />
@@ -151,13 +169,6 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
-              {/* Buttons purely for custom y-websocket testing */}
-              {/* <Button onClick={() => provider?.sendJoinMessage(nickname)}>
-                Send User Joined
-              </Button>
-              <Button onClick={() => provider?.sendDisconnectMessage(nickname)}>
-                Send User Left
-              </Button> */}
               <Button onClick={() => console.log("WIP")}>Submit code</Button>
             </Flex>
           </Grid>
@@ -165,7 +176,12 @@ function Session() {
       </Grid>
 
       {/* Modal for leaving the session */}
-      <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
+      <Modal
+        isOpen={isLeaveModalOpen}
+        onClose={onCloseLeaveModal}
+        size="xl"
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Leaving soon?</ModalHeader>
@@ -177,13 +193,38 @@ function Session() {
           </ModalBody>
           <ModalFooter>
             <HStack gap={4}>
-              <Button variant="outline" colorScheme="green" onClick={onClose}>
+              <Button
+                variant="outline"
+                colorScheme="green"
+                onClick={onCloseLeaveModal}
+              >
                 Continue Session
               </Button>
               <Button colorScheme="red" onClick={leaveSessionHandler}>
                 Leave Session
               </Button>
             </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for disconnected session */}
+      <Modal
+        isOpen={isDisconnectModalOpen}
+        onClose={onCloseDisconnectModal}
+        size="xl"
+        isCentered
+        closeOnOverlayClick
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Oh no!</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>You got disconnected from the server.</ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" onClick={leaveSessionHandler}>
+              Leave Session
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
