@@ -1,4 +1,4 @@
-name: Deploy Docker Images on Amazon ECR
+name: cd-build
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy Images
+    name: Upload Images
     runs-on: ubuntu-latest
     environment: production
 
@@ -19,25 +19,22 @@ jobs:
       - name: Set up repository
         uses: actions/checkout@v3
 
-      # - name: Setup Golang
-      #   uses: actions/setup-go@v3
-      #   with:
-      #     go-version: '1.19'
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
 
-      # - name: 'Add dummy env files'
-      #   run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
+      - name: 'Add dummy env files'
+        run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
 
-      # - name: 'Build Matchmaker'
-      #   run: 'cd matchmaker && make build'
+      - name: 'Build Matchmaker'
+        run: 'cd matchmaker && make build'
 
-      # - name: 'Build Gateway'
-      #   run: 'cd gateway && make build'
+      - name: 'Build Gateway'
+        run: 'cd gateway && make build'
 
-      # - name: 'Build Session Service'
-      #   run: 'cd session-service && make build'
-        
-      # - name: Checkout
-      #   uses: actions/checkout@v3
+      - name: 'Build Session Service'
+        run: 'cd session-service && make build'
 
       # - name: Build y-socket
       #   run: 'npm run gen-y-websocket'
@@ -63,25 +60,41 @@ jobs:
           # push it to ECR so that it can
           # be deployed to ECS.
 
+          # node services
+
           # frontend
           # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile .
           # docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
 
-          # question-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
+          # # question-service
+          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
 
-          # matching-service 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
+          # # matching-service 
+          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
 
-          # collab-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
+          # # collab-service
+          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
 
-          # user-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
+          # # user-service
+          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
+
+          # go services
+
+          # matchmaker
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
+
+          # gateway
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
+
+          # session-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
 
           # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
