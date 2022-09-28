@@ -21,7 +21,7 @@ WORKDIR /app/frontend
 
 # Install project dependencies
 COPY frontend/package.json .
-COPY frontend/package-lock.json .
+COPY frontend/y-websocket-peerprep-1.4.5.tgz .
 RUN npm install
 
 COPY frontend .
@@ -33,7 +33,7 @@ RUN npm run build
 FROM nginx:alpine
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY ./frontend.nginx.conf /etc/nginx/nginx.conf
+COPY ./frontend/frontend.nginx.conf /etc/nginx/nginx.conf
 
 # Remove default nginx index page
 RUN rm -rf /usr/share/nginx/html/*
