@@ -11,20 +11,16 @@ import {
 import React from "react";
 
 type Props = {
-  isDisconnectModalOpen: boolean;
-  onCloseDisconnectModal: () => void;
+  isOpen: boolean;
+  onClose: () => void;
   leaveSessionHandler: () => void;
 };
 
-function DisconnectModal({
-  isDisconnectModalOpen,
-  onCloseDisconnectModal,
-  leaveSessionHandler,
-}: Props) {
+function DisconnectModal({ isOpen, onClose, leaveSessionHandler }: Props) {
   return (
     <Modal
-      isOpen={isDisconnectModalOpen}
-      onClose={onCloseDisconnectModal}
+      isOpen={isOpen}
+      onClose={onClose}
       size="xl"
       isCentered
       closeOnOverlayClick

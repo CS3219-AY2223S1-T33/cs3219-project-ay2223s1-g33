@@ -12,23 +12,14 @@ import {
 import React from "react";
 
 type Props = {
-  isLeaveModalOpen: boolean;
-  onCloseLeaveModal: () => void;
+  isOpen: boolean;
+  onClose: () => void;
   leaveSessionHandler: () => void;
 };
 
-function LeaveModal({
-  isLeaveModalOpen,
-  onCloseLeaveModal,
-  leaveSessionHandler,
-}: Props) {
+function LeaveModal({ isOpen, onClose, leaveSessionHandler }: Props) {
   return (
-    <Modal
-      isOpen={isLeaveModalOpen}
-      onClose={onCloseLeaveModal}
-      size="xl"
-      isCentered
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Leaving soon?</ModalHeader>
@@ -39,11 +30,7 @@ function LeaveModal({
         </ModalBody>
         <ModalFooter>
           <HStack gap={4}>
-            <Button
-              variant="outline"
-              colorScheme="green"
-              onClick={onCloseLeaveModal}
-            >
+            <Button variant="outline" colorScheme="green" onClick={onClose}>
               Continue Session
             </Button>
             <Button colorScheme="red" onClick={leaveSessionHandler}>

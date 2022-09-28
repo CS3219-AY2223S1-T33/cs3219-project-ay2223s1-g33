@@ -169,13 +169,13 @@ function Session() {
 
       {/* Modals */}
       <LeaveModal
-        isLeaveModalOpen={isLeaveModalOpen}
-        onCloseLeaveModal={onCloseLeaveModal}
+        isOpen={isLeaveModalOpen}
+        onClose={onCloseLeaveModal}
         leaveSessionHandler={leaveSessionHandler}
       />
       <DisconnectModal
-        isDisconnectModalOpen={isDisconnectModalOpen}
-        onCloseDisconnectModal={onCloseDisconnectModal}
+        isOpen={isDisconnectModalOpen}
+        onClose={onCloseDisconnectModal}
         leaveSessionHandler={leaveSessionHandler}
       />
     </>
