@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   HStack,
-  Button
+  Button,
 } from "@chakra-ui/react";
 import React from "react";
 
@@ -20,7 +20,7 @@ type Props = {
 function LeaveModal({
   isLeaveModalOpen,
   onCloseLeaveModal,
-  leaveSessionHandler
+  leaveSessionHandler,
 }: Props) {
   return (
     <Modal

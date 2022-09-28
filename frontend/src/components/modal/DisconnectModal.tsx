@@ -6,7 +6,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  Button
+  Button,
 } from "@chakra-ui/react";
 import React from "react";
 
@@ -19,7 +19,7 @@ type Props = {
 function DisconnectModal({
   isDisconnectModalOpen,
   onCloseDisconnectModal,
-  leaveSessionHandler
+  leaveSessionHandler,
 }: Props) {
   return (
     <Modal

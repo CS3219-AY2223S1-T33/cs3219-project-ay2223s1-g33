@@ -27,12 +27,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal
+    onClose: onCloseLeaveModal,
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal
+    onClose: onCloseDisconnectModal,
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -81,13 +81,13 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`
+          title: `${joinedNickname.nickname} has joined the room!`,
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`
+          title: `${leftNickname.nickname} has left the room.`,
         });
       });
 
@@ -98,7 +98,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken
+        room: roomToken === undefined ? "" : roomToken,
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
