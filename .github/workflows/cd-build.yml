@@ -19,22 +19,22 @@ jobs:
       - name: Set up repository
         uses: actions/checkout@v3
 
-      - name: Setup Golang
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.19'
+      # - name: Setup Golang
+      #   uses: actions/setup-go@v3
+      #   with:
+      #     go-version: '1.19'
 
-      - name: 'Add dummy env files'
-        run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
+      # - name: 'Add dummy env files'
+      #   run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
 
-      - name: 'Build Matchmaker'
-        run: 'cd matchmaker && make build'
+      # - name: 'Build Matchmaker'
+      #   run: 'cd matchmaker && make build'
 
-      - name: 'Build Gateway'
-        run: 'cd gateway && make build'
+      # - name: 'Build Gateway'
+      #   run: 'cd gateway && make build'
 
-      - name: 'Build Session Service'
-        run: 'cd session-service && make build'
+      # - name: 'Build Session Service'
+      #   run: 'cd session-service && make build'
         
       # - name: Checkout
       #   uses: actions/checkout@v3

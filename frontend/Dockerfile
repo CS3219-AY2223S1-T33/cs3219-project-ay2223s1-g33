@@ -5,7 +5,7 @@ RUN mkdir -p /app/frontend
 WORKDIR /app
 
 # Patch alpine to run bash and grpc
-RUN apk add --no-cache bash && apk add libc6-compat
+RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 
 # Generate protobuff
 COPY proto proto/
