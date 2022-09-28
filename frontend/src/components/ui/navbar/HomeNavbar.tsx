@@ -8,15 +8,14 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Text,
+  Text
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { RootState } from "../../../app/store";
-import { logout } from "../../../feature/user/userSlice";
+import { logout, selectUser } from "../../../feature/user/userSlice";
 import { LogoutResponse } from "../../../proto/user-bff-service";
 
 function HomeNavbar() {
@@ -44,7 +43,7 @@ function HomeNavbar() {
       });
   };
 
-  const user = useSelector((state: RootState) => state.user.user);
+  const user = useSelector(selectUser);
   if (!user) {
     return null;
   }

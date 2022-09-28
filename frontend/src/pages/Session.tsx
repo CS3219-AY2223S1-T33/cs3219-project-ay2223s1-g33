@@ -1,24 +1,11 @@
-import {
-  Flex,
-  Button,
-  Text,
-  ModalOverlay,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  useDisclosure,
-  HStack,
-  Box,
-  Grid
-} from "@chakra-ui/react";
+import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
+import LeaveModal from "../components/modal/LeaveModal";
+import DisconnectModal from "../components/modal/DisconnectModal";
 import InvalidSession from "./InvalidSession";
 import { RootState } from "../app/store";
 import EditorTabs from "../components/editor/EditorTabs";
@@ -26,6 +13,7 @@ import { leaveRoom } from "../feature/matching/matchingSlice";
 import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
+import { selectUser } from "../feature/user/userSlice";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -33,7 +21,7 @@ type Nickname = { nickname: string };
 let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
-  const nickname = useSelector((state: RootState) => state.user.user?.nickname);
+  const nickname = useSelector(selectUser)?.nickname;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
@@ -76,6 +64,10 @@ function Session() {
             setWsOpen("Connected");
             break;
           case "connecting":
+            // If it came from a disconnected state, skip
+            if (wsOpen !== "Disconnected") {
+              return;
+            }
             setWsOpen("Connecting");
             break;
           default:
@@ -125,13 +117,12 @@ function Session() {
   }, []);
 
   const leaveSessionHandler = () => {
-    console.log("End session");
     provider?.destroy();
     yDoc?.destroy();
     // Clears the room session token
     dispatch(leaveRoom());
 
-    // Just in case for rejoins
+    // Just in case when use joins a brand new session
     isInit = false;
     navigate("/");
   };
@@ -140,6 +131,7 @@ function Session() {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
 
+  // Ensures that the yDoc components are ready before passing to Editor
   const collabDefined = yText && provider && undoManager;
 
   return (
@@ -155,7 +147,7 @@ function Session() {
           <Flex direction="row" bg="gray.100" px={12} py={2}>
             Code Editor options
           </Flex>
-          {/* Editor - I may find a more IDE-like component for this */}
+          {/* Editor */}
           {collabDefined && (
             <Editor
               yText={yText}
@@ -175,59 +167,17 @@ function Session() {
         </Grid>
       </Grid>
 
-      {/* Modal for leaving the session */}
-      <Modal
-        isOpen={isLeaveModalOpen}
-        onClose={onCloseLeaveModal}
-        size="xl"
-        isCentered
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Leaving soon?</ModalHeader>
-          <ModalCloseButton />
-
-          <ModalBody>
-            Leaving this session will also terminate this session with your
-            buddy.
-          </ModalBody>
-          <ModalFooter>
-            <HStack gap={4}>
-              <Button
-                variant="outline"
-                colorScheme="green"
-                onClick={onCloseLeaveModal}
-              >
-                Continue Session
-              </Button>
-              <Button colorScheme="red" onClick={leaveSessionHandler}>
-                Leave Session
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      {/* Modal for disconnected session */}
-      <Modal
-        isOpen={isDisconnectModalOpen}
-        onClose={onCloseDisconnectModal}
-        size="xl"
-        isCentered
-        closeOnOverlayClick
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Oh no!</ModalHeader>
-          <ModalCloseButton />
-
-          <ModalBody>You got disconnected from the server.</ModalBody>
-          <ModalFooter>
-            <Button colorScheme="red" onClick={leaveSessionHandler}>
-              Leave Session
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      {/* Modals */}
+      <LeaveModal
+        isLeaveModalOpen={isLeaveModalOpen}
+        onCloseLeaveModal={onCloseLeaveModal}
+        leaveSessionHandler={leaveSessionHandler}
+      />
+      <DisconnectModal
+        isDisconnectModalOpen={isDisconnectModalOpen}
+        onCloseDisconnectModal={onCloseDisconnectModal}
+        leaveSessionHandler={leaveSessionHandler}
+      />
     </>
   );
 }
