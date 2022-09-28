@@ -5,10 +5,19 @@ declare type TunnelMessage = {
   data: Uint8Array,
 };
 
+declare type TunnelInternalMessage = {
+  sender: string,
+  data: Array<number>,
+};
+
 class CollabTunnelSerializer implements TunnelSerializer<TunnelMessage> {
   // eslint-disable-next-line class-methods-use-this
   serialize(data: TunnelMessage): string {
-    return JSON.stringify(data);
+    const simplifiedStruct: TunnelInternalMessage = {
+      sender: data.sender,
+      data: Array.from(data.data),
+    };
+    return JSON.stringify(simplifiedStruct);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -21,7 +30,7 @@ class CollabTunnelSerializer implements TunnelSerializer<TunnelMessage> {
 
     return {
       sender: parsedObject.sender,
-      data: parsedObject.data,
+      data: new Uint8Array(parsedObject.data),
     };
   }
 }

@@ -11,12 +11,6 @@ import (
 const (
 	loginRoute    = "/api/user/login"
 	registerRoute = "/api/user/register"
-
-	headerUsername         = "X-Bearer-Username"
-	headerSessionToken     = "X-Bearer-Session-Token"
-	headerRefreshToken     = "X-Bearer-Refresh-Token"
-	cookieNameSessionToken = "AUTH-SESSION"
-	cookieNameRefreshToken = "AUTH-REFRESH"
 )
 
 func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Handler, util.Disposable, error) {
@@ -33,46 +27,63 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 			return
 		}
 
-		// Sanitize the request
-		r.Header.Set(headerUsername, "")
-		r.Header.Set(headerSessionToken, "")
-		r.Header.Set(headerRefreshToken, "")
+		sanitizeRequest(r)
 
 		// Authenticate
-		sessionToken, err := r.Cookie(cookieNameSessionToken)
+		sessionTokenCookie, err := r.Cookie(AuthCookieNameSessionToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
+		sessionToken := sessionTokenCookie.Value
 
-		refreshToken, err := r.Cookie(cookieNameRefreshToken)
+		refreshTokenCookie, err := r.Cookie(AuthCookieNameRefreshToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
+		refreshToken := refreshTokenCookie.Value
 
 		log.Println("Authenticating with server")
-		username, newSessionToken, err := authAgent.ValidateToken(sessionToken.Value, refreshToken.Value)
+		username, nickname, newSessionToken, err := authAgent.ValidateToken(sessionToken, refreshToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
-
-		r.Header.Set(headerUsername, username)
-		r.Header.Set(headerSessionToken, sessionToken.Value)
-		r.Header.Set(headerRefreshToken, refreshToken.Value)
 
 		if newSessionToken != "" {
 			w.Header().Add("Set-Cookie", fmt.Sprintf(
 				"%s=%s; Path=/",
-				cookieNameSessionToken,
+				AuthCookieNameSessionToken,
 				newSessionToken,
 			))
+			sessionToken = newSessionToken
 		}
 
+		addAuthHeaders(r, username, nickname, sessionToken, refreshToken)
 		mux.ServeHTTP(w, r)
 	})
 	return handler, authAgent, nil
+}
+
+func sanitizeRequest(req *http.Request) {
+	req.Header.Set(AuthHeaderUsername, "")
+	req.Header.Set(AuthHeaderNickname, "")
+	req.Header.Set(AuthHeaderSessionToken, "")
+	req.Header.Set(AuthHeaderRefreshToken, "")
+}
+
+func addAuthHeaders(
+	req *http.Request,
+	username string,
+	nickname string,
+	sessionToken string,
+	refreshToken string,
+) {
+	req.Header.Set(AuthHeaderUsername, username)
+	req.Header.Set(AuthHeaderNickname, nickname)
+	req.Header.Set(AuthHeaderSessionToken, sessionToken)
+	req.Header.Set(AuthHeaderRefreshToken, refreshToken)
 }
 
 func writeUnauthorizedResponse(w http.ResponseWriter) {

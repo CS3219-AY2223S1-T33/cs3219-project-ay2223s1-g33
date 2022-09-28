@@ -21,7 +21,8 @@ func NewCreateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.Tok
 
 func (handler *createTokenHandler) Handle(req *pb.CreateTokenRequest) (*pb.CreateTokenResponse, error) {
 	tokenData := &token.TokenData{
-		Email: req.GetEmail(),
+		Email:    req.GetEmail(),
+		Nickname: req.GetNickname(),
 	}
 
 	sessionToken, err := handler.sessionAgent.CreateToken(tokenData)
