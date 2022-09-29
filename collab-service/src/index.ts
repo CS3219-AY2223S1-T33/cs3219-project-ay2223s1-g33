@@ -10,11 +10,13 @@ Logger.info(`Starting Collab Service [V${version}]`);
 const envConfig = loadEnvironment();
 
 const streamServer = createStreamServer(envConfig.GRPC_PORT);
-const controller = new CollabTunnelController(
+
+const collabController = new CollabTunnelController(
   envConfig.REDIS_SERVER_URL,
+  envConfig.QUESTION_SERVER_URL,
   envConfig.JWT_ROOM_SECRET,
 );
 
-const router = new CollabTunnelRouter(controller);
+const router = new CollabTunnelRouter(collabController);
 streamServer.registerServiceRoutes(router);
 streamServer.bind();

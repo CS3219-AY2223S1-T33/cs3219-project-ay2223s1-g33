@@ -1,16 +1,16 @@
 import { ServerDuplexStream } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
-
-import buildErrorResponse from '../adapter/room_handler';
+import { createDisconnectMessage } from '../room/disconnect_message_builder';
 import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter';
+import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
 import createRoomSessionService from '../room_auth/room_session_agent';
-import getQuestionByDifficulty from '../adapter/question_handler';
+import createUnauthorizedMessage from '../room/unauthorized_message_builder';
+import createQuestionService from '../question_client/question_agent';
 import setQuestionRedis from '../redis_adapter/redis_question_adapter';
 import { CollabTunnelRequest, CollabTunnelResponse, VerifyRoomErrorCode } from '../proto/collab-service';
 import { CollabTunnelSerializer, TunnelMessage } from './collab_tunnel_serializer';
-import { createDisconnectMessage } from '../room/disconnect_message_builder';
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
-import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
+import { IQuestionAgent } from '../question_client/question_agent_types';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -41,7 +41,9 @@ export default class CollabTunnelController {
 
   roomTokenAgent: IRoomSessionAgent;
 
-  constructor(redisUrl: string, roomSecret: string) {
+  questionAgent: IQuestionAgent;
+
+  constructor(redisUrl: string, questionUrl: string, roomSecret: string) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
     this.pub = createClient({
       url: redisUrl,
@@ -55,6 +57,8 @@ export default class CollabTunnelController {
     sub.connect();
 
     this.topicPool = createRedisTopicPool(sub);
+
+    this.questionAgent = createQuestionService(questionUrl);
   }
 
   async handleOpenStream(
@@ -68,14 +72,14 @@ export default class CollabTunnelController {
     const data = await this.roomTokenAgent.verifyToken(roomToken);
     if (!data) {
       // Kill stream when invalid
-      const errMsg = buildErrorResponse();
+      const errMsg = createUnauthorizedMessage();
       call.write(errMsg);
       call.end();
       return;
     }
 
     const { roomId, difficulty } = data;
-    const question = await getQuestionByDifficulty(difficulty);
+    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
     await setQuestionRedis(roomId, question, this.pub);
 
     const redisPubSubAdapter = createRedisPubSubAdapter(
