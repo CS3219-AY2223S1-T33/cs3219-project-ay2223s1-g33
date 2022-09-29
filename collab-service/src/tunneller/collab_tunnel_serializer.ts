@@ -1,21 +1,14 @@
 import { TunnelSerializer } from '../redis_adapter/redis_pubsub_types';
+import { TunnelInternalMessage, TunnelMessage } from '../message_handler/internal/internal_message_types';
 
-declare type TunnelMessage = {
-  sender: string,
-  data: Uint8Array,
-};
-
-declare type TunnelInternalMessage = {
-  sender: string,
-  data: Array<number>,
-};
-
-class CollabTunnelSerializer implements TunnelSerializer<TunnelMessage> {
+export default class CollabTunnelSerializer implements TunnelSerializer<TunnelMessage> {
   // eslint-disable-next-line class-methods-use-this
   serialize(data: TunnelMessage): string {
     const simplifiedStruct: TunnelInternalMessage = {
       sender: data.sender,
+      nick: data.nick,
       data: Array.from(data.data),
+      flag: data.flag,
     };
     return JSON.stringify(simplifiedStruct);
   }
@@ -23,19 +16,14 @@ class CollabTunnelSerializer implements TunnelSerializer<TunnelMessage> {
   // eslint-disable-next-line class-methods-use-this
   deserialize(data: string): (TunnelMessage | undefined) {
     const parsedObject = JSON.parse(data);
-
     if (!('sender' in parsedObject) || !('data' in parsedObject)) {
       return undefined;
     }
-
     return {
       sender: parsedObject.sender,
+      nick: parsedObject.nick,
       data: new Uint8Array(parsedObject.data),
+      flag: parsedObject.flag,
     };
   }
 }
-
-export {
-  TunnelMessage,
-  CollabTunnelSerializer,
-};
