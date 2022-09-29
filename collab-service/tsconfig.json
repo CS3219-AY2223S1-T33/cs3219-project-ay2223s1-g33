@@ -13,7 +13,7 @@
     "isolatedModules": false,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "test/**/**/*.ts"],
   "exclude": ["node_modules/**/*"],
   // Options for file/directory watching
   "watchOptions": {
