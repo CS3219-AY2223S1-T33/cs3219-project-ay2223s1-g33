@@ -1,18 +1,11 @@
 import setQuestionRedis from '../../../src/redis_adapter/redis_question_adapter';
 import { Question } from '../../../src/proto/types';
 
-const redis = require('redis-mock');
-
-jest.mock('redis-mock');
-
-const
-redis.set = jest.fn().mockImplementation(() => {
-  console.log('set');
-});
+const redisMock = require('redis-mock');
 
 describe('Function-Redis-Question setQuestionRedis', () => {
-  const pub = redis.createClient();
-  it(' Test setQuestionRedis', async () => {
+  test('Test question is saved on redis', async () => {
+    const redis = redisMock.createClient();
     const question: Question = {
       questionId: 1,
       name: '1',
@@ -20,6 +13,11 @@ describe('Function-Redis-Question setQuestionRedis', () => {
       content: '1',
       solution: '1',
     };
-    await setQuestionRedis('key', question, pub);
+    const key = 'key';
+    await setQuestionRedis(key, question, redis);
+    await redis.get(`qns-${key}`, (_err: any, result: any) => {
+      expect(result)
+        .toBe(JSON.stringify(question));
+    });
   });
 });
