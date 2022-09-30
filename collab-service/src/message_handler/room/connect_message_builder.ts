@@ -3,7 +3,7 @@ import * as encoding from 'lib0/encoding';
 export const OPCODE_USER_JOIN = 4;
 export const OPCODE_USER_LEAVE = 5;
 
-function createConnectionMessage(username: string, opcode: number): Uint8Array {
+function createConnectionAlertMessage(username: string, opcode: number): Uint8Array {
   const encoder = encoding.createEncoder();
   encoding.writeVarUint(encoder, opcode);
   encoding.writeVarString(encoder, username);
@@ -11,11 +11,11 @@ function createConnectionMessage(username: string, opcode: number): Uint8Array {
 }
 
 function createConnectedMessage(username: string): Uint8Array {
-  return createConnectionMessage(username, OPCODE_USER_JOIN);
+  return createConnectionAlertMessage(username, OPCODE_USER_JOIN);
 }
 
 function createDisconnectedMessage(username: string): Uint8Array {
-  return createConnectionMessage(username, OPCODE_USER_LEAVE);
+  return createConnectionAlertMessage(username, OPCODE_USER_LEAVE);
 }
 
 export {

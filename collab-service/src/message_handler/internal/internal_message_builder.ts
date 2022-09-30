@@ -1,12 +1,10 @@
 import { ConnectionFlag, TunnelMessage } from './internal_message_types';
-
-const emptyData = new Uint8Array(0);
+import { createConnectedMessage } from '../room/connect_message_builder';
 
 function createJoinMessage(username: string, nickname: string): TunnelMessage {
   return {
     sender: username,
-    nick: nickname,
-    data: emptyData,
+    data: createConnectedMessage(nickname),
     flag: ConnectionFlag.JOIN,
   };
 }
@@ -14,8 +12,7 @@ function createJoinMessage(username: string, nickname: string): TunnelMessage {
 function createAckMessage(username: string, nickname: string): TunnelMessage {
   return {
     sender: username,
-    nick: nickname,
-    data: emptyData,
+    data: createConnectedMessage(nickname),
     flag: ConnectionFlag.ACK,
   };
 }
