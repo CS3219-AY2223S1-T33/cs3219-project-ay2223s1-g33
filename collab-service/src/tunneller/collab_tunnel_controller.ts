@@ -37,24 +37,25 @@ function createCallWriter(
     });
   }
   return async (message: TunnelMessage): Promise<void> => {
-    if (message.sender !== username) {
-      switch (message.flag) {
-        case ConnectionFlag.NONE: // Receive normal, Send normal
-          call.write(makeResponse(message.data));
-          break;
-        case ConnectionFlag.JOIN: // Receive A, Send B
-          Logger.info(`${username} received JOIN from ${message.sender}`);
-          await pubsub.pushMessage(createAckMessage(username, nickname));
-          call.write(makeResponse(createConnectedMessage(message.nick)));
-          break;
-        case ConnectionFlag.ACK: // Receive B, Send connected
-          Logger.info(`${username} received ACK from ${message.sender}`);
-          call.write(makeResponse(createConnectedMessage(message.nick)));
-          break;
-        default:
-          Logger.error('Unknown connection flag');
-          break;
-      }
+    if (message.sender === username) {
+      return;
+    }
+    switch (message.flag) {
+      case ConnectionFlag.NONE: // Receive normal, Send normal
+        call.write(makeResponse(message.data));
+        break;
+      case ConnectionFlag.JOIN: // Receive A, Send B
+        Logger.info(`${username} received JOIN from ${message.sender}`);
+        await pubsub.pushMessage(createAckMessage(username, nickname));
+        call.write(makeResponse(createConnectedMessage(message.nick)));
+        break;
+      case ConnectionFlag.ACK: // Receive B, Send 'Connected'
+        Logger.info(`${username} received ACK from ${message.sender}`);
+        call.write(makeResponse(createConnectedMessage(message.nick)));
+        break;
+      default:
+        Logger.error('Unknown connection flag');
+        break;
     }
   };
 }
@@ -98,7 +99,7 @@ class CollabTunnelController {
 
     const data = await this.roomTokenAgent.verifyToken(roomToken);
     if (!data) {
-      // Kill stream when invalid
+      // Kill stream when invalid room
       const errMsg = createUnauthorizedMessage();
       call.write(errMsg);
       call.end();
@@ -129,6 +130,7 @@ class CollabTunnelController {
 
     // When data is detected
     call.on('data', (request: CollabTunnelRequest) => {
+      // Send Normal
       redisPubSubAdapter.pushMessage({
         sender: username,
         nick: nickname,
@@ -139,6 +141,7 @@ class CollabTunnelController {
 
     // When stream closes
     call.on('end', () => {
+      // Send 'Disconnected'
       redisPubSubAdapter.pushMessage({
         sender: username,
         nick: nickname,
