@@ -1,4 +1,4 @@
-const enum ConnectionFlag {
+const enum ConnectionOpCode {
   DATA,
   JOIN,
   ACK,
@@ -7,17 +7,17 @@ const enum ConnectionFlag {
 declare type TunnelMessage = {
   sender: string,
   data: Uint8Array,
-  flag: ConnectionFlag,
+  flag: ConnectionOpCode,
 };
 
 declare type TunnelInternalMessage = {
   sender: string,
   data: Array<number>,
-  flag: ConnectionFlag,
+  flag: ConnectionOpCode,
 };
 
 export {
-  ConnectionFlag,
+  ConnectionOpCode,
   TunnelMessage,
   TunnelInternalMessage,
 };

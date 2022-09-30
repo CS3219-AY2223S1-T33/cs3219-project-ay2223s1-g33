@@ -17,7 +17,7 @@ import {
 } from '../proto/collab-service';
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { IQuestionAgent } from '../question_client/question_agent_types';
-import { ConnectionFlag, TunnelMessage } from '../message_handler/internal/internal_message_types';
+import { ConnectionOpCode, TunnelMessage } from '../message_handler/internal/internal_message_types';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -43,15 +43,15 @@ async function writerHandler(
   }
   // Handle message cases
   switch (message.flag) {
-    case ConnectionFlag.DATA: // Receive normal, Send normal
+    case ConnectionOpCode.DATA: // Receive normal, Send normal
       call.write(makeResponse(message.data));
       break;
-    case ConnectionFlag.JOIN: // Receive A, Send B
+    case ConnectionOpCode.JOIN: // Receive A, Send B
       Logger.info(`${username} received JOIN from ${message.sender}`);
       await pubsub.pushMessage(createAckMessage(username, nickname));
       call.write(makeResponse(message.data));
       break;
-    case ConnectionFlag.ACK: // Receive B, Send 'Connected'
+    case ConnectionOpCode.ACK: // Receive B, Send 'Connected'
       Logger.info(`${username} received ACK from ${message.sender}`);
       call.write(makeResponse(message.data));
       break;
@@ -146,7 +146,7 @@ class CollabTunnelController {
       redisPubSubAdapter.pushMessage({
         sender: username,
         data: request.data,
-        flag: ConnectionFlag.DATA,
+        flag: ConnectionOpCode.DATA,
       });
     });
 
@@ -156,7 +156,7 @@ class CollabTunnelController {
       redisPubSubAdapter.pushMessage({
         sender: username,
         data: createDisconnectedMessage(nickname),
-        flag: ConnectionFlag.DATA,
+        flag: ConnectionOpCode.DATA,
       });
 
       const endFunc = () => call.end();
