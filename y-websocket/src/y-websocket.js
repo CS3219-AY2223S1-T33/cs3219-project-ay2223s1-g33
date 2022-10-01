@@ -24,6 +24,7 @@ export const messageAuth = 2
 // Custom events for peerPrep
 export const USER_JOIN = 4
 export const USER_LEAVE = 5
+export const LANG_CHANGE = 6
 
 /**
  *                       encoder,          decoder,          provider,          emitSynced, messageType
@@ -113,6 +114,14 @@ messageHandlers[USER_LEAVE] = (_encoder, decoder, provider, _emitSynced, _messag
   console.log('nickname: ', nickname)
   provider.emit('user_leave', [{ nickname }])
 }
+
+messageHandlers[LANG_CHANGE] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+  console.log('[Rcv]: Language Changed')
+  const language = decoding.readVarString(decoder)
+  console.log(language)
+  provider.emit('lang_change', [{language}])
+}
+
 
 // @todo - this should depend on awareness.outdatedTime
 const messageReconnectTimeout = 30000
@@ -520,6 +529,13 @@ export class WebsocketProvider extends Observable {
     const encoder = encoding.createEncoder()
     encoding.writeVarUint(encoder, USER_LEAVE)
     encoding.writeVarString(encoder, nickname)
+    broadcastMessage(this, encoding.toUint8Array(encoder))
+  }
+
+  sendLanguageChange(/** @type {string} */ language) {
+    const encoder = encoding.createEncoder()
+    encoding.writeVarUint(encoder, LANG_CHANGE)
+    encoding.writeVarString(encoder, language)
     broadcastMessage(this, encoding.toUint8Array(encoder))
   }
 }

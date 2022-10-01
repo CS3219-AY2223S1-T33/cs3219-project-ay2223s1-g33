@@ -1,7 +1,15 @@
-import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
+import {
+  Flex,
+  Button,
+  Text,
+  useDisclosure,
+  Box,
+  Grid,
+  Select
+} from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import LeaveModal from "../components/modal/LeaveModal";
@@ -36,14 +44,17 @@ function Session() {
   } = useDisclosure();
   const toast = useFixedToast();
 
+  // YJS Settings
   const [yDoc, setYDoc] = useState<Y.Doc>();
   const [provider, setProvider] = useState<WebsocketProvider>();
   const [yText, setYText] = useState<Y.Text>();
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
+
   const [wsOpen, setWsOpen] = useState("Not Connected");
+  const [selectedLang, setSelectedLang] = useState("javascript");
 
   useEffect(() => {
-    // Helper function to configure websocket with yDoc and custom events
+    /** Helper function to configure websocket with yDoc and custom events */
     const buildWSProvider = (yd: Y.Doc, params: { [x: string]: string }) => {
       // First 2 params builds the room session: ws://localhost:5001/ + ws
       const ws = new WebsocketProvider(
@@ -87,6 +98,12 @@ function Session() {
         });
       });
 
+      ws.on("lang_change", (languageChange: { language: string }) => {
+        const { language } = languageChange;
+        // console.log(language);
+        setSelectedLang(language);
+      });
+
       return ws;
     };
 
@@ -111,6 +128,12 @@ function Session() {
 
     return () => {};
   }, []);
+
+  const changeLangHandler = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newLang = e.target.value;
+    provider?.sendLanguageChange(newLang);
+    setSelectedLang(newLang);
+  };
 
   const leaveSessionHandler = () => {
     provider?.destroy();
@@ -141,7 +164,20 @@ function Session() {
         <Grid templateRows="7% 7fr auto" h="91vh">
           {/* Code Editor Settings */}
           <Flex direction="row" bg="gray.100" px={12} py={2}>
-            Code Editor options
+            {/* Code Editor options */}
+            {/* Language Change */}
+            <Select
+              value={selectedLang}
+              isDisabled={wsOpen !== "Connected"}
+              onChange={changeLangHandler}
+            >
+              {["javascript", "go", "java", "python"].map((l) => (
+                <option value={l} key={l}>
+                  {l}
+                </option>
+              ))}
+            </Select>
+            {/* Other Quality of life options */}
           </Flex>
           {/* Editor */}
           {collabDefined && (

@@ -129,6 +129,7 @@ export class WebsocketProvider extends Observable<string> {
 	destroy(): void;
 	sendJoinMessage(nickname: string): void;
 	sendDisconnectMessage(nickname: string): void;
+	sendLanguageChange(language: string): void;
 }
 import { Observable } from "lib0/observable";
 import * as Y from "yjs";
