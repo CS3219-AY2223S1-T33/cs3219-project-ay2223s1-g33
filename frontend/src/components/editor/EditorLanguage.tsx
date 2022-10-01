@@ -10,7 +10,7 @@ type Props = {
 function EditorLanguage({
   selectedLang,
   isDisabled,
-  changeLangHandler
+  changeLangHandler,
 }: Props) {
   return (
     <>

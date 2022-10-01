@@ -15,6 +15,7 @@ import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
+import { Language } from "../types";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -28,12 +29,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal
+    onClose: onCloseLeaveModal,
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal
+    onClose: onCloseDisconnectModal,
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -44,12 +45,10 @@ function Session() {
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
   const [wsStatus, setWsStatus] = useState("Not Connected");
-  const [selectedLang, setSelectedLang] = useState<
-    "javascript" | "java" | "python" | "go"
-  >("javascript");
+  const [selectedLang, setSelectedLang] = useState<Language>("javascript");
 
   useEffect(() => {
-    /** Helper function to configure websocket with yDoc and custom events */
+    /** Helper function to configure websocket with yDoc and custom events. */
     const buildWSProvider = (yd: Y.Doc, params: { [x: string]: string }) => {
       // First 2 params builds the room session: ws://localhost:5001/ + ws
       const ws = new WebsocketProvider(
@@ -83,26 +82,20 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`
+          title: `${joinedNickname.nickname} has joined the room!`,
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`
+          title: `${leftNickname.nickname} has left the room.`,
         });
       });
 
-      ws.on(
-        "lang_change",
-        (languageChange: {
-          language: "javascript" | "java" | "python" | "go";
-        }) => {
-          const { language } = languageChange;
-          // console.log(language);
-          setSelectedLang(language);
-        }
-      );
+      ws.on("lang_change", (languageChange: { language: Language }) => {
+        const { language } = languageChange;
+        setSelectedLang(language);
+      });
 
       return ws;
     };
@@ -111,7 +104,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken
+        room: roomToken === undefined ? "" : roomToken,
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -132,7 +125,7 @@ function Session() {
   const changeLangHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
     provider?.sendLanguageChange(newLang);
-    setSelectedLang(newLang as "javascript" | "java" | "python" | "go");
+    setSelectedLang(newLang as Language);
   };
 
   const leaveSessionHandler = () => {
@@ -177,6 +170,7 @@ function Session() {
             />
             {/* Other Quality of life options */}
           </Flex>
+
           {/* Editor */}
           {collabDefined && (
             <Editor
