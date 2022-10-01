@@ -1,5 +1,9 @@
 import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
+import { loadLanguage } from "@uiw/codemirror-extensions-langs";
+// import { javascript } from "@codemirror/lang-javascript";
+// import { java } from "@codemirror/lang-java";
+// import { python } from "@codemirror/lang-python";
+// import { StreamLanguage } from "@codemirror/language";
 import * as Y from "yjs";
 import React, { useEffect } from "react";
 import { WebsocketProvider } from "y-websocket-peerprep";
@@ -12,15 +16,22 @@ type Props = {
   provider: WebsocketProvider;
   undoManager: Y.UndoManager;
   nickname: string;
+  selectedLang: "javascript" | "java" | "python" | "go";
 };
 
-function Editor({ yText, provider, undoManager, nickname }: Props) {
+function Editor({
+  yText,
+  provider,
+  undoManager,
+  nickname,
+  selectedLang
+}: Props) {
   useEffect(() => {
     if (!providerSet) {
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333",
+        colorLight: "#6eeb8333"
       });
       providerSet = true;
     }
@@ -28,13 +39,16 @@ function Editor({ yText, provider, undoManager, nickname }: Props) {
     return () => {};
   }, []);
 
+  const lang: any = loadLanguage(selectedLang);
+
   return (
     <CodeMirror
       value=""
       height="100%"
       extensions={[
-        javascript({ jsx: true }),
-        yCollab(yText, provider.awareness, { undoManager }),
+        // StreamLanguage.define(lang),
+        lang,
+        yCollab(yText, provider.awareness, { undoManager })
       ]}
     />
   );

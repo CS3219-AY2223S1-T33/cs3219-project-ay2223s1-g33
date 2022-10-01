@@ -1,17 +1,10 @@
-import {
-  Flex,
-  Button,
-  Text,
-  useDisclosure,
-  Box,
-  Grid,
-  Select
-} from "@chakra-ui/react";
+import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
+import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
 import InvalidSession from "./InvalidSession";
@@ -50,8 +43,10 @@ function Session() {
   const [yText, setYText] = useState<Y.Text>();
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
-  const [wsOpen, setWsOpen] = useState("Not Connected");
-  const [selectedLang, setSelectedLang] = useState("javascript");
+  const [wsStatus, setWsStatus] = useState("Not Connected");
+  const [selectedLang, setSelectedLang] = useState<
+    "javascript" | "java" | "python" | "go"
+  >("javascript");
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events */
@@ -68,17 +63,17 @@ function Session() {
         const { status } = joinStatus;
         switch (status) {
           case "connected":
-            setWsOpen("Connected");
+            setWsStatus("Connected");
             break;
           case "connecting":
             // If it came from a disconnected state, skip
-            if (wsOpen !== "Disconnected") {
+            if (wsStatus !== "Disconnected") {
               return;
             }
-            setWsOpen("Connecting");
+            setWsStatus("Connecting");
             break;
           default:
-            setWsOpen("Disconnected");
+            setWsStatus("Disconnected");
             // Opens a modal to show that they got disconnected
             // leaveSessionHandler() will handle the cleanup of ws and yJS
             onOpenDisconnectModal();
@@ -98,11 +93,16 @@ function Session() {
         });
       });
 
-      ws.on("lang_change", (languageChange: { language: string }) => {
-        const { language } = languageChange;
-        // console.log(language);
-        setSelectedLang(language);
-      });
+      ws.on(
+        "lang_change",
+        (languageChange: {
+          language: "javascript" | "java" | "python" | "go";
+        }) => {
+          const { language } = languageChange;
+          // console.log(language);
+          setSelectedLang(language);
+        }
+      );
 
       return ws;
     };
@@ -132,7 +132,7 @@ function Session() {
   const changeLangHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
     provider?.sendLanguageChange(newLang);
-    setSelectedLang(newLang);
+    setSelectedLang(newLang as "javascript" | "java" | "python" | "go");
   };
 
   const leaveSessionHandler = () => {
@@ -156,27 +156,25 @@ function Session() {
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar onOpen={onOpenLeaveModal} status={wsOpen} />
+      <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs />
         {/* Code Editor */}
-        <Grid templateRows="7% 7fr auto" h="91vh">
+        <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}
-          <Flex direction="row" bg="gray.100" px={12} py={2}>
-            {/* Code Editor options */}
-            {/* Language Change */}
-            <Select
-              value={selectedLang}
-              isDisabled={wsOpen !== "Connected"}
-              onChange={changeLangHandler}
-            >
-              {["javascript", "go", "java", "python"].map((l) => (
-                <option value={l} key={l}>
-                  {l}
-                </option>
-              ))}
-            </Select>
+          <Flex
+            direction="row"
+            alignItems="center"
+            bg="gray.100"
+            px={12}
+            py={2}
+          >
+            <EditorLanguage
+              selectedLang={selectedLang}
+              isDisabled={wsStatus !== "Connected"}
+              changeLangHandler={changeLangHandler}
+            />
             {/* Other Quality of life options */}
           </Flex>
           {/* Editor */}
@@ -186,6 +184,7 @@ function Session() {
               provider={provider}
               undoManager={undoManager}
               nickname={nickname}
+              selectedLang={selectedLang}
             />
           )}
           {/* Test case window */}
