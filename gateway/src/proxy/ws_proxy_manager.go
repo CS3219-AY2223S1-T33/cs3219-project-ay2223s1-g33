@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -26,11 +27,14 @@ type websocketProxy struct {
 }
 
 type websocketConnection struct {
-	socket         *websocket.Conn
-	writeBuffer    chan []byte
-	downstream     io.WriteCloser
-	closeListener  func()
+	socket        *websocket.Conn
+	writeBuffer   chan []byte
+	downstream    io.WriteCloser
+	closeListener func()
+
+	stateMutex     sync.Mutex
 	hasPumpStarted bool
+	isAlive        bool
 }
 
 const (
@@ -41,7 +45,7 @@ const (
 	pongWait = 60 * time.Second
 
 	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
+	pingPeriod = 20 * time.Second
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
@@ -86,15 +90,34 @@ func (conn *websocketConnection) Write(data []byte) (n int, err error) {
 }
 
 func (conn *websocketConnection) Close() error {
-	return conn.socket.Close()
+	conn.stateMutex.Lock()
+	defer conn.stateMutex.Unlock()
+
+	if !conn.isAlive {
+		return nil
+	}
+
+	log.Println("Closing WS Connection")
+	close(conn.writeBuffer)
+	err := conn.socket.Close()
+	conn.isAlive = false
+
+	if conn.closeListener != nil {
+		conn.closeListener()
+	}
+	return err
 }
 
 func (conn *websocketConnection) ConnectTunnel() error {
+	conn.stateMutex.Lock()
+	defer conn.stateMutex.Unlock()
+
 	if conn.hasPumpStarted {
 		return nil
 	}
 
 	conn.hasPumpStarted = true
+	conn.isAlive = true
 	go conn.startReadPump()
 	go conn.startWritePump()
 	return nil
@@ -108,11 +131,12 @@ func (conn *websocketConnection) startReadPump() {
 		return nil
 	})
 
-	for {
+	log.Println("Read Pump Started")
+	for conn.isAlive {
 		_, message, err := conn.socket.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Websocket closed: %v", err)
+				log.Printf("Websocket unexpectedly closed: %v", err)
 			}
 			break
 		}
@@ -120,18 +144,21 @@ func (conn *websocketConnection) startReadPump() {
 			conn.downstream.Write(message)
 		}
 	}
+
+	conn.Close()
+	log.Println("Read Pump Death")
 }
 
 func (conn *websocketConnection) startWritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
+		log.Println("Write Pump Death")
+		conn.Close()
 		ticker.Stop()
-		if conn.closeListener != nil {
-			conn.closeListener()
-		}
 	}()
 
-	for {
+	log.Println("Write Pump Started")
+	for conn.isAlive {
 		select {
 		case message, ok := <-conn.writeBuffer:
 			conn.socket.SetWriteDeadline(time.Now().Add(writeWait))

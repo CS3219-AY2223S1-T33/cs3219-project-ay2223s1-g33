@@ -25,7 +25,7 @@ func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http
 			nickname := r.Header.Get(auth.AuthHeaderNickname)
 
 			downstreamClient := proxy.CreateProxyClient(config.CollabServer, roomToken, username, nickname)
-			downstreamWriter, err := downstreamClient.Start()
+			downstreamWriter, err := downstreamClient.Connect()
 			if err != nil {
 				log.Println(err)
 				log.Println("Failed to connect downstream")
@@ -34,6 +34,7 @@ func AttachProxyMiddleware(config *GatewayConfiguration, mux http.Handler) (http
 
 			wsConn, err := proxyManager.UpgradeProtocol(w, r)
 			if err != nil {
+				downstreamClient.Close()
 				log.Println(err)
 				log.Println("Failed to upgrade to Websocket")
 				return

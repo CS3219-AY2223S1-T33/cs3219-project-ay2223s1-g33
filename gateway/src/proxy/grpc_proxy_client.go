@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io"
 	"log"
+	"sync"
+	"time"
 
 	pb "cs3219-project-ay2223s1-g33/gateway/proto"
 
@@ -16,7 +18,7 @@ import (
 type ProxyWorker interface {
 	SetUpstream(upstream io.WriteCloser)
 	SetCloseListener(func())
-	Start() (io.WriteCloser, error)
+	Connect() (io.WriteCloser, error)
 	Write(data []byte) (n int, err error)
 	Close() error
 }
@@ -27,10 +29,14 @@ type proxyWorker struct {
 	sessionNickname string
 	roomToken       string
 
-	conn          *grpc.ClientConn
-	stream        pb.CollabTunnelService_OpenStreamClient
-	upstream      io.WriteCloser
 	closeListener func()
+	upstream      io.WriteCloser
+
+	mutex              sync.Mutex
+	deathSignalChannel chan bool
+	isOpen             bool
+	conn               *grpc.ClientConn
+	stream             pb.CollabTunnelService_OpenStreamClient
 }
 
 func CreateProxyClient(
@@ -40,10 +46,12 @@ func CreateProxyClient(
 	sessionNickname string,
 ) ProxyWorker {
 	return &proxyWorker{
-		server:          server,
-		sessionUsername: sessionUsername,
-		sessionNickname: sessionNickname,
-		roomToken:       roomToken,
+		server:             server,
+		sessionUsername:    sessionUsername,
+		sessionNickname:    sessionNickname,
+		roomToken:          roomToken,
+		deathSignalChannel: make(chan bool, 2),
+		isOpen:             false,
 	}
 }
 
@@ -55,7 +63,10 @@ func (worker *proxyWorker) SetCloseListener(listener func()) {
 	worker.closeListener = listener
 }
 
-func (worker *proxyWorker) Start() (io.WriteCloser, error) {
+func (worker *proxyWorker) Connect() (io.WriteCloser, error) {
+	worker.mutex.Lock()
+	defer worker.mutex.Unlock()
+
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	conn, err := grpc.Dial(worker.server, opts...)
 	if err != nil {
@@ -75,14 +86,16 @@ func (worker *proxyWorker) Start() (io.WriteCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	worker.stream = stream
+	worker.isOpen = true
 	go worker.handleConnection()
 
 	return worker, nil
 }
 
 func (worker *proxyWorker) Write(data []byte) (n int, err error) {
-	if worker.conn == nil {
+	if worker.conn == nil || worker.stream == nil {
 		return 0, errors.New("Connection not established")
 	}
 
@@ -96,17 +109,41 @@ func (worker *proxyWorker) Write(data []byte) (n int, err error) {
 	return len(data), nil
 }
 
+func (worker *proxyWorker) writeHeartbeat() error {
+	if worker.conn == nil || worker.stream == nil {
+		return errors.New("Connection not established")
+	}
+
+	return worker.stream.Send(&pb.CollabTunnelRequest{
+		Flags: int32(pb.CollabTunnelRequestFlags_COLLAB_REQUEST_FLAG_HEARTBEAT),
+	})
+}
+
 func (worker *proxyWorker) Close() error {
-	return worker.conn.Close()
+	worker.mutex.Lock()
+	defer worker.mutex.Unlock()
+
+	if !worker.isOpen {
+		return nil
+	}
+
+	log.Println("GRPC Client Closing")
+	close(worker.deathSignalChannel)
+
+	err := worker.conn.Close()
+	if worker.closeListener != nil {
+		worker.closeListener()
+	}
+	worker.isOpen = false
+
+	return err
 }
 
 func (worker *proxyWorker) handleConnection() {
-	defer func() {
-		if worker.closeListener != nil {
-			worker.closeListener()
-		}
-	}()
-	for {
+	defer worker.Close()
+	go worker.runHeartbeatWorker(worker.deathSignalChannel)
+
+	for worker.isOpen {
 		message, err := worker.stream.Recv()
 		if err == io.EOF {
 			return
@@ -117,13 +154,49 @@ func (worker *proxyWorker) handleConnection() {
 		}
 
 		if worker.upstream != nil {
-			if message.Flags&int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) ==
-				int32(pb.VerifyRoomErrorCode_VERIFY_ROOM_UNAUTHORIZED) {
+			if worker.checkIsUnauthorized(message.Flags) {
 				log.Println("Unauthorized room token detected")
-				worker.upstream.Close()
-				worker.Close()
+				return
 			}
+			if worker.checkIsHeartbeat(message.Flags) {
+				log.Println("Heartbeat received")
+				continue
+			}
+
 			worker.upstream.Write(message.Data)
 		}
 	}
+}
+
+func (worker *proxyWorker) checkIsUnauthorized(flags int32) bool {
+	return worker.isFlagSet(flags, int32(pb.CollabTunnelResponseFlags_COLLAB_RESPONSE_FLAG_UNAUTHORIZED))
+}
+
+func (worker *proxyWorker) checkIsHeartbeat(flags int32) bool {
+	return worker.isFlagSet(flags, int32(pb.CollabTunnelResponseFlags_COLLAB_RESPONSE_FLAG_HEARTBEAT))
+}
+
+func (worker *proxyWorker) isFlagSet(flags int32, targetFlag int32) bool {
+	return flags&targetFlag == targetFlag
+}
+
+func (worker *proxyWorker) runHeartbeatWorker(deathSignal <-chan bool) {
+	log.Println("Starting Heartbeat Worker")
+	isAlive := true
+	for isAlive {
+		select {
+		case <-deathSignal:
+			isAlive = false
+			break
+		case <-time.After(20 * time.Second):
+			err := worker.writeHeartbeat()
+			if err != nil {
+				log.Println("Failed to write heartbeat")
+				isAlive = false
+				break
+			}
+			log.Println("Gateway Sending Heartbeat")
+		}
+	}
+	log.Println("Heartbeat Worker death")
 }
