@@ -16,9 +16,19 @@ import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
 import { Language } from "../types";
+import { Question } from "../proto/types";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
+
+const DUMMY_QUESTION = {
+  questionId: 1,
+  name: "Number of Dice Rolls With Target Sum",
+  difficulty: 2,
+  content:
+    '{"question":"You have n dice and each die has k faces numbered from 1 to k.\nGiven three integers n, k, and target, return the number of possible ways (out of the kn total ways) to roll the dice so the sum of the face-up numbers equals target. Since the answer may be too large, return it modulo 109 + 7.\n","example":["Input: n = 1, k = 6, target = 3\nOutput: 1\nExplanation: You throw one die with 6 faces.\nThere is only one way to get a sum of 3.\n","Input: n = 2, k = 6, target = 7\nOutput: 6\nExplanation: You throw two dice, each with 6 faces.\nThere are 6 ways to get a sum of 7: 1+6, 2+5, 3+4, 4+3, 5+2, 6+1.\n","Input: n = 30, k = 30, target = 500\nOutput: 222616187\nExplanation: The answer must be returned modulo 109 + 7.\n"],"constrains":["1 <= n, k <= 30","1 <= target <= 1000"]}',
+  solution: "ok"
+};
 
 let isInit = false;
 function Session() {
@@ -29,12 +39,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal,
+    onClose: onCloseLeaveModal
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal,
+    onClose: onCloseDisconnectModal
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -46,6 +56,9 @@ function Session() {
 
   const [wsStatus, setWsStatus] = useState("Not Connected");
   const [selectedLang, setSelectedLang] = useState<Language>("javascript");
+  const [question, setQuestion] = useState<Question | undefined>(
+    DUMMY_QUESTION
+  );
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -82,19 +95,26 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`,
+          title: `${joinedNickname.nickname} has joined the room!`
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`,
+          title: `${leftNickname.nickname} has left the room.`
         });
       });
 
       ws.on("lang_change", (languageChange: { language: Language }) => {
         const { language } = languageChange;
         setSelectedLang(language);
+      });
+
+      // TODO: Collab-svc integration
+      ws.on("question_get", (q: { question: string }) => {
+        const questionObj: Question = Question.fromJsonString(q.question);
+        // Update question Obj
+        setQuestion(questionObj);
       });
 
       return ws;
@@ -104,7 +124,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -152,7 +172,7 @@ function Session() {
       <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
-        <EditorTabs />
+        <EditorTabs question={question} />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}
