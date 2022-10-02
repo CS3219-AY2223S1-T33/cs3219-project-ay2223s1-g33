@@ -6,7 +6,6 @@ export default class CollabTunnelSerializer implements TunnelSerializer<TunnelMe
   serialize(data: TunnelMessage): string {
     const simplifiedStruct: TunnelInternalMessage = {
       sender: data.sender,
-      nick: data.nick,
       data: Array.from(data.data),
       flag: data.flag,
     };
@@ -21,7 +20,6 @@ export default class CollabTunnelSerializer implements TunnelSerializer<TunnelMe
     }
     return {
       sender: parsedObject.sender,
-      nick: parsedObject.nick,
       data: new Uint8Array(parsedObject.data),
       flag: parsedObject.flag,
     };
