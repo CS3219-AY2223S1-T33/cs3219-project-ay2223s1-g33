@@ -7,6 +7,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import React from "react";
+import QuestionSection from "../question/QuestionSection";
 
 function EditorTabs() {
   return (
@@ -19,7 +20,7 @@ function EditorTabs() {
 
       <TabPanels>
         <TabPanel key="question_section">
-          <Text>Question section</Text>
+          <QuestionSection />
         </TabPanel>
         <TabPanel key="chat_section">
           <Text>Chat section</Text>
