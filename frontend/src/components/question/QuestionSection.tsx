@@ -18,15 +18,13 @@ type Props = {
 };
 
 function QuestionSection({ question }: Props) {
+  // TODO: Blocker - backend need to send question thru ws. Temp implementation
   const { questionId, name, difficulty, content } = question;
 
-  // TODO: Use the parse the question.content directly
-  // TODO: Blocker - backend need to send question thru ws. Temp implementation
-  // const questionContent = JSON.stringify(SAMPLE_DATA);
   const contentDecode = JSON.parse(content.replace(/\n/g, "\\".concat("n")));
 
   return (
-    <>
+    <Box>
       <Box
         // pb={4}
         id="title"
@@ -62,7 +60,7 @@ function QuestionSection({ question }: Props) {
           ))}
         </UnorderedList>
       </Box>
-    </>
+    </Box>
   );
 }
 

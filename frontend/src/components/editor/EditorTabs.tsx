@@ -26,7 +26,7 @@ function EditorTabs({ question }: Props) {
       </TabList>
 
       <TabPanels>
-        <TabPanel key="question_section">
+        <TabPanel key="question_section" h="85vh" overflowY="scroll">
           {/* TODO Maybe have a refresh button? (Collab svc) */}
           {question ? (
             <QuestionSection question={question} />
