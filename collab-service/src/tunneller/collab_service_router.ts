@@ -3,7 +3,7 @@ import {
   collabTunnelServiceDefinition,
   ICollabTunnelService,
 } from '../proto/collab-service.grpc-server';
-import CollabTunnelController from './collab_tunnel_controller';
+import { CollabTunnelController } from './collab_tunnel_controller';
 
 class CollabTunnelHandler {
   public serviceDefinition: ServiceDefinition<ICollabTunnelService>;
