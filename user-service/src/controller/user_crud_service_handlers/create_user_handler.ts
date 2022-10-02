@@ -1,6 +1,6 @@
-import { CreateUserRequest, CreateUserResponse } from '../../proto/user-service';
+import { CreateUserRequest, CreateUserResponse } from '../../proto/user-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { IStorage, IUserStore } from '../../storage/storage.d';
+import { IStorage, IUserStore } from '../../storage/storage';
 import {
   convertPasswordUserToStoredUser,
   convertStoredUserToPasswordUser,

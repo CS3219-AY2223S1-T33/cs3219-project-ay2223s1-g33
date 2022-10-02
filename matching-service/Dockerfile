@@ -1,31 +1,31 @@
 # Stage 1 : Builder
 FROM node:alpine
 
-RUN mkdir -p /app/collab-service
-RUN mkdir -p /app/collab-service/src/proto
+RUN mkdir -p /app/matching-service
 WORKDIR /app
 
 # Patch alpine to run bash and grpc
-RUN apk add --no-cache bash && apk add libc6-compat
+RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 
 # Generate protobuff & database schema
 COPY proto proto/
 COPY scripts scripts/
+COPY matching-service/src matching-service/src
 COPY package.json package-lock.json ./
+COPY matching-service/proto-emit.cfg matching-service
 
 # Install protobuff dependencies
 RUN npm install
 RUN npm run-script gen-proto
 
-WORKDIR /app/collab-service
+WORKDIR /app/matching-service
 
 # Install project dependencies
-COPY collab-service/package.json .
-COPY collab-service/package-lock.json .
+COPY matching-service/package.json .
+COPY matching-service/package-lock.json .
 RUN npm install
 
-COPY collab-service/src collab-service/src
-COPY collab-service .
+COPY matching-service .
 
 # Build project
 RUN npm run-script build

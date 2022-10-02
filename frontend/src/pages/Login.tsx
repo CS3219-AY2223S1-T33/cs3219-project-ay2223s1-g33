@@ -23,7 +23,7 @@ import {
   LoginRequest,
   LoginResponse,
   UserCredentials,
-} from "../proto/user-bff-service";
+} from "../proto/user-service";
 import useFixedToast from "../utils/hooks/useFixedToast";
 
 function Login() {

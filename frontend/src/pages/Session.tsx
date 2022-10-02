@@ -1,9 +1,10 @@
 import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
+import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
 import InvalidSession from "./InvalidSession";
@@ -14,6 +15,7 @@ import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
+import { Language } from "../types";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -27,23 +29,26 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal
+    onClose: onCloseLeaveModal,
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal
+    onClose: onCloseDisconnectModal,
   } = useDisclosure();
   const toast = useFixedToast();
 
+  // YJS Settings
   const [yDoc, setYDoc] = useState<Y.Doc>();
   const [provider, setProvider] = useState<WebsocketProvider>();
   const [yText, setYText] = useState<Y.Text>();
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
-  const [wsOpen, setWsOpen] = useState("Not Connected");
+
+  const [wsStatus, setWsStatus] = useState("Not Connected");
+  const [selectedLang, setSelectedLang] = useState<Language>("javascript");
 
   useEffect(() => {
-    // Helper function to configure websocket with yDoc and custom events
+    /** Helper function to configure websocket with yDoc and custom events. */
     const buildWSProvider = (yd: Y.Doc, params: { [x: string]: string }) => {
       // First 2 params builds the room session: ws://localhost:5001/ + ws
       const ws = new WebsocketProvider(
@@ -57,17 +62,17 @@ function Session() {
         const { status } = joinStatus;
         switch (status) {
           case "connected":
-            setWsOpen("Connected");
+            setWsStatus("Connected");
             break;
           case "connecting":
             // If it came from a disconnected state, skip
-            if (wsOpen !== "Disconnected") {
+            if (wsStatus !== "Disconnected") {
               return;
             }
-            setWsOpen("Connecting");
+            setWsStatus("Connecting");
             break;
           default:
-            setWsOpen("Disconnected");
+            setWsStatus("Disconnected");
             // Opens a modal to show that they got disconnected
             // leaveSessionHandler() will handle the cleanup of ws and yJS
             onOpenDisconnectModal();
@@ -77,14 +82,19 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`
+          title: `${joinedNickname.nickname} has joined the room!`,
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`
+          title: `${leftNickname.nickname} has left the room.`,
         });
+      });
+
+      ws.on("lang_change", (languageChange: { language: Language }) => {
+        const { language } = languageChange;
+        setSelectedLang(language);
       });
 
       return ws;
@@ -94,7 +104,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken
+        room: roomToken === undefined ? "" : roomToken,
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -111,6 +121,12 @@ function Session() {
 
     return () => {};
   }, []);
+
+  const changeLangHandler = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newLang = e.target.value;
+    provider?.sendLanguageChange(newLang);
+    setSelectedLang(newLang as Language);
+  };
 
   const leaveSessionHandler = () => {
     provider?.destroy();
@@ -133,16 +149,28 @@ function Session() {
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar onOpen={onOpenLeaveModal} status={wsOpen} />
+      <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs />
         {/* Code Editor */}
-        <Grid templateRows="7% 7fr auto" h="91vh">
+        <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}
-          <Flex direction="row" bg="gray.100" px={12} py={2}>
-            Code Editor options
+          <Flex
+            direction="row"
+            alignItems="center"
+            bg="gray.100"
+            px={12}
+            py={2}
+          >
+            <EditorLanguage
+              selectedLang={selectedLang}
+              isDisabled={wsStatus !== "Connected"}
+              changeLangHandler={changeLangHandler}
+            />
+            {/* Other Quality of life options */}
           </Flex>
+
           {/* Editor */}
           {collabDefined && (
             <Editor
@@ -150,6 +178,7 @@ function Session() {
               provider={provider}
               undoManager={undoManager}
               nickname={nickname}
+              selectedLang={selectedLang}
             />
           )}
           {/* Test case window */}

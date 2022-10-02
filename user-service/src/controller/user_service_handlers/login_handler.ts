@@ -1,18 +1,18 @@
 import bcrypt from 'bcrypt';
 import Validator from 'validator';
-import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-bff-service';
+import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { UserServiceClient } from '../../proto/user-service.grpc-client';
+import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import Constants from '../../utils/constants';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
-  rpcClient: UserServiceClient;
+  rpcClient: UserCrudServiceClient;
 
   authService: IAuthenticationAgent;
 
-  constructor(rpcClient: UserServiceClient, authService: IAuthenticationAgent) {
+  constructor(rpcClient: UserCrudServiceClient, authService: IAuthenticationAgent) {
     this.rpcClient = rpcClient;
     this.authService = authService;
   }

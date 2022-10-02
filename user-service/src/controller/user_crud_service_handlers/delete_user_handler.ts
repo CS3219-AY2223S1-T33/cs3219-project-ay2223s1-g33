@@ -1,6 +1,6 @@
-import { DeleteUserRequest, DeleteUserResponse } from '../../proto/user-service';
+import { DeleteUserRequest, DeleteUserResponse } from '../../proto/user-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { IStorage, IUserStore } from '../../storage/storage.d';
+import { IStorage, IUserStore } from '../../storage/storage';
 
 function getHeaderlessResponse(resp: DeleteUserResponse): ApiResponse<DeleteUserResponse> {
   return {

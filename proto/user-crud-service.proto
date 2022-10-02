@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package user_crud_service;
+option go_package = "cs3219-project-ay2223s1-g33/proto";
+
+import "types.proto";
+
+message GetUserRequest {
+  common.User user = 1;
+}
+
+message GetUserResponse {
+  common.PasswordUser user = 1;
+  string error_message = 2;
+}
+
+message CreateUserRequest {
+  common.PasswordUser user = 1;
+}
+
+message CreateUserResponse {
+  common.PasswordUser user = 1;
+  string error_message = 2;
+}
+
+message EditUserRequest {
+  common.PasswordUser user = 1;
+}
+
+message EditUserResponse {
+  common.PasswordUser user = 1;
+  string error_message = 2;
+}
+
+message DeleteUserRequest {
+  uint64 user_id = 1;
+}
+
+message DeleteUserResponse {
+  string error_message = 1;
+}
+
+service UserCrudService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc EditUser(EditUserRequest) returns (EditUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}

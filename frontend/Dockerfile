@@ -5,12 +5,13 @@ RUN mkdir -p /app/frontend
 WORKDIR /app
 
 # Patch alpine to run bash and grpc
-RUN apk add --no-cache bash && apk add libc6-compat
+RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 
 # Generate protobuff
 COPY proto proto/
 COPY scripts scripts/
 COPY frontend/src frontend/src
+COPY frontend/proto-emit.cfg frontend
 COPY package.json package-lock.json ./
 
 # Install protobuff dependencies
@@ -21,7 +22,7 @@ WORKDIR /app/frontend
 
 # Install project dependencies
 COPY frontend/package.json .
-COPY frontend/package-lock.json .
+COPY frontend/y-websocket-peerprep-1.4.5.tgz .
 RUN npm install
 
 COPY frontend .
@@ -33,7 +34,7 @@ RUN npm run build
 FROM nginx:alpine
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY ./frontend.nginx.conf /etc/nginx/nginx.conf
+COPY ./frontend/frontend.nginx.conf /etc/nginx/nginx.conf
 
 # Remove default nginx index page
 RUN rm -rf /usr/share/nginx/html/*
