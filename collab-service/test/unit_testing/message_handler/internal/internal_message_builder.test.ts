@@ -3,8 +3,11 @@ import {
   createJoinMessage,
 } from '../../../../src/message_handler/internal/internal_message_builder';
 import {
-  ConnectionFlag,
+  ConnectionOpCode,
 } from '../../../../src/message_handler/internal/internal_message_types';
+import {
+  createConnectedMessage
+} from '../../../../src/message_handler/room/connect_message_builder';
 
 describe('Function-Message-Internal createJoinMessage', () => {
   test('Test creating username', () => {
@@ -14,9 +17,8 @@ describe('Function-Message-Internal createJoinMessage', () => {
     expect(msg)
       .toStrictEqual({
         sender: name,
-        nick: nickname,
-        data: new Uint8Array(0),
-        flag: ConnectionFlag.JOIN,
+        data: createConnectedMessage(nickname),
+        flag: ConnectionOpCode.JOIN,
       });
   });
 });
@@ -29,9 +31,8 @@ describe('Function-Message-Internal createAckMessage', () => {
     expect(msg)
       .toStrictEqual({
         sender: name,
-        nick: nickname,
-        data: new Uint8Array(0),
-        flag: ConnectionFlag.ACK,
+        data: createConnectedMessage(nickname),
+        flag: ConnectionOpCode.ACK,
       });
   });
 });
