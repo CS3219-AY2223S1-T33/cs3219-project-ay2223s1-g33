@@ -1,9 +1,10 @@
-package proxy
+package wsproxy
 
 import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -14,11 +15,12 @@ type WebsocketProxyManager interface {
 }
 
 type WebsocketConnection interface {
-	SetDownstream(io.WriteCloser)
-	SetCloseListener(func())
+	CloseObservable
+	Closeable
+	Pipeable
+	io.WriteCloser
+
 	ConnectTunnel() error
-	Write(data []byte) (n int, err error)
-	Close() error
 }
 
 type websocketProxy struct {
@@ -26,38 +28,40 @@ type websocketProxy struct {
 }
 
 type websocketConnection struct {
-	socket         *websocket.Conn
-	writeBuffer    chan []byte
-	downstream     io.WriteCloser
-	closeListener  func()
+	socket        *websocket.Conn
+	writeBuffer   chan []byte
+	pipeTarget    io.WriteCloser
+	closeListener func()
+
+	stateMutex     sync.Mutex
 	hasPumpStarted bool
+	isAlive        bool
 }
 
 const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
+	// Data channel parameters
+	writeWait       = 10 * time.Second
+	maxMessageSize  = 512
+	writeBufferSize = 10
 
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	// KeepAlive Parameters, ping period must be smaller than pong wait
+	maxPongInterval = 60 * time.Second
+	pingInterval    = 20 * time.Second
 )
 
 func CreateWebsocketProxyManager() WebsocketProxyManager {
-	upgrader := websocket.Upgrader{
+	wsUpgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
-		CheckOrigin: func(req *http.Request) bool {
-			return true
-		},
+		CheckOrigin:     checkOrigin,
 	}
 	return &websocketProxy{
-		connectionUpgrader: &upgrader,
+		connectionUpgrader: &wsUpgrader,
 	}
+}
+
+func checkOrigin(req *http.Request) bool {
+	return true
 }
 
 func (proxy *websocketProxy) UpgradeProtocol(writer http.ResponseWriter, req *http.Request) (WebsocketConnection, error) {
@@ -68,15 +72,15 @@ func (proxy *websocketProxy) UpgradeProtocol(writer http.ResponseWriter, req *ht
 
 	return &websocketConnection{
 		socket:      conn,
-		writeBuffer: make(chan []byte, 10),
+		writeBuffer: make(chan []byte, writeBufferSize),
 	}, nil
 }
 
-func (conn *websocketConnection) SetDownstream(writer io.WriteCloser) {
-	conn.downstream = writer
+func (conn *websocketConnection) PipeTo(pipeTarget io.WriteCloser) {
+	conn.pipeTarget = pipeTarget
 }
 
-func (conn *websocketConnection) SetCloseListener(listener func()) {
+func (conn *websocketConnection) SetCloseListener(listener CloseObserver) {
 	conn.closeListener = listener
 }
 
@@ -86,52 +90,74 @@ func (conn *websocketConnection) Write(data []byte) (n int, err error) {
 }
 
 func (conn *websocketConnection) Close() error {
-	return conn.socket.Close()
+	conn.stateMutex.Lock()
+	defer conn.stateMutex.Unlock()
+
+	if !conn.isAlive {
+		return nil
+	}
+
+	log.Println("Closing WS Connection")
+	close(conn.writeBuffer)
+	err := conn.socket.Close()
+	conn.isAlive = false
+
+	if conn.closeListener != nil {
+		conn.closeListener()
+	}
+	return err
 }
 
 func (conn *websocketConnection) ConnectTunnel() error {
+	conn.stateMutex.Lock()
+	defer conn.stateMutex.Unlock()
+
 	if conn.hasPumpStarted {
 		return nil
 	}
 
 	conn.hasPumpStarted = true
+	conn.isAlive = true
 	go conn.startReadPump()
 	go conn.startWritePump()
+
 	return nil
 }
 
 func (conn *websocketConnection) startReadPump() {
 	conn.socket.SetReadLimit(maxMessageSize)
-	conn.socket.SetReadDeadline(time.Now().Add(pongWait))
+	conn.socket.SetReadDeadline(time.Now().Add(maxPongInterval))
 	conn.socket.SetPongHandler(func(string) error {
-		conn.socket.SetReadDeadline(time.Now().Add(pongWait))
+		conn.socket.SetReadDeadline(time.Now().Add(maxPongInterval))
 		return nil
 	})
 
-	for {
+	for conn.isAlive {
 		_, message, err := conn.socket.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Websocket closed: %v", err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseMessage, websocket.CloseNormalClosure) {
+				log.Printf("Websocket unexpectedly closed: %v", err)
 			}
 			break
 		}
-		if conn.downstream != nil {
-			conn.downstream.Write(message)
+		if conn.pipeTarget != nil {
+			conn.pipeTarget.Write(message)
 		}
 	}
+
+	log.Println("WS Read Pump Death")
+	conn.Close()
 }
 
 func (conn *websocketConnection) startWritePump() {
-	ticker := time.NewTicker(pingPeriod)
+	ticker := time.NewTicker(pingInterval)
 	defer func() {
+		log.Println("WS Write Pump Death")
+		conn.Close()
 		ticker.Stop()
-		if conn.closeListener != nil {
-			conn.closeListener()
-		}
 	}()
 
-	for {
+	for conn.isAlive {
 		select {
 		case message, ok := <-conn.writeBuffer:
 			conn.socket.SetWriteDeadline(time.Now().Add(writeWait))

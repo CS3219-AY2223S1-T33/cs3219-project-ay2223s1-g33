@@ -13,7 +13,8 @@ import CollabTunnelSerializer from './collab_tunnel_serializer';
 import {
   CollabTunnelRequest,
   CollabTunnelResponse,
-  VerifyRoomErrorCode,
+  CollabTunnelResponseFlags,
+  CollabTunnelRequestFlags,
 } from '../proto/collab-service';
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { IQuestionAgent } from '../question_client/question_agent_types';
@@ -22,6 +23,7 @@ import { ConnectionOpCode, TunnelMessage } from '../message_handler/internal/int
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
 const PROXY_HEADER_ROOM_TOKEN = 'X-Gateway-Proxy-Room-Token';
+const HEARTBEAT_INTERVAL = 20000;
 
 async function writerHandler(
   message: TunnelMessage,
@@ -34,7 +36,7 @@ async function writerHandler(
   function makeResponse(data: Uint8Array): CollabTunnelResponse {
     return CollabTunnelResponse.create({
       data: Buffer.from(data),
-      flags: VerifyRoomErrorCode.VERIFY_ROOM_ERROR_NONE,
+      flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_NONE,
     });
   }
   // Prevent self echo
@@ -70,6 +72,22 @@ function createCallWriter(
   return async (message: TunnelMessage): Promise<void> => {
     await writerHandler(message, username, nickname, call, pubsub);
   };
+}
+
+function writeHeartbeat(call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>) {
+  const res = CollabTunnelResponse.create(
+    {
+      data: Buffer.from([]),
+      flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_HEARTBEAT,
+    },
+  );
+  call.write(res);
+}
+
+function isHeartbeat(flag: number): boolean {
+  /* eslint no-bitwise: ["error", { "allow": ["&"] }] */
+  return (flag & CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT)
+    === CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT;
 }
 
 class CollabTunnelController {
@@ -140,9 +158,17 @@ class CollabTunnelController {
     // Connection discovery, Send A
     await redisPubSubAdapter.pushMessage(createJoinMessage(username, nickname));
 
+    const heartbeatWorker = setInterval(() => {
+      writeHeartbeat(call);
+    }, HEARTBEAT_INTERVAL);
+
     // When data is detected
     call.on('data', (request: CollabTunnelRequest) => {
+      if (isHeartbeat(request.flags)) {
+        return;
+      }
       // Send Normal
+
       redisPubSubAdapter.pushMessage({
         sender: username,
         data: request.data,
@@ -152,6 +178,8 @@ class CollabTunnelController {
 
     // When stream closes
     call.on('end', () => {
+      clearInterval(heartbeatWorker);
+
       // Send 'Disconnected'
       redisPubSubAdapter.pushMessage({
         sender: username,
