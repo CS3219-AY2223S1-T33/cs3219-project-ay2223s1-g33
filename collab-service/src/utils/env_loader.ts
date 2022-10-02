@@ -57,7 +57,7 @@ export default function loadEnvironment(): EnvironmentConfig {
 
   return {
     JWT_ROOM_SECRET: requireString('JWT_ROOM_SECRET'),
-    REDIS_SERVER_URL: requireString('REDIS_SERVER_URL'),
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
     QUESTION_SERVER_URL: requireString('QUESTION_SERVER_URL'),
     GRPC_PORT: requireInt('GRPC_PORT', 4003),
   };
