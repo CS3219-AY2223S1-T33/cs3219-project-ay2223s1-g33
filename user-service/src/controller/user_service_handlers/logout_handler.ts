@@ -1,4 +1,4 @@
-import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user-bff-service';
+import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import Constants from '../../utils/constants';
