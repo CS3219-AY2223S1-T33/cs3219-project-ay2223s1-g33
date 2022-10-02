@@ -1,17 +1,17 @@
 # Stage 1 : Builder
 FROM node:alpine
 
-RUN mkdir -p /app/question-service
+RUN mkdir -p /app/user-service
 WORKDIR /app
 
 # Patch alpine to run bash and grpc
-RUN apk add --no-cache bash && apk add libc6-compat
+RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 
 # Generate protobuff & database schema
 COPY proto proto/
 COPY scripts scripts/
 COPY db db/
-COPY question-service/src question-service/src
+COPY user-service/src user-service/src
 COPY package.json package-lock.json ./
 
 # Install protobuff dependencies
@@ -19,14 +19,14 @@ RUN npm install
 RUN npm run-script gen-proto
 RUN npm run-script sync-schema
 
-WORKDIR /app/question-service
+WORKDIR /app/user-service
 
 # Install project dependencies
-COPY question-service/package.json .
-COPY question-service/package-lock.json .
+COPY user-service/package.json .
+COPY user-service/package-lock.json .
 RUN npm install
 
-COPY question-service .
+COPY user-service .
 
 # Build project
 RUN npm run-script build
