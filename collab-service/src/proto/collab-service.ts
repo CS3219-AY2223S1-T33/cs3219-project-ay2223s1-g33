@@ -40,25 +40,44 @@ export interface CollabTunnelResponse {
     flags: number;
 }
 /**
- * @generated from protobuf enum collaboration_service.VerifyRoomErrorCode
+ * @generated from protobuf enum collaboration_service.CollabTunnelRequestFlags
  */
-export enum VerifyRoomErrorCode {
+export enum CollabTunnelRequestFlags {
     /**
-     * @generated from protobuf enum value: VERIFY_ROOM_ERROR_NONE = 0;
+     * @generated from protobuf enum value: COLLAB_REQUEST_FLAG_NONE = 0;
      */
-    VERIFY_ROOM_ERROR_NONE = 0,
+    COLLAB_REQUEST_FLAG_NONE = 0,
     /**
-     * @generated from protobuf enum value: VERIFY_ROOM_BAD_REQUEST = 1;
+     * @generated from protobuf enum value: COLLAB_REQUEST_FLAG_HEARTBEAT = 1;
      */
-    VERIFY_ROOM_BAD_REQUEST = 1,
+    COLLAB_REQUEST_FLAG_HEARTBEAT = 1
+}
+/**
+ * @generated from protobuf enum collaboration_service.CollabTunnelResponseFlags
+ */
+export enum CollabTunnelResponseFlags {
     /**
-     * @generated from protobuf enum value: VERIFY_ROOM_INTERNAL_ERROR = 2;
+     * @generated from protobuf enum value: COLLAB_RESPONSE_FLAG_NONE = 0;
      */
-    VERIFY_ROOM_INTERNAL_ERROR = 2,
+    COLLAB_RESPONSE_FLAG_NONE = 0,
     /**
-     * @generated from protobuf enum value: VERIFY_ROOM_UNAUTHORIZED = 4;
+     * @generated from protobuf enum value: COLLAB_RESPONSE_FLAG_HEARTBEAT = 1;
      */
-    VERIFY_ROOM_UNAUTHORIZED = 4
+    COLLAB_RESPONSE_FLAG_HEARTBEAT = 1,
+    /**
+     * @generated from protobuf enum value: COLLAB_RESPONSE_FLAG_BAD_REQUEST = 2;
+     */
+    COLLAB_RESPONSE_FLAG_BAD_REQUEST = 2,
+    /**
+     * @generated from protobuf enum value: COLLAB_RESPONSE_FLAG_UNAUTHORIZED = 4;
+     */
+    COLLAB_RESPONSE_FLAG_UNAUTHORIZED = 4,
+    /**
+     * 2 ^ 30
+     *
+     * @generated from protobuf enum value: COLLAB_RESPONSE_FLAG_INTERNAL_ERROR = 1073741824;
+     */
+    COLLAB_RESPONSE_FLAG_INTERNAL_ERROR = 1073741824
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class CollabTunnelRequest$Type extends MessageType<CollabTunnelRequest> {

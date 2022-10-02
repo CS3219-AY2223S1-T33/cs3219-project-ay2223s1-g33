@@ -15,17 +15,19 @@ import (
 )
 
 func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) (http.Handler, error) {
-	marshalerOpts := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
-		Marshaler: &runtime.JSONPb{
-			MarshalOptions: protojson.MarshalOptions{
-				Multiline:       true,
-				UseEnumNumbers:  true,
-				EmitUnpopulated: true,
-			},
-			UnmarshalOptions: protojson.UnmarshalOptions{
-				DiscardUnknown: true,
-			},
+	marshaller := &runtime.JSONPb{
+		MarshalOptions: protojson.MarshalOptions{
+			Multiline:       true,
+			UseEnumNumbers:  true,
+			EmitUnpopulated: true,
 		},
+		UnmarshalOptions: protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		},
+	}
+
+	marshalerOpts := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
+		Marshaler: marshaller,
 	})
 
 	incomingHeaderOpts := runtime.WithIncomingHeaderMatcher(gatewayIncomingHeaderMatcher)
