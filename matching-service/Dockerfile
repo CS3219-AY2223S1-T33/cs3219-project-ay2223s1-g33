@@ -12,6 +12,7 @@ COPY proto proto/
 COPY scripts scripts/
 COPY matching-service/src matching-service/src
 COPY package.json package-lock.json ./
+COPY matching-service/proto-emit.cfg matching-service
 
 # Install protobuff dependencies
 RUN npm install

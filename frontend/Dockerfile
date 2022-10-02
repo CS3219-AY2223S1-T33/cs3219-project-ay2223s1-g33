@@ -11,6 +11,7 @@ RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 COPY proto proto/
 COPY scripts scripts/
 COPY frontend/src frontend/src
+COPY frontend/proto-emit.cfg frontend
 COPY package.json package-lock.json ./
 
 # Install protobuff dependencies
