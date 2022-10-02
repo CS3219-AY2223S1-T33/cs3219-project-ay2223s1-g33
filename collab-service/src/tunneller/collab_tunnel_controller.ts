@@ -114,7 +114,6 @@ export default class CollabTunnelController {
 
     await redisPubSubAdapter.addOnMessageListener(createCallWriter(call, username));
 
-    console.log('Starting Heartbeat');
     const heartbeatWorker = setInterval(() => {
       writeHeartbeat(call);
     }, HEARTBEAT_INTERVAL);
@@ -133,7 +132,6 @@ export default class CollabTunnelController {
 
     // When stream closes
     call.on('end', () => {
-      console.log('Killing heartbeat');
       clearInterval(heartbeatWorker);
       redisPubSubAdapter.pushMessage({
         data: createDisconnectMessage(nickname),
