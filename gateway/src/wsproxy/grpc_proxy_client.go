@@ -1,4 +1,4 @@
-package proxy
+package wsproxy
 
 import (
 	"context"
@@ -16,11 +16,12 @@ import (
 )
 
 type ProxyWorker interface {
-	SetUpstream(upstream io.WriteCloser)
-	SetCloseListener(func())
+	CloseObservable
+	Closeable
+	Pipeable
+	io.WriteCloser
+
 	Connect() (io.WriteCloser, error)
-	Write(data []byte) (n int, err error)
-	Close() error
 }
 
 type proxyWorker struct {
@@ -30,7 +31,7 @@ type proxyWorker struct {
 	roomToken       string
 
 	closeListener func()
-	upstream      io.WriteCloser
+	pipeTarget    io.WriteCloser
 
 	mutex              sync.Mutex
 	deathSignalChannel chan bool
@@ -55,11 +56,11 @@ func CreateProxyClient(
 	}
 }
 
-func (worker *proxyWorker) SetUpstream(upstream io.WriteCloser) {
-	worker.upstream = upstream
+func (worker *proxyWorker) PipeTo(pipeTarget io.WriteCloser) {
+	worker.pipeTarget = pipeTarget
 }
 
-func (worker *proxyWorker) SetCloseListener(listener func()) {
+func (worker *proxyWorker) SetCloseListener(listener CloseObserver) {
 	worker.closeListener = listener
 }
 
@@ -75,13 +76,8 @@ func (worker *proxyWorker) Connect() (io.WriteCloser, error) {
 	worker.conn = conn
 
 	client := pb.NewCollabTunnelServiceClient(conn)
-	headers := metadata.Pairs(
-		ProxyHeaderRoomToken, worker.roomToken,
-		ProxyHeaderUsername, worker.sessionUsername,
-		ProxyHeaderNickanme, worker.sessionNickname,
-	)
+	ctx := worker.buildContextWithHeaders()
 
-	ctx := metadata.NewOutgoingContext(context.Background(), headers)
 	stream, err := client.OpenStream(ctx)
 	if err != nil {
 		return nil, err
@@ -94,6 +90,16 @@ func (worker *proxyWorker) Connect() (io.WriteCloser, error) {
 	return worker, nil
 }
 
+func (worker *proxyWorker) buildContextWithHeaders() context.Context {
+	headers := metadata.Pairs(
+		ProxyHeaderRoomToken, worker.roomToken,
+		ProxyHeaderUsername, worker.sessionUsername,
+		ProxyHeaderNickanme, worker.sessionNickname,
+	)
+
+	return metadata.NewOutgoingContext(context.Background(), headers)
+}
+
 func (worker *proxyWorker) Write(data []byte) (n int, err error) {
 	if worker.conn == nil || worker.stream == nil {
 		return 0, errors.New("Connection not established")
@@ -102,6 +108,7 @@ func (worker *proxyWorker) Write(data []byte) (n int, err error) {
 	err = worker.stream.Send(&pb.CollabTunnelRequest{
 		Data: data,
 	})
+
 	if err != nil {
 		return 0, err
 	}
@@ -127,7 +134,7 @@ func (worker *proxyWorker) Close() error {
 		return nil
 	}
 
-	log.Println("GRPC Client Closing")
+	log.Printf("Closing %s GRPC Client\n", worker.sessionUsername)
 	close(worker.deathSignalChannel)
 
 	err := worker.conn.Close()
@@ -149,22 +156,24 @@ func (worker *proxyWorker) handleConnection() {
 			return
 		}
 		if err != nil {
-			log.Printf("Failed to receive a data : %v\n", err)
+			log.Printf("GRPC Receive Error: %v\n", err)
 			return
 		}
 
-		if worker.upstream != nil {
-			if worker.checkIsUnauthorized(message.Flags) {
-				log.Println("Unauthorized room token detected")
-				return
-			}
-			if worker.checkIsHeartbeat(message.Flags) {
-				log.Println("Heartbeat received")
-				continue
-			}
-
-			worker.upstream.Write(message.Data)
+		if worker.pipeTarget == nil {
+			continue
 		}
+
+		if worker.checkIsUnauthorized(message.Flags) {
+			log.Printf("Unauthorized room token for user %s\n", worker.sessionUsername)
+			return
+		}
+
+		if worker.checkIsHeartbeat(message.Flags) {
+			continue
+		}
+
+		worker.pipeTarget.Write(message.Data)
 	}
 }
 
@@ -181,7 +190,7 @@ func (worker *proxyWorker) isFlagSet(flags int32, targetFlag int32) bool {
 }
 
 func (worker *proxyWorker) runHeartbeatWorker(deathSignal <-chan bool) {
-	log.Println("Starting Heartbeat Worker")
+	log.Printf("Starting Heartbeat Worker for %s\n", worker.sessionUsername)
 	isAlive := true
 	for isAlive {
 		select {
@@ -195,8 +204,7 @@ func (worker *proxyWorker) runHeartbeatWorker(deathSignal <-chan bool) {
 				isAlive = false
 				break
 			}
-			log.Println("Gateway Sending Heartbeat")
 		}
 	}
-	log.Println("Heartbeat Worker death")
+	log.Printf("Heartbeat Worker death for %s\n", worker.sessionUsername)
 }

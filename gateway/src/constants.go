@@ -5,3 +5,7 @@ const (
 	VersionMinor    = 2
 	VersionRevision = 0
 )
+
+const (
+	websocketRoute = "/api/roomws"
+)

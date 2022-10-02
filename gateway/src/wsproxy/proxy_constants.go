@@ -1,4 +1,4 @@
-package proxy
+package wsproxy
 
 const (
 	ProxyHeaderUsername  = "X-Gateway-Proxy-Username"
