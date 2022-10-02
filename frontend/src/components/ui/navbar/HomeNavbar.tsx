@@ -16,7 +16,7 @@ import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, selectUser } from "../../../feature/user/userSlice";
-import { LogoutResponse } from "../../../proto/user-bff-service";
+import { LogoutResponse } from "../../../proto/user-service";
 
 function HomeNavbar() {
   const navigate = useNavigate();
