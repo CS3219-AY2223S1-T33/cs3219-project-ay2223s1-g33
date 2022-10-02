@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
 import Validator from 'validator';
-import { RegisterErrorCode, RegisterRequest, RegisterResponse } from '../../proto/user-bff-service';
+import { RegisterErrorCode, RegisterRequest, RegisterResponse } from '../../proto/user-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { UserServiceClient } from '../../proto/user-service.grpc-client';
+import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { PasswordUser } from '../../proto/types';
-import { CreateUserResponse } from '../../proto/user-service';
+import { CreateUserResponse } from '../../proto/user-crud-service';
 
 function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResponse> {
   return {
@@ -14,9 +14,9 @@ function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResp
 }
 
 class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> {
-  rpcClient: UserServiceClient;
+  rpcClient: UserCrudServiceClient;
 
-  constructor(rpcClient: UserServiceClient) {
+  constructor(rpcClient: UserCrudServiceClient) {
     this.rpcClient = rpcClient;
   }
 

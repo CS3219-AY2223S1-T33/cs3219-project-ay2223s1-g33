@@ -36,7 +36,7 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	log.Printf("Proxying to User-BFF on %s\n", config.UserBFFServer)
-	err := gw.RegisterUserBFFServiceHandlerFromEndpoint(ctx, mux, config.UserBFFServer, opts)
+	err := gw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, config.UserBFFServer, opts)
 	if err != nil {
 		return nil, err
 	}

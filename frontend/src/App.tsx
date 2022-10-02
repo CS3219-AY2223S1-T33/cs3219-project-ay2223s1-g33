@@ -7,7 +7,7 @@ import { BrowserRouter } from "react-router-dom";
 import UnprotectedRoute from "./components/auth/UnprotectedRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import axios from "./axios";
-import { GetUserProfileResponse } from "./proto/user-bff-service";
+import { GetUserProfileResponse } from "./proto/user-service";
 import { login, selectUser } from "./feature/user/userSlice";
 import useFixedToast from "./utils/hooks/useFixedToast";
 

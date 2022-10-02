@@ -1,6 +1,6 @@
-import { GetUserProfileRequest, GetUserProfileResponse } from '../../proto/user-bff-service';
+import { GetUserProfileRequest, GetUserProfileResponse } from '../../proto/user-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { UserServiceClient } from '../../proto/user-service.grpc-client';
+import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
@@ -14,11 +14,11 @@ function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUse
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
 class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUserProfileResponse> {
-  rpcClient: UserServiceClient;
+  rpcClient: UserCrudServiceClient;
 
   authService: IAuthenticationAgent;
 
-  constructor(rpcClient: UserServiceClient, authService: IAuthenticationAgent) {
+  constructor(rpcClient: UserCrudServiceClient, authService: IAuthenticationAgent) {
     this.rpcClient = rpcClient;
     this.authService = authService;
   }
