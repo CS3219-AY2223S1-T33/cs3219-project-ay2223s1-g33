@@ -1,6 +1,6 @@
-import { EditUserRequest, EditUserResponse } from '../../proto/user-service';
+import { EditUserRequest, EditUserResponse } from '../../proto/user-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { IStorage, IUserStore } from '../../storage/storage.d';
+import { IStorage, IUserStore } from '../../storage/storage';
 import { convertPasswordUserToStoredUser } from '../../model/user_helper';
 
 function getHeaderlessResponse(resp: EditUserResponse): ApiResponse<EditUserResponse> {
