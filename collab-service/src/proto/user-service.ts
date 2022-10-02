@@ -13,107 +13,289 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { PasswordUser } from "./types";
 import { User } from "./types";
 /**
- * @generated from protobuf message user_service.GetUserRequest
+ * @generated from protobuf message user_service.UserCredentials
  */
-export interface GetUserRequest {
+export interface UserCredentials {
+    /**
+     * @generated from protobuf field: string username = 1;
+     */
+    username: string;
+    /**
+     * @generated from protobuf field: string password = 2;
+     */
+    password: string;
+}
+/**
+ * @generated from protobuf message user_service.LoginRequest
+ */
+export interface LoginRequest {
+    /**
+     * @generated from protobuf field: user_service.UserCredentials credentials = 1;
+     */
+    credentials?: UserCredentials;
+}
+/**
+ * @generated from protobuf message user_service.LoginResponse
+ */
+export interface LoginResponse {
     /**
      * @generated from protobuf field: common.User user = 1;
      */
     user?: User;
+    /**
+     * @generated from protobuf field: user_service.LoginErrorCode error_code = 2;
+     */
+    errorCode: LoginErrorCode;
+    /**
+     * @generated from protobuf field: string error_message = 3;
+     */
+    errorMessage: string;
 }
 /**
- * @generated from protobuf message user_service.GetUserResponse
+ * @generated from protobuf message user_service.RegisterRequest
  */
-export interface GetUserResponse {
+export interface RegisterRequest {
     /**
-     * @generated from protobuf field: common.PasswordUser user = 1;
+     * @generated from protobuf field: user_service.UserCredentials credentials = 1;
      */
-    user?: PasswordUser;
+    credentials?: UserCredentials;
+    /**
+     * @generated from protobuf field: string nickname = 2;
+     */
+    nickname: string;
+}
+/**
+ * @generated from protobuf message user_service.RegisterResponse
+ */
+export interface RegisterResponse {
+    /**
+     * @generated from protobuf field: user_service.RegisterErrorCode error_code = 1;
+     */
+    errorCode: RegisterErrorCode;
     /**
      * @generated from protobuf field: string error_message = 2;
      */
     errorMessage: string;
 }
 /**
- * @generated from protobuf message user_service.CreateUserRequest
+ * @generated from protobuf message user_service.LogoutRequest
  */
-export interface CreateUserRequest {
-    /**
-     * @generated from protobuf field: common.PasswordUser user = 1;
-     */
-    user?: PasswordUser;
+export interface LogoutRequest {
 }
 /**
- * @generated from protobuf message user_service.CreateUserResponse
+ * @generated from protobuf message user_service.LogoutResponse
  */
-export interface CreateUserResponse {
+export interface LogoutResponse {
     /**
-     * @generated from protobuf field: common.PasswordUser user = 1;
+     * @generated from protobuf field: user_service.LogoutErrorCode error_code = 1;
      */
-    user?: PasswordUser;
+    errorCode: LogoutErrorCode;
     /**
      * @generated from protobuf field: string error_message = 2;
      */
     errorMessage: string;
 }
 /**
- * @generated from protobuf message user_service.EditUserRequest
+ * @generated from protobuf message user_service.GetUserProfileRequest
  */
-export interface EditUserRequest {
-    /**
-     * @generated from protobuf field: common.PasswordUser user = 1;
-     */
-    user?: PasswordUser;
+export interface GetUserProfileRequest {
 }
 /**
- * @generated from protobuf message user_service.EditUserResponse
+ * @generated from protobuf message user_service.GetUserProfileResponse
  */
-export interface EditUserResponse {
+export interface GetUserProfileResponse {
     /**
-     * @generated from protobuf field: common.PasswordUser user = 1;
+     * @generated from protobuf field: common.User user = 1;
      */
-    user?: PasswordUser;
+    user?: User;
     /**
      * @generated from protobuf field: string error_message = 2;
      */
     errorMessage: string;
 }
 /**
- * @generated from protobuf message user_service.DeleteUserRequest
+ * @generated from protobuf enum user_service.LoginErrorCode
  */
-export interface DeleteUserRequest {
+export enum LoginErrorCode {
     /**
-     * @generated from protobuf field: uint64 user_id = 1;
+     * @generated from protobuf enum value: LOGIN_ERROR_NONE = 0;
      */
-    userId: number;
+    LOGIN_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: LOGIN_ERROR_INVALID_CREDENTIALS = 1;
+     */
+    LOGIN_ERROR_INVALID_CREDENTIALS = 1,
+    /**
+     * @generated from protobuf enum value: LOGIN_ERROR_DISABLED_ACCOUNT = 2;
+     */
+    LOGIN_ERROR_DISABLED_ACCOUNT = 2,
+    /**
+     * @generated from protobuf enum value: LOGIN_ERROR_BAD_REQUEST = 100;
+     */
+    LOGIN_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: LOGIN_ERROR_INTERNAL_ERROR = 101;
+     */
+    LOGIN_ERROR_INTERNAL_ERROR = 101
 }
 /**
- * @generated from protobuf message user_service.DeleteUserResponse
+ * @generated from protobuf enum user_service.RegisterErrorCode
  */
-export interface DeleteUserResponse {
+export enum RegisterErrorCode {
     /**
-     * @generated from protobuf field: string error_message = 1;
+     * @generated from protobuf enum value: REGISTER_ERROR_NONE = 0;
      */
-    errorMessage: string;
+    REGISTER_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: REGISTER_ERROR_USERNAME_EXISTS = 1;
+     */
+    REGISTER_ERROR_USERNAME_EXISTS = 1,
+    /**
+     * @generated from protobuf enum value: REGISTER_ERROR_BAD_REQUEST = 100;
+     */
+    REGISTER_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: REGISTER_ERROR_INTERNAL_ERROR = 101;
+     */
+    REGISTER_ERROR_INTERNAL_ERROR = 101
+}
+/**
+ * @generated from protobuf enum user_service.LogoutErrorCode
+ */
+export enum LogoutErrorCode {
+    /**
+     * @generated from protobuf enum value: LOGOUT_ERROR_NONE = 0;
+     */
+    LOGOUT_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: LOGOUT_ERROR_BAD_REQUEST = 100;
+     */
+    LOGOUT_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: LOGOUT_ERROR_INTERNAL_ERROR = 101;
+     */
+    LOGOUT_ERROR_INTERNAL_ERROR = 101
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class GetUserRequest$Type extends MessageType<GetUserRequest> {
+class UserCredentials$Type extends MessageType<UserCredentials> {
     constructor() {
-        super("user_service.GetUserRequest", [
-            { no: 1, name: "user", kind: "message", T: () => User }
+        super("user_service.UserCredentials", [
+            { no: 1, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "password", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<GetUserRequest>): GetUserRequest {
+    create(value?: PartialMessage<UserCredentials>): UserCredentials {
+        const message = { username: "", password: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<UserCredentials>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: UserCredentials): UserCredentials {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string username */ 1:
+                    message.username = reader.string();
+                    break;
+                case /* string password */ 2:
+                    message.password = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: UserCredentials, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string username = 1; */
+        if (message.username !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.username);
+        /* string password = 2; */
+        if (message.password !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.password);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.UserCredentials
+ */
+export const UserCredentials = new UserCredentials$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class LoginRequest$Type extends MessageType<LoginRequest> {
+    constructor() {
+        super("user_service.LoginRequest", [
+            { no: 1, name: "credentials", kind: "message", T: () => UserCredentials }
+        ]);
+    }
+    create(value?: PartialMessage<LoginRequest>): LoginRequest {
         const message = {};
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<GetUserRequest>(this, message, value);
+            reflectionMergePartial<LoginRequest>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserRequest): GetUserRequest {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LoginRequest): LoginRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_service.UserCredentials credentials */ 1:
+                    message.credentials = UserCredentials.internalBinaryRead(reader, reader.uint32(), options, message.credentials);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: LoginRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.UserCredentials credentials = 1; */
+        if (message.credentials)
+            UserCredentials.internalBinaryWrite(message.credentials, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.LoginRequest
+ */
+export const LoginRequest = new LoginRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class LoginResponse$Type extends MessageType<LoginResponse> {
+    constructor() {
+        super("user_service.LoginResponse", [
+            { no: 1, name: "user", kind: "message", T: () => User },
+            { no: 2, name: "error_code", kind: "enum", T: () => ["user_service.LoginErrorCode", LoginErrorCode] },
+            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<LoginResponse>): LoginResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<LoginResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LoginResponse): LoginResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -121,6 +303,12 @@ class GetUserRequest$Type extends MessageType<GetUserRequest> {
                 case /* common.User user */ 1:
                     message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
                     break;
+                case /* user_service.LoginErrorCode error_code */ 2:
+                    message.errorCode = reader.int32();
+                    break;
+                case /* string error_message */ 3:
+                    message.errorMessage = reader.string();
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -132,10 +320,16 @@ class GetUserRequest$Type extends MessageType<GetUserRequest> {
         }
         return message;
     }
-    internalBinaryWrite(message: GetUserRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: LoginResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* common.User user = 1; */
         if (message.user)
             User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* user_service.LoginErrorCode error_code = 2; */
+        if (message.errorCode !== 0)
+            writer.tag(2, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 3; */
+        if (message.errorMessage !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.errorMessage);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -143,31 +337,85 @@ class GetUserRequest$Type extends MessageType<GetUserRequest> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_service.GetUserRequest
+ * @generated MessageType for protobuf message user_service.LoginResponse
  */
-export const GetUserRequest = new GetUserRequest$Type();
+export const LoginResponse = new LoginResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class GetUserResponse$Type extends MessageType<GetUserResponse> {
+class RegisterRequest$Type extends MessageType<RegisterRequest> {
     constructor() {
-        super("user_service.GetUserResponse", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser },
-            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        super("user_service.RegisterRequest", [
+            { no: 1, name: "credentials", kind: "message", T: () => UserCredentials },
+            { no: 2, name: "nickname", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<GetUserResponse>): GetUserResponse {
-        const message = { errorMessage: "" };
+    create(value?: PartialMessage<RegisterRequest>): RegisterRequest {
+        const message = { nickname: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<GetUserResponse>(this, message, value);
+            reflectionMergePartial<RegisterRequest>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserResponse): GetUserResponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RegisterRequest): RegisterRequest {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.PasswordUser user */ 1:
-                    message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                case /* user_service.UserCredentials credentials */ 1:
+                    message.credentials = UserCredentials.internalBinaryRead(reader, reader.uint32(), options, message.credentials);
+                    break;
+                case /* string nickname */ 2:
+                    message.nickname = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: RegisterRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.UserCredentials credentials = 1; */
+        if (message.credentials)
+            UserCredentials.internalBinaryWrite(message.credentials, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string nickname = 2; */
+        if (message.nickname !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.nickname);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.RegisterRequest
+ */
+export const RegisterRequest = new RegisterRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class RegisterResponse$Type extends MessageType<RegisterResponse> {
+    constructor() {
+        super("user_service.RegisterResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_service.RegisterErrorCode", RegisterErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<RegisterResponse>): RegisterResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<RegisterResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RegisterResponse): RegisterResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_service.RegisterErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
                     break;
                 case /* string error_message */ 2:
                     message.errorMessage = reader.string();
@@ -183,10 +431,10 @@ class GetUserResponse$Type extends MessageType<GetUserResponse> {
         }
         return message;
     }
-    internalBinaryWrite(message: GetUserResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.PasswordUser user = 1; */
-        if (message.user)
-            PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+    internalBinaryWrite(message: RegisterResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.RegisterErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
         /* string error_message = 2; */
         if (message.errorMessage !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
@@ -197,46 +445,25 @@ class GetUserResponse$Type extends MessageType<GetUserResponse> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_service.GetUserResponse
+ * @generated MessageType for protobuf message user_service.RegisterResponse
  */
-export const GetUserResponse = new GetUserResponse$Type();
+export const RegisterResponse = new RegisterResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class CreateUserRequest$Type extends MessageType<CreateUserRequest> {
+class LogoutRequest$Type extends MessageType<LogoutRequest> {
     constructor() {
-        super("user_service.CreateUserRequest", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser }
-        ]);
+        super("user_service.LogoutRequest", []);
     }
-    create(value?: PartialMessage<CreateUserRequest>): CreateUserRequest {
+    create(value?: PartialMessage<LogoutRequest>): LogoutRequest {
         const message = {};
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<CreateUserRequest>(this, message, value);
+            reflectionMergePartial<LogoutRequest>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CreateUserRequest): CreateUserRequest {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* common.PasswordUser user */ 1:
-                    message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LogoutRequest): LogoutRequest {
+        return target ?? this.create();
     }
-    internalBinaryWrite(message: CreateUserRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.PasswordUser user = 1; */
-        if (message.user)
-            PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+    internalBinaryWrite(message: LogoutRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -244,31 +471,31 @@ class CreateUserRequest$Type extends MessageType<CreateUserRequest> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_service.CreateUserRequest
+ * @generated MessageType for protobuf message user_service.LogoutRequest
  */
-export const CreateUserRequest = new CreateUserRequest$Type();
+export const LogoutRequest = new LogoutRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class CreateUserResponse$Type extends MessageType<CreateUserResponse> {
+class LogoutResponse$Type extends MessageType<LogoutResponse> {
     constructor() {
-        super("user_service.CreateUserResponse", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser },
+        super("user_service.LogoutResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_service.LogoutErrorCode", LogoutErrorCode] },
             { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<CreateUserResponse>): CreateUserResponse {
-        const message = { errorMessage: "" };
+    create(value?: PartialMessage<LogoutResponse>): LogoutResponse {
+        const message = { errorCode: 0, errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<CreateUserResponse>(this, message, value);
+            reflectionMergePartial<LogoutResponse>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CreateUserResponse): CreateUserResponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LogoutResponse): LogoutResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.PasswordUser user */ 1:
-                    message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                case /* user_service.LogoutErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
                     break;
                 case /* string error_message */ 2:
                     message.errorMessage = reader.string();
@@ -284,10 +511,10 @@ class CreateUserResponse$Type extends MessageType<CreateUserResponse> {
         }
         return message;
     }
-    internalBinaryWrite(message: CreateUserResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.PasswordUser user = 1; */
-        if (message.user)
-            PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+    internalBinaryWrite(message: LogoutResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.LogoutErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
         /* string error_message = 2; */
         if (message.errorMessage !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
@@ -298,46 +525,25 @@ class CreateUserResponse$Type extends MessageType<CreateUserResponse> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_service.CreateUserResponse
+ * @generated MessageType for protobuf message user_service.LogoutResponse
  */
-export const CreateUserResponse = new CreateUserResponse$Type();
+export const LogoutResponse = new LogoutResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class EditUserRequest$Type extends MessageType<EditUserRequest> {
+class GetUserProfileRequest$Type extends MessageType<GetUserProfileRequest> {
     constructor() {
-        super("user_service.EditUserRequest", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser }
-        ]);
+        super("user_service.GetUserProfileRequest", []);
     }
-    create(value?: PartialMessage<EditUserRequest>): EditUserRequest {
+    create(value?: PartialMessage<GetUserProfileRequest>): GetUserProfileRequest {
         const message = {};
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<EditUserRequest>(this, message, value);
+            reflectionMergePartial<GetUserProfileRequest>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EditUserRequest): EditUserRequest {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* common.PasswordUser user */ 1:
-                    message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserProfileRequest): GetUserProfileRequest {
+        return target ?? this.create();
     }
-    internalBinaryWrite(message: EditUserRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.PasswordUser user = 1; */
-        if (message.user)
-            PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+    internalBinaryWrite(message: GetUserProfileRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -345,31 +551,31 @@ class EditUserRequest$Type extends MessageType<EditUserRequest> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_service.EditUserRequest
+ * @generated MessageType for protobuf message user_service.GetUserProfileRequest
  */
-export const EditUserRequest = new EditUserRequest$Type();
+export const GetUserProfileRequest = new GetUserProfileRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class EditUserResponse$Type extends MessageType<EditUserResponse> {
+class GetUserProfileResponse$Type extends MessageType<GetUserProfileResponse> {
     constructor() {
-        super("user_service.EditUserResponse", [
-            { no: 1, name: "user", kind: "message", T: () => PasswordUser },
+        super("user_service.GetUserProfileResponse", [
+            { no: 1, name: "user", kind: "message", T: () => User },
             { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<EditUserResponse>): EditUserResponse {
+    create(value?: PartialMessage<GetUserProfileResponse>): GetUserProfileResponse {
         const message = { errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<EditUserResponse>(this, message, value);
+            reflectionMergePartial<GetUserProfileResponse>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EditUserResponse): EditUserResponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetUserProfileResponse): GetUserProfileResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.PasswordUser user */ 1:
-                    message.user = PasswordUser.internalBinaryRead(reader, reader.uint32(), options, message.user);
+                case /* common.User user */ 1:
+                    message.user = User.internalBinaryRead(reader, reader.uint32(), options, message.user);
                     break;
                 case /* string error_message */ 2:
                     message.errorMessage = reader.string();
@@ -385,10 +591,10 @@ class EditUserResponse$Type extends MessageType<EditUserResponse> {
         }
         return message;
     }
-    internalBinaryWrite(message: EditUserResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.PasswordUser user = 1; */
+    internalBinaryWrite(message: GetUserProfileResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.User user = 1; */
         if (message.user)
-            PasswordUser.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+            User.internalBinaryWrite(message.user, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* string error_message = 2; */
         if (message.errorMessage !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
@@ -399,109 +605,15 @@ class EditUserResponse$Type extends MessageType<EditUserResponse> {
     }
 }
 /**
- * @generated MessageType for protobuf message user_service.EditUserResponse
+ * @generated MessageType for protobuf message user_service.GetUserProfileResponse
  */
-export const EditUserResponse = new EditUserResponse$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class DeleteUserRequest$Type extends MessageType<DeleteUserRequest> {
-    constructor() {
-        super("user_service.DeleteUserRequest", [
-            { no: 1, name: "user_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
-        ]);
-    }
-    create(value?: PartialMessage<DeleteUserRequest>): DeleteUserRequest {
-        const message = { userId: 0 };
-        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            reflectionMergePartial<DeleteUserRequest>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteUserRequest): DeleteUserRequest {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint64 user_id */ 1:
-                    message.userId = reader.uint64().toNumber();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: DeleteUserRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint64 user_id = 1; */
-        if (message.userId !== 0)
-            writer.tag(1, WireType.Varint).uint64(message.userId);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message user_service.DeleteUserRequest
- */
-export const DeleteUserRequest = new DeleteUserRequest$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class DeleteUserResponse$Type extends MessageType<DeleteUserResponse> {
-    constructor() {
-        super("user_service.DeleteUserResponse", [
-            { no: 1, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<DeleteUserResponse>): DeleteUserResponse {
-        const message = { errorMessage: "" };
-        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            reflectionMergePartial<DeleteUserResponse>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteUserResponse): DeleteUserResponse {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string error_message */ 1:
-                    message.errorMessage = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: DeleteUserResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string error_message = 1; */
-        if (message.errorMessage !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.errorMessage);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message user_service.DeleteUserResponse
- */
-export const DeleteUserResponse = new DeleteUserResponse$Type();
+export const GetUserProfileResponse = new GetUserProfileResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_service.UserService
  */
 export const UserService = new ServiceType("user_service.UserService", [
-    { name: "GetUser", options: {}, I: GetUserRequest, O: GetUserResponse },
-    { name: "CreateUser", options: {}, I: CreateUserRequest, O: CreateUserResponse },
-    { name: "EditUser", options: {}, I: EditUserRequest, O: EditUserResponse },
-    { name: "DeleteUser", options: {}, I: DeleteUserRequest, O: DeleteUserResponse }
+    { name: "Login", options: {}, I: LoginRequest, O: LoginResponse },
+    { name: "Register", options: {}, I: RegisterRequest, O: RegisterResponse },
+    { name: "Logout", options: {}, I: LogoutRequest, O: LogoutResponse },
+    { name: "GetUserProfile", options: {}, I: GetUserProfileRequest, O: GetUserProfileResponse }
 ]);

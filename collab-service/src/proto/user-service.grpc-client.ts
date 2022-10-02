@@ -5,47 +5,47 @@
 import { UserService } from "./user-service";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
-import type { DeleteUserResponse } from "./user-service";
-import type { DeleteUserRequest } from "./user-service";
-import type { EditUserResponse } from "./user-service";
-import type { EditUserRequest } from "./user-service";
-import type { CreateUserResponse } from "./user-service";
-import type { CreateUserRequest } from "./user-service";
-import type { GetUserResponse } from "./user-service";
-import type { GetUserRequest } from "./user-service";
+import type { GetUserProfileResponse } from "./user-service";
+import type { GetUserProfileRequest } from "./user-service";
+import type { LogoutResponse } from "./user-service";
+import type { LogoutRequest } from "./user-service";
+import type { RegisterResponse } from "./user-service";
+import type { RegisterRequest } from "./user-service";
+import type { LoginResponse } from "./user-service";
+import type { LoginRequest } from "./user-service";
 import * as grpc from "@grpc/grpc-js";
 /**
  * @generated from protobuf service user_service.UserService
  */
 export interface IUserServiceClient {
     /**
-     * @generated from protobuf rpc: GetUser(user_service.GetUserRequest) returns (user_service.GetUserResponse);
+     * @generated from protobuf rpc: Login(user_service.LoginRequest) returns (user_service.LoginResponse);
      */
-    getUser(input: GetUserRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetUserResponse) => void): grpc.ClientUnaryCall;
-    getUser(input: GetUserRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: GetUserResponse) => void): grpc.ClientUnaryCall;
-    getUser(input: GetUserRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetUserResponse) => void): grpc.ClientUnaryCall;
-    getUser(input: GetUserRequest, callback: (err: grpc.ServiceError | null, value?: GetUserResponse) => void): grpc.ClientUnaryCall;
+    login(input: LoginRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LoginResponse) => void): grpc.ClientUnaryCall;
+    login(input: LoginRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: LoginResponse) => void): grpc.ClientUnaryCall;
+    login(input: LoginRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LoginResponse) => void): grpc.ClientUnaryCall;
+    login(input: LoginRequest, callback: (err: grpc.ServiceError | null, value?: LoginResponse) => void): grpc.ClientUnaryCall;
     /**
-     * @generated from protobuf rpc: CreateUser(user_service.CreateUserRequest) returns (user_service.CreateUserResponse);
+     * @generated from protobuf rpc: Register(user_service.RegisterRequest) returns (user_service.RegisterResponse);
      */
-    createUser(input: CreateUserRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateUserResponse) => void): grpc.ClientUnaryCall;
-    createUser(input: CreateUserRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: CreateUserResponse) => void): grpc.ClientUnaryCall;
-    createUser(input: CreateUserRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateUserResponse) => void): grpc.ClientUnaryCall;
-    createUser(input: CreateUserRequest, callback: (err: grpc.ServiceError | null, value?: CreateUserResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
+    register(input: RegisterRequest, callback: (err: grpc.ServiceError | null, value?: RegisterResponse) => void): grpc.ClientUnaryCall;
     /**
-     * @generated from protobuf rpc: EditUser(user_service.EditUserRequest) returns (user_service.EditUserResponse);
+     * @generated from protobuf rpc: Logout(user_service.LogoutRequest) returns (user_service.LogoutResponse);
      */
-    editUser(input: EditUserRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditUserResponse) => void): grpc.ClientUnaryCall;
-    editUser(input: EditUserRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: EditUserResponse) => void): grpc.ClientUnaryCall;
-    editUser(input: EditUserRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditUserResponse) => void): grpc.ClientUnaryCall;
-    editUser(input: EditUserRequest, callback: (err: grpc.ServiceError | null, value?: EditUserResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
+    logout(input: LogoutRequest, callback: (err: grpc.ServiceError | null, value?: LogoutResponse) => void): grpc.ClientUnaryCall;
     /**
-     * @generated from protobuf rpc: DeleteUser(user_service.DeleteUserRequest) returns (user_service.DeleteUserResponse);
+     * @generated from protobuf rpc: GetUserProfile(user_service.GetUserProfileRequest) returns (user_service.GetUserProfileResponse);
      */
-    deleteUser(input: DeleteUserRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
-    deleteUser(input: DeleteUserRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
-    deleteUser(input: DeleteUserRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
-    deleteUser(input: DeleteUserRequest, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
+    getUserProfile(input: GetUserProfileRequest, callback: (err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service user_service.UserService
@@ -57,31 +57,31 @@ export class UserServiceClient extends grpc.Client implements IUserServiceClient
         this._binaryOptions = binaryOptions;
     }
     /**
-     * @generated from protobuf rpc: GetUser(user_service.GetUserRequest) returns (user_service.GetUserResponse);
+     * @generated from protobuf rpc: Login(user_service.LoginRequest) returns (user_service.LoginResponse);
      */
-    getUser(input: GetUserRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetUserResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetUserResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: GetUserResponse) => void)): grpc.ClientUnaryCall {
+    login(input: LoginRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: LoginResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: LoginResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: LoginResponse) => void)): grpc.ClientUnaryCall {
         const method = UserService.methods[0];
-        return this.makeUnaryRequest<GetUserRequest, GetUserResponse>(`/${UserService.typeName}/${method.name}`, (value: GetUserRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): GetUserResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+        return this.makeUnaryRequest<LoginRequest, LoginResponse>(`/${UserService.typeName}/${method.name}`, (value: LoginRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): LoginResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: CreateUser(user_service.CreateUserRequest) returns (user_service.CreateUserResponse);
+     * @generated from protobuf rpc: Register(user_service.RegisterRequest) returns (user_service.RegisterResponse);
      */
-    createUser(input: CreateUserRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateUserResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateUserResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: CreateUserResponse) => void)): grpc.ClientUnaryCall {
+    register(input: RegisterRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: RegisterResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: RegisterResponse) => void)): grpc.ClientUnaryCall {
         const method = UserService.methods[1];
-        return this.makeUnaryRequest<CreateUserRequest, CreateUserResponse>(`/${UserService.typeName}/${method.name}`, (value: CreateUserRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): CreateUserResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+        return this.makeUnaryRequest<RegisterRequest, RegisterResponse>(`/${UserService.typeName}/${method.name}`, (value: RegisterRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): RegisterResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: EditUser(user_service.EditUserRequest) returns (user_service.EditUserResponse);
+     * @generated from protobuf rpc: Logout(user_service.LogoutRequest) returns (user_service.LogoutResponse);
      */
-    editUser(input: EditUserRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditUserResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditUserResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: EditUserResponse) => void)): grpc.ClientUnaryCall {
+    logout(input: LogoutRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: LogoutResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: LogoutResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: LogoutResponse) => void)): grpc.ClientUnaryCall {
         const method = UserService.methods[2];
-        return this.makeUnaryRequest<EditUserRequest, EditUserResponse>(`/${UserService.typeName}/${method.name}`, (value: EditUserRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): EditUserResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+        return this.makeUnaryRequest<LogoutRequest, LogoutResponse>(`/${UserService.typeName}/${method.name}`, (value: LogoutRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): LogoutResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: DeleteUser(user_service.DeleteUserRequest) returns (user_service.DeleteUserResponse);
+     * @generated from protobuf rpc: GetUserProfile(user_service.GetUserProfileRequest) returns (user_service.GetUserProfileResponse);
      */
-    deleteUser(input: DeleteUserRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteUserResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteUserResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteUserResponse) => void)): grpc.ClientUnaryCall {
+    getUserProfile(input: GetUserProfileRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: GetUserProfileResponse) => void)): grpc.ClientUnaryCall {
         const method = UserService.methods[3];
-        return this.makeUnaryRequest<DeleteUserRequest, DeleteUserResponse>(`/${UserService.typeName}/${method.name}`, (value: DeleteUserRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteUserResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+        return this.makeUnaryRequest<GetUserProfileRequest, GetUserProfileResponse>(`/${UserService.typeName}/${method.name}`, (value: GetUserProfileRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): GetUserProfileResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }
