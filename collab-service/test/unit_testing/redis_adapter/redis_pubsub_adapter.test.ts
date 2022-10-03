@@ -4,7 +4,7 @@ import SerializerStub from '../tunneller/tunnel_serializer_stub';
 
 const Redis = require('ioredis-mock');
 
-describe('Class-Redis-Pubsub RedisPubSubAdapter', () => {
+describe('Class-Redis-PubSub RedisPubSubAdapter', () => {
   let pub = new Redis();
   let pool = new RedisTopicPoolStub();
   const serial = new SerializerStub();

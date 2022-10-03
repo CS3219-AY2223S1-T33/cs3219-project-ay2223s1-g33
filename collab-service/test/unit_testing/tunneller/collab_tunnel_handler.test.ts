@@ -1,13 +1,18 @@
-import { ServerDuplexStream } from '@grpc/grpc-js';
+import { Metadata } from '@grpc/grpc-js';
 import { CollabTunnelController } from '../../../src/tunneller/collab_tunnel_controller';
-import { CollabTunnelRequest, CollabTunnelResponse } from '../../../src/proto/collab-service';
 
-jest.mock('@grpc/grpc-js');
-const mockedFoo = jest.mocked(ServerDuplexStream, true);
-
-describe('Class-CollabTunnelController', () => {
+describe('Class-TunnelController CollabTunnelController', () => {
   test('Function Test extractMetadata', () => {
-    const caller = (call) => CollabTunnelController.extractMetadata(call);
-    CollabTunnelController.extractMetadata(call);
+    const meta = new Metadata();
+    meta.set('X-Gateway-Proxy-Username', 'user');
+    meta.set('X-Gateway-Proxy-Nickname', 'nick');
+    meta.set('X-Gateway-Proxy-Room-Token', 'room');
+
+    const data = CollabTunnelController.extractMetadata(meta);
+    expect(data).toStrictEqual({
+      roomToken: 'room',
+      username: 'user',
+      nickname: 'nick',
+    });
   });
 });
