@@ -4,6 +4,8 @@ import (
 	"cs3219-project-ay2223s1-g33/matchmaker/conn"
 	"cs3219-project-ay2223s1-g33/matchmaker/worker"
 	"log"
+
+	redis "github.com/go-redis/redis/v9"
 )
 
 func main() {
@@ -14,17 +16,28 @@ func main() {
 		log.Fatal("Matchmaker environment configuration not found")
 	}
 
-	redisClient := conn.NewRedisMatchmakerClient(config.RedisServer, config.QueueMessageLifespan)
-	redisClient.Connect()
+	connOptions := &redis.Options{
+		Addr:     config.RedisServer,
+		Password: "",
+		DB:       0,
+	}
+	redisClient := redis.NewClient(connOptions)
 	defer redisClient.Close()
 
-	fetchWorker := worker.NewFetchWorker(redisClient, config.PollBatchSize, config.SleepInterval)
+	heartbeatClient := conn.NewHeartbeatClient(redisClient)
+
+	redisMatchmakerClient := conn.NewRedisMatchmakerClient(redisClient, config.QueueMessageLifespan)
+	fetchWorker := worker.NewFetchWorker(redisMatchmakerClient, config.PollBatchSize, config.SleepInterval)
 	matchWorker := worker.NewMatchWorker()
-	uploadWorker := worker.NewUploadWorker(redisClient)
+	uploadWorker := worker.NewUploadWorker(redisMatchmakerClient)
 
 	fetchWorker.PipeTo(matchWorker)
 	matchWorker.PipeTo(uploadWorker)
 
-	fetchWorker.Run()
+	heartbeatClient.RegisterEntrypoint(func() {
+		log.Println("Matchmaker acquired control")
+		fetchWorker.Run()
+	})
+	heartbeatClient.Run()
 	log.Println("Matchmaker Death")
 }

@@ -14,8 +14,6 @@ import (
 
 //go:generate mockgen -destination=../mocks/mock_redis_client.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/conn RedisMatchmakerClient
 type RedisMatchmakerClient interface {
-	Connect()
-	Close()
 	PollQueue(count int) (expired []*common.QueueItem, result []*common.QueueItem, err error)
 	DeleteQueueItems(items []*common.QueueItem) error
 	UploadMatch(username string, matchId string, difficulty int) error
@@ -23,7 +21,6 @@ type RedisMatchmakerClient interface {
 }
 
 type redisMatchmakerClient struct {
-	server        string
 	redisClient   *redis.Client
 	queueLifespan time.Duration
 }
@@ -36,29 +33,11 @@ const (
 	matchValueTemplate = "%d;%s"
 )
 
-func NewRedisMatchmakerClient(server string, queueLifespan time.Duration) RedisMatchmakerClient {
+func NewRedisMatchmakerClient(redisClient *redis.Client, queueLifespan time.Duration) RedisMatchmakerClient {
 	return &redisMatchmakerClient{
-		server:        server,
+		redisClient:   redisClient,
 		queueLifespan: queueLifespan,
 	}
-}
-
-func (client *redisMatchmakerClient) Connect() {
-	if client.redisClient != nil {
-		return
-	}
-
-	connOptions := &redis.Options{
-		Addr:     client.server,
-		Password: "",
-		DB:       0,
-	}
-
-	client.redisClient = redis.NewClient(connOptions)
-}
-
-func (client *redisMatchmakerClient) Close() {
-	client.redisClient.Close()
 }
 
 func (client *redisMatchmakerClient) PollQueue(count int) (expired []*common.QueueItem, result []*common.QueueItem, err error) {
@@ -92,6 +71,10 @@ func (client *redisMatchmakerClient) PollQueue(count int) (expired []*common.Que
 func (client *redisMatchmakerClient) DeleteQueueItems(items []*common.QueueItem) error {
 	ctx := context.Background()
 
+	if len(items) == 0 {
+		return nil
+	}
+
 	messageIds := make([]string, len(items))
 	for i, item := range items {
 		messageIds[i] = item.StreamId
@@ -111,6 +94,10 @@ func (client *redisMatchmakerClient) UploadMatch(username string, matchId string
 }
 
 func (client *redisMatchmakerClient) UploadFailures(usernames []string) error {
+	if len(usernames) == 0 {
+		return nil
+	}
+
 	keys := make([]string, len(usernames))
 	ctx := context.Background()
 
