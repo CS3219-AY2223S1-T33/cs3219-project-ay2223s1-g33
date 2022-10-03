@@ -55,7 +55,7 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
 
   static validateRequest(request: JoinQueueRequest): (JoinQueueRequest | Error) {
     if (!request.difficulties || request.difficulties.length === 0) {
-      return new Error('Diffculty not provided');
+      return new Error('Difficulty not provided');
     }
 
     const { difficulties } = request;
