@@ -19,10 +19,6 @@ class QuestionAgent implements IQuestionAgent {
   }
 
   getQuestionByDifficulty(difficulty: QuestionDifficulty): Promise<Question | undefined> {
-    // // Assume difficulty HARD, db not populated yet
-    // // eslint-disable-next-line no-param-reassign
-    // difficulty = QuestionDifficulty.HARD;
-
     const questionEasy: Question = {
       questionId: 0,
       difficulty,

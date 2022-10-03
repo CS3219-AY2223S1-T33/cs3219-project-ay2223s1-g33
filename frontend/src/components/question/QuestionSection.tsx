@@ -1,14 +1,6 @@
-/* eslint react/no-array-index-key: 0 */
-import {
-  Box,
-  Code,
-  Divider,
-  Heading,
-  ListItem,
-  Text,
-  UnorderedList
-} from "@chakra-ui/react";
+import { Box, Divider, Heading, Text, VStack } from "@chakra-ui/react";
 import React from "react";
+import ConstraintsList from "./ConstraintsList";
 import { QuestionDifficulty, Question } from "../../proto/types";
 import difficultyColor from "../../utils/diffcultyColors";
 import ExampleList from "./ExampleList";
@@ -25,10 +17,7 @@ function QuestionSection({ question }: Props) {
 
   return (
     <Box>
-      <Box
-        // pb={4}
-        id="title"
-      >
+      <Box id="title">
         <Heading as="h4" size="md" pb={2}>
           {questionId}. {name}
         </Heading>
@@ -37,29 +26,18 @@ function QuestionSection({ question }: Props) {
         </Heading>
       </Box>
       <Divider py={4} />
-      <Box
+      <VStack
+        spacing={4}
         // pt={4}
         id="question-content"
       >
         {/* To HW: Maybe VStack it? */}
         {contentDecode.question.split("\n").map((ln: string) => (
-          <>
-            <Text>{ln}</Text>
-            <br />
-          </>
+          <Text>{ln}</Text>
         ))}
-      </Box>
+      </VStack>
       <ExampleList examples={contentDecode.example} />
-      <Box>
-        <Text fontWeight="bold">Constraints</Text>
-        <UnorderedList pl={4}>
-          {contentDecode.constrains.map((constrain: string, id: number) => (
-            <ListItem key={id}>
-              <Code key={id}>{constrain}</Code>
-            </ListItem>
-          ))}
-        </UnorderedList>
-      </Box>
+      <ConstraintsList constraints={contentDecode.constrains} />
     </Box>
   );
 }
