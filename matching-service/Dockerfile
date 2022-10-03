@@ -10,7 +10,6 @@ RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 # Generate protobuff & database schema
 COPY proto proto/
 COPY scripts scripts/
-COPY matching-service/src matching-service/src
 COPY package.json package-lock.json ./
 COPY matching-service/proto-emit.cfg matching-service
 
@@ -24,6 +23,7 @@ WORKDIR /app/matching-service
 COPY matching-service/package.json .
 COPY matching-service/package-lock.json .
 RUN npm install
+COPY matching-service/src matching-service/src
 
 COPY matching-service .
 
