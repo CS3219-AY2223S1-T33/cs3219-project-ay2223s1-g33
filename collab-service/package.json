@@ -7,7 +7,7 @@
     "dev": "ts-node-dev src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 0",
+    "test": "jest",
     "lint": "eslint --cache src"
   },
   "keywords": [],
