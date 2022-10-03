@@ -9,6 +9,7 @@
     "@codemirror/lang-javascript": "^6.0.2",
     "@codemirror/lang-python": "^6.0.2",
     "@codemirror/language": "^6.2.1",
+    "@codemirror/view": "^6.3.0",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@grpc/grpc-js": "^1.6.12",

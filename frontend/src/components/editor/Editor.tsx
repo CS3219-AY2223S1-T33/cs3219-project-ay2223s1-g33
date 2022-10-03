@@ -1,5 +1,6 @@
 import CodeMirror from "@uiw/react-codemirror";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
+import { ViewUpdate } from "@codemirror/view";
 import * as Y from "yjs";
 import React, { useEffect } from "react";
 import { WebsocketProvider } from "y-websocket-peerprep";
@@ -14,6 +15,7 @@ type Props = {
   undoManager: Y.UndoManager;
   nickname: string;
   selectedLang: Language;
+  onCodeUpdate: (c: string, update: ViewUpdate) => void;
 };
 
 function Editor({
@@ -22,13 +24,14 @@ function Editor({
   undoManager,
   nickname,
   selectedLang,
+  onCodeUpdate
 }: Props) {
   useEffect(() => {
     if (!providerSet) {
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333",
+        colorLight: "#6eeb8333"
       });
       providerSet = true;
     }
@@ -43,6 +46,7 @@ function Editor({
       value=""
       height="100%"
       extensions={[lang, yCollab(yText, provider.awareness, { undoManager })]}
+      onChange={onCodeUpdate}
     />
   );
 }
