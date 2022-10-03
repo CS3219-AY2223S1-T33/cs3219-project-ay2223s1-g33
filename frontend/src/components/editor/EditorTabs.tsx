@@ -16,7 +16,7 @@ type Props = {
 
 function EditorTabs({ question }: Props) {
   // TODO Remove when implementation properly done
-  console.log("Using dummy question");
+  // ! Using Dummy Question
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
       <TabList>

@@ -1,27 +1,33 @@
 import { useToast, UseToastOptions } from "@chakra-ui/react";
 
-const ERROR_TOAST: UseToastOptions = {
-  title: "Error",
-  status: "error",
+const TOAST_BASIC: UseToastOptions = {
   duration: 5000,
   isClosable: true,
   position: "top",
+};
+
+const ERROR_TOAST: UseToastOptions = {
+  ...TOAST_BASIC,
+  title: "Error",
+  status: "error",
 };
 
 const SUCCESS_TOAST: UseToastOptions = {
+  ...TOAST_BASIC,
   title: "Success!",
   status: "success",
-  duration: 5000,
-  isClosable: true,
-  position: "top",
 };
 
 const ALERT_TOAST: UseToastOptions = {
+  ...TOAST_BASIC,
   title: "Alert",
   status: "warning",
-  duration: 5000,
-  isClosable: true,
-  position: "top",
+};
+
+const INFO_TOAST: UseToastOptions = {
+  ...TOAST_BASIC,
+  title: "Info",
+  status: "info",
 };
 
 const useFixedToast = () => {
@@ -42,7 +48,16 @@ const useFixedToast = () => {
     toast({ ...ALERT_TOAST, ...options, description });
   };
 
-  return { sendAlertMessage, sendErrorMessage, sendSuccessMessage };
+  const sendInfoMessage = (description: string, options?: UseToastOptions) => {
+    toast({ ...INFO_TOAST, ...options, description });
+  };
+
+  return {
+    sendAlertMessage,
+    sendErrorMessage,
+    sendInfoMessage,
+    sendSuccessMessage,
+  };
 };
 
 export default useFixedToast;
