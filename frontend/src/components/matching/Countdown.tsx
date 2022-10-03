@@ -8,7 +8,7 @@ import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 import {
   CheckQueueStatusResponse,
-  QueueStatus,
+  QueueStatus
 } from "../../proto/matching-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 
@@ -30,7 +30,6 @@ function Countdown() {
   };
 
   const completeTimeHandler = () => {
-    console.log(`Times up. Leaving queue.`);
     leaveQueueHandler();
   };
 
@@ -40,13 +39,12 @@ function Countdown() {
       return;
     }
 
-    console.log(`API update call made`);
     axios
       .post<CheckQueueStatusResponse>(
         "/api/queue/status",
         {},
         {
-          withCredentials: true,
+          withCredentials: true
         }
       )
       .then((res) => {
