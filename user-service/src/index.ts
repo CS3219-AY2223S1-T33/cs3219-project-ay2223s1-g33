@@ -11,7 +11,7 @@ import Constants from './constants';
 import Logger from './utils/logger';
 
 const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
-Logger.info(`Starting Collab Service [V${version}]`);
+Logger.info(`Starting User Service [V${version}]`);
 const envConfig = loadEnvironment();
 
 const dataStore: AppStorage = new AppStorage();
