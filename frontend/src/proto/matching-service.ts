@@ -5,10 +5,10 @@
 import { ServiceType } from "@protobuf-ts/runtime-rpc";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { IBinaryWriter } from "@protobuf-ts/runtime";
-import { WireType } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
 import type { IBinaryReader } from "@protobuf-ts/runtime";
 import { UnknownFieldHandler } from "@protobuf-ts/runtime";
+import { WireType } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
@@ -19,9 +19,9 @@ import { QuestionDifficulty } from "./types";
  */
 export interface JoinQueueRequest {
     /**
-     * @generated from protobuf field: common.QuestionDifficulty difficulty = 1;
+     * @generated from protobuf field: repeated common.QuestionDifficulty difficulties = 1;
      */
-    difficulty: QuestionDifficulty;
+    difficulties: QuestionDifficulty[];
 }
 /**
  * @generated from protobuf message matching_service.JoinQueueResponse
@@ -129,11 +129,11 @@ export enum QueueStatus {
 class JoinQueueRequest$Type extends MessageType<JoinQueueRequest> {
     constructor() {
         super("matching_service.JoinQueueRequest", [
-            { no: 1, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] }
+            { no: 1, name: "difficulties", kind: "enum", repeat: 1 /*RepeatType.PACKED*/, T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] }
         ]);
     }
     create(value?: PartialMessage<JoinQueueRequest>): JoinQueueRequest {
-        const message = { difficulty: 0 };
+        const message = { difficulties: [] };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<JoinQueueRequest>(this, message, value);
@@ -144,8 +144,12 @@ class JoinQueueRequest$Type extends MessageType<JoinQueueRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.QuestionDifficulty difficulty */ 1:
-                    message.difficulty = reader.int32();
+                case /* repeated common.QuestionDifficulty difficulties */ 1:
+                    if (wireType === WireType.LengthDelimited)
+                        for (let e = reader.int32() + reader.pos; reader.pos < e;)
+                            message.difficulties.push(reader.int32());
+                    else
+                        message.difficulties.push(reader.int32());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -159,9 +163,13 @@ class JoinQueueRequest$Type extends MessageType<JoinQueueRequest> {
         return message;
     }
     internalBinaryWrite(message: JoinQueueRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.QuestionDifficulty difficulty = 1; */
-        if (message.difficulty !== 0)
-            writer.tag(1, WireType.Varint).int32(message.difficulty);
+        /* repeated common.QuestionDifficulty difficulties = 1; */
+        if (message.difficulties.length) {
+            writer.tag(1, WireType.LengthDelimited).fork();
+            for (let i = 0; i < message.difficulties.length; i++)
+                writer.int32(message.difficulties[i]);
+            writer.join();
+        }
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

@@ -7,6 +7,11 @@ import MatchingServiceApi from './controller/matching_service_controller';
 import { createRedisMatchingAdapter } from './redis_adapter/redis_matching_adapter';
 import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
+import Logger from './utils/logger';
+import Constants from './constants';
+
+const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
+Logger.info(`Starting Matching Service [V${version}]`);
 
 const envConfig = loadEnvironment();
 

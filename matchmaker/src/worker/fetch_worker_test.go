@@ -7,44 +7,37 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestInQueueProcessing(t *testing.T) {
-	easyChan := make(chan *string, 10)
-	medChan := make(chan *string, 10)
-	hardChan := make(chan *string, 10)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	worker := fetchWorker{
-		queues: &common.QueueBuffers{
-			EasyQueue:   easyChan,
-			MediumQueue: medChan,
-			HardQueue:   hardChan,
-		},
-	}
+	worker := fetchWorker{}
+	mockHandler := mocks.NewMockFetchResultHandler(ctrl)
 
 	items := []*common.QueueItem{
 		{
-			Username:   "A",
-			Difficulty: common.DifficultyEasy,
+			Username:     "A",
+			Difficulties: []int{1},
 		},
 		{
-			Username:   "B",
-			Difficulty: common.DifficultyMedium,
+			Username:     "B",
+			Difficulties: []int{2},
 		},
 		{
-			Username:   "C",
-			Difficulty: common.DifficultyHard,
+			Username:     "C",
+			Difficulties: []int{3},
 		},
 	}
 
+	mockHandler.EXPECT().HandleQueueItems(items)
+
 	worker.processInQueue(items)
-	assertChanFound(t, easyChan)
-	assertChanFound(t, medChan)
-	assertChanFound(t, hardChan)
-	assertChanEmpty(t, easyChan)
-	assertChanEmpty(t, medChan)
-	assertChanEmpty(t, hardChan)
+
+	worker.PipeTo(mockHandler)
+	worker.processInQueue(items)
+	worker.processInQueue(nil)
 }
 
 func TestExpiredQueueProcessing(t *testing.T) {
@@ -56,96 +49,31 @@ func TestExpiredQueueProcessing(t *testing.T) {
 		redisClient: redisClient,
 	}
 
+	items := []*common.QueueItem{
+		{
+			Username:     "A",
+			Difficulties: []int{1},
+		},
+		{
+			Username:     "B",
+			Difficulties: []int{1},
+		},
+		{
+			Username:     "C",
+			Difficulties: []int{1},
+		},
+	}
+
 	gomock.InOrder(
 		redisClient.EXPECT().UploadFailures([]string{"A", "B", "C"}),
 		redisClient.EXPECT().UploadFailures([]string{"A", "B", "C"}).Return(errors.New("Testing error")),
 	)
 
-	items := []*common.QueueItem{
-		{
-			Username:   "A",
-			Difficulty: 1,
-		},
-		{
-			Username:   "B",
-			Difficulty: 1,
-		},
-		{
-			Username:   "C",
-			Difficulty: 1,
-		},
-	}
+	gomock.InOrder(
+		redisClient.EXPECT().DeleteQueueItems(items),
+		redisClient.EXPECT().DeleteQueueItems(items).Return(errors.New("Testing error")),
+	)
 
 	worker.processExpired(items)
 	worker.processExpired(items)
-}
-
-func TestQueueDemuxing(t *testing.T) {
-	easyChan := make(chan *string, 10)
-	medChan := make(chan *string, 10)
-	hardChan := make(chan *string, 10)
-
-	worker := fetchWorker{
-		queues: &common.QueueBuffers{
-			EasyQueue:   easyChan,
-			MediumQueue: medChan,
-			HardQueue:   hardChan,
-		},
-	}
-
-	worker.addToQueue(&common.QueueItem{
-		Username:   "A",
-		Difficulty: common.DifficultyEasy,
-	})
-
-	assertChanFound(t, easyChan)
-	assertChanEmpty(t, easyChan)
-	assertChanEmpty(t, medChan)
-	assertChanEmpty(t, hardChan)
-
-	worker.addToQueue(&common.QueueItem{
-		Username:   "A",
-		Difficulty: common.DifficultyMedium,
-	})
-
-	assertChanEmpty(t, easyChan)
-	assertChanFound(t, medChan)
-	assertChanEmpty(t, medChan)
-	assertChanEmpty(t, hardChan)
-
-	worker.addToQueue(&common.QueueItem{
-		Username:   "A",
-		Difficulty: common.DifficultyHard,
-	})
-
-	assertChanEmpty(t, easyChan)
-	assertChanEmpty(t, medChan)
-	assertChanFound(t, hardChan)
-	assertChanEmpty(t, hardChan)
-
-	worker.addToQueue(&common.QueueItem{
-		Username:   "A",
-		Difficulty: 100,
-	})
-
-	assertChanEmpty(t, easyChan)
-	assertChanEmpty(t, medChan)
-	assertChanEmpty(t, hardChan)
-}
-
-func assertChanFound(t *testing.T, channel chan *string) {
-	select {
-	case item := <-channel:
-		assert.NotNil(t, item)
-	default:
-		t.FailNow()
-	}
-}
-
-func assertChanEmpty(t *testing.T, channel chan *string) {
-	select {
-	case <-channel:
-		t.FailNow()
-	default:
-	}
 }

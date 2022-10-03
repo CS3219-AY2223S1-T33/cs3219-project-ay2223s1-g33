@@ -58,13 +58,28 @@ func (mr *MockRedisMatchmakerClientMockRecorder) Connect() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockRedisMatchmakerClient)(nil).Connect))
 }
 
+// DeleteQueueItems mocks base method.
+func (m *MockRedisMatchmakerClient) DeleteQueueItems(arg0 []*common.QueueItem) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteQueueItems", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteQueueItems indicates an expected call of DeleteQueueItems.
+func (mr *MockRedisMatchmakerClientMockRecorder) DeleteQueueItems(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQueueItems", reflect.TypeOf((*MockRedisMatchmakerClient)(nil).DeleteQueueItems), arg0)
+}
+
 // PollQueue mocks base method.
-func (m *MockRedisMatchmakerClient) PollQueue(arg0 int) ([]*common.QueueItem, []*common.QueueItem) {
+func (m *MockRedisMatchmakerClient) PollQueue(arg0 int) ([]*common.QueueItem, []*common.QueueItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PollQueue", arg0)
 	ret0, _ := ret[0].([]*common.QueueItem)
 	ret1, _ := ret[1].([]*common.QueueItem)
-	return ret0, ret1
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // PollQueue indicates an expected call of PollQueue.

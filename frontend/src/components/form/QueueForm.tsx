@@ -1,25 +1,32 @@
 import { Button, Stack } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
+import axios from "../../axios";
 import {
   enterQueue,
-  toggleDifficulty,
+  toggleDifficulty
 } from "../../feature/matching/matchingSlice";
+import {
+  JoinQueueResponse,
+  JoinQueueRequest
+} from "../../proto/matching-service";
 import { RootState } from "../../app/store";
+import useFixedToast from "../../utils/hooks/useFixedToast";
+import { QuestionDifficulty } from "../../proto/types";
 
 const DIFFICULTY = [
   {
     name: "Easy",
-    colorScheme: "green",
+    colorScheme: "green"
   },
   {
     name: "Medium",
-    colorScheme: "orange",
+    colorScheme: "orange"
   },
   {
     name: "Hard",
-    colorScheme: "red",
-  },
+    colorScheme: "red"
+  }
 ];
 
 function QueueForm() {
@@ -28,6 +35,7 @@ function QueueForm() {
     (state: RootState) => state.matching.diffSelected
   );
   const noneSelected = difficulties.every((d) => !d);
+  const toast = useFixedToast();
 
   const toggleDifficultyHandler = (index: number) => {
     dispatch(toggleDifficulty({ index }));
@@ -35,9 +43,38 @@ function QueueForm() {
 
   const enterQueueHandler = () => {
     // API call to enter queue, probably may need to pass some information to redux store
+    if (noneSelected) {
+      toast.sendErrorMessage("You must select at least 1 difficulty");
+      return;
+    }
 
-    // For now just change the flag
-    dispatch(enterQueue());
+    const selectedDifficulties: QuestionDifficulty[] = [];
+    difficulties
+      .map((isSelected, index) => (isSelected ? index + 1 : undefined))
+      .filter((x) => x)
+      .forEach((x) => selectedDifficulties.push(x as QuestionDifficulty));
+
+    const joinQueueReq: JoinQueueRequest = {
+      difficulties: selectedDifficulties
+    };
+
+    axios
+      .post<JoinQueueResponse>("/api/queue/join", joinQueueReq, {
+        withCredentials: true
+      })
+      .then((res) => {
+        const { errorCode, errorMessage } = res.data;
+
+        if (errorCode) {
+          throw new Error(errorMessage);
+        }
+
+        // For now just change the flag
+        dispatch(enterQueue());
+      })
+      .catch((err) => {
+        toast.sendErrorMessage(err.message);
+      });
   };
 
   return (

@@ -2,6 +2,7 @@ package conn
 
 import (
 	"context"
+	"cs3219-project-ay2223s1-g33/matchmaker/common"
 	"testing"
 	"time"
 
@@ -17,7 +18,7 @@ func TestPartitionMesssages_ValidityCheck(t *testing.T) {
 		{
 			ID: "1-0",
 			Values: map[string]interface{}{
-				"diff": "1",
+				"diff": "[1]",
 			},
 		},
 		{
@@ -35,12 +36,9 @@ func TestPartitionMesssages_ValidityCheck(t *testing.T) {
 		},
 	}
 
-	idsToDelete, expired, inQueue := client.partitionMesssages(ctx, testMessages, time.UnixMilli(10))
+	expired, inQueue := client.partitionMesssages(ctx, testMessages, time.UnixMilli(10))
 	assert.Equal(t, 0, len(expired))
 	assert.Equal(t, 0, len(inQueue))
-	assert.Contains(t, idsToDelete, "1-0")
-	assert.Contains(t, idsToDelete, "2-0")
-	assert.Contains(t, idsToDelete, "3-0")
 }
 
 func TestPartitionMesssages_ExpiryTest(t *testing.T) {
@@ -54,31 +52,43 @@ func TestPartitionMesssages_ExpiryTest(t *testing.T) {
 			ID: "1-0",
 			Values: map[string]interface{}{
 				"user": "testA@email.com",
-				"diff": "1",
+				"diff": "[1]",
 			},
 		},
 		{
 			ID: "2-0",
 			Values: map[string]interface{}{
 				"user": "testB@email.com",
-				"diff": "1",
+				"diff": "[1,2]",
 			},
 		},
 		{
 			ID: "3-0",
 			Values: map[string]interface{}{
 				"user": "testC@email.com",
-				"diff": "1",
+				"diff": "[2,3]",
 			},
 		},
 	}
 
-	idsToDelete, expired, inQueue := client.partitionMesssages(ctx, testMessages, time.UnixMilli(2).Add(client.queueLifespan))
+	expired, inQueue := client.partitionMesssages(ctx, testMessages, time.UnixMilli(2).Add(client.queueLifespan))
 	assert.Equal(t, 2, len(expired))
 	assert.Equal(t, 1, len(inQueue))
-	assert.Contains(t, idsToDelete, "1-0")
-	assert.Contains(t, idsToDelete, "2-0")
-	assert.Contains(t, idsToDelete, "3-0")
+	assert.Contains(t, expired, &common.QueueItem{
+		StreamId:     "1-0",
+		Username:     "testA@email.com",
+		Difficulties: []int{1},
+	})
+	assert.Contains(t, expired, &common.QueueItem{
+		StreamId:     "2-0",
+		Username:     "testB@email.com",
+		Difficulties: []int{1, 2},
+	})
+	assert.Contains(t, inQueue, &common.QueueItem{
+		StreamId:     "3-0",
+		Username:     "testC@email.com",
+		Difficulties: []int{2, 3},
+	})
 }
 
 func TestGetTimestampFromid(t *testing.T) {
