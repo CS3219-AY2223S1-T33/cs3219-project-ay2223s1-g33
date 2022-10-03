@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
+import { DownloadIcon } from "@chakra-ui/icons";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -17,6 +18,7 @@ import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
 import { Language } from "../types";
 import { Question } from "../proto/types";
+import saveFile from "../utils/fileDownloadUtil";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -59,6 +61,8 @@ function Session() {
   const [question, setQuestion] = useState<Question | undefined>(
     DUMMY_QUESTION
   );
+
+  const [code, setCode] = useState("");
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -159,6 +163,15 @@ function Session() {
     navigate("/");
   };
 
+  const updateCodeHandler = (value: string) => {
+    setCode(value);
+  };
+
+  const downloadCodeHandler = () => {
+    toast.sendInfoMessage("Downloading file...", { duration: 3000 });
+    saveFile(code, selectedLang);
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -189,6 +202,9 @@ function Session() {
               changeLangHandler={changeLangHandler}
             />
             {/* Other Quality of life options */}
+            <Button leftIcon={<DownloadIcon />} onClick={downloadCodeHandler}>
+              Save code
+            </Button>
           </Flex>
 
           {/* Editor */}
@@ -199,6 +215,7 @@ function Session() {
               undoManager={undoManager}
               nickname={nickname}
               selectedLang={selectedLang}
+              onCodeUpdate={updateCodeHandler}
             />
           )}
           {/* Test case window */}
