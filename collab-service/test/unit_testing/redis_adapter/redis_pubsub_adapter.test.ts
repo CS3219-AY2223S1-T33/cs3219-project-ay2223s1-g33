@@ -50,4 +50,13 @@ describe('Class-Redis-PubSub RedisPubSubAdapter', () => {
     expect(pool.unregisterTopic)
       .toBeCalledWith(`pubsub-${room}`, expect.any(Function));
   });
+
+  test('Test cleaning, no existing topics', async () => {
+    jest.spyOn(pool, 'unregisterTopic')
+      .mockImplementationOnce(() => {
+      });
+    await adapter.clean(listenFn);
+    expect(pool.unregisterTopic)
+      .toBeCalledTimes(0);
+  });
 });

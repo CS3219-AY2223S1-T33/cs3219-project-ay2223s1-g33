@@ -6,6 +6,7 @@ const Redis = require('ioredis-mock');
 describe('Function-Redis-Question setQuestionRedis', () => {
   test('Test question is saved on redis', async () => {
     const redis = new Redis();
+    jest.spyOn(redis, 'set');
     const question: Question = {
       questionId: 1,
       name: '1',
@@ -15,6 +16,7 @@ describe('Function-Redis-Question setQuestionRedis', () => {
     };
     const key = 'key';
     await setQuestionRedis(key, question, redis);
+    expect(redis.set).toBeCalledTimes(1);
     await redis.get(`qns-${key}`, (_err: any, result: any) => {
       expect(result)
         .toBe(JSON.stringify(question));
