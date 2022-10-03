@@ -1,14 +1,13 @@
 package main
 
 import (
-	"cs3219-project-ay2223s1-g33/matchmaker/common"
 	"cs3219-project-ay2223s1-g33/matchmaker/conn"
 	"cs3219-project-ay2223s1-g33/matchmaker/worker"
 	"log"
 )
 
 func main() {
-	log.Println("Starting Matchmaker")
+	log.Printf("Starting Matchmaker [V%d.%d.%d]\n", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION)
 
 	config := loadConfig()
 	if config == nil {
@@ -19,15 +18,13 @@ func main() {
 	redisClient.Connect()
 	defer redisClient.Close()
 
-	queueBuffer := common.QueueBuffers{
-		EasyQueue:   make(chan *string, config.QueueBufferSize),
-		MediumQueue: make(chan *string, config.QueueBufferSize),
-		HardQueue:   make(chan *string, config.QueueBufferSize),
-	}
+	fetchWorker := worker.NewFetchWorker(redisClient, config.PollBatchSize, config.SleepInterval)
+	matchWorker := worker.NewMatchWorker()
+	uploadWorker := worker.NewUploadWorker(redisClient)
 
-	matchWorker := worker.NewMatchWorker(redisClient, &queueBuffer, config.QueueMessageLifespan)
-	fetchWorker := worker.NewFetchWorker(redisClient, &queueBuffer, config.PollBatchSize, config.SleepInterval)
-	go matchWorker.Run()
+	fetchWorker.PipeTo(matchWorker)
+	matchWorker.PipeTo(uploadWorker)
 
 	fetchWorker.Run()
+	log.Println("Matchmaker Death")
 }

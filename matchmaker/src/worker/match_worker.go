@@ -1,147 +1,80 @@
 package worker
 
 import (
-	"context"
 	"cs3219-project-ay2223s1-g33/matchmaker/common"
-	"cs3219-project-ay2223s1-g33/matchmaker/conn"
-	"log"
-	"time"
-
-	"github.com/google/uuid"
+	"sort"
 )
 
-type MatchmakerMatch struct {
-	userA      *string
-	userB      *string
-	token      *string
-	difficulty int
+type MatchWorker interface {
+	PipeTo(handler MatchResultHandler)
+	HandleQueueItems(input []*common.QueueItem)
 }
 
-type MatchWorker interface {
-	Run()
+//go:generate mockgen -destination=../mocks/mock_match_result_handler.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/worker MatchResultHandler
+type MatchResultHandler interface {
+	HandleMatches(matches []*common.QueueItemsMatch)
 }
 
 type matchWorker struct {
-	redisClient          conn.RedisMatchmakerClient
-	queues               *common.QueueBuffers
-	queueMessageLifespan time.Duration
-	active               bool
+	outputHandler MatchResultHandler
 }
 
-type bufferObject struct {
-	expiryTime time.Time
-	user       *string
+func NewMatchWorker() MatchWorker {
+	return &matchWorker{}
 }
 
-const (
-	DIFFICULTY_EASY   = 1
-	DIFFICULTY_MEDIUM = 2
-	DIFFICULTY_HARD   = 3
-)
-
-func NewMatchWorker(
-	redisClient conn.RedisMatchmakerClient,
-	queues *common.QueueBuffers,
-	queueMessageLifespan time.Duration,
-) MatchWorker {
-	return &matchWorker{
-		redisClient:          redisClient,
-		queues:               queues,
-		queueMessageLifespan: queueMessageLifespan,
-		active:               true,
-	}
+func (worker *matchWorker) PipeTo(handler MatchResultHandler) {
+	worker.outputHandler = handler
 }
 
-func (worker *matchWorker) Run() {
-	log.Println("Starting match worker")
+func (worker *matchWorker) HandleQueueItems(items []*common.QueueItem) {
+	bufferMap := make(map[int]*common.QueueItem)
+	matches := make([]*common.QueueItemsMatch, 0, len(items)/2)
 
-	executor := worker.createMatchingContext()
-	for worker.active {
-		match := executor()
-
+	for _, item := range items {
+		match := worker.tryMatch(bufferMap, item)
 		if match != nil {
-			go worker.uploadMatch(match)
+			matches = append(matches, match)
 		}
 	}
-	log.Println("Match worker dying")
-}
 
-func (worker *matchWorker) createMatchingContext() (executor func() *MatchmakerMatch) {
-	var easyBuffer, medBuffer, hardBuffer *bufferObject
-
-	return func() *MatchmakerMatch {
-		// Decay buffers
-		easyBuffer, medBuffer, hardBuffer = worker.decayBuffers(easyBuffer, medBuffer, hardBuffer)
-
-		var match *MatchmakerMatch
-		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
-		defer cancel()
-
-		select {
-		case queuer := <-worker.queues.EasyQueue:
-			easyBuffer, match = worker.matchmake(easyBuffer, queuer, DIFFICULTY_EASY)
-		case queuer := <-worker.queues.MediumQueue:
-			medBuffer, match = worker.matchmake(medBuffer, queuer, DIFFICULTY_MEDIUM)
-		case queuer := <-worker.queues.HardQueue:
-			hardBuffer, match = worker.matchmake(hardBuffer, queuer, DIFFICULTY_HARD)
-		case <-ctx.Done():
-		}
-		return match
-	}
-}
-
-func (worker *matchWorker) matchmake(buffer *bufferObject, incoming *string, difficulty int) (*bufferObject, *MatchmakerMatch) {
-	if buffer == nil {
-		expiryTime := time.Now().Add(worker.queueMessageLifespan)
-		return &bufferObject{
-			expiryTime: expiryTime,
-			user:       incoming,
-		}, nil
-	}
-
-	matchId := uuid.New().String()
-	return nil, &MatchmakerMatch{
-		userA:      buffer.user,
-		userB:      incoming,
-		token:      &matchId,
-		difficulty: difficulty,
-	}
-}
-
-func (worker *matchWorker) decayBuffers(easyBuffer, medBuffer, hardBuffer *bufferObject) (*bufferObject, *bufferObject, *bufferObject) {
-	now := time.Now()
-
-	easyBuffer = worker.decayBuffer(easyBuffer, now)
-	medBuffer = worker.decayBuffer(medBuffer, now)
-	hardBuffer = worker.decayBuffer(hardBuffer, now)
-
-	return easyBuffer, medBuffer, hardBuffer
-}
-
-func (worker *matchWorker) decayBuffer(buffer *bufferObject, now time.Time) *bufferObject {
-	if buffer != nil {
-		if buffer.expiryTime.Before(now) {
-			return nil
-		}
-	}
-	return buffer
-}
-
-func (worker *matchWorker) uploadMatch(match *MatchmakerMatch) {
-	if match == nil {
+	if worker.outputHandler == nil {
 		return
 	}
 
-	log.Printf("Uploading match for (%s, %s)\n", *match.userA, *match.userB)
+	worker.outputHandler.HandleMatches(matches)
+}
 
-	err := worker.redisClient.UploadMatch(*match.userA, *match.token, match.difficulty)
-	if err != nil {
-		log.Println("Failed to upload match result")
-		return
+func (worker *matchWorker) tryMatch(buffer map[int]*common.QueueItem, item *common.QueueItem) *common.QueueItemsMatch {
+	difficulties := item.Difficulties
+	sort.Ints(difficulties)
+
+	// Matching Strategy: Hardest First
+	for i := len(difficulties) - 1; i >= 0; i-- {
+		difficulty := difficulties[i]
+
+		bufferedItem, found := buffer[difficulty]
+		if found {
+			worker.flushBuffer(buffer, bufferedItem)
+			return &common.QueueItemsMatch{
+				UserA:      bufferedItem,
+				UserB:      item,
+				Difficulty: difficulty,
+			}
+		}
 	}
 
-	err = worker.redisClient.UploadMatch(*match.userB, *match.token, match.difficulty)
-	if err != nil {
-		log.Println("Failed to upload match result")
+	// No match, add to buffer
+	for _, difficulty := range difficulties {
+		buffer[difficulty] = item
+	}
+	return nil
+}
+
+func (worker *matchWorker) flushBuffer(buffer map[int]*common.QueueItem, item *common.QueueItem) {
+	for k := range buffer {
+		if buffer[k] == item {
+			delete(buffer, k)
+		}
 	}
 }
