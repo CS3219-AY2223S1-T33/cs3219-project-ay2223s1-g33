@@ -10,7 +10,7 @@ interface MatchingState {
 
 const initialState: MatchingState = {
   inQueue: false,
-  diffSelected: [true, true, true],
+  diffSelected: [false, false, false],
   roomToken: undefined,
 };
 
