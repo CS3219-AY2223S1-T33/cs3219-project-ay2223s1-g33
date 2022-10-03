@@ -1,4 +1,4 @@
-import { ServerDuplexStream } from '@grpc/grpc-js';
+import { Metadata, ServerDuplexStream } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
 import { createAckMessage, createJoinMessage } from '../message_handler/internal/internal_message_builder';
 import { createDisconnectedMessage } from '../message_handler/room/connect_message_builder';
@@ -125,7 +125,7 @@ class CollabTunnelController {
       roomToken,
       username,
       nickname,
-    } = CollabTunnelController.extractMetadata(call);
+    } = CollabTunnelController.extractMetadata(call.metadata);
 
     const data = await this.roomTokenAgent.verifyToken(roomToken);
     if (!data) {
@@ -168,7 +168,6 @@ class CollabTunnelController {
         return;
       }
       // Send Normal
-
       redisPubSubAdapter.pushMessage({
         sender: username,
         data: request.data,
@@ -193,11 +192,11 @@ class CollabTunnelController {
   }
 
   static extractMetadata(
-    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+    data: Metadata,
   ) {
-    const roomToken: string = call.metadata.get(PROXY_HEADER_ROOM_TOKEN)[0].toString();
-    const username: string = call.metadata.get(PROXY_HEADER_USERNAME)[0].toString();
-    const nickname: string = call.metadata.get(PROXY_HEADER_NICKNAME)[0].toString();
+    const roomToken: string = data.get(PROXY_HEADER_ROOM_TOKEN)[0].toString();
+    const username: string = data.get(PROXY_HEADER_USERNAME)[0].toString();
+    const nickname: string = data.get(PROXY_HEADER_NICKNAME)[0].toString();
     return {
       roomToken,
       username,
