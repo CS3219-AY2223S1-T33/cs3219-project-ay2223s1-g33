@@ -38,7 +38,7 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
     }
 
     const isQueueingSuccessful = await this.redisAdapter
-      .pushStream(username, validatedRequest.difficulty);
+      .pushStream(username, validatedRequest.difficulties);
 
     if (!isQueueingSuccessful) {
       return JoinQueueHandler.buildResponse(
@@ -54,14 +54,14 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
   }
 
   static validateRequest(request: JoinQueueRequest): (JoinQueueRequest | Error) {
-    if (!request.difficulty) {
+    if (!request.difficulties || request.difficulties.length === 0) {
       return new Error('Diffculty not provided');
     }
 
-    const { difficulty } = request;
+    const { difficulties } = request;
 
     return {
-      difficulty,
+      difficulties,
     };
   }
 
