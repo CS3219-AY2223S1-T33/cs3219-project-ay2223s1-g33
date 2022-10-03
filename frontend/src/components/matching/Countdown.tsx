@@ -22,7 +22,8 @@ function Countdown() {
 
   // Cleanup function for leaving the queue (may be extended for specific scenarios: timeout, matched)
   const leaveQueueHandler = () => {
-    // API call to leave queue, may require some information from the redux store
+    // TODO API call to leave queue
+    // TODO Blocker - exposed API endpoint
     console.log("Call API to leave the queue");
     setIsPlaying.off();
     dispatch(leaveQueue());

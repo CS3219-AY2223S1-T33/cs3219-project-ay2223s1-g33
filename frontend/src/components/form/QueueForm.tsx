@@ -49,11 +49,16 @@ function QueueForm() {
     }
 
     const selectedDifficulties: QuestionDifficulty[] = [];
-    difficulties.map((isSelected, index) => isSelected ? (index + 1) as QuestionDifficulty : undefined)
-      .filter((x) => x !== undefined)
+    difficulties
+      .map((isSelected, index) => (isSelected ? index + 1 : undefined))
+      .filter((x) => x)
       .forEach((x) => selectedDifficulties.push(x as QuestionDifficulty));
 
-    const joinQueueReq: JoinQueueRequest = { difficulties: selectedDifficulties };
+    console.log("selectedDifficulties", selectedDifficulties);
+
+    const joinQueueReq: JoinQueueRequest = {
+      difficulties: selectedDifficulties,
+    };
 
     axios
       .post<JoinQueueResponse>("/api/queue/join", joinQueueReq, {
@@ -72,9 +77,6 @@ function QueueForm() {
       .catch((err) => {
         toast.sendErrorMessage(err.message);
       });
-
-    // For now just change the flag
-    dispatch(enterQueue());
   };
 
   return (
