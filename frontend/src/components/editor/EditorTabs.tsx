@@ -4,7 +4,7 @@ import {
   Tab,
   TabPanels,
   TabPanel,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";

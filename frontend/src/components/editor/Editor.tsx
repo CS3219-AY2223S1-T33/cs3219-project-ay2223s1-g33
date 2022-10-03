@@ -24,14 +24,14 @@ function Editor({
   undoManager,
   nickname,
   selectedLang,
-  onCodeUpdate
+  onCodeUpdate,
 }: Props) {
   useEffect(() => {
     if (!providerSet) {
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333"
+        colorLight: "#6eeb8333",
       });
       providerSet = true;
     }
