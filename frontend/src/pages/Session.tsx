@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
+import { DownloadIcon } from "@chakra-ui/icons";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -17,6 +18,7 @@ import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
 import { Language } from "../types";
 import { Question } from "../proto/types";
+import saveFile from "../utils/fileDownloadUtil";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -60,7 +62,6 @@ function Session() {
     DUMMY_QUESTION
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [code, setCode] = useState("");
 
   useEffect(() => {
@@ -166,6 +167,11 @@ function Session() {
     setCode(value);
   };
 
+  const downloadCodeHandler = () => {
+    toast.sendInfoMessage("Downloading file...", { duration: 3000 });
+    saveFile(code, selectedLang);
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -196,6 +202,9 @@ function Session() {
               changeLangHandler={changeLangHandler}
             />
             {/* Other Quality of life options */}
+            <Button leftIcon={<DownloadIcon />} onClick={downloadCodeHandler}>
+              Save code
+            </Button>
           </Flex>
 
           {/* Editor */}
