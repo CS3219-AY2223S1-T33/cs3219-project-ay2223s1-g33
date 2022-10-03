@@ -25,6 +25,7 @@ export const messageAuth = 2
 export const USER_JOIN = 4
 export const USER_LEAVE = 5
 export const LANG_CHANGE = 6
+export const QUESTION_RCV = 7
 
 /**
  *                       encoder,          decoder,          provider,          emitSynced, messageType
@@ -120,6 +121,11 @@ messageHandlers[LANG_CHANGE] = (_encoder, decoder, provider, _emitSynced, _messa
   const language = decoding.readVarString(decoder)
   console.log(language)
   provider.emit('lang_change', [{language}])
+}
+
+messageHandlers[QUESTION_RCV] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+  const question = decoding.readVarString(decoder)
+  provider.emit('question_get', [ { question }])
 }
 
 
