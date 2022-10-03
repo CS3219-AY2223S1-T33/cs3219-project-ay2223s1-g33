@@ -6,7 +6,7 @@ import {
   ConnectionOpCode,
 } from '../../../../src/message_handler/internal/internal_message_types';
 import {
-  createConnectedMessage
+  createConnectedMessage,
 } from '../../../../src/message_handler/room/connect_message_builder';
 
 describe('Function-Message-Internal createJoinMessage', () => {
