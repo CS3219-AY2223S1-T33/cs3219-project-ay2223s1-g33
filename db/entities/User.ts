@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../proto/types';
 import PasswordReset from './PasswordReset';
@@ -21,7 +22,8 @@ export default class UserEntity implements User {
   @Column()
     nickname!: string;
 
-  @Column()
+  @Index('user_username_index')
+  @Column({ unique: true })
     username!: string;
 
   @Column()
