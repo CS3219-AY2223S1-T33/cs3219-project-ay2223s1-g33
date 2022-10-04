@@ -37,11 +37,11 @@ export default class UserEntity implements User {
     name: 'users_histories_owner', // table name for the junction table of this relation
     joinColumn: {
       name: 'user_id',
-      referencedColumnName: 'user_id',
+      referencedColumnName: 'userId',
     },
     inverseJoinColumn: {
       name: 'history_id',
-      referencedColumnName: 'history_id',
+      referencedColumnName: 'id',
     },
   })
     histories?: History[];
