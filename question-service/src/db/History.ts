@@ -4,20 +4,25 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import Question from './Question';
+import QuestionEntity from './Question';
+import UserEntity from './User';
 
 @Entity('histories')
 export default class HistoryEntity {
   @PrimaryGeneratedColumn({ name: 'history_id' })
     id!: string;
 
-  @ManyToOne(() => Question, (question) => question.histories)
+  @ManyToOne(() => QuestionEntity, (question) => question.histories)
   @JoinColumn({ name: 'question_id' })
-    question!: Question;
+    question!: QuestionEntity;
+
+  @ManyToMany(() => UserEntity)
+    users?: UserEntity[];
 
   @Column()
     submission!: string;

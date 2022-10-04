@@ -11,8 +11,8 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../proto/types';
-import PasswordResetToken from './PasswordResetToken';
-import History from './History';
+import PasswordResetTokenEntity from './PasswordResetToken';
+import HistoryEntity from './History';
 
 @Entity('users')
 export default class UserEntity implements User {
@@ -32,7 +32,7 @@ export default class UserEntity implements User {
   @Column({ default: true, name: 'is_active' })
     isActive!: boolean;
 
-  @ManyToMany(() => History)
+  @ManyToMany(() => HistoryEntity)
   @JoinTable({
     name: 'users_histories_owner', // table name for the junction table of this relation
     joinColumn: {
@@ -44,10 +44,10 @@ export default class UserEntity implements User {
       referencedColumnName: 'id',
     },
   })
-    histories?: History[];
+    histories?: HistoryEntity[];
 
-  @OneToMany(() => PasswordResetToken, (passwordResetToken) => passwordResetToken.user)
-    passwordResetTokens?: PasswordResetToken[];
+  @OneToMany(() => PasswordResetTokenEntity, (passwordResetToken) => passwordResetToken.user)
+    passwordResetTokens?: PasswordResetTokenEntity[];
 
   @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;

@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import History from './History';
+import HistoryEntity from './History';
 import { QuestionDifficulty, Question } from '../proto/types';
 
 @Entity('questions')
@@ -29,8 +29,8 @@ export default class QuestionEntity implements Question {
   @Column({ nullable: false })
     solution!: string;
 
-  @OneToMany(() => History, (history) => history.question)
-    histories?: History[];
+  @OneToMany(() => HistoryEntity, (history) => history.question)
+    histories?: HistoryEntity[];
 
   @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime?: Date;
