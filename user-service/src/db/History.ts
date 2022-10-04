@@ -27,6 +27,9 @@ export default class HistoryEntity {
   @Column()
     submission!: string;
 
+  @Column()
+    language!: string;
+
   @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;
 
