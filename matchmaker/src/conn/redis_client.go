@@ -3,8 +3,8 @@ package conn
 import (
 	"context"
 	"cs3219-project-ay2223s1-g33/matchmaker/common"
+	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -14,15 +14,13 @@ import (
 
 //go:generate mockgen -destination=../mocks/mock_redis_client.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/conn RedisMatchmakerClient
 type RedisMatchmakerClient interface {
-	Connect()
-	Close()
-	PollQueue(count int) (result []*common.QueueItem, expired []*common.QueueItem)
+	PollQueue(count int) (expired []*common.QueueItem, result []*common.QueueItem, err error)
+	DeleteQueueItems(items []*common.QueueItem) error
 	UploadMatch(username string, matchId string, difficulty int) error
 	UploadFailures(username []string) error
 }
 
 type redisMatchmakerClient struct {
-	server        string
 	redisClient   *redis.Client
 	queueLifespan time.Duration
 }
@@ -35,32 +33,14 @@ const (
 	matchValueTemplate = "%d;%s"
 )
 
-func NewRedisMatchmakerClient(server string, queueLifespan time.Duration) RedisMatchmakerClient {
+func NewRedisMatchmakerClient(redisClient *redis.Client, queueLifespan time.Duration) RedisMatchmakerClient {
 	return &redisMatchmakerClient{
-		server:        server,
+		redisClient:   redisClient,
 		queueLifespan: queueLifespan,
 	}
 }
 
-func (client *redisMatchmakerClient) Connect() {
-	if client.redisClient != nil {
-		return
-	}
-
-	connOptions := &redis.Options{
-		Addr:     client.server,
-		Password: "",
-		DB:       0,
-	}
-
-	client.redisClient = redis.NewClient(connOptions)
-}
-
-func (client *redisMatchmakerClient) Close() {
-	client.redisClient.Close()
-}
-
-func (client *redisMatchmakerClient) PollQueue(count int) (result []*common.QueueItem, expired []*common.QueueItem) {
+func (client *redisMatchmakerClient) PollQueue(count int) (expired []*common.QueueItem, result []*common.QueueItem, err error) {
 	ctx := context.Background()
 
 	resultStreams, err := client.redisClient.XRead(ctx, &redis.XReadArgs{
@@ -70,28 +50,38 @@ func (client *redisMatchmakerClient) PollQueue(count int) (result []*common.Queu
 	}).Result()
 
 	if err == redis.Nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	if err != nil {
-		log.Print(err)
-		return nil, nil
+		return nil, nil, err
 	}
 
 	redisTime, err := client.redisClient.Time(ctx).Result()
 	if err != nil {
-		return nil, nil
+		return nil, nil, err
 	}
 
 	messageStream := resultStreams[0].Messages
-	messagesToDelete, expired, inQueue := client.partitionMesssages(ctx, messageStream, redisTime)
+	expired, inQueue := client.partitionMesssages(ctx, messageStream, redisTime)
 
-	err = client.redisClient.XDel(ctx, queueKey, messagesToDelete...).Err()
-	if err != nil {
-		return nil, nil
+	return expired, inQueue, err
+}
+
+func (client *redisMatchmakerClient) DeleteQueueItems(items []*common.QueueItem) error {
+	ctx := context.Background()
+
+	if len(items) == 0 {
+		return nil
 	}
 
-	return inQueue, expired
+	messageIds := make([]string, len(items))
+	for i, item := range items {
+		messageIds[i] = item.StreamId
+	}
+
+	err := client.redisClient.XDel(ctx, queueKey, messageIds...).Err()
+	return err
 }
 
 func (client *redisMatchmakerClient) UploadMatch(username string, matchId string, difficulty int) error {
@@ -104,24 +94,25 @@ func (client *redisMatchmakerClient) UploadMatch(username string, matchId string
 }
 
 func (client *redisMatchmakerClient) UploadFailures(usernames []string) error {
+	if len(usernames) == 0 {
+		return nil
+	}
+
 	keys := make([]string, len(usernames))
+	ctx := context.Background()
 
 	for i, username := range usernames {
 		keys[i] = fmt.Sprintf(matchKeyTemplate, username)
 	}
-	ctx := context.Background()
-
 	err := client.redisClient.Del(ctx, keys...).Err()
 	return err
 }
 
 func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, messageStream []redis.XMessage, timeNow time.Time) (
-	idsToDelete []string,
 	expired []*common.QueueItem,
 	newInQueue []*common.QueueItem) {
 
 	messageCount := len(messageStream)
-	deleteIds := make([]string, messageCount)
 	expiredArray := make([]*common.QueueItem, 0, messageCount)
 	validArray := make([]*common.QueueItem, 0, messageCount)
 
@@ -137,7 +128,6 @@ func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, mes
 			break
 		}
 
-		deleteIds[i] = message.ID
 		queueObject := buildQueueItem(&message)
 		if queueObject == nil {
 			continue
@@ -148,7 +138,6 @@ func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, mes
 
 	for ; i < messageCount; i++ {
 		message := messageStream[i]
-		deleteIds[i] = message.ID
 		queueObject := buildQueueItem(&message)
 		if queueObject == nil {
 			continue
@@ -157,7 +146,7 @@ func (client *redisMatchmakerClient) partitionMesssages(ctx context.Context, mes
 		validArray = append(validArray, queueObject)
 	}
 
-	return deleteIds, expiredArray, validArray
+	return expiredArray, validArray
 }
 
 func getTimestampFromMessageId(id *string) *time.Time {
@@ -177,7 +166,7 @@ func buildQueueItem(message *redis.XMessage) *common.QueueItem {
 		return nil
 	}
 
-	difficulty, ok := message.Values[difficultyKey]
+	stringDifficulties, ok := message.Values[difficultyKey]
 	if !ok {
 		return nil
 	}
@@ -187,18 +176,20 @@ func buildQueueItem(message *redis.XMessage) *common.QueueItem {
 		return nil
 	}
 
-	stringDifficulty, ok := difficulty.(string)
+	jsonDifficulties, ok := stringDifficulties.(string)
 	if !ok {
 		return nil
 	}
 
-	intDifficulty, err := strconv.Atoi(stringDifficulty)
+	difficulties := make([]int, 0)
+	err := json.Unmarshal([]byte(jsonDifficulties), &difficulties)
 	if err != nil {
 		return nil
 	}
 
 	return &common.QueueItem{
-		Username:   stringUsername,
-		Difficulty: intDifficulty,
+		StreamId:     message.ID,
+		Username:     stringUsername,
+		Difficulties: difficulties,
 	}
 }

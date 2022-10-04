@@ -27,7 +27,7 @@ const (
 func loadConfig() *GatewayConfiguration {
 	userBFFServer := loadEnvVariableOrDefaultString(envUserBFFServer, "localhost:4000")
 	matchingServer := loadEnvVariableOrDefaultString(envMatchingServer, "localhost:4001")
-	collabServer := loadEnvVariableOrDefaultString(envCollabServer, "localhost:4002")
+	collabServer := loadEnvVariableOrDefaultString(envCollabServer, "localhost:4003")
 	sessionServer := loadEnvVariableOrDefaultString(envSessionServer, "localhost:4100")
 	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "localhost:8000")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)

@@ -1,51 +1,55 @@
-import { ServiceDefinition } from '@grpc/grpc-js';
+import { ServiceDefinition, ChannelCredentials } from '@grpc/grpc-js';
 import { IUserService, userServiceDefinition } from '../proto/user-service.grpc-server';
-import {
-  CreateUserRequest,
-  CreateUserResponse,
-  DeleteUserRequest,
-  DeleteUserResponse,
-  EditUserRequest,
-  EditUserResponse,
-  GetUserRequest,
-  GetUserResponse,
-} from '../proto/user-service';
 import { ServiceHandlerDefinition, ApiService } from '../api_server/api_server_types';
 import { fromApiHandler } from '../api_server/api_server_helpers';
-import GetUserHandler from './user_service_handlers/get_user_handler';
-import { IStorage } from '../storage/storage.d';
-import CreateUserHandler from './user_service_handlers/create_user_handler';
-import EditUserHandler from './user_service_handlers/edit_user_handler';
-import DeleteUserHandler from './user_service_handlers/delete_user_handler';
+import { UserCrudServiceClient } from '../proto/user-crud-service.grpc-client';
+import RegisterHandler from './user_service_handlers/register_handler';
+import {
+  GetUserProfileRequest,
+  GetUserProfileResponse,
+  LoginRequest,
+  LoginResponse,
+  LogoutRequest,
+  LogoutResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from '../proto/user-service';
+import LoginHandler from './user_service_handlers/login_handler';
+import { IAuthenticationAgent } from '../auth/authentication_agent_types';
+import LogoutHandler from './user_service_handlers/logout_handler';
+import GetUserProfileHandler from './user_service_handlers/get_user_profile_handler';
 
-class UserServiceApi implements ApiService<IUserService> {
+class UserBFFServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
 
   serviceDefinition: ServiceDefinition<IUserService>;
 
   serviceImplementation: IUserService;
 
-  constructor(storage: IStorage) {
+  constructor(authService: IAuthenticationAgent) {
+    const grpcClient = new UserCrudServiceClient(
+      '127.0.0.1:4000',
+      ChannelCredentials.createInsecure(),
+      {},
+      {},
+    );
+
     const handlerDefinitions: ServiceHandlerDefinition<IUserService> = {
-      getUser: fromApiHandler(new GetUserHandler(storage), GetUserRequest, GetUserResponse),
-      createUser: fromApiHandler(
-        new CreateUserHandler(storage),
-        CreateUserRequest,
-        CreateUserResponse,
-      ),
-      editUser: fromApiHandler(new EditUserHandler(storage), EditUserRequest, EditUserResponse),
-      deleteUser: fromApiHandler(
-        new DeleteUserHandler(storage),
-        DeleteUserRequest,
-        DeleteUserResponse,
+      register: fromApiHandler(new RegisterHandler(grpcClient), RegisterRequest, RegisterResponse),
+      login: fromApiHandler(new LoginHandler(grpcClient, authService), LoginRequest, LoginResponse),
+      logout: fromApiHandler(new LogoutHandler(authService), LogoutRequest, LogoutResponse),
+      getUserProfile: fromApiHandler(
+        new GetUserProfileHandler(grpcClient, authService),
+        GetUserProfileRequest,
+        GetUserProfileResponse,
       ),
     };
 
     const userService: IUserService = {
-      getUser: handlerDefinitions.getUser.grpcRouteHandler,
-      createUser: handlerDefinitions.createUser.grpcRouteHandler,
-      editUser: handlerDefinitions.editUser.grpcRouteHandler,
-      deleteUser: handlerDefinitions.deleteUser.grpcRouteHandler,
+      register: handlerDefinitions.register.grpcRouteHandler,
+      login: handlerDefinitions.login.grpcRouteHandler,
+      logout: handlerDefinitions.logout.grpcRouteHandler,
+      getUserProfile: handlerDefinitions.getUserProfile.grpcRouteHandler,
     };
 
     this.serviceHandlerDefinition = handlerDefinitions;
@@ -54,4 +58,4 @@ class UserServiceApi implements ApiService<IUserService> {
   }
 }
 
-export default UserServiceApi;
+export default UserBFFServiceApi;

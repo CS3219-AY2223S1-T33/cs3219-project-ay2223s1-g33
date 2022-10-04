@@ -15,17 +15,19 @@ import (
 )
 
 func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) (http.Handler, error) {
-	marshalerOpts := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
-		Marshaler: &runtime.JSONPb{
-			MarshalOptions: protojson.MarshalOptions{
-				Multiline:       true,
-				UseEnumNumbers:  true,
-				EmitUnpopulated: true,
-			},
-			UnmarshalOptions: protojson.UnmarshalOptions{
-				DiscardUnknown: true,
-			},
+	marshaller := &runtime.JSONPb{
+		MarshalOptions: protojson.MarshalOptions{
+			Multiline:       true,
+			UseEnumNumbers:  true,
+			EmitUnpopulated: true,
 		},
+		UnmarshalOptions: protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		},
+	}
+
+	marshalerOpts := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
+		Marshaler: marshaller,
 	})
 
 	incomingHeaderOpts := runtime.WithIncomingHeaderMatcher(gatewayIncomingHeaderMatcher)
@@ -34,7 +36,7 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	log.Printf("Proxying to User-BFF on %s\n", config.UserBFFServer)
-	err := gw.RegisterUserBFFServiceHandlerFromEndpoint(ctx, mux, config.UserBFFServer, opts)
+	err := gw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, config.UserBFFServer, opts)
 	if err != nil {
 		return nil, err
 	}

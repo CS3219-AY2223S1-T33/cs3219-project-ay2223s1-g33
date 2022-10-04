@@ -1,14 +1,15 @@
 package common
 
-type QueueBuffers struct {
-	EasyQueue   chan *string
-	MediumQueue chan *string
-	HardQueue   chan *string
+type QueueItemsMatch struct {
+	UserA      *QueueItem
+	UserB      *QueueItem
+	Difficulty int
 }
 
 type QueueItem struct {
-	Username   string
-	Difficulty int
+	StreamId     string
+	Username     string
+	Difficulties []int
 }
 
 const (

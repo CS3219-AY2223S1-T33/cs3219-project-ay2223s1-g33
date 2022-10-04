@@ -8,6 +8,7 @@ import (
 )
 
 type FetchWorker interface {
+	PipeTo(FetchResultHandler)
 	Run()
 }
 
@@ -15,9 +16,14 @@ type sleepAdapter interface {
 	Sleep(duration time.Duration)
 }
 
+//go:generate mockgen -destination=../mocks/mock_fetch_result_handler.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/matchmaker/worker FetchResultHandler
+type FetchResultHandler interface {
+	HandleQueueItems([]*common.QueueItem)
+}
+
 type fetchWorker struct {
 	redisClient   conn.RedisMatchmakerClient
-	queues        *common.QueueBuffers
+	outputHandler FetchResultHandler
 	pollBatchSize int
 	sleepDuration time.Duration
 	active        bool
@@ -25,25 +31,30 @@ type fetchWorker struct {
 
 func NewFetchWorker(
 	redisClient conn.RedisMatchmakerClient,
-	queues *common.QueueBuffers,
 	pollBatchSize int,
 	sleepInterval int,
 ) FetchWorker {
 	return &fetchWorker{
 		redisClient:   redisClient,
-		queues:        queues,
 		pollBatchSize: pollBatchSize,
 		sleepDuration: time.Duration(int64(sleepInterval) * int64(time.Millisecond)),
 		active:        true,
 	}
 }
 
+func (worker *fetchWorker) PipeTo(handler FetchResultHandler) {
+	worker.outputHandler = handler
+}
+
 func (worker *fetchWorker) Run() {
 	log.Println("Starting fetch worker")
 	for worker.active {
-		inQueue, expired := worker.redisClient.PollQueue(worker.pollBatchSize)
-		worker.processInQueue(inQueue)
+		expired, inQueue, err := worker.redisClient.PollQueue(worker.pollBatchSize)
+		if err != nil {
+			log.Printf("Error Polling Redis: %s\n", err)
+		}
 		worker.processExpired(expired)
+		worker.processInQueue(inQueue)
 		time.Sleep(worker.sleepDuration)
 	}
 
@@ -51,35 +62,30 @@ func (worker *fetchWorker) Run() {
 }
 
 func (worker *fetchWorker) processInQueue(queueItems []*common.QueueItem) {
-	for _, queueItem := range queueItems {
-		worker.addToQueue(queueItem)
+	if worker.outputHandler == nil {
+		return
 	}
+
+	if queueItems == nil {
+		return
+	}
+
+	worker.outputHandler.HandleQueueItems(queueItems)
 }
 
-func (worker *fetchWorker) processExpired(expired []*common.QueueItem) {
-	if len(expired) > 0 {
-		usernames := make([]string, len(expired))
-		for i, expiredItem := range expired {
-			usernames[i] = expiredItem.Username
-		}
-		err := worker.redisClient.UploadFailures(usernames)
-		if err != nil {
-			log.Println("Failed to remove users from queue")
-		}
-	}
-}
-
-func (worker *fetchWorker) addToQueue(queueItem *common.QueueItem) {
-	switch queueItem.Difficulty {
-	case common.DifficultyEasy:
-		worker.queues.EasyQueue <- &queueItem.Username
-	case common.DifficultyMedium:
-		worker.queues.MediumQueue <- &queueItem.Username
-	case common.DifficultyHard:
-		worker.queues.HardQueue <- &queueItem.Username
-	default:
-		log.Println("Invalid difficulty value detected in queue")
+func (worker *fetchWorker) processExpired(queueItems []*common.QueueItem) {
+	err := worker.redisClient.DeleteQueueItems(queueItems)
+	if err != nil {
+		log.Printf("Failed to clear expired items: %s\n", err)
 	}
 
-	log.Printf("Adding [%s] to queue\n", queueItem.Username)
+	usernames := make([]string, len(queueItems))
+	for i, item := range queueItems {
+		usernames[i] = item.Username
+	}
+
+	err = worker.redisClient.UploadFailures(usernames)
+	if err != nil {
+		log.Printf("Failed to upload failures for expired items: %s\n", err)
+	}
 }
