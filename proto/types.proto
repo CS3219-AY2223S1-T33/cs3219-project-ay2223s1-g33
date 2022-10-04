@@ -28,3 +28,12 @@ message Question {
   string content = 4;
   string solution = 5;
 }
+
+message HistoryAttempt {
+  uint64 attempt_id = 1;
+  Question question = 2;
+  string language = 3;
+  uint64 timestamp = 4;
+  repeated string users = 5;
+  bytes submission = 6;
+}
