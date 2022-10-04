@@ -1,6 +1,5 @@
 /* eslint import/no-cycle: 0 */
 import {
-  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
@@ -8,19 +7,16 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import Question from './Question';
+import User from './User';
 
-@Entity('histories')
-export default class HistoryEntity {
-  @PrimaryGeneratedColumn({ name: 'history_id' })
+@Entity('password_reset_tokens')
+export default class PasswordResetTokenEntity {
+  @PrimaryGeneratedColumn({ name: 'token_id' })
     id!: string;
 
-  @ManyToOne(() => Question, (question) => question.histories)
-  @JoinColumn({ name: 'question_id' })
-    question!: Question;
-
-  @Column()
-    submission!: string;
+  @ManyToOne(() => User, (user) => user.passwordResetTokens)
+  @JoinColumn({ name: 'user_id' })
+    user!: User;
 
   @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;

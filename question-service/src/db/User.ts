@@ -11,12 +11,12 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../proto/types';
-import PasswordReset from './PasswordReset';
+import PasswordResetToken from './PasswordResetToken';
 import History from './History';
 
-@Entity('User')
+@Entity('users')
 export default class UserEntity implements User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'user_id' })
     userId!: number;
 
   @Column()
@@ -29,19 +29,29 @@ export default class UserEntity implements User {
   @Column()
     password!: string;
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'is_active' })
     isActive!: boolean;
 
   @ManyToMany(() => History)
-  @JoinTable()
+  @JoinTable({
+    name: 'users_histories_owner', // table name for the junction table of this relation
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'user_id',
+    },
+    inverseJoinColumn: {
+      name: 'history_id',
+      referencedColumnName: 'history_id',
+    },
+  })
     histories?: History[];
 
-  @OneToMany(() => PasswordReset, (passwordReset) => passwordReset.user)
-    passwordReset?: PasswordReset[];
+  @OneToMany(() => PasswordResetToken, (passwordResetToken) => passwordResetToken.user)
+    passwordResetTokens?: PasswordResetToken[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'update_timestamp' })
     updateDateTime!: Date;
 }

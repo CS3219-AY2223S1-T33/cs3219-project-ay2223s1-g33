@@ -6,23 +6,25 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import Question from './Question';
 
-@Entity('History')
+@Entity('histories')
 export default class HistoryEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'history_id' })
     id!: string;
 
   @ManyToOne(() => Question, (question) => question.histories)
+  @JoinColumn({ name: 'question_id' })
     question!: Question;
 
   @Column()
     submission!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'update_timestamp' })
     updateDateTime!: Date;
 }
