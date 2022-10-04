@@ -38,7 +38,7 @@ export const SAVECODE_ACK = 10;
 const messageHandlers = [];
 
 messageHandlers[messageSync] = (encoder, decoder, provider, emitSynced, _messageType) => {
-	encoding.writeVarUint(encoder, messageSync);
+	encoding.writeUint8(encoder, messageSync);
 	const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, provider.doc, provider);
 	if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2 && !provider.synced) {
 		provider.synced = true;
@@ -46,7 +46,7 @@ messageHandlers[messageSync] = (encoder, decoder, provider, emitSynced, _message
 };
 
 messageHandlers[messageQueryAwareness] = (encoder, _decoder, provider, _emitSynced, _messageType) => {
-	encoding.writeVarUint(encoder, messageAwareness);
+	encoding.writeUint8(encoder, messageAwareness);
 	encoding.writeVarUint8Array(
 		encoder,
 		awarenessProtocol.encodeAwarenessUpdate(provider.awareness, Array.from(provider.awareness.getStates().keys()))
@@ -70,23 +70,17 @@ messageHandlers[TERMINATE_WITH_ERROR] = (_encoder, decoder, provider, _emitSynce
 };
 
 messageHandlers[USER_JOIN] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
-	console.log("[Rcv]: Other user has joined");
 	const nickname = decoding.readVarString(decoder);
-	console.log("nickname: ", nickname);
 	provider.emit("user_join", [{ nickname }]);
 };
 
 messageHandlers[USER_LEAVE] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
-	console.log("[Rcv]: Other user has left");
 	const nickname = decoding.readVarString(decoder);
-	console.log("nickname: ", nickname);
 	provider.emit("user_leave", [{ nickname }]);
 };
 
 messageHandlers[LANG_CHANGE] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
-	console.log("[Rcv]: Language Changed");
 	const language = decoding.readVarString(decoder);
-	console.log(language);
 	provider.emit("lang_change", [{ language }]);
 };
 
@@ -193,13 +187,13 @@ const setupWS = (provider) => {
 			]);
 			// always send sync step 1 when connected
 			const encoder = encoding.createEncoder();
-			encoding.writeVarUint(encoder, messageSync);
+			encoding.writeUint8(encoder, messageSync);
 			syncProtocol.writeSyncStep1(encoder, provider.doc);
 			websocket.send(encoding.toUint8Array(encoder));
 			// broadcast local awareness state
 			if (provider.awareness.getLocalState() !== null) {
 				const encoderAwarenessState = encoding.createEncoder();
-				encoding.writeVarUint(encoderAwarenessState, messageAwareness);
+				encoding.writeUint8(encoderAwarenessState, messageAwareness);
 				encoding.writeVarUint8Array(
 					encoderAwarenessState,
 					awarenessProtocol.encodeAwarenessUpdate(provider.awareness, [provider.doc.clientID])
@@ -314,7 +308,7 @@ export class WebsocketProvider extends Observable {
 					if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 						// resend sync step 1
 						const encoder = encoding.createEncoder();
-						encoding.writeVarUint(encoder, messageSync);
+						encoding.writeUint8(encoder, messageSync);
 						syncProtocol.writeSyncStep1(encoder, doc);
 						this.ws.send(encoding.toUint8Array(encoder));
 					}
@@ -342,7 +336,7 @@ export class WebsocketProvider extends Observable {
 		this._updateHandler = (update, origin) => {
 			if (origin !== this) {
 				const encoder = encoding.createEncoder();
-				encoding.writeVarUint(encoder, messageSync);
+				encoding.writeUint8(encoder, messageSync);
 				syncProtocol.writeUpdate(encoder, update);
 				broadcastMessage(this, encoding.toUint8Array(encoder));
 			}
@@ -355,7 +349,7 @@ export class WebsocketProvider extends Observable {
 		this._awarenessUpdateHandler = ({ added, updated, removed }, _origin) => {
 			const changedClients = added.concat(updated).concat(removed);
 			const encoder = encoding.createEncoder();
-			encoding.writeVarUint(encoder, messageAwareness);
+			encoding.writeUint8(encoder, messageAwareness);
 			encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(awareness, changedClients));
 			broadcastMessage(this, encoding.toUint8Array(encoder));
 		};
@@ -426,21 +420,21 @@ export class WebsocketProvider extends Observable {
 		// send sync step1 to bc
 		// write sync step 1
 		const encoderSync = encoding.createEncoder();
-		encoding.writeVarUint(encoderSync, messageSync);
+		encoding.writeUint8(encoderSync, messageSync);
 		syncProtocol.writeSyncStep1(encoderSync, this.doc);
 		bc.publish(this.bcChannel, encoding.toUint8Array(encoderSync), this);
 		// broadcast local state
 		const encoderState = encoding.createEncoder();
-		encoding.writeVarUint(encoderState, messageSync);
+		encoding.writeUint8(encoderState, messageSync);
 		syncProtocol.writeSyncStep2(encoderState, this.doc);
 		bc.publish(this.bcChannel, encoding.toUint8Array(encoderState), this);
 		// write queryAwareness
 		const encoderAwarenessQuery = encoding.createEncoder();
-		encoding.writeVarUint(encoderAwarenessQuery, messageQueryAwareness);
+		encoding.writeUint8(encoderAwarenessQuery, messageQueryAwareness);
 		bc.publish(this.bcChannel, encoding.toUint8Array(encoderAwarenessQuery), this);
 		// broadcast local awareness state
 		const encoderAwarenessState = encoding.createEncoder();
-		encoding.writeVarUint(encoderAwarenessState, messageAwareness);
+		encoding.writeUint8(encoderAwarenessState, messageAwareness);
 		encoding.writeVarUint8Array(
 			encoderAwarenessState,
 			awarenessProtocol.encodeAwarenessUpdate(this.awareness, [this.doc.clientID])
@@ -451,7 +445,7 @@ export class WebsocketProvider extends Observable {
 	disconnectBc() {
 		// broadcast message with local awareness state set to null (indicating disconnect)
 		const encoder = encoding.createEncoder();
-		encoding.writeVarUint(encoder, messageAwareness);
+		encoding.writeUint8(encoder, messageAwareness);
 		encoding.writeVarUint8Array(
 			encoder,
 			awarenessProtocol.encodeAwarenessUpdate(this.awareness, [this.doc.clientID], new Map())
@@ -482,7 +476,7 @@ export class WebsocketProvider extends Observable {
 	// Custom functions for Peerprep
 	sendJoinMessage(/** @type {string} */ nickname) {
 		const encoder = encoding.createEncoder();
-		encoding.writeVarUint(encoder, USER_JOIN);
+		encoding.writeUint8(encoder, USER_JOIN);
 		encoding.writeVarString(encoder, nickname);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
@@ -490,14 +484,14 @@ export class WebsocketProvider extends Observable {
 	/** Referenced from {@link _updateHandler} */
 	sendDisconnectMessage(/** @type {string} */ nickname) {
 		const encoder = encoding.createEncoder();
-		encoding.writeVarUint(encoder, USER_LEAVE);
+		encoding.writeUint8(encoder, USER_LEAVE);
 		encoding.writeVarString(encoder, nickname);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
 
 	sendLanguageChange(/** @type {string} */ language) {
 		const encoder = encoding.createEncoder();
-		encoding.writeVarUint(encoder, LANG_CHANGE);
+		encoding.writeUint8(encoder, LANG_CHANGE);
 		encoding.writeVarString(encoder, language);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
