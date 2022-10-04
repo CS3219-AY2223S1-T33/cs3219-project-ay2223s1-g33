@@ -4,8 +4,6 @@
 // tslint:disable
 import { DeleteAttemptResponse } from "./history-crud-service";
 import { DeleteAttemptRequest } from "./history-crud-service";
-import { EditAttemptResponse } from "./history-crud-service";
-import { EditAttemptRequest } from "./history-crud-service";
 import { CreateAttemptResponse } from "./history-crud-service";
 import { CreateAttemptRequest } from "./history-crud-service";
 import { GetAttemptsResponse } from "./history-crud-service";
@@ -29,10 +27,6 @@ export interface IHistoryCrudService extends grpc.UntypedServiceImplementation {
      * @generated from protobuf rpc: CreateAttempt(history_crud_service.CreateAttemptRequest) returns (history_crud_service.CreateAttemptResponse);
      */
     createAttempt: grpc.handleUnaryCall<CreateAttemptRequest, CreateAttemptResponse>;
-    /**
-     * @generated from protobuf rpc: EditAttempt(history_crud_service.EditAttemptRequest) returns (history_crud_service.EditAttemptResponse);
-     */
-    editAttempt: grpc.handleUnaryCall<EditAttemptRequest, EditAttemptResponse>;
     /**
      * @generated from protobuf rpc: DeleteAttempt(history_crud_service.DeleteAttemptRequest) returns (history_crud_service.DeleteAttemptResponse);
      */
@@ -79,16 +73,6 @@ export const historyCrudServiceDefinition: grpc.ServiceDefinition<IHistoryCrudSe
         requestDeserialize: bytes => CreateAttemptRequest.fromBinary(bytes),
         responseSerialize: value => Buffer.from(CreateAttemptResponse.toBinary(value)),
         requestSerialize: value => Buffer.from(CreateAttemptRequest.toBinary(value))
-    },
-    editAttempt: {
-        path: "/history_crud_service.HistoryCrudService/EditAttempt",
-        originalName: "EditAttempt",
-        requestStream: false,
-        responseStream: false,
-        responseDeserialize: bytes => EditAttemptResponse.fromBinary(bytes),
-        requestDeserialize: bytes => EditAttemptRequest.fromBinary(bytes),
-        responseSerialize: value => Buffer.from(EditAttemptResponse.toBinary(value)),
-        requestSerialize: value => Buffer.from(EditAttemptRequest.toBinary(value))
     },
     deleteAttempt: {
         path: "/history_crud_service.HistoryCrudService/DeleteAttempt",

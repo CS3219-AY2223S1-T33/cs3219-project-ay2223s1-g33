@@ -92,9 +92,9 @@ export interface HistoryAttempt {
      */
     users: string[];
     /**
-     * @generated from protobuf field: bytes submission = 6;
+     * @generated from protobuf field: string submission = 6;
      */
-    submission: Uint8Array;
+    submission: string;
 }
 /**
  * @generated from protobuf enum common.QuestionDifficulty
@@ -316,11 +316,11 @@ class HistoryAttempt$Type extends MessageType<HistoryAttempt> {
             { no: 3, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "timestamp", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
             { no: 5, name: "users", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "submission", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+            { no: 6, name: "submission", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<HistoryAttempt>): HistoryAttempt {
-        const message = { attemptId: 0, language: "", timestamp: 0, users: [], submission: new Uint8Array(0) };
+        const message = { attemptId: 0, language: "", timestamp: 0, users: [], submission: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<HistoryAttempt>(this, message, value);
@@ -346,8 +346,8 @@ class HistoryAttempt$Type extends MessageType<HistoryAttempt> {
                 case /* repeated string users */ 5:
                     message.users.push(reader.string());
                     break;
-                case /* bytes submission */ 6:
-                    message.submission = reader.bytes();
+                case /* string submission */ 6:
+                    message.submission = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -376,9 +376,9 @@ class HistoryAttempt$Type extends MessageType<HistoryAttempt> {
         /* repeated string users = 5; */
         for (let i = 0; i < message.users.length; i++)
             writer.tag(5, WireType.LengthDelimited).string(message.users[i]);
-        /* bytes submission = 6; */
-        if (message.submission.length)
-            writer.tag(6, WireType.LengthDelimited).bytes(message.submission);
+        /* string submission = 6; */
+        if (message.submission !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.submission);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

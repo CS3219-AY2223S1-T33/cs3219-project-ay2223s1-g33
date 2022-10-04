@@ -35,5 +35,5 @@ message HistoryAttempt {
   string language = 3;
   uint64 timestamp = 4;
   repeated string users = 5;
-  bytes submission = 6;
+  string submission = 6;
 }

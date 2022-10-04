@@ -28,9 +28,9 @@ export interface GetAttemptRequest {
  */
 export interface GetAttemptResponse {
     /**
-     * @generated from protobuf field: common.HistoryAttempt attempts = 1;
+     * @generated from protobuf field: common.HistoryAttempt attempt = 1;
      */
-    attempts?: HistoryAttempt;
+    attempt?: HistoryAttempt;
     /**
      * @generated from protobuf field: string error_message = 2;
      */
@@ -87,28 +87,6 @@ export interface CreateAttemptRequest {
  * @generated from protobuf message history_crud_service.CreateAttemptResponse
  */
 export interface CreateAttemptResponse {
-    /**
-     * @generated from protobuf field: common.HistoryAttempt attempt = 1;
-     */
-    attempt?: HistoryAttempt;
-    /**
-     * @generated from protobuf field: string error_message = 2;
-     */
-    errorMessage: string;
-}
-/**
- * @generated from protobuf message history_crud_service.EditAttemptRequest
- */
-export interface EditAttemptRequest {
-    /**
-     * @generated from protobuf field: common.HistoryAttempt attempt = 1;
-     */
-    attempt?: HistoryAttempt;
-}
-/**
- * @generated from protobuf message history_crud_service.EditAttemptResponse
- */
-export interface EditAttemptResponse {
     /**
      * @generated from protobuf field: common.HistoryAttempt attempt = 1;
      */
@@ -187,7 +165,7 @@ export const GetAttemptRequest = new GetAttemptRequest$Type();
 class GetAttemptResponse$Type extends MessageType<GetAttemptResponse> {
     constructor() {
         super("history_crud_service.GetAttemptResponse", [
-            { no: 1, name: "attempts", kind: "message", T: () => HistoryAttempt },
+            { no: 1, name: "attempt", kind: "message", T: () => HistoryAttempt },
             { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
@@ -203,8 +181,8 @@ class GetAttemptResponse$Type extends MessageType<GetAttemptResponse> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* common.HistoryAttempt attempts */ 1:
-                    message.attempts = HistoryAttempt.internalBinaryRead(reader, reader.uint32(), options, message.attempts);
+                case /* common.HistoryAttempt attempt */ 1:
+                    message.attempt = HistoryAttempt.internalBinaryRead(reader, reader.uint32(), options, message.attempt);
                     break;
                 case /* string error_message */ 2:
                     message.errorMessage = reader.string();
@@ -221,9 +199,9 @@ class GetAttemptResponse$Type extends MessageType<GetAttemptResponse> {
         return message;
     }
     internalBinaryWrite(message: GetAttemptResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.HistoryAttempt attempts = 1; */
-        if (message.attempts)
-            HistoryAttempt.internalBinaryWrite(message.attempts, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* common.HistoryAttempt attempt = 1; */
+        if (message.attempt)
+            HistoryAttempt.internalBinaryWrite(message.attempt, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* string error_message = 2; */
         if (message.errorMessage !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
@@ -468,107 +446,6 @@ class CreateAttemptResponse$Type extends MessageType<CreateAttemptResponse> {
  */
 export const CreateAttemptResponse = new CreateAttemptResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class EditAttemptRequest$Type extends MessageType<EditAttemptRequest> {
-    constructor() {
-        super("history_crud_service.EditAttemptRequest", [
-            { no: 1, name: "attempt", kind: "message", T: () => HistoryAttempt }
-        ]);
-    }
-    create(value?: PartialMessage<EditAttemptRequest>): EditAttemptRequest {
-        const message = {};
-        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            reflectionMergePartial<EditAttemptRequest>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EditAttemptRequest): EditAttemptRequest {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* common.HistoryAttempt attempt */ 1:
-                    message.attempt = HistoryAttempt.internalBinaryRead(reader, reader.uint32(), options, message.attempt);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: EditAttemptRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.HistoryAttempt attempt = 1; */
-        if (message.attempt)
-            HistoryAttempt.internalBinaryWrite(message.attempt, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message history_crud_service.EditAttemptRequest
- */
-export const EditAttemptRequest = new EditAttemptRequest$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class EditAttemptResponse$Type extends MessageType<EditAttemptResponse> {
-    constructor() {
-        super("history_crud_service.EditAttemptResponse", [
-            { no: 1, name: "attempt", kind: "message", T: () => HistoryAttempt },
-            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<EditAttemptResponse>): EditAttemptResponse {
-        const message = { errorMessage: "" };
-        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            reflectionMergePartial<EditAttemptResponse>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EditAttemptResponse): EditAttemptResponse {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* common.HistoryAttempt attempt */ 1:
-                    message.attempt = HistoryAttempt.internalBinaryRead(reader, reader.uint32(), options, message.attempt);
-                    break;
-                case /* string error_message */ 2:
-                    message.errorMessage = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: EditAttemptResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* common.HistoryAttempt attempt = 1; */
-        if (message.attempt)
-            HistoryAttempt.internalBinaryWrite(message.attempt, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* string error_message = 2; */
-        if (message.errorMessage !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message history_crud_service.EditAttemptResponse
- */
-export const EditAttemptResponse = new EditAttemptResponse$Type();
-// @generated message type with reflection information, may provide speed optimized methods
 class DeleteAttemptRequest$Type extends MessageType<DeleteAttemptRequest> {
     constructor() {
         super("history_crud_service.DeleteAttemptRequest", [
@@ -669,6 +546,5 @@ export const HistoryCrudService = new ServiceType("history_crud_service.HistoryC
     { name: "GetAttempt", options: {}, I: GetAttemptRequest, O: GetAttemptResponse },
     { name: "GetAttempts", options: {}, I: GetAttemptsRequest, O: GetAttemptsResponse },
     { name: "CreateAttempt", options: {}, I: CreateAttemptRequest, O: CreateAttemptResponse },
-    { name: "EditAttempt", options: {}, I: EditAttemptRequest, O: EditAttemptResponse },
     { name: "DeleteAttempt", options: {}, I: DeleteAttemptRequest, O: DeleteAttemptResponse }
 ]);

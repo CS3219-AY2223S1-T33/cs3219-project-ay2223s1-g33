@@ -7,8 +7,6 @@ import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
 import type { DeleteAttemptResponse } from "./history-crud-service";
 import type { DeleteAttemptRequest } from "./history-crud-service";
-import type { EditAttemptResponse } from "./history-crud-service";
-import type { EditAttemptRequest } from "./history-crud-service";
 import type { CreateAttemptResponse } from "./history-crud-service";
 import type { CreateAttemptRequest } from "./history-crud-service";
 import type { GetAttemptsResponse } from "./history-crud-service";
@@ -41,13 +39,6 @@ export interface IHistoryCrudServiceClient {
     createAttempt(input: CreateAttemptRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: CreateAttemptResponse) => void): grpc.ClientUnaryCall;
     createAttempt(input: CreateAttemptRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateAttemptResponse) => void): grpc.ClientUnaryCall;
     createAttempt(input: CreateAttemptRequest, callback: (err: grpc.ServiceError | null, value?: CreateAttemptResponse) => void): grpc.ClientUnaryCall;
-    /**
-     * @generated from protobuf rpc: EditAttempt(history_crud_service.EditAttemptRequest) returns (history_crud_service.EditAttemptResponse);
-     */
-    editAttempt(input: EditAttemptRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditAttemptResponse) => void): grpc.ClientUnaryCall;
-    editAttempt(input: EditAttemptRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: EditAttemptResponse) => void): grpc.ClientUnaryCall;
-    editAttempt(input: EditAttemptRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: EditAttemptResponse) => void): grpc.ClientUnaryCall;
-    editAttempt(input: EditAttemptRequest, callback: (err: grpc.ServiceError | null, value?: EditAttemptResponse) => void): grpc.ClientUnaryCall;
     /**
      * @generated from protobuf rpc: DeleteAttempt(history_crud_service.DeleteAttemptRequest) returns (history_crud_service.DeleteAttemptResponse);
      */
@@ -87,17 +78,10 @@ export class HistoryCrudServiceClient extends grpc.Client implements IHistoryCru
         return this.makeUnaryRequest<CreateAttemptRequest, CreateAttemptResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: CreateAttemptRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): CreateAttemptResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
     /**
-     * @generated from protobuf rpc: EditAttempt(history_crud_service.EditAttemptRequest) returns (history_crud_service.EditAttemptResponse);
-     */
-    editAttempt(input: EditAttemptRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditAttemptResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: EditAttemptResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: EditAttemptResponse) => void)): grpc.ClientUnaryCall {
-        const method = HistoryCrudService.methods[3];
-        return this.makeUnaryRequest<EditAttemptRequest, EditAttemptResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: EditAttemptRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): EditAttemptResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
-    }
-    /**
      * @generated from protobuf rpc: DeleteAttempt(history_crud_service.DeleteAttemptRequest) returns (history_crud_service.DeleteAttemptResponse);
      */
     deleteAttempt(input: DeleteAttemptRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void)): grpc.ClientUnaryCall {
-        const method = HistoryCrudService.methods[4];
+        const method = HistoryCrudService.methods[3];
         return this.makeUnaryRequest<DeleteAttemptRequest, DeleteAttemptResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: DeleteAttemptRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteAttemptResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }

@@ -10,7 +10,7 @@ message GetAttemptRequest {
 }
 
 message GetAttemptResponse {
-  common.HistoryAttempt attempts = 1;
+  common.HistoryAttempt attempt = 1;
   string error_message = 2;
 }
 
@@ -37,15 +37,6 @@ message CreateAttemptResponse {
   string error_message = 2;
 }
 
-message EditAttemptRequest {
-  common.HistoryAttempt attempt = 1;
-}
-
-message EditAttemptResponse {
-  common.HistoryAttempt attempt = 1;
-  string error_message = 2;
-}
-
 message DeleteAttemptRequest {
   uint64 attempt_id = 1;
 }
@@ -58,6 +49,5 @@ service HistoryCrudService {
   rpc GetAttempt(GetAttemptRequest) returns (GetAttemptResponse);
   rpc GetAttempts(GetAttemptsRequest) returns (GetAttemptsResponse);
   rpc CreateAttempt(CreateAttemptRequest) returns (CreateAttemptResponse);
-  rpc EditAttempt(EditAttemptRequest) returns (EditAttemptResponse);
   rpc DeleteAttempt(DeleteAttemptRequest) returns (DeleteAttemptResponse);
 }
