@@ -8,38 +8,50 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../proto/types';
-import PasswordReset from './PasswordReset';
-import History from './History';
+import PasswordResetTokenEntity from './PasswordResetToken';
+import HistoryEntity from './History';
 
-@Entity('User')
+@Entity('users')
 export default class UserEntity implements User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'user_id' })
     userId!: number;
 
   @Column()
     nickname!: string;
 
-  @Column()
+  @Index('user_username_index')
+  @Column({ unique: true })
     username!: string;
 
   @Column()
     password!: string;
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'is_active' })
     isActive!: boolean;
 
-  @ManyToMany(() => History)
-  @JoinTable()
-    histories?: History[];
+  @ManyToMany(() => HistoryEntity)
+  @JoinTable({
+    name: 'users_histories_owner', // table name for the junction table of this relation
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'userId',
+    },
+    inverseJoinColumn: {
+      name: 'history_id',
+      referencedColumnName: 'id',
+    },
+  })
+    histories?: HistoryEntity[];
 
-  @OneToMany(() => PasswordReset, (passwordReset) => passwordReset.user)
-    passwordReset?: PasswordReset[];
+  @OneToMany(() => PasswordResetTokenEntity, (passwordResetToken) => passwordResetToken.user)
+    passwordResetTokens?: PasswordResetTokenEntity[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'update_timestamp' })
     updateDateTime!: Date;
 }
