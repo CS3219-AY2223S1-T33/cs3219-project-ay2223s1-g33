@@ -11,8 +11,9 @@ RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 # Generate protobuff & database schema
 COPY proto proto/
 COPY scripts scripts/
+COPY collab-service/proto-emit.cfg collab-service/
 COPY package.json package-lock.json ./
-COPY collab-service/proto-emit.cfg collab-service
+
 
 # Install protobuff dependencies
 RUN npm install

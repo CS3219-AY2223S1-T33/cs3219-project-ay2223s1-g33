@@ -10,8 +10,8 @@ RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 # Generate protobuff & database schema
 COPY proto proto/
 COPY scripts scripts/
+COPY matching-service/proto-emit.cfg matching-service/
 COPY package.json package-lock.json ./
-COPY matching-service/proto-emit.cfg matching-service
 
 # Install protobuff dependencies
 RUN npm install

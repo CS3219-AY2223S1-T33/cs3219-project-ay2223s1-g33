@@ -13,7 +13,7 @@ COPY scripts scripts/
 COPY db db/
 COPY question-service/src question-service/src
 COPY package.json package-lock.json ./
-COPY question-service/proto-emit.cfg question-service
+COPY question-service/proto-emit.cfg question-service/
 
 # Install protobuff dependencies
 RUN npm install
