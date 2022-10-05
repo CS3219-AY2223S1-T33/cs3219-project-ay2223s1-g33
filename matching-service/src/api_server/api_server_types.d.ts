@@ -53,7 +53,7 @@ declare interface ApiService<T extends UntypedServiceImplementation> {
 }
 
 declare interface ILoopbackServiceChannel<T extends UntypedServiceImplementation> {
-  registerServiceRoutes(apiService: ApiService<T>): any;
+  registerServiceRoutes(apiService: ApiService<T>): void;
   callRoute<R extends object, U extends object>(
     route: string,
     request: R,
