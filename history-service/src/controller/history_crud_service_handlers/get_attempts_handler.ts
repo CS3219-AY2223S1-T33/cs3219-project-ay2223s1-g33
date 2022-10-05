@@ -1,17 +1,20 @@
 import { HistoryAttempt } from '../../proto/types';
 import { GetAttemptsRequest, GetAttemptsResponse } from '../../proto/history-crud-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IAttemptStore } from '../../storage/storage';
 import { convertToProtoAttempt, StoredAttempt } from '../../model/attempt_store_model';
 
-class GetQuestionHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsResponse> {
+class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsResponse> {
   attemptStore: IAttemptStore;
 
   constructor(storage: IStorage) {
     this.attemptStore = storage.getAttemptStore();
   }
 
-  async handle(request: GetAttemptsRequest): Promise<GetAttemptsResponse> {
+  async handle(apiRequest: ApiRequest<GetAttemptsRequest>):
+  Promise<ApiResponse<GetAttemptsResponse>> {
+    const { request } = apiRequest;
+
     let limit = 50;
     let offset = 0;
 
@@ -24,20 +27,14 @@ class GetQuestionHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsR
     }
 
     if (!request.userId && !request.username) {
-      return {
-        attempts: [],
-        errorMessage: 'UserId or Username must be supplied',
-      };
+      return GetAttemptsHandler.buildErrorResponse('UserId or Username must be supplied');
     }
 
     let storedAttempts: StoredAttempt[] = [];
 
     if (request.questionId) {
       if (!request.username) {
-        return {
-          attempts: [],
-          errorMessage: 'Username must be supplied for questionId filter',
-        };
+        return GetAttemptsHandler.buildErrorResponse('Username must be supplied for questionId filter');
       }
 
       storedAttempts = await this.attemptStore.getAttemptByUsernameAndQuestionId(
@@ -59,20 +56,30 @@ class GetQuestionHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsR
         offset,
       );
     } else {
-      return {
-        attempts: [],
-        errorMessage: 'Malformed request',
-      };
+      return GetAttemptsHandler.buildErrorResponse('Malformed request');
     }
 
     return {
-      attempts: storedAttempts
-        .map((x) => convertToProtoAttempt(x))
-        .filter((x) => x !== undefined)
-        .map((x) => x as HistoryAttempt),
-      errorMessage: '',
+      response: {
+        attempts: storedAttempts
+          .map((x) => convertToProtoAttempt(x))
+          .filter((x) => x !== undefined)
+          .map((x) => x as HistoryAttempt),
+        errorMessage: '',
+      },
+      headers: {},
+    };
+  }
+
+  static buildErrorResponse(errorMessage: string): ApiResponse<GetAttemptsResponse> {
+    return {
+      response: {
+        errorMessage,
+        attempts: [],
+      },
+      headers: {},
     };
   }
 }
 
-export default GetQuestionHandler;
+export default GetAttemptsHandler;

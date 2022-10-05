@@ -1,5 +1,5 @@
 import { DeleteAttemptRequest, DeleteAttemptResponse } from '../../proto/history-crud-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IAttemptStore } from '../../storage/storage';
 
 class DeleteAttemptHandler implements IApiHandler<DeleteAttemptRequest, DeleteAttemptResponse> {
@@ -9,17 +9,28 @@ class DeleteAttemptHandler implements IApiHandler<DeleteAttemptRequest, DeleteAt
     this.attemptStore = storage.getAttemptStore();
   }
 
-  async handle(request: DeleteAttemptRequest): Promise<DeleteAttemptResponse> {
+  async handle(apiRequest: ApiRequest<DeleteAttemptRequest>):
+  Promise<ApiResponse<DeleteAttemptResponse>> {
+    const { request } = apiRequest;
+
     if (request.attemptId <= 0) {
-      return {
+      return DeleteAttemptHandler.buildHeaderlessResponse({
         errorMessage: 'Malformed request',
-      };
+      });
     }
 
     await this.attemptStore.removeAttempt(request.attemptId);
 
-    return {
+    return DeleteAttemptHandler.buildHeaderlessResponse({
       errorMessage: '',
+    });
+  }
+
+  static buildHeaderlessResponse(response: DeleteAttemptResponse):
+  ApiResponse<DeleteAttemptResponse> {
+    return {
+      response,
+      headers: {},
     };
   }
 }

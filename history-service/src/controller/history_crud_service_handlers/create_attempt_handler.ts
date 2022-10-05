@@ -1,5 +1,5 @@
 import { CreateAttemptRequest, CreateAttemptResponse } from '../../proto/history-crud-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IAttemptStore } from '../../storage/storage';
 import { StoredAttempt, convertToProtoAttempt, convertToStoredAttempt } from '../../model/attempt_store_model';
 import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
@@ -15,12 +15,12 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
     this.grpcClient = grpcClient;
   }
 
-  async handle(request: CreateAttemptRequest): Promise<CreateAttemptResponse> {
+  async handle(apiRequest: ApiRequest<CreateAttemptRequest>):
+  Promise<ApiResponse<CreateAttemptResponse>> {
+    const { request } = apiRequest;
+
     if (!request.attempt) {
-      return {
-        attempt: undefined,
-        errorMessage: 'Invalid attempt information',
-      };
+      return CreateAttemptHandler.buildErrorResponse('Invalid attempt information');
     }
 
     const users = await this.getUsersByUsername(request.attempt.users);
@@ -33,10 +33,7 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
 
     const convertedAttempt = convertToStoredAttempt(request.attempt, userIds);
     if (!convertedAttempt) {
-      return {
-        attempt: undefined,
-        errorMessage: 'Invalid attempt information',
-      };
+      return CreateAttemptHandler.buildErrorResponse('Invalid attempt information');
     }
 
     convertedAttempt.attemptId = 0;
@@ -44,24 +41,21 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
     try {
       attempt = await this.attemptStore.addAttempt(convertedAttempt);
     } catch (err) {
-      return {
-        attempt: undefined,
-        errorMessage: `${err}`,
-      };
+      return CreateAttemptHandler.buildErrorResponse(`${err}`);
     }
 
     const resultAttempt = convertToProtoAttempt(attempt);
     if (!resultAttempt) {
-      return {
-        attempt: undefined,
-        errorMessage: 'An internal error occurred',
-      };
+      return CreateAttemptHandler.buildErrorResponse('An internal error occurred');
     }
 
     resultAttempt.users = userUsernames;
     return {
-      attempt: resultAttempt,
-      errorMessage: '',
+      response: {
+        attempt: resultAttempt,
+        errorMessage: '',
+      },
+      headers: {},
     };
   }
 
@@ -93,6 +87,17 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
 
     const users = await Promise.all(promises);
     return users.filter((x) => x !== undefined).map((x) => x as PasswordUser);
+  }
+
+  static buildErrorResponse(errorMessage: string):
+  ApiResponse<CreateAttemptResponse> {
+    return {
+      response: {
+        errorMessage,
+        attempt: undefined,
+      },
+      headers: {},
+    };
   }
 }
 
