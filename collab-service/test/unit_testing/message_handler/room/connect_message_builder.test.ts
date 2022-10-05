@@ -2,14 +2,14 @@ import { decoding } from 'lib0';
 import {
   OPCODE_USER_LEAVE,
   OPCODE_USER_JOIN,
-  createDisconnectedMessage,
-  createConnectedMessage,
+  createDisconnectedPackage,
+  createConnectedPackage,
 } from '../../../../src/message_handler/room/connect_message_builder';
 
 describe('Function-Message-Room createDisconnectedMessage', () => {
   test('Test encoding username and leave code', () => {
     const expectedUsername = 'username';
-    const msg = createDisconnectedMessage(expectedUsername);
+    const msg = createDisconnectedPackage(expectedUsername);
 
     const decoder = decoding.createDecoder(msg);
     const opcode = decoding.readVarInt(decoder);
@@ -24,7 +24,7 @@ describe('Function-Message-Room createDisconnectedMessage', () => {
 describe('Function-Message-Room createConnectedMessage', () => {
   test('Test encoding username and join code', () => {
     const expectedUsername = 'username';
-    const msg = createConnectedMessage(expectedUsername);
+    const msg = createConnectedPackage(expectedUsername);
 
     const decoder = decoding.createDecoder(msg);
     const opcode = decoding.readVarInt(decoder);

@@ -6,7 +6,7 @@ import {
   ConnectionOpCode,
 } from '../../../../src/message_handler/internal/internal_message_types';
 import {
-  createConnectedMessage,
+  createConnectedPackage,
 } from '../../../../src/message_handler/room/connect_message_builder';
 
 describe('Function-Message-Internal createJoinMessage', () => {
@@ -17,7 +17,7 @@ describe('Function-Message-Internal createJoinMessage', () => {
     expect(msg)
       .toStrictEqual({
         sender: name,
-        data: createConnectedMessage(nickname),
+        data: createConnectedPackage(nickname),
         flag: ConnectionOpCode.JOIN,
       });
   });
@@ -31,7 +31,7 @@ describe('Function-Message-Internal createAckMessage', () => {
     expect(msg)
       .toStrictEqual({
         sender: name,
-        data: createConnectedMessage(nickname),
+        data: createConnectedPackage(nickname),
         flag: ConnectionOpCode.ACK,
       });
   });

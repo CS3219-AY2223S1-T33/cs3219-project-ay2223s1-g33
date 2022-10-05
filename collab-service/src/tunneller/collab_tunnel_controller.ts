@@ -1,13 +1,16 @@
 import { Metadata, ServerDuplexStream } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
-import { createAckMessage, createJoinMessage } from '../message_handler/internal/internal_message_builder';
-import { createDisconnectedMessage } from '../message_handler/room/connect_message_builder';
+import {
+  createAckMessage,
+  createJoinMessage,
+} from '../message_handler/internal/internal_message_builder';
+import { createDisconnectedPackage } from '../message_handler/room/connect_message_builder';
 import { createRedisPubSubAdapter, TunnelPubSub } from '../redis_adapter/redis_pubsub_adapter';
 import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
 import createRoomSessionService from '../room_auth/room_session_agent';
 import createUnauthorizedMessage from '../message_handler/room/unauthorized_message_builder';
 import createQuestionService from '../question_client/question_agent';
-import setQuestionRedis from '../redis_adapter/redis_question_adapter';
+import { setQuestionRedis, getQuestionRedis } from '../redis_adapter/redis_question_adapter';
 import Logger from '../utils/logger';
 import CollabTunnelSerializer from './collab_tunnel_serializer';
 import {
@@ -25,6 +28,14 @@ const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
 const PROXY_HEADER_ROOM_TOKEN = 'X-Gateway-Proxy-Room-Token';
 const HEARTBEAT_INTERVAL = 20000;
 
+// Creates collab response to be sent to client
+function makeResponse(data: Uint8Array): CollabTunnelResponse {
+  return CollabTunnelResponse.create({
+    data: Buffer.from(data),
+    flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_NONE,
+  });
+}
+
 async function writerHandler(
   message: TunnelMessage,
   username: string,
@@ -32,13 +43,6 @@ async function writerHandler(
   call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   pubsub: TunnelPubSub<TunnelMessage>,
 ) {
-  // Creates collab response to be sent to client
-  function makeResponse(data: Uint8Array): CollabTunnelResponse {
-    return CollabTunnelResponse.create({
-      data: Buffer.from(data),
-      flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_NONE,
-    });
-  }
   // Prevent self echo
   if (message.sender === username) {
     return;
@@ -135,13 +139,10 @@ class CollabTunnelController {
       call.end();
       return;
     }
-
     const {
       roomId,
       difficulty,
     } = data;
-    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
-    await setQuestionRedis(roomId, question, this.pub);
 
     const redisPubSubAdapter = createRedisPubSubAdapter(
       this.pub,
@@ -157,6 +158,9 @@ class CollabTunnelController {
 
     // Connection discovery, Send A
     await redisPubSubAdapter.pushMessage(createJoinMessage(username, nickname));
+
+    // Retrieve and send question
+    this.handleQuestion(difficulty, roomId);
 
     const heartbeatWorker = setInterval(() => {
       writeHeartbeat(call);
@@ -182,13 +186,21 @@ class CollabTunnelController {
       // Send 'Disconnected'
       redisPubSubAdapter.pushMessage({
         sender: username,
-        data: createDisconnectedMessage(nickname),
+        data: createDisconnectedPackage(nickname),
         flag: ConnectionOpCode.DATA,
       });
 
       const endFunc = () => call.end();
       redisPubSubAdapter.clean(endFunc);
     });
+  }
+
+  async handleQuestion(
+    difficulty: number,
+    roomId: string,
+  ) {
+    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
+    setQuestionRedis(roomId, question, this.pub);
   }
 
   static extractMetadata(

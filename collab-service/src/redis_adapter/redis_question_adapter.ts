@@ -12,4 +12,19 @@ async function setQuestionRedis(
   });
 }
 
-export default setQuestionRedis;
+async function getQuestionRedis(
+  key: string,
+  publisher: RedisClientType,
+): Promise<string> {
+  const question = await publisher.get(`qns-${key}`);
+  if (question === null) {
+    // No question found
+    return '';
+  }
+  return question;
+}
+
+export {
+  setQuestionRedis,
+  getQuestionRedis,
+};
