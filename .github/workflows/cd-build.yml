@@ -205,7 +205,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-gateway.outputs.task-definition }}
-          container-name: gateway
+          container-name: history-service
           image: ${{ steps.build-image.outputs.history-service-image }}  
           environment-variables: |
             DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
