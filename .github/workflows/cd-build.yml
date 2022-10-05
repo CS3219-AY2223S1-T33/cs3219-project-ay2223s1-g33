@@ -131,7 +131,10 @@ jobs:
           container-name: question-service
           image: ${{ steps.build-image.outputs.question-service-image }}
           environment-variables: |
-            REDIS_SERVER=redis:6379
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
@@ -141,10 +144,7 @@ jobs:
           container-name: matchmaker
           image: ${{ steps.build-image.outputs.matchmaker-image }}
           environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            REDIS_SERVER=redis:6379
 
       - name: Update task definition for user-service
         id: task-def-user-service
@@ -181,8 +181,8 @@ jobs:
           image: ${{ steps.build-image.outputs.collab-service-image }}
           environment-variables: |
             REDIS_SERVER=redis:6379
+            QUESTION_SERVER_URL="question-service:4004"
             JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
-            JWT_SIGNING_SECRET=${{ secrets.JWT_SIGNING_SECRET }}
 
       - name: Update task definition for frontend
         id: task-def-frontend
