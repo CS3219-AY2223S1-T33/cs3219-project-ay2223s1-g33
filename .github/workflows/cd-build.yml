@@ -108,7 +108,7 @@ jobs:
 
       - name: Update task definition for session-service
         id: task-def-session-service
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .aws/task-definition.json
           container-name: session-service
@@ -120,7 +120,7 @@ jobs:
 
       - name: Update task definition for question-service
         id: task-def-question-service
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-session-service.outputs.task-definition }}
           container-name: session-service
@@ -130,7 +130,7 @@ jobs:
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-question-service.outputs.task-definition }}
           container-name: matchmaker
@@ -143,7 +143,7 @@ jobs:
 
       - name: Update task definition for user-service
         id: task-def-user-service
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-matchmaker.outputs.task-definition }}
           container-name: user-service
@@ -157,7 +157,7 @@ jobs:
 
       - name: Update task definition for matching-service
         id: task-def-matching-service
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-user-service.outputs.task-definition }}
           container-name: matching-service
@@ -169,7 +169,7 @@ jobs:
 
       - name: Update task definition for collab-service
         id: task-def-collab-service
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-matching-service.outputs.task-definition }}
           container-name: collab-service
@@ -181,7 +181,7 @@ jobs:
 
       - name: Update task definition for frontend
         id: task-def-frontend
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-collab-service.outputs.task-definition }}
           container-name: frontend
@@ -189,7 +189,7 @@ jobs:
           
       - name: Update task definition for gateway
         id: task-def-gateway
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
           container-name: gateway
