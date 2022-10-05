@@ -21,7 +21,7 @@ FROM node:alpine
 WORKDIR /app/matching-service
 
 # Install project dependencies
-COPY matching-service/package.json matching-service/package-lock.json .
+COPY matching-service/package.json matching-service/package-lock.json ./
 RUN npm install
 
 COPY matching-service .

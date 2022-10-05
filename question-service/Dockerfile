@@ -23,7 +23,7 @@ FROM node:alpine
 WORKDIR /app/question-service
 
 # Install project dependencies
-COPY question-service/package.json question-service/package-lock.json .
+COPY question-service/package.json question-service/package-lock.json ./
 RUN npm install
 
 COPY question-service .
