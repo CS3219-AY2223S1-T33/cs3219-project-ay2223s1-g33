@@ -11,7 +11,8 @@ class CreateQuestionHandler implements IApiHandler<CreateQuestionRequest, Create
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(apiRequest: ApiRequest<CreateQuestionRequest>): Promise<ApiResponse<CreateQuestionResponse>> {
+  async handle(apiRequest: ApiRequest<CreateQuestionRequest>):
+  Promise<ApiResponse<CreateQuestionResponse>> {
     const { request } = apiRequest;
 
     if (!request.question) {
@@ -46,7 +47,7 @@ class CreateQuestionHandler implements IApiHandler<CreateQuestionRequest, Create
         errorMessage,
       },
       headers: {},
-    }
+    };
   }
 }
 

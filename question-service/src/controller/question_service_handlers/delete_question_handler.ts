@@ -9,7 +9,8 @@ class DeleteQuestionHandler implements IApiHandler<DeleteQuestionRequest, Delete
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(apiRequest: ApiRequest<DeleteQuestionRequest>): Promise<ApiResponse<DeleteQuestionResponse>> {
+  async handle(apiRequest: ApiRequest<DeleteQuestionRequest>):
+  Promise<ApiResponse<DeleteQuestionResponse>> {
     const { request } = apiRequest;
     if (request.questionId <= 0) {
       return {

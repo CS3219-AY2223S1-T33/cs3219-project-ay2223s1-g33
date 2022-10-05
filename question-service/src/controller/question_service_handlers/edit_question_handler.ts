@@ -9,7 +9,8 @@ class EditQuestionHandler implements IApiHandler<EditQuestionRequest, EditQuesti
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(apiRequest: ApiRequest<EditQuestionRequest>): Promise<ApiResponse<EditQuestionResponse>> {
+  async handle(apiRequest: ApiRequest<EditQuestionRequest>):
+  Promise<ApiResponse<EditQuestionResponse>> {
     const { request } = apiRequest;
     if (!request.question) {
       return EditQuestionHandler.buildErrorResponse('Invalid question information');
@@ -37,7 +38,7 @@ class EditQuestionHandler implements IApiHandler<EditQuestionRequest, EditQuesti
         errorMessage,
       },
       headers: {},
-    }
+    };
   }
 }
 

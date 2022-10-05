@@ -11,7 +11,8 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(apiRequest: ApiRequest<GetQuestionRequest>): Promise<ApiResponse<GetQuestionResponse>> {
+  async handle(apiRequest: ApiRequest<GetQuestionRequest>):
+  Promise<ApiResponse<GetQuestionResponse>> {
     const { request } = apiRequest;
 
     if (!request.question) {
@@ -21,7 +22,8 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
     let questionResult : StoredQuestion | undefined;
 
     if (request.question.difficulty) {
-      questionResult = await this.questionStore.getRandomQuestionByDifficulty(request.question.difficulty);
+      questionResult = await this.questionStore
+        .getRandomQuestionByDifficulty(request.question.difficulty);
     } else if (request.question.name !== '') {
       questionResult = await this.questionStore.getQuestionByName(request.question.name);
     } else if (request.question.questionId > 0) {
