@@ -28,7 +28,9 @@ RUN npm install
 
 COPY history-service .
 COPY history-service/src ./src/
+RUN true
 COPY --from=0 /app/history-service/src/proto/ ./src/proto/
+RUN true
 COPY --from=0 /app/history-service/src/db/ ./src/db/
 
 # Build project

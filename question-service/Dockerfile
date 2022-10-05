@@ -28,7 +28,9 @@ RUN npm install
 
 COPY question-service .
 COPY question-service/src ./src/
+RUN true
 COPY --from=0 /app/question-service/src/proto/ ./src/proto/
+RUN true
 COPY --from=0 /app/question-service/src/db/ ./src/db/
 
 # Build project

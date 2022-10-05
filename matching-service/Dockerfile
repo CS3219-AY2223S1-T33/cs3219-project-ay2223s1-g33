@@ -26,6 +26,7 @@ RUN npm install
 
 COPY matching-service .
 COPY matching-service/src matching-service/src
+RUN true
 COPY --from=0 /app/matching-service/src/proto/ ./src/proto/
 
 # Build project
