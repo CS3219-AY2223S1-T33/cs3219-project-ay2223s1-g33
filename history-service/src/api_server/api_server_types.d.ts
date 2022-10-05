@@ -4,6 +4,7 @@ import {
   ServiceDefinition,
   handleUnaryCall,
 } from '@grpc/grpc-js';
+import { IMessageType } from '@protobuf-ts/runtime';
 import { Express } from 'express';
 
 declare interface IApiServer {
@@ -52,8 +53,8 @@ declare interface ApiService<T extends UntypedServiceImplementation> {
 }
 
 declare interface ILoopbackServiceChannel<T extends UntypedServiceImplementation> {
-  registerServiceRoutes(apiService: ApiService<T>);
-  async callRoute<R extends object, U extends object>(
+  registerServiceRoutes(apiService: ApiService<T>): void;
+  callRoute<R extends object, U extends object>(
     route: string,
     request: R,
     responseContainer: IMessageType<U>,
