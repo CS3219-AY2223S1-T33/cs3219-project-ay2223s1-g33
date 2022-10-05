@@ -7,6 +7,11 @@ import HistoryCrudServiceApi from './controller/history_crud_service_controller'
 import HistoryServiceApi from './controller/history_service_controller';
 import LoopbackApiChannel from './api_server/loopback_channel';
 import { IHistoryCrudService } from './proto/history-crud-service.grpc-server';
+import Constants from './constants';
+import Logger from './utils/logger';
+
+const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
+Logger.info(`Starting History Service [V${version}]`);
 
 const envConfig = loadEnvironment();
 
@@ -16,7 +21,7 @@ const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
 const expressApp = apiServer.getHttpServer();
 
 expressApp.get('/', (_: Request, resp: Response) => {
-  resp.status(200).send('Welcome to Question Service');
+  resp.status(200).send('Welcome to History Service');
 });
 
 const crudController = new HistoryCrudServiceApi(dataStore, envConfig.USER_SERVICE_URL);
