@@ -79,7 +79,7 @@ func RegisterHistoryServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptHistory", runtime.WithHTTPPathPattern("/history_service.HistoryService/GetAttemptHistory"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptHistory", runtime.WithHTTPPathPattern("/api/user/history"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -143,7 +143,7 @@ func RegisterHistoryServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptHistory", runtime.WithHTTPPathPattern("/history_service.HistoryService/GetAttemptHistory"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptHistory", runtime.WithHTTPPathPattern("/api/user/history"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -163,7 +163,7 @@ func RegisterHistoryServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_HistoryService_GetAttemptHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"history_service.HistoryService", "GetAttemptHistory"}, ""))
+	pattern_HistoryService_GetAttemptHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "history"}, ""))
 )
 
 var (

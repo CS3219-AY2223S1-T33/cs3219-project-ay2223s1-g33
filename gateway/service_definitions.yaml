@@ -27,3 +27,6 @@ http:
       post: /api/queue/status
       body: "*"
     
+    - selector: history_service.HistoryService.GetAttemptHistory
+      post: /api/user/history
+      body: "*"
