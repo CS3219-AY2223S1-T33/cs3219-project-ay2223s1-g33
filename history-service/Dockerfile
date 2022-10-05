@@ -6,17 +6,17 @@ WORKDIR /app
 # Patch alpine to run bash and grpc
 RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 
-RUN mkdir -p history-service history-service/src/proto history-service/src/db
+# Install protobuff dependencies
+COPY package.json package-lock.json ./
+RUN npm install
 
 # Generate protobuff & database schema
+RUN mkdir -p history-service history-service/src/proto history-service/src/db
 COPY proto proto/
 COPY scripts scripts/
 COPY db db/
-COPY package.json package-lock.json ./
 COPY history-service/proto-emit.cfg history-service
 
-# Install protobuff dependencies
-RUN npm install
 RUN npm run-script gen-proto
 RUN npm run-script sync-schema
 
