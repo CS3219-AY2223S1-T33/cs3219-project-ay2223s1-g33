@@ -122,8 +122,8 @@ services:
     env_file: config_env/history-service.env
 
     build:
-      context: ./history-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: history-service/Dockerfile
 
     ports:
       - "4005:4005"
