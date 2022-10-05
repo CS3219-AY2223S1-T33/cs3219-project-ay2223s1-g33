@@ -144,7 +144,7 @@ jobs:
           container-name: matchmaker
           image: ${{ steps.build-image.outputs.matchmaker-image }}
           environment-variables: |
-            REDIS_SERVER_URL=redis:6379
+            REDIS_SERVER=redis:6379
 
       - name: Update task definition for user-service
         id: task-def-user-service
