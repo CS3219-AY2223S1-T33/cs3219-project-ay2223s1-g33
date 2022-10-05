@@ -128,7 +128,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-session-service.outputs.task-definition }}
-          container-name: session-service
+          container-name: question-service
           image: ${{ steps.build-image.outputs.question-service-image }}
           environment-variables: |
             REDIS_SERVER=redis:6379
