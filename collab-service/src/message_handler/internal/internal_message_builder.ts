@@ -1,5 +1,5 @@
 import { ConnectionOpCode, TunnelMessage } from './internal_message_types';
-import { createConnectedPackage, createQuestionPackage } from '../room/connect_message_builder';
+import { createConnectedPackage, createQuestionRcvPackage } from '../room/connect_message_builder';
 
 function createJoinMessage(username: string, nickname: string): TunnelMessage {
   return {
@@ -17,10 +17,10 @@ function createAckMessage(username: string, nickname: string): TunnelMessage {
   };
 }
 
-function createQuestionRcvPackage(username: string, question: string): TunnelMessage {
+function createQuestionRcvMessage(username: string, question: string): TunnelMessage {
   return {
     sender: username,
-    data: createQuestionPackage(question),
+    data: createQuestionRcvPackage(question),
     flag: ConnectionOpCode.ACK,
   };
 }
@@ -28,5 +28,5 @@ function createQuestionRcvPackage(username: string, question: string): TunnelMes
 export {
   createJoinMessage,
   createAckMessage,
-  createQuestionRcvPackage,
+  createQuestionRcvMessage,
 };

@@ -1,4 +1,4 @@
-import setQuestionRedis from '../../../src/redis_adapter/redis_question_adapter';
+import { setQuestionRedis } from '../../../src/redis_adapter/redis_question_adapter';
 import { Question } from '../../../src/proto/types';
 
 const Redis = require('ioredis-mock');
