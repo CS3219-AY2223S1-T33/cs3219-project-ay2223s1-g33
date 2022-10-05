@@ -4,25 +4,47 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
+  JoinTable,
 } from 'typeorm';
-import Question from './Question';
+import QuestionEntity from './Question';
+import UserEntity from './User';
 
-@Entity('History')
-export default class HistoryEntity {
-  @PrimaryGeneratedColumn()
-    id!: string;
+@Entity('histories')
+export default class HistoryAttemptEntity {
+  @PrimaryGeneratedColumn({ name: 'attempt_id' })
+    attemptId!: number;
 
-  @ManyToOne(() => Question, (question) => question.histories)
-    question!: Question;
+  @ManyToOne(() => QuestionEntity, (question) => question.histories)
+  @JoinColumn({ name: 'question_id' })
+    question!: QuestionEntity;
+
+  @ManyToMany(() => UserEntity, (user) => user.histories)
+  @JoinTable({
+    name: 'users_histories_owner', // table name for the junction table of this relation
+    inverseJoinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'userId',
+    },
+    joinColumn: {
+      name: 'history_id',
+      referencedColumnName: 'attemptId',
+    },
+  })
+    users?: UserEntity[];
 
   @Column()
     submission!: string;
 
-  @CreateDateColumn()
-    createDateTime!: Date;
+  @Column()
+    language!: string;
 
-  @UpdateDateColumn()
-    updateDateTime!: Date;
+  @CreateDateColumn({ name: 'create_timestamp' })
+    createDateTime?: Date;
+
+  @UpdateDateColumn({ name: 'update_timestamp' })
+    updateDateTime?: Date;
 }

@@ -1,5 +1,10 @@
 import cors from 'cors';
-import express, { Express, Request, Response } from 'express';
+import express, {
+  Express,
+  Request,
+  Response,
+  Router,
+} from 'express';
 import { Server as GrpcServer, ServerCredentials, UntypedServiceImplementation } from '@grpc/grpc-js';
 import { ApiService, IApiServer } from './api_server_types';
 import jsonParseMiddleware from '../utils/json_middleware';
@@ -16,6 +21,8 @@ class ApiServer implements IApiServer {
 
   grpcServer: GrpcServer;
 
+  httpRouter: Router;
+
   constructor(httpPort: number, grpcPort: number) {
     this.httpPort = httpPort;
     this.grpcPort = grpcPort;
@@ -23,6 +30,8 @@ class ApiServer implements IApiServer {
     this.httpServer.use(cors());
 
     this.grpcServer = new GrpcServer();
+    this.httpRouter = Router();
+    this.httpServer.use('/grpc', this.httpRouter);
   }
 
   getHttpServer(): Express {
@@ -62,19 +71,29 @@ class ApiServer implements IApiServer {
   registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void {
     this.grpcServer.addService(apiService.serviceDefinition, apiService.serviceImplementation);
 
-    const httpRouter = express.Router();
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
-      httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
+      this.httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
+        const normalizedHeaders: { [key: string]: string[] } = {};
+
+        Object.keys(req.headers).forEach((headerName: string) => {
+          const value = req.headers[headerName];
+          if (typeof value === 'string') {
+            normalizedHeaders[headerName] = [value];
+          }
+        });
+
         try {
           const response = await apiService.serviceHandlerDefinition[key]
-            .httpRouteHandler(req.body);
-          resp.json(response);
+            .httpRouteHandler(req.body, normalizedHeaders);
+          Object.keys(response.headers).forEach((headerName: string) => {
+            resp.header(headerName, response.headers[headerName]);
+          });
+          resp.json(response.jsonResponse);
         } catch {
           resp.status(400).json({});
         }
       });
     });
-    this.httpServer.use('/grpc', httpRouter);
   }
 }
 

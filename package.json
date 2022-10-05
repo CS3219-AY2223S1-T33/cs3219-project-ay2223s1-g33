@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "This is a template repository for CS3219 project.",
   "config": {
-    "proto_output_ts": "./user-service ./matching-service ./frontend/ ./collab-service ./db ./question-service",
+    "proto_output_ts": "./user-service ./matching-service ./frontend/ ./collab-service ./db ./question-service ./history-service",
     "proto_output_go": "./session-service ./gateway",
-    "schema_output": "./user-service/src/db ./question-service/src/db"
+    "schema_output": "./user-service/src/db ./question-service/src/db ./history-service/src/db"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

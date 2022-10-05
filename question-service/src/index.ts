@@ -4,6 +4,11 @@ import getApiServer from './api_server/api_server';
 import loadEnvironment from './utils/env_loader';
 import AppStorage from './storage/app_storage';
 import QuestionServiceApi from './controller/question_service_controller';
+import Constants from './constants';
+import Logger from './utils/logger';
+
+const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
+Logger.info(`Starting Question Service [V${version}]`);
 
 const envConfig = loadEnvironment();
 

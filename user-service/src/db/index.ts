@@ -5,7 +5,7 @@ import { config } from 'dotenv';
 import UserEntity from './User';
 import QuestionEntity from './Question';
 import HistoryEntity from './History';
-import PasswordResetEntity from './PasswordReset';
+import PasswordResetEntity from './PasswordResetToken';
 
 type DataSourceConfig = {
   DATABASE_DBHOST: string,
@@ -18,7 +18,7 @@ interface IDatabase {
   getDataSource(): DataSource;
   getUserRepo(): Repository<UserEntity>;
   getHistoryRepo(): Repository<HistoryEntity>;
-  getPasswordRepo(): Repository<PasswordResetEntity>;
+  getPasswordResetTokenRepo(): Repository<PasswordResetEntity>;
   getQuestionRepo(): Repository<QuestionEntity>;
 }
 
@@ -56,7 +56,7 @@ class Database implements IDatabase {
     return this.dataSource.getRepository(HistoryEntity);
   }
 
-  getPasswordRepo(): Repository<PasswordResetEntity> {
+  getPasswordResetTokenRepo(): Repository<PasswordResetEntity> {
     return this.dataSource.getRepository(PasswordResetEntity);
   }
 
