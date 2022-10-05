@@ -3,9 +3,10 @@ import * as encoding from 'lib0/encoding';
 export const OPCODE_TERMINATE_WITH_ERROR = 4;
 export const OPCODE_USER_JOIN = 5;
 export const OPCODE_USER_LEAVE = 6;
-export const OPCODE_QUESTION_RCV = 8;
-export const OPCODE_SAVE_CODE_SEND = 9;
-export const OPCODE_SAVE_CODE_ACK = 10;
+export const OPCODE_QUESTION_REQ = 8;
+export const OPCODE_QUESTION_RCV = 9;
+export const OPCODE_SAVE_CODE_SEND = 10;
+export const OPCODE_SAVE_CODE_ACK = 11;
 
 function createConnectionAlertMessage(username: string, opcode: number): Uint8Array {
   const encoder = encoding.createEncoder();
