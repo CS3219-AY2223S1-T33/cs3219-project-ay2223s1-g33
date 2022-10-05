@@ -212,7 +212,7 @@ jobs:
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            USER_SERVICE_URL=user-service:4000"
+            USER_SERVICE_URL=user-service:4000
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
