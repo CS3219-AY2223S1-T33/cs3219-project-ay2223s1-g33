@@ -34,14 +34,7 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
       return GetQuestionHandler.buildErrorResponse('Malformed request');
     }
 
-    const resultQuestionModel: Question | undefined = {
-      questionId: questionResult?.questionId!,
-      name: questionResult?.name!,
-      difficulty: questionResult?.difficulty!,
-      content: questionResult?.content!,
-      solution: questionResult?.solution!,
-    };
-
+    const resultQuestionModel = Question.create(questionResult);
     return {
       response: {
         question: resultQuestionModel,
