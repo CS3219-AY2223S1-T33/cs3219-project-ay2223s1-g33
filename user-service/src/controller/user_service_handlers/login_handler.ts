@@ -1,18 +1,27 @@
 import bcrypt from 'bcrypt';
 import Validator from 'validator';
 import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-service';
-import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
+import {
+  IApiHandler,
+  ApiRequest,
+  ApiResponse,
+  ILoopbackServiceChannel,
+} from '../../api_server/api_server_types';
 import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import Constants from '../../utils/constants';
+import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
+import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
-  rpcClient: UserCrudServiceClient;
+  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
 
   authService: IAuthenticationAgent;
 
-  constructor(rpcClient: UserCrudServiceClient, authService: IAuthenticationAgent) {
+  constructor(
+    rpcClient: ILoopbackServiceChannel<IUserCrudService>,
+    authService: IAuthenticationAgent,
+  ) {
     this.rpcClient = rpcClient;
     this.authService = authService;
   }
@@ -100,29 +109,24 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     };
   }
 
-  getUserByUsername(username: string): Promise<PasswordUser | undefined> {
+  async getUserByUsername(username: string): Promise<PasswordUser | undefined> {
     const searchUserObject: User = User.create();
     searchUserObject.username = username;
 
-    return new Promise<PasswordUser | undefined>((resolve, reject) => {
-      this.rpcClient.getUser(
-        {
-          user: searchUserObject,
-        },
-        (err, value) => {
-          if (!value) {
-            reject(err);
-            return;
-          }
+    const request: GetUserRequest = {
+      user: searchUserObject,
+    };
 
-          if (!value.user && value.errorMessage !== '') {
-            reject(value.errorMessage);
-            return;
-          }
-          resolve(value.user);
-        },
-      );
-    });
+    const result = await this.rpcClient.callRoute<GetUserRequest, GetUserResponse>('getUser', request, GetUserResponse);
+    if (!result) {
+      return undefined;
+    }
+
+    if (!result.user && result.errorMessage !== '') {
+      throw new Error(result.errorMessage);
+    }
+
+    return result.user;
   }
 
   static buildErrorResponse(errorCode: LoginErrorCode, errorMessage: string)
