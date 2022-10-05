@@ -206,7 +206,13 @@ jobs:
         with:
           task-definition: ${{ steps.task-def-gateway.outputs.task-definition }}
           container-name: gateway
-          image: ${{ steps.build-image.outputs.history-service-image }}      
+          image: ${{ steps.build-image.outputs.history-service-image }}  
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            USER_SERVICE_URL=user-service:4000"
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
