@@ -10,6 +10,7 @@ type GatewayConfiguration struct {
 	MatchingServer string
 	CollabServer   string
 	SessionServer  string
+	HistoryServer  string
 	StaticServer   string
 
 	Port int
@@ -20,6 +21,7 @@ const (
 	envMatchingServer = "MATCHING_SERVER"
 	envCollabServer   = "COLLAB_SERVER"
 	envSessionServer  = "SESSION_SERVER"
+	envHistoryServer  = "HISTORY_SERVER"
 	envStaticServer   = "STATIC_SERVER"
 	envPort           = "GATEWAY_PORT"
 )
@@ -29,6 +31,7 @@ func loadConfig() *GatewayConfiguration {
 	matchingServer := loadEnvVariableOrDefaultString(envMatchingServer, "localhost:4001")
 	collabServer := loadEnvVariableOrDefaultString(envCollabServer, "localhost:4003")
 	sessionServer := loadEnvVariableOrDefaultString(envSessionServer, "localhost:4100")
+	historyServer := loadEnvVariableOrDefaultString(envHistoryServer, "localhost:4005")
 	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "localhost:8000")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
 
@@ -37,6 +40,7 @@ func loadConfig() *GatewayConfiguration {
 		MatchingServer: matchingServer,
 		CollabServer:   collabServer,
 		SessionServer:  sessionServer,
+		HistoryServer:  historyServer,
 		StaticServer:   staticServer,
 		Port:           port,
 	}

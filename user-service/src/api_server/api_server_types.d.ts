@@ -4,6 +4,7 @@ import {
   ServiceDefinition,
   handleUnaryCall,
 } from '@grpc/grpc-js';
+import { IMessageType } from '@protobuf-ts/runtime';
 import { Express } from 'express';
 
 declare interface IApiServer {
@@ -32,10 +33,13 @@ declare interface IApiHandler<RequestType, ResponseType> {
   handle(request: ApiRequest<RequestType>): Promise<ApiResponse<ResponseType>>;
 }
 
+declare type LoopbackRouteHandler = (req: object) => Promise<object>;
+
 declare type ApiCallHandler<RequestType, ResponseType> = {
   handler: IApiHandler<RequestType, ResponseType>;
   grpcRouteHandler: handleUnaryCall<RequestType, ResponseType>;
   httpRouteHandler: (json: any, headers: { [key: string]: string[] }) => Promise<HTTPResponse>;
+  loopbackRouteHandler: LoopbackRouteHandler;
 };
 
 declare type ServiceHandlerDefinition<ServiceDefinition = UntypedServiceImplementation> = {
@@ -48,6 +52,15 @@ declare interface ApiService<T extends UntypedServiceImplementation> {
   readonly serviceImplementation: T;
 }
 
+declare interface ILoopbackServiceChannel<T extends UntypedServiceImplementation> {
+  registerServiceRoutes(apiService: ApiService<T>): void;
+  callRoute<R extends object, U extends object>(
+    route: string,
+    request: R,
+    responseContainer: IMessageType<U>,
+  ): Promise<U>
+}
+
 export {
   IApiServer,
   IApiHandler,
@@ -57,4 +70,6 @@ export {
   ApiRequest,
   ApiResponse,
   HTTPResponse,
+  LoopbackRouteHandler,
+  ILoopbackServiceChannel,
 };

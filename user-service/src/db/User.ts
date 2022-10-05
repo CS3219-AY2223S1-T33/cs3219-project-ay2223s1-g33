@@ -3,7 +3,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -12,7 +11,7 @@ import {
 } from 'typeorm';
 import { User } from '../proto/types';
 import PasswordResetTokenEntity from './PasswordResetToken';
-import HistoryEntity from './History';
+import HistoryAttemptEntity from './History';
 
 @Entity('users')
 export default class UserEntity implements User {
@@ -32,19 +31,8 @@ export default class UserEntity implements User {
   @Column({ default: true, name: 'is_active' })
     isActive!: boolean;
 
-  @ManyToMany(() => HistoryEntity)
-  @JoinTable({
-    name: 'users_histories_owner', // table name for the junction table of this relation
-    joinColumn: {
-      name: 'user_id',
-      referencedColumnName: 'userId',
-    },
-    inverseJoinColumn: {
-      name: 'history_id',
-      referencedColumnName: 'id',
-    },
-  })
-    histories?: HistoryEntity[];
+  @ManyToMany(() => HistoryAttemptEntity)
+    histories?: HistoryAttemptEntity[];
 
   @OneToMany(() => PasswordResetTokenEntity, (passwordResetToken) => passwordResetToken.user)
     passwordResetTokens?: PasswordResetTokenEntity[];

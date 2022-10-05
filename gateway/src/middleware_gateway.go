@@ -47,6 +47,12 @@ func AttachGatewayMiddleware(ctx context.Context, config *GatewayConfiguration) 
 		return nil, err
 	}
 
+	log.Printf("Proxying to History on %s\n", config.HistoryServer)
+	err = gw.RegisterHistoryServiceHandlerFromEndpoint(ctx, mux, config.HistoryServer, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return mux, nil
 }
 

@@ -1,5 +1,5 @@
 import { EditQuestionRequest, EditQuestionResponse } from '../../proto/question-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IQuestionStore } from '../../storage/storage.d';
 
 class EditQuestionHandler implements IApiHandler<EditQuestionRequest, EditQuestionResponse> {
@@ -9,26 +9,35 @@ class EditQuestionHandler implements IApiHandler<EditQuestionRequest, EditQuesti
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(request: EditQuestionRequest): Promise<EditQuestionResponse> {
+  async handle(apiRequest: ApiRequest<EditQuestionRequest>):
+  Promise<ApiResponse<EditQuestionResponse>> {
+    const { request } = apiRequest;
     if (!request.question) {
-      return {
-        question: undefined,
-        errorMessage: 'Invalid question information',
-      };
+      return EditQuestionHandler.buildErrorResponse('Invalid question information');
     }
 
     try {
       await this.questionStore.replaceQuestion(request.question);
     } catch (err) {
-      return {
-        question: undefined,
-        errorMessage: `${err}`,
-      };
+      return EditQuestionHandler.buildErrorResponse(`${err}`);
     }
 
     return {
-      question: request.question,
-      errorMessage: '',
+      response: {
+        question: request.question,
+        errorMessage: '',
+      },
+      headers: {},
+    };
+  }
+
+  static buildErrorResponse(errorMessage: string): ApiResponse<EditQuestionResponse> {
+    return {
+      response: {
+        question: undefined,
+        errorMessage,
+      },
+      headers: {},
     };
   }
 }

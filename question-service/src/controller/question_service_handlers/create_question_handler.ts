@@ -1,6 +1,6 @@
 import { Question } from '../../proto/types';
 import { CreateQuestionRequest, CreateQuestionResponse } from '../../proto/question-service';
-import { IApiHandler } from '../../api_server/api_server_types';
+import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IQuestionStore } from '../../storage/storage.d';
 import { StoredQuestion } from '../../model/question_store_model';
 
@@ -11,22 +11,19 @@ class CreateQuestionHandler implements IApiHandler<CreateQuestionRequest, Create
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(request: CreateQuestionRequest): Promise<CreateQuestionResponse> {
+  async handle(apiRequest: ApiRequest<CreateQuestionRequest>):
+  Promise<ApiResponse<CreateQuestionResponse>> {
+    const { request } = apiRequest;
+
     if (!request.question) {
-      return {
-        question: undefined,
-        errorMessage: 'Invalid question information',
-      };
+      return CreateQuestionHandler.buildErrorResponse('Invalid question information');
     }
 
     let question: StoredQuestion | undefined;
     try {
       question = await this.questionStore.addQuestion(request.question);
     } catch (err) {
-      return {
-        question: undefined,
-        errorMessage: `${err}`,
-      };
+      return CreateQuestionHandler.buildErrorResponse(`${err}`);
     }
 
     const resultQuestionModel : Question = {
@@ -35,8 +32,21 @@ class CreateQuestionHandler implements IApiHandler<CreateQuestionRequest, Create
     };
 
     return {
-      question: resultQuestionModel,
-      errorMessage: '',
+      response: {
+        question: resultQuestionModel,
+        errorMessage: '',
+      },
+      headers: {},
+    };
+  }
+
+  static buildErrorResponse(errorMessage: string): ApiResponse<CreateQuestionResponse> {
+    return {
+      response: {
+        question: undefined,
+        errorMessage,
+      },
+      headers: {},
     };
   }
 }

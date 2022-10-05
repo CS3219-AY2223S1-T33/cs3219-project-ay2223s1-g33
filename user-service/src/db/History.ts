@@ -8,20 +8,32 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import QuestionEntity from './Question';
 import UserEntity from './User';
 
 @Entity('histories')
-export default class HistoryEntity {
-  @PrimaryGeneratedColumn({ name: 'history_id' })
-    id!: string;
+export default class HistoryAttemptEntity {
+  @PrimaryGeneratedColumn({ name: 'attempt_id' })
+    attemptId!: number;
 
   @ManyToOne(() => QuestionEntity, (question) => question.histories)
   @JoinColumn({ name: 'question_id' })
     question!: QuestionEntity;
 
-  @ManyToMany(() => UserEntity)
+  @ManyToMany(() => UserEntity, (user) => user.histories)
+  @JoinTable({
+    name: 'users_histories_owner', // table name for the junction table of this relation
+    inverseJoinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'userId',
+    },
+    joinColumn: {
+      name: 'history_id',
+      referencedColumnName: 'attemptId',
+    },
+  })
     users?: UserEntity[];
 
   @Column()
@@ -31,8 +43,8 @@ export default class HistoryEntity {
     language!: string;
 
   @CreateDateColumn({ name: 'create_timestamp' })
-    createDateTime!: Date;
+    createDateTime?: Date;
 
   @UpdateDateColumn({ name: 'update_timestamp' })
-    updateDateTime!: Date;
+    updateDateTime?: Date;
 }
