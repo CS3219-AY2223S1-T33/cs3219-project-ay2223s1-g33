@@ -17,10 +17,13 @@ declare interface IApiHandler<RequestType, ResponseType> {
   handle(request: RequestType): Promise<ResponseType>;
 }
 
+declare type LoopbackRouteHandler = (object) => Promise<object>;
+
 declare type ApiCallHandler<RequestType, ResponseType> = {
   handler: IApiHandler<RequestType, ResponseType>;
   grpcRouteHandler: handleUnaryCall<RequestType, ResponseType>;
   httpRouteHandler: (json: any) => Promise<any>;
+  loopbackRouteHandler: LoopbackRouteHandler;
 };
 
 declare type ServiceHandlerDefinition<ServiceDefinition = UntypedServiceImplementation> = {
@@ -39,4 +42,5 @@ export {
   ApiCallHandler,
   ServiceHandlerDefinition,
   ApiService,
+  LoopbackRouteHandler,
 };

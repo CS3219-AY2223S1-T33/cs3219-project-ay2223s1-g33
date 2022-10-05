@@ -40,6 +40,16 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   };
 }
 
+function getLoopbackRouteHandler<RequestType extends object, ResponseType extends object>(
+  handler: IApiHandler<RequestType, ResponseType>,
+  reqType: IMessageType<RequestType>,
+): (request: object) => Promise<object> {
+  return async (request: object): Promise<object> => {
+    const requestObject = reqType.create(request);
+    return handler.handle(requestObject);
+  };
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function fromApiHandler<RequestType extends object, ResponseType extends object>(
   handler: IApiHandler<RequestType, ResponseType>,
@@ -50,5 +60,6 @@ export function fromApiHandler<RequestType extends object, ResponseType extends 
     handler,
     grpcRouteHandler: getGrpcRouteHandler(handler),
     httpRouteHandler: getHttpRouteHandler(handler, reqType, respType),
+    loopbackRouteHandler: getLoopbackRouteHandler(handler, reqType),
   };
 }
