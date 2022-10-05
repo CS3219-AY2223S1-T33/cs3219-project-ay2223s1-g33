@@ -27,9 +27,10 @@ export const TERMINATE_WITH_ERROR = 4;
 export const USER_JOIN = 5;
 export const USER_LEAVE = 6;
 export const LANG_CHANGE = 7;
-export const QUESTION_RCV = 8;
-export const SAVECODE_SEND = 9;
-export const SAVECODE_ACK = 10;
+export const QUESTION_REQ = 8;
+export const QUESTION_RCV = 9;
+export const SAVECODE_SEND = 10;
+export const SAVECODE_ACK = 11;
 
 /**
  *                       encoder,          decoder,          provider,          emitSynced, messageType
