@@ -1,8 +1,7 @@
-import { ServiceDefinition, ChannelCredentials } from '@grpc/grpc-js';
+import { ServiceDefinition } from '@grpc/grpc-js';
 import { IUserService, userServiceDefinition } from '../proto/user-service.grpc-server';
-import { ServiceHandlerDefinition, ApiService } from '../api_server/api_server_types';
+import { ServiceHandlerDefinition, ApiService, ILoopbackServiceChannel } from '../api_server/api_server_types';
 import { fromApiHandler } from '../api_server/api_server_helpers';
-import { UserCrudServiceClient } from '../proto/user-crud-service.grpc-client';
 import RegisterHandler from './user_service_handlers/register_handler';
 import {
   GetUserProfileRequest,
@@ -18,28 +17,37 @@ import LoginHandler from './user_service_handlers/login_handler';
 import { IAuthenticationAgent } from '../auth/authentication_agent_types';
 import LogoutHandler from './user_service_handlers/logout_handler';
 import GetUserProfileHandler from './user_service_handlers/get_user_profile_handler';
+import { IUserCrudService } from '../proto/user-crud-service.grpc-server';
 
-class UserBFFServiceApi implements ApiService<IUserService> {
+class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
 
   serviceDefinition: ServiceDefinition<IUserService>;
 
   serviceImplementation: IUserService;
 
-  constructor(authService: IAuthenticationAgent) {
-    const grpcClient = new UserCrudServiceClient(
-      '127.0.0.1:4000',
-      ChannelCredentials.createInsecure(),
-      {},
-      {},
-    );
-
+  constructor(
+    authService: IAuthenticationAgent,
+    crudLoopback: ILoopbackServiceChannel<IUserCrudService>,
+  ) {
     const handlerDefinitions: ServiceHandlerDefinition<IUserService> = {
-      register: fromApiHandler(new RegisterHandler(grpcClient), RegisterRequest, RegisterResponse),
-      login: fromApiHandler(new LoginHandler(grpcClient, authService), LoginRequest, LoginResponse),
-      logout: fromApiHandler(new LogoutHandler(authService), LogoutRequest, LogoutResponse),
+      register: fromApiHandler(
+        new RegisterHandler(crudLoopback),
+        RegisterRequest,
+        RegisterResponse,
+      ),
+      login: fromApiHandler(
+        new LoginHandler(crudLoopback, authService),
+        LoginRequest,
+        LoginResponse,
+      ),
+      logout: fromApiHandler(
+        new LogoutHandler(authService),
+        LogoutRequest,
+        LogoutResponse,
+      ),
       getUserProfile: fromApiHandler(
-        new GetUserProfileHandler(grpcClient, authService),
+        new GetUserProfileHandler(crudLoopback, authService),
         GetUserProfileRequest,
         GetUserProfileResponse,
       ),
@@ -58,4 +66,4 @@ class UserBFFServiceApi implements ApiService<IUserService> {
   }
 }
 
-export default UserBFFServiceApi;
+export default UserServiceApi;

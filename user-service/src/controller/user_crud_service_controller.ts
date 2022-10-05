@@ -18,7 +18,7 @@ import CreateUserHandler from './user_crud_service_handlers/create_user_handler'
 import EditUserHandler from './user_crud_service_handlers/edit_user_handler';
 import DeleteUserHandler from './user_crud_service_handlers/delete_user_handler';
 
-class UserServiceApi implements ApiService<IUserCrudService> {
+class UserCrudServiceApi implements ApiService<IUserCrudService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserCrudService>;
 
   serviceDefinition: ServiceDefinition<IUserCrudService>;
@@ -54,4 +54,4 @@ class UserServiceApi implements ApiService<IUserCrudService> {
   }
 }
 
-export default UserServiceApi;
+export default UserCrudServiceApi;

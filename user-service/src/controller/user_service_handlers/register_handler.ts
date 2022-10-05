@@ -1,10 +1,15 @@
 import bcrypt from 'bcrypt';
 import Validator from 'validator';
 import { RegisterErrorCode, RegisterRequest, RegisterResponse } from '../../proto/user-service';
-import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
+import {
+  IApiHandler,
+  ApiRequest,
+  ApiResponse,
+  ILoopbackServiceChannel,
+} from '../../api_server/api_server_types';
 import { PasswordUser } from '../../proto/types';
-import { CreateUserResponse } from '../../proto/user-crud-service';
+import { CreateUserRequest, CreateUserResponse } from '../../proto/user-crud-service';
+import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 
 function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResponse> {
   return {
@@ -14,9 +19,9 @@ function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResp
 }
 
 class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> {
-  rpcClient: UserCrudServiceClient;
+  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
 
-  constructor(rpcClient: UserCrudServiceClient) {
+  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>) {
     this.rpcClient = rpcClient;
   }
 
@@ -93,17 +98,12 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
     };
   }
 
-  createUser(user: PasswordUser) {
-    return new Promise<CreateUserResponse>((resolve, reject) => {
-      this.rpcClient.createUser({
-        user,
-      }, (err, value) => {
-        if (value) {
-          resolve(value);
-        }
-        reject(err);
-      });
-    });
+  async createUser(user: PasswordUser): Promise<CreateUserResponse> {
+    const request: CreateUserRequest = {
+      user,
+    };
+    const createResult = await this.rpcClient.callRoute<CreateUserRequest, CreateUserResponse>('createUser', request, CreateUserResponse);
+    return createResult;
   }
 
   static buildErrorResponse(errorCode: RegisterErrorCode, errorMessage: string)

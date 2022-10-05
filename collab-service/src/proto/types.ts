@@ -68,6 +68,35 @@ export interface Question {
     solution: string;
 }
 /**
+ * @generated from protobuf message common.HistoryAttempt
+ */
+export interface HistoryAttempt {
+    /**
+     * @generated from protobuf field: uint64 attempt_id = 1;
+     */
+    attemptId: number;
+    /**
+     * @generated from protobuf field: common.Question question = 2;
+     */
+    question?: Question;
+    /**
+     * @generated from protobuf field: string language = 3;
+     */
+    language: string;
+    /**
+     * @generated from protobuf field: uint64 timestamp = 4;
+     */
+    timestamp: number;
+    /**
+     * @generated from protobuf field: repeated string users = 5;
+     */
+    users: string[];
+    /**
+     * @generated from protobuf field: string submission = 6;
+     */
+    submission: string;
+}
+/**
  * @generated from protobuf enum common.QuestionDifficulty
  */
 export enum QuestionDifficulty {
@@ -278,3 +307,85 @@ class Question$Type extends MessageType<Question> {
  * @generated MessageType for protobuf message common.Question
  */
 export const Question = new Question$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class HistoryAttempt$Type extends MessageType<HistoryAttempt> {
+    constructor() {
+        super("common.HistoryAttempt", [
+            { no: 1, name: "attempt_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "question", kind: "message", T: () => Question },
+            { no: 3, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "timestamp", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 5, name: "users", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "submission", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<HistoryAttempt>): HistoryAttempt {
+        const message = { attemptId: 0, language: "", timestamp: 0, users: [], submission: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<HistoryAttempt>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: HistoryAttempt): HistoryAttempt {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint64 attempt_id */ 1:
+                    message.attemptId = reader.uint64().toNumber();
+                    break;
+                case /* common.Question question */ 2:
+                    message.question = Question.internalBinaryRead(reader, reader.uint32(), options, message.question);
+                    break;
+                case /* string language */ 3:
+                    message.language = reader.string();
+                    break;
+                case /* uint64 timestamp */ 4:
+                    message.timestamp = reader.uint64().toNumber();
+                    break;
+                case /* repeated string users */ 5:
+                    message.users.push(reader.string());
+                    break;
+                case /* string submission */ 6:
+                    message.submission = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: HistoryAttempt, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint64 attempt_id = 1; */
+        if (message.attemptId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.attemptId);
+        /* common.Question question = 2; */
+        if (message.question)
+            Question.internalBinaryWrite(message.question, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* string language = 3; */
+        if (message.language !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.language);
+        /* uint64 timestamp = 4; */
+        if (message.timestamp !== 0)
+            writer.tag(4, WireType.Varint).uint64(message.timestamp);
+        /* repeated string users = 5; */
+        for (let i = 0; i < message.users.length; i++)
+            writer.tag(5, WireType.LengthDelimited).string(message.users[i]);
+        /* string submission = 6; */
+        if (message.submission !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.submission);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message common.HistoryAttempt
+ */
+export const HistoryAttempt = new HistoryAttempt$Type();
