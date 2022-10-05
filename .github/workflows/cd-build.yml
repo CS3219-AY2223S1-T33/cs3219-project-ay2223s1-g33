@@ -119,7 +119,7 @@ jobs:
           container-name: session-service
           image: ${{ steps.build-image.outputs.session-service-image }}
           environment-variables: |
-            REDIS_SERVER_URL=redis:6379
+            REDIS_SERVER=redis:6379
             REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
             SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
 
@@ -144,7 +144,7 @@ jobs:
           container-name: matchmaker
           image: ${{ steps.build-image.outputs.matchmaker-image }}
           environment-variables: |
-            REDIS_SERVER_URL=redis:6379
+            REDIS_SERVER=redis:6379
 
       - name: Update task definition for user-service
         id: task-def-user-service
