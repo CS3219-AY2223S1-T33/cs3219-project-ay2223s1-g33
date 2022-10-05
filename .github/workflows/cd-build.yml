@@ -89,6 +89,11 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
           echo "::set-output name=user-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG"
 
+          # history-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
+          echo "::set-output name=history-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG"
+
           # go services
 
           # matchmaker
