@@ -82,10 +82,11 @@ function getLoopbackRouteHandler<RequestType extends object, ResponseType extend
 ): (request: object) => Promise<object> {
   return async (request: object): Promise<object> => {
     const requestObject = reqType.create(request);
-    return handler.handle({
+    const result = await handler.handle({
       request: requestObject,
       headers: {},
     });
+    return result.response;
   };
 }
 
