@@ -41,7 +41,7 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
       content: questionResult?.content!,
       solution: questionResult?.solution!,
     };
-    
+
     return {
       response: {
         question: resultQuestionModel,
@@ -58,7 +58,7 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
         errorMessage,
       },
       headers: {},
-    }
+    };
   }
 }
 
