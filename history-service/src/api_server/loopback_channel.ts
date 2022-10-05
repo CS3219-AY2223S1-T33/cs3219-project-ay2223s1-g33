@@ -1,8 +1,9 @@
 import { UntypedServiceImplementation } from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
-import { LoopbackRouteHandler, ApiService } from './api_server_types';
+import { LoopbackRouteHandler, ApiService, ILoopbackServiceChannel } from './api_server_types';
 
-export default class LoopbackApiChannel {
+export default class LoopbackApiChannel<S extends UntypedServiceImplementation>
+implements ILoopbackServiceChannel<S> {
   routes: { [route: string]: LoopbackRouteHandler };
 
   constructor() {
@@ -15,7 +16,7 @@ export default class LoopbackApiChannel {
     });
   }
 
-  async callRoute<T, U extends object>(
+  async callRoute<T extends object, U extends object>(
     route: string,
     request: T,
     responseContainer: IMessageType<U>,

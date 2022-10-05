@@ -2,7 +2,12 @@ import {
   ServerUnaryCall, sendUnaryData, Metadata, handleUnaryCall,
 } from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
-import { IApiHandler, ApiCallHandler } from './api_server_types';
+import {
+  IApiHandler,
+  ApiCallHandler,
+  ApiResponse,
+  HTTPResponse,
+} from './api_server_types';
 import Logger from '../utils/logger';
 
 function getGrpcRouteHandler<RequestType, ResponseType>(
@@ -16,13 +21,38 @@ function getGrpcRouteHandler<RequestType, ResponseType>(
       Logger.warn(`Error on GRPC Route call: ${args}`);
     });
 
-    const response: ResponseType = await handler.handle(call.request);
+    const metadata = call.metadata.getMap();
+    const headers: { [key: string]: string[] } = {};
+    Object.keys(metadata).forEach((key: string) => {
+      headers[key] = [metadata[key].toString()];
+    });
+
+    const cookies = call.metadata.get('Cookie').map((val) => val.toString());
+    if (cookies.length > 0) {
+      headers.Cookie = cookies;
+    }
+
+    const response: ApiResponse<ResponseType> = await handler.handle({
+      request: call.request,
+      headers,
+    });
 
     const responseHeaders = new Metadata();
-    responseHeaders.add('server-header', 'server header value');
-    call.sendMetadata(responseHeaders);
+    Object.keys(response.headers).forEach((key: string) => {
+      const values = response.headers[key];
+      if (values.length === 0) {
+        return;
+      }
 
-    callback(null, response, undefined);
+      if (key === 'Set-Cookie') {
+        values.forEach((value) => responseHeaders.add(key, value));
+      } else {
+        responseHeaders.add(key, response.headers[key][0]);
+      }
+    });
+
+    call.sendMetadata(responseHeaders);
+    callback(null, response.response, undefined);
   };
 }
 
@@ -30,13 +60,19 @@ function getHttpRouteHandler<RequestType extends object, ResponseType extends ob
   handler: IApiHandler<RequestType, ResponseType>,
   reqType: IMessageType<RequestType>,
   respType: IMessageType<ResponseType>,
-): (object: any) => Promise<any> {
-  return async (requestJson: any): Promise<any> => {
+): (json: any, headers: { [key: string]: string[] }) => Promise<HTTPResponse> {
+  return async (requestJson: any, headers: { [key: string]: string[] }): Promise<HTTPResponse> => {
     const requestObject = reqType.fromJson(requestJson);
-    const responseObject: ResponseType = await handler.handle(requestObject);
-    return respType.toJson(responseObject, {
-      enumAsInteger: true,
+    const responseObject: ApiResponse<ResponseType> = await handler.handle({
+      request: requestObject,
+      headers,
     });
+    return {
+      jsonResponse: respType.toJson(responseObject.response, {
+        enumAsInteger: true,
+      }),
+      headers: responseObject.headers,
+    };
   };
 }
 
@@ -46,7 +82,10 @@ function getLoopbackRouteHandler<RequestType extends object, ResponseType extend
 ): (request: object) => Promise<object> {
   return async (request: object): Promise<object> => {
     const requestObject = reqType.create(request);
-    return handler.handle(requestObject);
+    return handler.handle({
+      request: requestObject,
+      headers: {},
+    });
   };
 }
 
