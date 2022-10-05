@@ -1,8 +1,8 @@
 package main
 
 const (
-	VersionMajor    = 2
-	VersionMinor    = 1
+	VersionMajor    = 3
+	VersionMinor    = 0
 	VersionRevision = 0
 )
 
