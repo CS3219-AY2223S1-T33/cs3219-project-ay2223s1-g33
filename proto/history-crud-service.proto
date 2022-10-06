@@ -25,7 +25,8 @@ message GetAttemptsRequest {
 
 message GetAttemptsResponse {
   repeated common.HistoryAttempt attempts = 1;
-  string error_message = 2;
+  int32 total_count = 2;
+  string error_message = 3;
 }
 
 message CreateAttemptRequest {
