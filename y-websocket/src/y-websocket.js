@@ -113,7 +113,7 @@ const permissionDeniedHandler = (provider, reason) =>
 const readMessage = (provider, buf, emitSynced) => {
 	const decoder = decoding.createDecoder(buf);
 	const encoder = encoding.createEncoder();
-	const messageType = decoding.readVarUint(decoder);
+	const messageType = decoding.readUint8(decoder);
 	const messageHandler = provider.messageHandlers[messageType];
 	if (/** @type {any} */ (messageHandler)) {
 		messageHandler(encoder, decoder, provider, emitSynced, messageType);
