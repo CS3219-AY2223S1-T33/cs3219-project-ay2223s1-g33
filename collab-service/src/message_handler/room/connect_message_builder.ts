@@ -1,5 +1,4 @@
 import * as encoding from 'lib0/encoding';
-import * as decoding from 'lib0/decoding';
 
 export const OPCODE_TERMINATE_WITH_ERROR = 4;
 export const OPCODE_USER_JOIN = 5;
@@ -28,13 +27,12 @@ function createQuestionRcvPackage(question: string): Uint8Array {
   return createConnectionAlertPackage(question, OPCODE_QUESTION_RCV);
 }
 
-/*
+/**
  * Extracts opcode of given data package
  * @param data
  */
 function readConnectionOpCode(data: Uint8Array): number {
-  const decoder = decoding.createDecoder(data);
-  return decoding.readUint8(decoder);
+  return data[0];
 }
 
 export {
