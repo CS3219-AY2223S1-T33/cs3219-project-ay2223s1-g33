@@ -2,8 +2,8 @@ const enum ConnectionOpCode {
   DATA,
   JOIN,
   ACK,
-  ARP,
-  WMI,
+  ROOM_DISCOVER,
+  ROOM_HELLO,
 }
 
 declare type TunnelMessage = {
