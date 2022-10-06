@@ -6,7 +6,7 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";

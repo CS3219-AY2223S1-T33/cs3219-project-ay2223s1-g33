@@ -12,20 +12,17 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
-import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { reset } from "../../../feature/matching/matchingSlice";
 import { logout, selectUser } from "../../../feature/user/userSlice";
 import { LogoutResponse } from "../../../proto/user-service";
 
 function HomeNavbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // eslint-disable-next-line
-  const [cookies, setCookies, removeCookies] = useCookies(["session_token"]);
 
   const logoutHandler = () => {
-    // removeCookies("session_token");
     axios
       .post<LogoutResponse>("/api/user/logout", {}, { withCredentials: true })
       .then((res) => {
@@ -38,6 +35,7 @@ function HomeNavbar() {
         console.error(err.message);
       })
       .finally(() => {
+        dispatch(reset());
         dispatch(logout());
         navigate("/login", { replace: true });
       });
