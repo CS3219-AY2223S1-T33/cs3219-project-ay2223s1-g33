@@ -12,7 +12,7 @@ import {
   OPCODE_QUESTION_REQ,
 } from '../message_handler/room/connect_message_builder';
 import {
-  makeUnauthorizedMessage,
+  makeUnauthorizedResponse,
   makeDataResponse,
   makeHeartbeatResponse,
   isHeartbeat,
@@ -87,7 +87,7 @@ class CollabTunnelController {
     const data = await this.roomTokenAgent.verifyToken(roomToken);
     if (!data) {
       // Kill stream when invalid room
-      call.write(makeUnauthorizedMessage());
+      call.write(makeUnauthorizedResponse());
       call.end();
       return;
     }

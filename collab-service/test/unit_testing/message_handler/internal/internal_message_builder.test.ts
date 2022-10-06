@@ -1,6 +1,7 @@
 import {
   createAckMessage,
   createJoinMessage,
+  createDataMessage,
 } from '../../../../src/message_handler/internal/internal_message_builder';
 import {
   ConnectionOpCode,
@@ -33,6 +34,20 @@ describe('Function-Message-Internal createAckMessage', () => {
         sender: name,
         data: createConnectedPackage(nickname),
         flag: ConnectionOpCode.ACK,
+      });
+  });
+});
+
+describe('Function-Message-Internal createDataMessage', () => {
+  test('Test creating data', () => {
+    const name = 'randomName';
+    const data = Buffer.from([123]);
+    const msg = createDataMessage(name, data);
+    expect(msg)
+      .toStrictEqual({
+        sender: name,
+        data,
+        flag: ConnectionOpCode.DATA,
       });
   });
 });

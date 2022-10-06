@@ -7,7 +7,7 @@ import {
 /*
  * Creates unauthorized error response message
  */
-function makeUnauthorizedMessage(): CollabTunnelResponse {
+function makeUnauthorizedResponse(): CollabTunnelResponse {
   return {
     data: Buffer.from([]),
     flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_UNAUTHORIZED,
@@ -16,6 +16,7 @@ function makeUnauthorizedMessage(): CollabTunnelResponse {
 
 /*
  * Creates normal response message for data forwarding
+ * @param data
  */
 function makeDataResponse(data: Uint8Array): CollabTunnelResponse {
   return CollabTunnelResponse.create({
@@ -34,6 +35,10 @@ function makeHeartbeatResponse(): CollabTunnelResponse {
   });
 }
 
+/*
+ * Checks if message flag is a heartbeat
+ * @param flag
+ */
 function isHeartbeat(flag: number): boolean {
   /* eslint no-bitwise: ["error", { "allow": ["&"] }] */
   return (flag & CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT)
@@ -41,7 +46,7 @@ function isHeartbeat(flag: number): boolean {
 }
 
 export {
-  makeUnauthorizedMessage,
+  makeUnauthorizedResponse,
   makeDataResponse,
   makeHeartbeatResponse,
   isHeartbeat,
