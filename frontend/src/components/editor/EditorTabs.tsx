@@ -9,6 +9,7 @@ import {
 import React from "react";
 import { Question } from "../../proto/types";
 import QuestionSection from "../question/QuestionSection";
+import HistoryTable from "../history/HistoryTable";
 
 type Props = {
   question: Question | undefined;
@@ -38,7 +39,7 @@ function EditorTabs({ question }: Props) {
           <Text>Chat section</Text>
         </TabPanel>
         <TabPanel key="history_section">
-          <Text>History section</Text>
+          <HistoryTable />
         </TabPanel>
       </TabPanels>
     </Tabs>
