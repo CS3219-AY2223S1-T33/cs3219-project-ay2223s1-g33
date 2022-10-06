@@ -22,6 +22,7 @@ import saveFile from "../utils/fileDownloadUtil";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
+type ErrorMessage = { errorMsg: string };
 
 let isInit = false;
 function Session() {
@@ -81,6 +82,12 @@ function Session() {
             onOpenDisconnectModal();
             break;
         }
+      });
+
+      // eslint-disable-next-line
+      ws.on("terminate_with_error", (error: ErrorMessage) => {
+        setWsStatus("Disconnected");
+        onOpenDisconnectModal();
       });
 
       ws.on("user_join", (joinedNickname: Nickname) => {
