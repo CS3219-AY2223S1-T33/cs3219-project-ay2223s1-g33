@@ -1,0 +1,224 @@
+name: cd-build
+
+on:
+  push:
+    branches:
+      - release
+
+env:
+  AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: cs3219                       # set this to your Amazon ECR repository name
+  ECS_SERVICE: cs3219-service
+  ECS_CLUSTER: cs3219-cluster
+
+jobs:
+  deploy:
+    name: Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+
+      - name: 'Add dummy env files'
+        run: 'touch matchmaker/.env && touch gateway/.env && touch session-service/.env'
+
+      - name: 'Build Matchmaker'
+        run: 'cd matchmaker && make build'
+
+      - name: 'Build Gateway'
+        run: 'cd gateway && make build'
+
+      - name: 'Build Session Service'
+        run: 'cd session-service && make build'
+
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
+
+      - name: Build, tag, and push images to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+
+          # node services
+
+          # frontend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
+          echo "::set-output name=frontend-image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
+
+          # question-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
+          echo "::set-output name=question-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG"
+
+          # matching-service 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
+          echo "::set-output name=matching-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG"
+
+          # collab-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
+          echo "::set-output name=collab-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG"
+
+          # user-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
+          echo "::set-output name=user-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG"
+
+          # history-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
+          echo "::set-output name=history-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG"
+
+          # go services
+
+          # matchmaker
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
+          echo "::set-output name=matchmaker-image::$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG"
+
+          # gateway
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
+          echo "::set-output name=gateway-image::$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG"
+
+          # session-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
+          echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
+
+      - name: Update task definition for session-service
+        id: task-def-session-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/task-definition.json
+          container-name: session-service
+          image: ${{ steps.build-image.outputs.session-service-image }}
+          environment-variables: |
+            REDIS_SERVER=redis:6379
+            REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
+            SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
+
+      - name: Update task definition for question-service
+        id: task-def-question-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-session-service.outputs.task-definition }}
+          container-name: question-service
+          image: ${{ steps.build-image.outputs.question-service-image }}
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+
+      - name: Update task definition for matchmaker
+        id: task-def-matchmaker
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-question-service.outputs.task-definition }}
+          container-name: matchmaker
+          image: ${{ steps.build-image.outputs.matchmaker-image }}
+          environment-variables: |
+            REDIS_SERVER=redis:6379
+
+      - name: Update task definition for user-service
+        id: task-def-user-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-matchmaker.outputs.task-definition }}
+          container-name: user-service
+          image: ${{ steps.build-image.outputs.user-service-image }}
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            SESSION_SERVICE_URL=session-service:4100
+
+      - name: Update task definition for matching-service
+        id: task-def-matching-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-user-service.outputs.task-definition }}
+          container-name: matching-service
+          image: ${{ steps.build-image.outputs.matching-service-image }}
+          environment-variables: |
+            REDIS_SERVER_URL=redis:6379
+            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
+            JWT_SIGNING_SECRET=${{ secrets.JWT_SIGNING_SECRET }}
+
+      - name: Update task definition for collab-service
+        id: task-def-collab-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-matching-service.outputs.task-definition }}
+          container-name: collab-service
+          image: ${{ steps.build-image.outputs.collab-service-image }}
+          environment-variables: |
+            REDIS_SERVER_URL=redis:6379
+            QUESTION_SERVER_URL=question-service:4004
+            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
+
+      - name: Update task definition for frontend
+        id: task-def-frontend
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-collab-service.outputs.task-definition }}
+          container-name: frontend
+          image: ${{ steps.build-image.outputs.frontend-image }}
+          
+      - name: Update task definition for gateway
+        id: task-def-gateway
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
+          container-name: gateway
+          image: ${{ steps.build-image.outputs.gateway-image }}      
+
+      - name: Update task definition for history-service
+        id: task-def-history-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-gateway.outputs.task-definition }}
+          container-name: history-service
+          image: ${{ steps.build-image.outputs.history-service-image }}  
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            USER_SERVICE_URL=user-service:4000
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-history-service.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          

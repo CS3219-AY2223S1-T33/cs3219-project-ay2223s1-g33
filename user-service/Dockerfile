@@ -23,12 +23,14 @@ FROM node:alpine
 WORKDIR /app/user-service
 
 # Install project dependencies
-COPY user-service/package.json user-service/package-lock.json .
+COPY user-service/package.json user-service/package-lock.json ./
 RUN npm install
 
 COPY user-service .
 COPY user-service/src user-service/src
+RUN true
 COPY --from=0 /app/user-service/src/proto ./src/proto/
+RUN true
 COPY --from=0 /app/user-service/src/db ./src/db/
 
 # Build project
