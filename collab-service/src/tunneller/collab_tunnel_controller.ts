@@ -2,95 +2,46 @@ import { Metadata, ServerDuplexStream } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
 import {
   createAckMessage,
+  createDataMessage,
   createJoinMessage,
 } from '../message_handler/internal/internal_message_builder';
-import { createDisconnectedPackage } from '../message_handler/room/connect_message_builder';
-import { createRedisPubSubAdapter, TunnelPubSub } from '../redis_adapter/redis_pubsub_adapter';
-import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
-import createRoomSessionService from '../room_auth/room_session_agent';
+import {
+  createDisconnectedPackage,
+  createQuestionRcvPackage,
+  readConnectionOpCode,
+  OPCODE_QUESTION_REQ,
+} from '../message_handler/room/connect_message_builder';
 import {
   makeUnauthorizedMessage,
   makeDataResponse,
+  makeHeartbeatResponse,
+  isHeartbeat,
 } from '../message_handler/room/response_message_builder';
+import { createRedisPubSubAdapter, TunnelPubSub } from '../redis_adapter/redis_pubsub_adapter';
+import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
+import createRoomSessionService from '../room_auth/room_session_agent';
 import createQuestionService from '../question_client/question_agent';
 import {
-  setQuestionRedis,
   getQuestionRedis,
+  setQuestionRedis,
 } from '../redis_adapter/redis_question_adapter';
-import Logger from '../utils/logger';
 import CollabTunnelSerializer from './collab_tunnel_serializer';
 import {
   CollabTunnelRequest,
   CollabTunnelResponse,
-  CollabTunnelResponseFlags,
-  CollabTunnelRequestFlags,
 } from '../proto/collab-service';
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { IQuestionAgent } from '../question_client/question_agent_types';
-import { ConnectionOpCode, TunnelMessage } from '../message_handler/internal/internal_message_types';
+import {
+  ConnectionOpCode,
+  TunnelMessage,
+} from '../message_handler/internal/internal_message_types';
+import Logger from '../utils/logger';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
 const PROXY_HEADER_ROOM_TOKEN = 'X-Gateway-Proxy-Room-Token';
 const HEARTBEAT_INTERVAL = 20000;
-
-async function writerHandler(
-  message: TunnelMessage,
-  username: string,
-  nickname: string,
-  call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
-  pubsub: TunnelPubSub<TunnelMessage>,
-) {
-  // Prevent self echo
-  if (message.sender === username) {
-    return;
-  }
-  // Handle message cases
-  switch (message.flag) {
-    case ConnectionOpCode.DATA: // Receive normal, Send normal
-      call.write(makeDataResponse(message.data));
-      break;
-    case ConnectionOpCode.JOIN: // Receive A, Send B
-      Logger.info(`${username} received JOIN from ${message.sender}`);
-      await pubsub.pushMessage(createAckMessage(username, nickname));
-      call.write(makeDataResponse(message.data));
-      break;
-    case ConnectionOpCode.ACK: // Receive B, Send 'Connected'
-      Logger.info(`${username} received ACK from ${message.sender}`);
-      call.write(makeDataResponse(message.data));
-      break;
-    default:
-      Logger.error('Unknown connection flag');
-      break;
-  }
-}
-
-function createCallWriter(
-  call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
-  pubsub: TunnelPubSub<TunnelMessage>,
-  username: string,
-  nickname: string,
-): (data: TunnelMessage) => void {
-  return async (message: TunnelMessage): Promise<void> => {
-    await writerHandler(message, username, nickname, call, pubsub);
-  };
-}
-
-function writeHeartbeat(call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>) {
-  const res = CollabTunnelResponse.create(
-    {
-      data: Buffer.from([]),
-      flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_HEARTBEAT,
-    },
-  );
-  call.write(res);
-}
-
-function isHeartbeat(flag: number): boolean {
-  /* eslint no-bitwise: ["error", { "allow": ["&"] }] */
-  return (flag & CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT)
-    === CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT;
-}
 
 class CollabTunnelController {
   pub: RedisClientType;
@@ -119,6 +70,10 @@ class CollabTunnelController {
     this.questionAgent = createQuestionService(questionUrl);
   }
 
+  /*
+   * Handles client stream, when it opens, closes and has data sent over
+   * @param call
+   */
   async handleOpenStream(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
@@ -150,7 +105,7 @@ class CollabTunnelController {
     );
 
     await redisPubSubAdapter.addOnMessageListener(
-      createCallWriter(call, redisPubSubAdapter, username, nickname),
+      CollabTunnelController.createCallWriter(call, redisPubSubAdapter, username, nickname),
     );
 
     // Connection discovery, Send A
@@ -159,21 +114,14 @@ class CollabTunnelController {
     // Retrieve and send question
     this.handleQuestion(difficulty, roomId);
 
+    // Upkeep gateway connection
     const heartbeatWorker = setInterval(() => {
-      writeHeartbeat(call);
+      call.write(makeHeartbeatResponse());
     }, HEARTBEAT_INTERVAL);
 
     // When data is detected
     call.on('data', (request: CollabTunnelRequest) => {
-      if (isHeartbeat(request.flags)) {
-        return;
-      }
-      // Send Normal
-      redisPubSubAdapter.pushMessage({
-        sender: username,
-        data: request.data,
-        flag: ConnectionOpCode.DATA,
-      });
+      this.handleIncomingData(username, roomId, request, call, redisPubSubAdapter);
     });
 
     // When stream closes
@@ -181,23 +129,115 @@ class CollabTunnelController {
       clearInterval(heartbeatWorker);
 
       // Send 'Disconnected'
-      redisPubSubAdapter.pushMessage({
-        sender: username,
-        data: createDisconnectedPackage(nickname),
-        flag: ConnectionOpCode.DATA,
-      });
+      redisPubSubAdapter.pushMessage(
+        createDataMessage(username, createDisconnectedPackage(nickname)),
+      );
 
       const endFunc = () => call.end();
       redisPubSubAdapter.clean(endFunc);
     });
   }
 
+  /*
+   * Handles subscribed message received from pubsub
+   * @param call, pubsub, username, nickname
+   */
+  static async handleWrite(
+    message: TunnelMessage,
+    username: string,
+    nickname: string,
+    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+    pubsub: TunnelPubSub<TunnelMessage>,
+  ) {
+    // Prevent self echo
+    if (message.sender === username) {
+      return;
+    }
+    // Handle internal message cases
+    switch (message.flag) {
+      case ConnectionOpCode.DATA: // Receive normal, Send normal
+        call.write(makeDataResponse(message.data));
+        break;
+      case ConnectionOpCode.JOIN: // Receive A, Send B
+        Logger.info(`${username} received JOIN from ${message.sender}`);
+        await pubsub.pushMessage(createAckMessage(username, nickname));
+        call.write(makeDataResponse(message.data));
+        break;
+      case ConnectionOpCode.ACK: // Receive B, Send 'Connected'
+        Logger.info(`${username} received ACK from ${message.sender}`);
+        call.write(makeDataResponse(message.data));
+        break;
+      default:
+        Logger.error('Unknown connection flag');
+        break;
+    }
+  }
+
+  /*
+   * Creates encapsulated lambda for writing subscribed data to client
+   * @param call, pubsub, username, nickname
+   */
+  static createCallWriter(
+    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+    pubsub: TunnelPubSub<TunnelMessage>,
+    username: string,
+    nickname: string,
+  ): (data: TunnelMessage) => void {
+    return async (message: TunnelMessage): Promise<void> => {
+      await CollabTunnelController.handleWrite(message, username, nickname, call, pubsub);
+    };
+  }
+
+  /*
+   * Handles question retrieval from client & saves unto Redis
+   * @param difficulty, roomId
+   */
   async handleQuestion(
     difficulty: number,
     roomId: string,
   ) {
     const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
-    setQuestionRedis(roomId, question, this.pub);
+    if (question === undefined) {
+      Logger.error(`No question of difficulty ${difficulty} found`);
+      return;
+    }
+    await setQuestionRedis(roomId, question, this.pub);
+  }
+
+  /*
+   * Handles data package to be sent based on package received
+   * @param username, roomId, request, call
+   */
+  async handleIncomingData(
+    username: string,
+    roomId: string,
+    request: CollabTunnelRequest,
+    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+    pubsub: TunnelPubSub<TunnelMessage>,
+  ) {
+    // Ignore heartbeat
+    if (isHeartbeat(request.flags)) {
+      return;
+    }
+    let question;
+    let dataToSend;
+    // Handle external connection message cases
+    switch (readConnectionOpCode(request.data)) {
+      case OPCODE_QUESTION_REQ: // Retrieve question, send back to user
+        Logger.info(`${username} requested for question`);
+        question = await getQuestionRedis(roomId, this.pub);
+        if (question === null) {
+          Logger.error(`No question of room ${roomId} found`);
+          return;
+        }
+        dataToSend = createQuestionRcvPackage(question);
+        call.write(makeDataResponse(dataToSend));
+        return;
+      default:
+        // Normal data, push to publisher
+        dataToSend = request.data;
+    }
+    await pubsub.pushMessage(createDataMessage(username, dataToSend));
   }
 
   static extractMetadata(

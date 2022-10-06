@@ -1,14 +1,22 @@
-import { CollabTunnelResponse, CollabTunnelResponseFlags } from '../../proto/collab-service';
+import {
+  CollabTunnelRequestFlags,
+  CollabTunnelResponse,
+  CollabTunnelResponseFlags,
+} from '../../proto/collab-service';
 
+/*
+ * Creates unauthorized error response message
+ */
 function makeUnauthorizedMessage(): CollabTunnelResponse {
-  const emptyByte = new Uint8Array(0);
   return {
-    data: emptyByte,
+    data: Buffer.from([]),
     flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_UNAUTHORIZED,
   };
 }
 
-// Creates collab response to be sent to client
+/*
+ * Creates normal response message for data forwarding
+ */
 function makeDataResponse(data: Uint8Array): CollabTunnelResponse {
   return CollabTunnelResponse.create({
     data: Buffer.from(data),
@@ -16,7 +24,25 @@ function makeDataResponse(data: Uint8Array): CollabTunnelResponse {
   });
 }
 
+/*
+ * Creates heartbeat response message for gateway upkeep
+ */
+function makeHeartbeatResponse(): CollabTunnelResponse {
+  return CollabTunnelResponse.create({
+    data: Buffer.from([]),
+    flags: CollabTunnelResponseFlags.COLLAB_RESPONSE_FLAG_HEARTBEAT,
+  });
+}
+
+function isHeartbeat(flag: number): boolean {
+  /* eslint no-bitwise: ["error", { "allow": ["&"] }] */
+  return (flag & CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT)
+    === CollabTunnelRequestFlags.COLLAB_REQUEST_FLAG_HEARTBEAT;
+}
+
 export {
   makeUnauthorizedMessage,
   makeDataResponse,
+  makeHeartbeatResponse,
+  isHeartbeat,
 };

@@ -19,7 +19,7 @@ class QuestionAgent implements IQuestionAgent {
   }
 
   getQuestionByDifficulty(difficulty: QuestionDifficulty): Promise<Question | undefined> {
-    const questionEasy: Question = {
+    const questionRequest: Question = {
       questionId: 0,
       difficulty,
       name: '',
@@ -30,7 +30,7 @@ class QuestionAgent implements IQuestionAgent {
     return new Promise<Question | undefined>((resolve, reject) => {
       this.questionClient.getQuestion(
         {
-          question: questionEasy,
+          question: questionRequest,
         },
         (err, value) => {
           if (value) {
