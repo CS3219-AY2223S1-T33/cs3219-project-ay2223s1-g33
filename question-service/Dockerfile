@@ -15,7 +15,6 @@ RUN mkdir -p /app/question-service question-service/src/proto question-service/s
 COPY proto proto/
 COPY scripts scripts/
 COPY db db/
-
 COPY question-service/proto-emit.cfg question-service
 RUN npm run-script gen-proto
 RUN npm run-script sync-schema
@@ -24,12 +23,14 @@ FROM node:alpine
 WORKDIR /app/question-service
 
 # Install project dependencies
-COPY question-service/package.json question-service/package-lock.json .
+COPY question-service/package.json question-service/package-lock.json ./
 RUN npm install
 
 COPY question-service .
 COPY question-service/src ./src/
+RUN true
 COPY --from=0 /app/question-service/src/proto/ ./src/proto/
+RUN true
 COPY --from=0 /app/question-service/src/db/ ./src/db/
 
 # Build project
