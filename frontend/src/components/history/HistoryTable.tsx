@@ -13,48 +13,22 @@ import {
   Th,
   Td,
   chakra,
+  Code,
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import { HistoryAttempt } from "../../proto/types";
+import { HistoryAttempt, QuestionDifficulty } from "../../proto/types";
+import HistoryAttemptModal from "./HistoryAttemptModal";
+import difficultyColor from "../../utils/diffcultyColors";
 
-// type Props = {
-//   historyAttempt: HistoryAttempt;
-// };
+type Props = {
+  historyAttempts: HistoryAttempt[];
+};
 
-function HistoryTable() {
+function HistoryTable({ historyAttempts }: Props) {
   const [userHistory, setUserHistory] = React.useState<HistoryAttempt[]>([]);
 
   React.useEffect(() => {
-    setUserHistory([
-      {
-        attemptId: 123,
-        language: "abcd",
-        timestamp: 123,
-        question: {
-          questionId: 123,
-          name: "abcd",
-          difficulty: 1,
-          content: "abcd",
-          solution: "abcd",
-        },
-        users: ["user 1"],
-        submission: "abcd",
-      },
-      {
-        attemptId: 123,
-        language: "abcd",
-        timestamp: 123,
-        question: {
-          questionId: 123,
-          name: "a",
-          difficulty: 1,
-          content: "abcd",
-          solution: "abcd",
-        },
-        users: ["user 1"],
-        submission: "abcd",
-      },
-    ]);
+    setUserHistory(historyAttempts);
   }, []);
 
   const columns: Column<HistoryAttempt>[] = React.useMemo(
@@ -66,11 +40,25 @@ function HistoryTable() {
       {
         Header: "question",
         accessor: "question",
-        Cell: (props) => <Text>{props.value?.name}</Text>,
+        Cell: (props) => (
+          <Text fontWeight="bold">{`${props.value?.questionId}. ${props.value?.name}`}</Text>
+        ),
+      },
+      {
+        Header: "diffculty",
+        accessor: (row) => (
+          <Text
+            fontWeight="bold"
+            color={difficultyColor(row.question!.difficulty)}
+          >
+            {QuestionDifficulty[row.question!.difficulty].toString()}
+          </Text>
+        ),
       },
       {
         Header: "language",
         accessor: "language",
+        Cell: (props) => <Code>{props.value}</Code>,
       },
       {
         Header: "users",
@@ -78,13 +66,21 @@ function HistoryTable() {
         Cell: (props) => <Text>{props.value[0]}</Text>,
       },
       {
-        Header: "submission",
-        accessor: "submission",
-        show: false,
+        Header: "Submited At",
+        accessor: "timestamp",
       },
       {
-        Header: "timestamp",
-        accessor: "timestamp",
+        Header: "submission",
+        disableSortBy: true,
+        accessor: (row) => (
+          <HistoryAttemptModal
+            language={row.language}
+            users={row.users}
+            attemptId={row.attemptId}
+            submission={row.submission}
+            question={row.question!}
+          />
+        ),
       },
     ],
     [userHistory]
@@ -104,7 +100,7 @@ function HistoryTable() {
               desc: false,
             },
           ],
-          hiddenColumns: ["submission", "attemptId"],
+          hiddenColumns: ["attemptId"],
         },
       },
 

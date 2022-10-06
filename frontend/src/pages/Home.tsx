@@ -7,6 +7,7 @@ import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
 import QueueForm from "../components/form/QueueForm";
 import HistoryTable from "../components/history/HistoryTable";
+import { DUMMY_HISTORY } from "../utils/mockData";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);
@@ -26,7 +27,7 @@ function Home() {
         <Box>
           <Heading>Attempt History</Heading>
           <Box borderRadius="md" boxShadow="lg" p={8}>
-            <HistoryTable />
+            <HistoryTable historyAttempts={DUMMY_HISTORY} />
           </Box>
         </Box>
 

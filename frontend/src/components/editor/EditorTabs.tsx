@@ -10,6 +10,7 @@ import React from "react";
 import { Question } from "../../proto/types";
 import QuestionSection from "../question/QuestionSection";
 import HistoryTable from "../history/HistoryTable";
+import { DUMMY_HISTORY } from "../../utils/mockData";
 
 type Props = {
   question: Question | undefined;
@@ -39,7 +40,7 @@ function EditorTabs({ question }: Props) {
           <Text>Chat section</Text>
         </TabPanel>
         <TabPanel key="history_section">
-          <HistoryTable />
+          <HistoryTable historyAttempts={DUMMY_HISTORY} />
         </TabPanel>
       </TabPanels>
     </Tabs>

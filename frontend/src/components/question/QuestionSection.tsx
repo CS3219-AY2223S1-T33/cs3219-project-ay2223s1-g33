@@ -30,10 +30,11 @@ function QuestionSection({ question }: Props) {
         spacing={4}
         // pt={4}
         id="question-content"
+        alignItems="flex-start"
       >
         {/* To HW: Maybe VStack it? */}
         {contentDecode.question.split("\n").map((ln: string) => (
-          <Text>{ln}</Text>
+          <Text textAlign="left">{ln}</Text>
         ))}
       </VStack>
       <ExampleList examples={contentDecode.example} />
