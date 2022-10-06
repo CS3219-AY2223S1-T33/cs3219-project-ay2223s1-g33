@@ -497,6 +497,12 @@ export class WebsocketProvider extends Observable {
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
 
+	sendQuestionRequest() {
+		const encoder = encoding.createEncoder();
+		encoding.writeUint8(encoder, QUESTION_REQ);
+		broadcastMessage(this, encoding.toUint8Array(encoder));
+	}
+
 	// sendSaveCode(/** @type {string} */ content) {
 	//   const encoder = encoding.createEncoder()
 	//   encoding.writeVarUint(encoder, SAVECODE_SEND)
