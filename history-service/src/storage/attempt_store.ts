@@ -76,6 +76,7 @@ class AttemptStore implements IAttemptStore {
       .innerJoinAndSelect('histories.users', 'users')
       .innerJoinAndSelect('histories.question', 'question')
       .where('users.userId = :userId', { userId })
+      .orderBy('attempt_id')
       .limit(limit)
       .offset(offset)
       .getMany();
@@ -107,6 +108,7 @@ class AttemptStore implements IAttemptStore {
       .innerJoinAndSelect('histories.users', 'users')
       .innerJoinAndSelect('histories.question', 'question')
       .where('users.username = :username', { username })
+      .orderBy('attempt_id')
       .limit(limit)
       .offset(offset)
       .getMany();
@@ -140,6 +142,7 @@ class AttemptStore implements IAttemptStore {
       .innerJoinAndSelect('histories.question', 'question')
       .where('users.username = :username', { username })
       .andWhere('question.questionId = :questionId', { questionId })
+      .orderBy('attempt_id')
       .limit(limit)
       .offset(offset)
       .getMany();
