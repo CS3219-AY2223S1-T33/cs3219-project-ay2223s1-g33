@@ -6,7 +6,7 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";
@@ -18,7 +18,7 @@ type Props = {
   getQuestion: () => void;
 };
 
-const hiddenColumns = ["attemptId", "question", "diffculty"];
+const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
 function EditorTabs({ question, getQuestion }: Props) {
   return (

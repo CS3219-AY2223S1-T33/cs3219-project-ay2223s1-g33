@@ -8,7 +8,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  HStack
+  HStack,
 } from "@chakra-ui/react";
 import QuestionSection from "../question/QuestionSection";
 import HistorySection from "../history/HistorySection";

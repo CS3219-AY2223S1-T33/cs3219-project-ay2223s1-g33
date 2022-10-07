@@ -16,13 +16,15 @@ import {
   Flex,
   useDisclosure,
   Button,
-  TableContainer
+  TableContainer,
+  Heading,
+  Divider,
 } from "@chakra-ui/react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   TriangleDownIcon,
-  TriangleUpIcon
+  TriangleUpIcon,
 } from "@chakra-ui/icons";
 import { useSelector } from "react-redux";
 import { HistoryAttempt, QuestionDifficulty } from "../../proto/types";
@@ -32,7 +34,7 @@ import usePagination from "../../utils/hooks/usePagination";
 import { RootState } from "../../app/store";
 import {
   createAttemptHistoryExtractor,
-  createAttemptHistoryReqFactory
+  createAttemptHistoryReqFactory,
 } from "../../utils/builderUtils";
 
 type Props = {
@@ -42,11 +44,19 @@ type Props = {
 
 function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   const currUser = useSelector((state: RootState) => state.user.user);
+  const dtOptions: Intl.DateTimeFormatOptions = {
+    hour12: true,
+    hour: "numeric",
+    minute: "numeric",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
 
   const pagination = usePagination({
     fetchUrl: "/api/user/history",
     requestFactory: createAttemptHistoryReqFactory(questionId),
-    responseExtractor: createAttemptHistoryExtractor()
+    responseExtractor: createAttemptHistoryExtractor(),
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalHistoryAttempt, setModalHistoryAttempt] = useState<
@@ -62,16 +72,17 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
     () => [
       {
         Header: "ID",
-        accessor: "attemptId"
+        accessor: "attemptId",
       },
       {
         Header: "question",
         accessor: "question",
         Cell: (props) => (
           <Text fontWeight="bold">{`${props.value?.questionId}. ${props.value?.name}`}</Text>
-        )
+        ),
       },
       {
+        id: "difficulty",
         Header: "difficulty",
         accessor: (row) => (
           <Text
@@ -80,23 +91,28 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           >
             {QuestionDifficulty[row.question!.difficulty].toString()}
           </Text>
-        )
+        ),
       },
       {
         Header: "language",
         accessor: "language",
-        Cell: (props) => <Code>{props.value}</Code>
+        Cell: (props) => <Code>{props.value}</Code>,
       },
       {
         Header: "users",
         accessor: "users",
         Cell: (props) => (
-          <Text>{props.value.find((user) => user !== currUser?.nickname)}</Text>
-        )
+          <Text>{props.value.find((user) => user !== currUser?.username)}</Text>
+        ),
       },
       {
         Header: "Submited At",
-        accessor: "timestamp"
+        accessor: "timestamp",
+        Cell: (props) => (
+          <Text>
+            {new Date(props.value * 1000).toLocaleString("en-GB", dtOptions)}
+          </Text>
+        ),
       },
       {
         Header: "submission",
@@ -105,8 +121,8 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           <Button onClick={() => onHistoryAttemptClick(row)} colorScheme="blue">
             View
           </Button>
-        )
-      }
+        ),
+      },
     ],
     [currUser]
   );
@@ -120,11 +136,11 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           sortBy: [
             {
               id: "timestamp",
-              desc: false
-            }
+              desc: false,
+            },
           ],
-          hiddenColumns
-        }
+          hiddenColumns,
+        },
       },
       useSortBy
     );
@@ -140,6 +156,10 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   return (
     <>
       <TableContainer>
+        <Heading as="h4" size="md" pb={4}>
+          Page {pagination.page}
+        </Heading>
+        <Divider />
         <Table overflow="auto" {...getTableProps()}>
           <Thead>
             {
@@ -209,15 +229,15 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           </Tbody>
         </Table>
       </TableContainer>
-      <Flex w="100%">
+      <Flex w="100%" pt={4}>
         <Button
           leftIcon={<ArrowLeftIcon />}
           isDisabled={!pagination.hasPrevious}
           onClick={pagination.previousPage}
+          mr={4}
         >
           Previous
         </Button>
-        <Text>{pagination.page}</Text>
         <Button
           rightIcon={<ArrowRightIcon />}
           isDisabled={!pagination.hasNext}

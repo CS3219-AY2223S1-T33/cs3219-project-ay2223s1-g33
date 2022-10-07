@@ -8,7 +8,7 @@ import {
   Heading,
   Input,
   Stack,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
@@ -20,7 +20,7 @@ import Link from "../components/ui/Link";
 import {
   LoginRequest,
   LoginResponse,
-  UserCredentials
+  UserCredentials,
 } from "../proto/user-service";
 import useFixedToast from "../utils/hooks/useFixedToast";
 
@@ -28,7 +28,7 @@ function Login() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
   const toast = useFixedToast();
   const dispatch = useDispatch();
@@ -41,7 +41,7 @@ function Login() {
 
     axios
       .post<LoginResponse>("/api/user/login", loginReq, {
-        withCredentials: true
+        withCredentials: true,
       })
       .then((res) => {
         const { errorCode, errorMessage } = res.data;
@@ -70,7 +70,7 @@ function Login() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
@@ -90,7 +90,7 @@ function Login() {
                 <Input
                   type="text"
                   {...register("email", {
-                    required: "Please enter your email."
+                    required: "Please enter your email.",
                   })}
                 />
                 <FormErrorMessage>
@@ -103,7 +103,7 @@ function Login() {
                 <Input
                   type="password"
                   {...register("password", {
-                    required: "Please enter your password."
+                    required: "Please enter your password.",
                   })}
                 />
                 <FormErrorMessage>
@@ -117,7 +117,7 @@ function Login() {
                 bg="blue.400"
                 color="white"
                 _hover={{
-                  bg: "blue.500"
+                  bg: "blue.500",
                 }}
                 type="submit"
               >

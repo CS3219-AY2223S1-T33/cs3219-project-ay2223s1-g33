@@ -10,7 +10,7 @@ import HistoryTable from "../components/history/HistoryTable";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);
-  const hiddenColumns = ["attemptId"];
+  const hiddenColumns: string[] = ["attemptId", "users"];
   return (
     <>
       <Navbar />
