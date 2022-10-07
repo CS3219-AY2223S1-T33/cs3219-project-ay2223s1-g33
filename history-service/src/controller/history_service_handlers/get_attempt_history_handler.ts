@@ -67,6 +67,7 @@ implements IApiHandler<GetAttemptHistoryRequest, GetAttemptHistoryResponse> {
       headers: {},
       response: {
         attempts: crudResult.attempts,
+        totalCount: crudResult.totalCount,
         errorMessage: '',
       },
     };
@@ -77,6 +78,7 @@ implements IApiHandler<GetAttemptHistoryRequest, GetAttemptHistoryResponse> {
     return {
       response: {
         errorMessage,
+        totalCount: 0,
         attempts: [],
       },
       headers: {},

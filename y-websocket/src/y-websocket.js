@@ -113,7 +113,7 @@ const permissionDeniedHandler = (provider, reason) =>
 const readMessage = (provider, buf, emitSynced) => {
 	const decoder = decoding.createDecoder(buf);
 	const encoder = encoding.createEncoder();
-	const messageType = decoding.readVarUint(decoder);
+	const messageType = decoding.readUint8(decoder);
 	const messageHandler = provider.messageHandlers[messageType];
 	if (/** @type {any} */ (messageHandler)) {
 		messageHandler(encoder, decoder, provider, emitSynced, messageType);
@@ -494,6 +494,12 @@ export class WebsocketProvider extends Observable {
 		const encoder = encoding.createEncoder();
 		encoding.writeUint8(encoder, LANG_CHANGE);
 		encoding.writeVarString(encoder, language);
+		broadcastMessage(this, encoding.toUint8Array(encoder));
+	}
+
+	sendQuestionRequest() {
+		const encoder = encoding.createEncoder();
+		encoding.writeUint8(encoder, QUESTION_REQ);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
 

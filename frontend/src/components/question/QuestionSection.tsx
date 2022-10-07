@@ -10,7 +10,6 @@ type Props = {
 };
 
 function QuestionSection({ question }: Props) {
-  // TODO: Blocker - backend need to send question thru ws. Temp implementation
   const { questionId, name, difficulty, content } = question;
 
   const contentDecode = JSON.parse(content.replace(/\n/g, "\\".concat("n")));

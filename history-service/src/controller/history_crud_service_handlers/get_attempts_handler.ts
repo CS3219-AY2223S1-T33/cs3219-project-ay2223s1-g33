@@ -1,8 +1,8 @@
 import { HistoryAttempt } from '../../proto/types';
 import { GetAttemptsRequest, GetAttemptsResponse } from '../../proto/history-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
-import { IStorage, IAttemptStore } from '../../storage/storage';
-import { convertToProtoAttempt, StoredAttempt } from '../../model/attempt_store_model';
+import { IStorage, IAttemptStore, AttemptStoreSearchResult } from '../../storage/storage';
+import { convertToProtoAttempt } from '../../model/attempt_store_model';
 
 class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsResponse> {
   attemptStore: IAttemptStore;
@@ -30,27 +30,26 @@ class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsR
       return GetAttemptsHandler.buildErrorResponse('UserId or Username must be supplied');
     }
 
-    let storedAttempts: StoredAttempt[] = [];
+    let result: AttemptStoreSearchResult;
 
     if (request.questionId) {
       if (!request.username) {
         return GetAttemptsHandler.buildErrorResponse('Username must be supplied for questionId filter');
       }
-
-      storedAttempts = await this.attemptStore.getAttemptByUsernameAndQuestionId(
+      result = await this.attemptStore.getAttemptByUsernameAndQuestionId(
         request.username,
         request.questionId,
         limit,
         offset,
       );
     } else if (request.userId) {
-      storedAttempts = await this.attemptStore.getAttemptByUserId(
+      result = await this.attemptStore.getAttemptByUserId(
         request.userId,
         limit,
         offset,
       );
     } else if (request.username) {
-      storedAttempts = await this.attemptStore.getAttemptByUsername(
+      result = await this.attemptStore.getAttemptByUsername(
         request.username,
         limit,
         offset,
@@ -61,10 +60,11 @@ class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsR
 
     return {
       response: {
-        attempts: storedAttempts
+        attempts: result.attempts
           .map((x) => convertToProtoAttempt(x))
           .filter((x) => x !== undefined)
           .map((x) => x as HistoryAttempt),
+        totalCount: result.totalCount,
         errorMessage: '',
       },
       headers: {},
@@ -76,6 +76,7 @@ class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsR
       response: {
         errorMessage,
         attempts: [],
+        totalCount: 0,
       },
       headers: {},
     };

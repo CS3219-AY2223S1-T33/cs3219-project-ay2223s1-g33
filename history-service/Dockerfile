@@ -23,12 +23,14 @@ RUN npm run-script sync-schema
 FROM node:alpine
 WORKDIR /app/history-service
 # Install project dependencies
-COPY history-service/package.json history-service/package-lock.json .
+COPY history-service/package.json history-service/package-lock.json ./
 RUN npm install
 
 COPY history-service .
 COPY history-service/src ./src/
+RUN true
 COPY --from=0 /app/history-service/src/proto/ ./src/proto/
+RUN true
 COPY --from=0 /app/history-service/src/db/ ./src/db/
 
 # Build project

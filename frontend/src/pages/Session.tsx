@@ -19,10 +19,10 @@ import { selectUser } from "../feature/user/userSlice";
 import { Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-import { DUMMY_QUESTION } from "../utils/mockData";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
+type ErrorMessage = { errorMsg: string };
 
 let isInit = false;
 function Session() {
@@ -50,9 +50,7 @@ function Session() {
 
   const [wsStatus, setWsStatus] = useState("Not Connected");
   const [selectedLang, setSelectedLang] = useState<Language>("javascript");
-  const [question, setQuestion] = useState<Question | undefined>(
-    DUMMY_QUESTION
-  );
+  const [question, setQuestion] = useState<Question | undefined>();
 
   const [code, setCode] = useState("");
 
@@ -74,7 +72,6 @@ function Session() {
             setWsStatus("Connected");
             break;
           case "connecting":
-            // If it came from a disconnected state, skip
             if (wsStatus !== "Disconnected") {
               return;
             }
@@ -82,11 +79,15 @@ function Session() {
             break;
           default:
             setWsStatus("Disconnected");
-            // Opens a modal to show that they got disconnected
-            // leaveSessionHandler() will handle the cleanup of ws and yJS
             onOpenDisconnectModal();
             break;
         }
+      });
+
+      // eslint-disable-next-line
+      ws.on("terminate_with_error", (error: ErrorMessage) => {
+        setWsStatus("Disconnected");
+        onOpenDisconnectModal();
       });
 
       ws.on("user_join", (joinedNickname: Nickname) => {
@@ -106,10 +107,9 @@ function Session() {
         setSelectedLang(language);
       });
 
-      // TODO: Collab-svc integration
       ws.on("question_get", (q: { question: string }) => {
         const questionObj: Question = Question.fromJsonString(q.question);
-        // Update question Obj
+        toast.sendInfoMessage("Question loaded");
         setQuestion(questionObj);
       });
 
@@ -164,6 +164,14 @@ function Session() {
     saveFile(code, selectedLang);
   };
 
+  const getQuestionHandler = () => {
+    if (!provider) {
+      return;
+    }
+
+    provider.sendQuestionRequest();
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -177,7 +185,7 @@ function Session() {
       <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
-        <EditorTabs question={question} />
+        <EditorTabs question={question} getQuestion={getQuestionHandler} />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}

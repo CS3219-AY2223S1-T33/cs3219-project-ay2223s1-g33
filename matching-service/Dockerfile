@@ -14,7 +14,6 @@ RUN npm install
 RUN mkdir -p /app/matching-service matching-service/src/proto
 COPY proto proto/
 COPY scripts scripts/
-
 COPY matching-service/proto-emit.cfg matching-service
 RUN npm run-script gen-proto
 
@@ -22,11 +21,12 @@ FROM node:alpine
 WORKDIR /app/matching-service
 
 # Install project dependencies
-COPY matching-service/package.json matching-service/package-lock.json .
+COPY matching-service/package.json matching-service/package-lock.json ./
 RUN npm install
 
 COPY matching-service .
 COPY matching-service/src matching-service/src
+RUN true
 COPY --from=0 /app/matching-service/src/proto/ ./src/proto/
 
 # Build project
