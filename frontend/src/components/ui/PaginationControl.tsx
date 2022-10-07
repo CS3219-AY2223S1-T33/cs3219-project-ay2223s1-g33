@@ -13,7 +13,7 @@ function PaginationControl({
   hasPrevious,
   hasNext,
   onPrevious,
-  onNext
+  onNext,
 }: Props) {
   return (
     <Flex w="100%" pt={4}>
