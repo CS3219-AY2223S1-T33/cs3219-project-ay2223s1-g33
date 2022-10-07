@@ -10,7 +10,6 @@ type Props = {
 };
 
 function QuestionSection({ question }: Props) {
-  // TODO: Blocker - backend need to send question thru ws. Temp implementation
   const { questionId, name, difficulty, content } = question;
 
   const contentDecode = JSON.parse(content.replace(/\n/g, "\\".concat("n")));
@@ -26,12 +25,7 @@ function QuestionSection({ question }: Props) {
         </Heading>
       </Box>
       <Divider py={4} />
-      <VStack
-        spacing={4}
-        // pt={4}
-        id="question-content"
-      >
-        {/* To HW: Maybe VStack it? */}
+      <VStack spacing={4} align="start" id="question-content">
         {contentDecode.question.split("\n").map((ln: string) => (
           <Text>{ln}</Text>
         ))}
