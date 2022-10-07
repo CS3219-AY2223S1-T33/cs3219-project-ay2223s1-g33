@@ -14,38 +14,76 @@ import {
   Td,
   chakra,
   Code,
+  Flex,
+  Button
 } from "@chakra-ui/react";
-import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  TriangleDownIcon,
+  TriangleUpIcon
+} from "@chakra-ui/icons";
 import { HistoryAttempt, QuestionDifficulty } from "../../proto/types";
 import HistoryAttemptModal from "./HistoryAttemptModal";
 import difficultyColor from "../../utils/diffcultyColors";
+import usePagination from "../../utils/hooks/usePagination";
+import {
+  GetAttemptHistoryRequest,
+  GetAttemptHistoryResponse
+} from "../../proto/history-service";
 
 type Props = {
-  historyAttempts: HistoryAttempt[];
+  questionId: number;
 };
 
-function HistoryTable({ historyAttempts }: Props) {
-  const [userHistory, setUserHistory] = React.useState<HistoryAttempt[]>([]);
+function HistoryTable({ questionId }: Props) {
+  const requestFactory = (offset: number, limit: number) => {
+    const req: GetAttemptHistoryRequest = {
+      offset,
+      limit,
+      questionId
+    };
+    return req;
+  };
 
-  React.useEffect(() => {
-    setUserHistory(historyAttempts);
-  }, []);
+  const responseExtractor = (data: GetAttemptHistoryResponse) => {
+    const { errorMessage } = data;
+    if (errorMessage !== "") {
+      throw new Error(errorMessage);
+    }
+
+    // TODO total missing - need pull from main
+    const { attempts } = data;
+    return { items: attempts, total: 25 };
+  };
+
+  const pagination = usePagination({
+    fetchUrl: "/api/user/history",
+    requestFactory,
+    responseExtractor
+  });
+
+  // const [userHistory, setUserHistory] = React.useState<HistoryAttempt[]>([]);
+
+  // React.useEffect(() => {
+  //   setUserHistory(historyAttempts);
+  // }, []);
 
   const columns: Column<HistoryAttempt>[] = React.useMemo(
     () => [
       {
         Header: "ID",
-        accessor: "attemptId",
+        accessor: "attemptId"
       },
       {
         Header: "question",
         accessor: "question",
         Cell: (props) => (
           <Text fontWeight="bold">{`${props.value?.questionId}. ${props.value?.name}`}</Text>
-        ),
+        )
       },
       {
-        Header: "diffculty",
+        Header: "difficulty",
         accessor: (row) => (
           <Text
             fontWeight="bold"
@@ -53,21 +91,21 @@ function HistoryTable({ historyAttempts }: Props) {
           >
             {QuestionDifficulty[row.question!.difficulty].toString()}
           </Text>
-        ),
+        )
       },
       {
         Header: "language",
         accessor: "language",
-        Cell: (props) => <Code>{props.value}</Code>,
+        Cell: (props) => <Code>{props.value}</Code>
       },
       {
         Header: "users",
         accessor: "users",
-        Cell: (props) => <Text>{props.value[0]}</Text>,
+        Cell: (props) => <Text>{props.value[0]}</Text>
       },
       {
         Header: "Submited At",
-        accessor: "timestamp",
+        accessor: "timestamp"
       },
       {
         Header: "submission",
@@ -80,30 +118,29 @@ function HistoryTable({ historyAttempts }: Props) {
             submission={row.submission}
             question={row.question!}
           />
-        ),
-      },
+        )
+      }
     ],
-    [userHistory]
+    []
   );
 
-  const data = React.useMemo(() => userHistory, [userHistory]);
+  // const data = React.useMemo(() => userHistory, [userHistory]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable(
       {
         columns,
-        data,
+        data: pagination.items,
         initialState: {
           sortBy: [
             {
               id: "timestamp",
-              desc: false,
-            },
+              desc: false
+            }
           ],
-          hiddenColumns: ["attemptId"],
-        },
+          hiddenColumns: ["attemptId"]
+        }
       },
-
       useSortBy
     );
 
@@ -175,6 +212,23 @@ function HistoryTable({ historyAttempts }: Props) {
           }
         </Tbody>
       </Table>
+      <Flex w="100%">
+        <Button
+          leftIcon={<ArrowLeftIcon />}
+          isDisabled={!pagination.hasPrevious}
+          onClick={pagination.previousPage}
+        >
+          Previous
+        </Button>
+        <Text>{pagination.page}</Text>
+        <Button
+          rightIcon={<ArrowRightIcon />}
+          isDisabled={!pagination.hasNext}
+          onClick={pagination.nextPage}
+        >
+          Next
+        </Button>
+      </Flex>
     </Box>
   );
 }
