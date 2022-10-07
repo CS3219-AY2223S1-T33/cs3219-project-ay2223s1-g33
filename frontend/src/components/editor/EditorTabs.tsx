@@ -19,6 +19,8 @@ type Props = {
   getQuestion: () => void;
 };
 
+const hiddenColumns = ["attemptId", "question", "diffculty"];
+
 function EditorTabs({ question, getQuestion }: Props) {
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
@@ -44,7 +46,10 @@ function EditorTabs({ question, getQuestion }: Props) {
           <Text>Chat section</Text>
         </TabPanel>
         <TabPanel key="history_section">
-          <HistoryTable historyAttempts={DUMMY_HISTORY} />
+          <HistoryTable
+            hiddenColumns={hiddenColumns}
+            historyAttempts={DUMMY_HISTORY}
+          />
         </TabPanel>
       </TabPanels>
     </Tabs>

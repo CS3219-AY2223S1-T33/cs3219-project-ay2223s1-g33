@@ -1,7 +1,6 @@
 import { Box, Grid, Heading } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
-// import QueueForm from "../components/form/QueueForm";
 import Navbar from "../components/ui/navbar/HomeNavbar";
 import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
@@ -11,7 +10,7 @@ import { DUMMY_HISTORY } from "../utils/mockData";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);
-
+  const hiddenColumns = ["attemptId"];
   return (
     <>
       <Navbar />
@@ -27,7 +26,10 @@ function Home() {
         <Box>
           <Heading>Attempt History</Heading>
           <Box borderRadius="md" boxShadow="lg" p={8}>
-            <HistoryTable historyAttempts={DUMMY_HISTORY} />
+            <HistoryTable
+              hiddenColumns={hiddenColumns}
+              historyAttempts={DUMMY_HISTORY}
+            />
           </Box>
         </Box>
 
