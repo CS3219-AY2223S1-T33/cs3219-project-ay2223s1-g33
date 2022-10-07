@@ -1,22 +1,23 @@
 import { ServiceDefinition } from '@grpc/grpc-js';
 import { IUserService, userServiceDefinition } from '../proto/user-service.grpc-server';
-import {
-  CreateUserRequest,
-  CreateUserResponse,
-  DeleteUserRequest,
-  DeleteUserResponse,
-  EditUserRequest,
-  EditUserResponse,
-  GetUserRequest,
-  GetUserResponse,
-} from '../proto/user-service';
-import { ServiceHandlerDefinition, ApiService } from '../api_server/api_server_types';
+import { ServiceHandlerDefinition, ApiService, ILoopbackServiceChannel } from '../api_server/api_server_types';
 import { fromApiHandler } from '../api_server/api_server_helpers';
-import GetUserHandler from './user_service_handlers/get_user_handler';
-import { IStorage } from '../storage/storage.d';
-import CreateUserHandler from './user_service_handlers/create_user_handler';
-import EditUserHandler from './user_service_handlers/edit_user_handler';
-import DeleteUserHandler from './user_service_handlers/delete_user_handler';
+import RegisterHandler from './user_service_handlers/register_handler';
+import {
+  GetUserProfileRequest,
+  GetUserProfileResponse,
+  LoginRequest,
+  LoginResponse,
+  LogoutRequest,
+  LogoutResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from '../proto/user-service';
+import LoginHandler from './user_service_handlers/login_handler';
+import { IAuthenticationAgent } from '../auth/authentication_agent_types';
+import LogoutHandler from './user_service_handlers/logout_handler';
+import GetUserProfileHandler from './user_service_handlers/get_user_profile_handler';
+import { IUserCrudService } from '../proto/user-crud-service.grpc-server';
 
 class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
@@ -25,27 +26,38 @@ class UserServiceApi implements ApiService<IUserService> {
 
   serviceImplementation: IUserService;
 
-  constructor(storage: IStorage) {
+  constructor(
+    authService: IAuthenticationAgent,
+    crudLoopback: ILoopbackServiceChannel<IUserCrudService>,
+  ) {
     const handlerDefinitions: ServiceHandlerDefinition<IUserService> = {
-      getUser: fromApiHandler(new GetUserHandler(storage), GetUserRequest, GetUserResponse),
-      createUser: fromApiHandler(
-        new CreateUserHandler(storage),
-        CreateUserRequest,
-        CreateUserResponse,
+      register: fromApiHandler(
+        new RegisterHandler(crudLoopback),
+        RegisterRequest,
+        RegisterResponse,
       ),
-      editUser: fromApiHandler(new EditUserHandler(storage), EditUserRequest, EditUserResponse),
-      deleteUser: fromApiHandler(
-        new DeleteUserHandler(storage),
-        DeleteUserRequest,
-        DeleteUserResponse,
+      login: fromApiHandler(
+        new LoginHandler(crudLoopback, authService),
+        LoginRequest,
+        LoginResponse,
+      ),
+      logout: fromApiHandler(
+        new LogoutHandler(authService),
+        LogoutRequest,
+        LogoutResponse,
+      ),
+      getUserProfile: fromApiHandler(
+        new GetUserProfileHandler(crudLoopback, authService),
+        GetUserProfileRequest,
+        GetUserProfileResponse,
       ),
     };
 
     const userService: IUserService = {
-      getUser: handlerDefinitions.getUser.grpcRouteHandler,
-      createUser: handlerDefinitions.createUser.grpcRouteHandler,
-      editUser: handlerDefinitions.editUser.grpcRouteHandler,
-      deleteUser: handlerDefinitions.deleteUser.grpcRouteHandler,
+      register: handlerDefinitions.register.grpcRouteHandler,
+      login: handlerDefinitions.login.grpcRouteHandler,
+      logout: handlerDefinitions.logout.grpcRouteHandler,
+      getUserProfile: handlerDefinitions.getUserProfile.grpcRouteHandler,
     };
 
     this.serviceHandlerDefinition = handlerDefinitions;

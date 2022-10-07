@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import Navbar from "../components/ui/navbar/HomeNavbar";
 import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
-import TempQueueForm from "../components/form/TempQueueForm";
+import QueueForm from "../components/form/QueueForm";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);
@@ -32,8 +32,7 @@ function Home() {
         <Box>
           <Heading>Start Coding!</Heading>
           <Box borderRadius="md" boxShadow="lg" p={8}>
-            {/* {inQueue ? <Countdown /> : <QueueForm />} */}
-            {inQueue ? <Countdown /> : <TempQueueForm />}
+            {inQueue ? <Countdown /> : <QueueForm />}
           </Box>
         </Box>
       </Grid>

@@ -7,19 +7,29 @@ import (
 )
 
 type addBlacklistHandler struct {
-	tokenAgent token.TokenAgent
+	sessionAgent token.TokenAgent
+	refreshAgent token.TokenAgent
 }
 
-func CreateAddBlacklistHandler(tokenAgent token.TokenAgent) server.ApiHandler[pb.AddBlacklistRequest, pb.AddBlacklistResponse] {
+func NewAddBlacklistHandler(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) server.ApiHandler[pb.AddBlacklistRequest, pb.AddBlacklistResponse] {
 	return &addBlacklistHandler{
-		tokenAgent: tokenAgent,
+		sessionAgent: sessionAgent,
+		refreshAgent: refreshAgent,
 	}
 }
 
 func (handler *addBlacklistHandler) Handle(req *pb.AddBlacklistRequest) (*pb.AddBlacklistResponse, error) {
-	token := req.Token
-	err := handler.tokenAgent.BlacklistToken(token)
+	sessionToken := req.GetSessionToken()
+	refreshToken := req.GetRefreshToken()
 
+	err := handler.refreshAgent.BlacklistToken(refreshToken)
+	if err != nil {
+		return &pb.AddBlacklistResponse{
+			ErrorCode: pb.AddBlacklistErrorCode_ADD_BLACKLIST_ERROR_INTERNAL,
+		}, nil
+	}
+
+	err = handler.sessionAgent.BlacklistToken(sessionToken)
 	if err != nil {
 		return &pb.AddBlacklistResponse{
 			ErrorCode: pb.AddBlacklistErrorCode_ADD_BLACKLIST_ERROR_INTERNAL,

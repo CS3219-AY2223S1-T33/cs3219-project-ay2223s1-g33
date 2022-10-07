@@ -27,7 +27,7 @@ enum QueueStatus {
 }
 
 message JoinQueueRequest {
-  common.QuestionDifficulty difficulty = 1;
+  repeated common.QuestionDifficulty difficulties = 1;
 }
 
 message JoinQueueResponse {

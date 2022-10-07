@@ -1,41 +1,66 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"strconv"
+	"time"
 )
 
 type SessionServiceConfig struct {
 	RedisServer string
 	Port        int
 
-	SigningSecret string
+	SessionSecret        string
+	RefreshSecret        string
+	SessionTokenLifespan time.Duration
+	RefreshTokenLifespan time.Duration
 }
 
 const (
-	envRedisServer   = "REDIS_SERVER"
-	envPort          = "SERVER_PORT"
-	envSigningSecret = "JWT_SIGNING_SECRET"
+	envRedisServer     = "REDIS_SERVER"
+	envPort            = "SERVER_PORT"
+	envSessionSecret   = "SESSION_SIGNING_SECRET"
+	envRefreshSecret   = "REFRESH_SIGNING_SECRET"
+	envSessionLifespan = "SESSION_LIFESPAN_MINS"
+	envRefreshLifespan = "REFRESH_LIFESPAN_MINS"
 )
 
-func loadConfig() *SessionServiceConfig {
+const (
+	defaultPort                 = 4100
+	defaultSessionTokenLifespan = 15          // 15 minutes
+	defaultRefreshTokenLifespan = 3 * 24 * 60 // 3 days
+)
+
+func loadConfig() (*SessionServiceConfig, error) {
 	server := loadEnvVariableOrDefaultString(envRedisServer, nil)
 	if server == nil {
-		return nil
+		return nil, errors.New("Redis Server not set")
 	}
 
-	signingSecret := loadEnvVariableOrDefaultString(envSigningSecret, nil)
-	if signingSecret == nil {
-		return nil
+	sessionSecret := loadEnvVariableOrDefaultString(envSessionSecret, nil)
+	if sessionSecret == nil {
+		return nil, errors.New("Session Secret not set")
 	}
+
+	refreshSecret := loadEnvVariableOrDefaultString(envRefreshSecret, nil)
+	if refreshSecret == nil {
+		return nil, errors.New("Refresh Secret not set")
+	}
+
+	sessionTokenLifespan := loadEnvVariableOrDefaultInt(envSessionLifespan, defaultSessionTokenLifespan)
+	refreshTokenLifespan := loadEnvVariableOrDefaultInt(envRefreshLifespan, defaultRefreshTokenLifespan)
 
 	port := loadEnvVariableOrDefaultInt(envPort, 4100)
 
 	return &SessionServiceConfig{
-		RedisServer:   *server,
-		Port:          port,
-		SigningSecret: *signingSecret,
-	}
+		RedisServer:          *server,
+		Port:                 port,
+		SessionSecret:        *sessionSecret,
+		RefreshSecret:        *refreshSecret,
+		SessionTokenLifespan: time.Duration(int64(sessionTokenLifespan) * int64(time.Minute)),
+		RefreshTokenLifespan: time.Duration(int64(refreshTokenLifespan) * int64(time.Minute)),
+	}, nil
 }
 
 func loadEnvVariableOrDefaultString(envKey string, defaultValue *string) *string {

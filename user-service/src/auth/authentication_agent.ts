@@ -2,6 +2,7 @@ import { ChannelCredentials } from '@grpc/grpc-js';
 import {
   IAuthenticationAgent,
   TokenUserData,
+  TokenPair,
 } from './authentication_agent_types';
 import { SessionServiceClient } from '../proto/session-service.grpc-client';
 import { AddBlacklistErrorCode, CreateTokenErrorCode } from '../proto/session-service';
@@ -21,10 +22,11 @@ class AuthenticationAgent implements IAuthenticationAgent {
     );
   }
 
-  createToken(userData: TokenUserData): Promise<string> {
+  createToken(userData: TokenUserData): Promise<TokenPair> {
     return new Promise((resolve, reject) => {
       this.grpcClient.createToken({
         email: userData.username,
+        nickname: userData.nickname,
       }, (err, value) => {
         if (!value) {
           reject(err);
@@ -36,15 +38,19 @@ class AuthenticationAgent implements IAuthenticationAgent {
           return;
         }
 
-        resolve(value.token);
+        resolve({
+          sessionToken: value.sessionToken,
+          refreshToken: value.refreshToken,
+        });
       });
     });
   }
 
-  invalidateToken(token: string): Promise<boolean> {
+  invalidateToken(token: TokenPair): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.grpcClient.addBlacklist({
-        token,
+        sessionToken: token.sessionToken,
+        refreshToken: token.refreshToken,
       }, (err, value) => {
         if (!value) {
           reject(err);

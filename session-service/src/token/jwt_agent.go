@@ -12,7 +12,7 @@ var jwtSigningMethod = jwt.SigningMethodHS256
 
 type JwtAgent interface {
 	CreateToken(data *TokenData) (string, error)
-	VerifyToken(token string) (*TokenData, error)
+	VerifyToken(token string) (data *TokenData, issuedAt int64, err error)
 }
 
 type jwtAgent struct {
@@ -49,7 +49,7 @@ func (agent *jwtAgent) CreateToken(data *TokenData) (string, error) {
 	return token.SignedString(agent.secret)
 }
 
-func (agent *jwtAgent) VerifyToken(tokenString string) (*TokenData, error) {
+func (agent *jwtAgent) VerifyToken(tokenString string) (*TokenData, int64, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// Validate Algo
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -61,21 +61,21 @@ func (agent *jwtAgent) VerifyToken(tokenString string) (*TokenData, error) {
 	if err != nil {
 		validationErr, ok := err.(*jwt.ValidationError)
 		if !ok {
-			return nil, err
+			return nil, 0, err
 		}
 		if (validationErr.Errors & jwt.ValidationErrorExpired) == jwt.ValidationErrorExpired {
-			return nil, ExpiredTokenError{}
+			return nil, 0, ExpiredTokenError{}
 		}
 		if (validationErr.Errors & jwt.ValidationErrorSignatureInvalid) == jwt.ValidationErrorSignatureInvalid {
-			return nil, InvalidTokenError{}
+			return nil, 0, InvalidTokenError{}
 		}
-		return nil, InvalidTokenError{}
+		return nil, 0, InvalidTokenError{}
 	}
 
 	claims, ok := token.Claims.(*JwtClaims)
 	if !ok || !token.Valid || claims.User == nil {
-		return nil, InvalidTokenError{}
+		return nil, 0, InvalidTokenError{}
 	}
 
-	return claims.User, nil
+	return claims.User, claims.IssuedAt.Unix(), nil
 }

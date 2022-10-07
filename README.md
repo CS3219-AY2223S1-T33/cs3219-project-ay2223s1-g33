@@ -19,5 +19,7 @@ PeerPrep is a web application for collaborating on technical interview questions
 2. Then, run `npm run-script sync-schema`.
 
 ## Frontend
-1. Install npm packages using `npm i`.
-2. Run Frontend using `npm start`.
+1. In the root of the project, run `npm run-script gen-y-websocket`.
+2. Go the the frontend using `cd frontend/`.
+3. Install npm packages using `npm i`.
+4. Run Frontend using `npm start`.

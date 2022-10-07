@@ -4,41 +4,7 @@
 // tslint:disable
 import { CollabTunnelResponse } from "./collab-service";
 import { CollabTunnelRequest } from "./collab-service";
-import { VerifyRoomResponse } from "./collab-service";
-import { VerifyRoomRequest } from "./collab-service";
 import type * as grpc from "@grpc/grpc-js";
-/**
- * @generated from protobuf service collaboration_service.CollabService
- */
-export interface ICollabService extends grpc.UntypedServiceImplementation {
-    /**
-     * @generated from protobuf rpc: VerifyRoom(collaboration_service.VerifyRoomRequest) returns (collaboration_service.VerifyRoomResponse);
-     */
-    verifyRoom: grpc.handleUnaryCall<VerifyRoomRequest, VerifyRoomResponse>;
-}
-/**
- * @grpc/grpc-js definition for the protobuf service collaboration_service.CollabService.
- *
- * Usage: Implement the interface ICollabService and add to a grpc server.
- *
- * ```typescript
- * const server = new grpc.Server();
- * const service: ICollabService = ...
- * server.addService(collabServiceDefinition, service);
- * ```
- */
-export const collabServiceDefinition: grpc.ServiceDefinition<ICollabService> = {
-    verifyRoom: {
-        path: "/collaboration_service.CollabService/VerifyRoom",
-        originalName: "VerifyRoom",
-        requestStream: false,
-        responseStream: false,
-        responseDeserialize: bytes => VerifyRoomResponse.fromBinary(bytes),
-        requestDeserialize: bytes => VerifyRoomRequest.fromBinary(bytes),
-        responseSerialize: value => Buffer.from(VerifyRoomResponse.toBinary(value)),
-        requestSerialize: value => Buffer.from(VerifyRoomRequest.toBinary(value))
-    }
-};
 /**
  * @generated from protobuf service collaboration_service.CollabTunnelService
  */

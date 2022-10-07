@@ -2,6 +2,7 @@ package auth
 
 import (
 	"cs3219-project-ay2223s1-g33/gateway/util"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -26,29 +27,63 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 			return
 		}
 
-		// Sanitize the request
-		r.Header.Set("X-Bearer-Username", "")
-		r.Header.Set("X-Bearer-Session-Token", "")
+		sanitizeRequest(r)
 
 		// Authenticate
-		token, err := r.Cookie("AUTH-SESSION")
+		sessionTokenCookie, err := r.Cookie(AuthCookieNameSessionToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
+		sessionToken := sessionTokenCookie.Value
+
+		refreshTokenCookie, err := r.Cookie(AuthCookieNameRefreshToken)
+		if err != nil {
+			writeUnauthorizedResponse(w)
+			return
+		}
+		refreshToken := refreshTokenCookie.Value
 
 		log.Println("Authenticating with server")
-		username, err := authAgent.ValidateToken(token.Value)
+		username, nickname, newSessionToken, err := authAgent.ValidateToken(sessionToken, refreshToken)
 		if err != nil {
 			writeUnauthorizedResponse(w)
 			return
 		}
 
-		r.Header.Set("X-Bearer-Username", username)
-		r.Header.Set("X-Bearer-Session-Token", token.Value)
+		if newSessionToken != "" {
+			w.Header().Add("Set-Cookie", fmt.Sprintf(
+				"%s=%s; Path=/",
+				AuthCookieNameSessionToken,
+				newSessionToken,
+			))
+			sessionToken = newSessionToken
+		}
+
+		addAuthHeaders(r, username, nickname, sessionToken, refreshToken)
 		mux.ServeHTTP(w, r)
 	})
 	return handler, authAgent, nil
+}
+
+func sanitizeRequest(req *http.Request) {
+	req.Header.Set(AuthHeaderUsername, "")
+	req.Header.Set(AuthHeaderNickname, "")
+	req.Header.Set(AuthHeaderSessionToken, "")
+	req.Header.Set(AuthHeaderRefreshToken, "")
+}
+
+func addAuthHeaders(
+	req *http.Request,
+	username string,
+	nickname string,
+	sessionToken string,
+	refreshToken string,
+) {
+	req.Header.Set(AuthHeaderUsername, username)
+	req.Header.Set(AuthHeaderNickname, nickname)
+	req.Header.Set(AuthHeaderSessionToken, sessionToken)
+	req.Header.Set(AuthHeaderRefreshToken, refreshToken)
 }
 
 func writeUnauthorizedResponse(w http.ResponseWriter) {

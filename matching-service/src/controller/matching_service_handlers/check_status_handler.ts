@@ -47,9 +47,12 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
       );
     }
 
-    if (queueToken !== '') {
+    if (queueToken.matched) {
       await this.redisClient.deleteUserLock(username);
-      roomToken = this.roomAuthService.createToken(queueToken);
+      roomToken = this.roomAuthService.createToken(
+        queueToken.roomId,
+        queueToken.difficulty,
+      );
       queueStatus = QueueStatus.MATCHED;
     }
 

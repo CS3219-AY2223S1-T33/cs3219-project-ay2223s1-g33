@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package history_crud_service;
+option go_package = "cs3219-project-ay2223s1-g33/proto";
+
+import "types.proto";
+
+message GetAttemptRequest {
+  uint64 attempt_id = 1;
+}
+
+message GetAttemptResponse {
+  common.HistoryAttempt attempt = 1;
+  string error_message = 2;
+}
+
+message GetAttemptsRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+
+  uint64 user_id = 3;
+  string username = 4;
+  uint64 question_id = 5;
+}
+
+message GetAttemptsResponse {
+  repeated common.HistoryAttempt attempts = 1;
+  int32 total_count = 2;
+  string error_message = 3;
+}
+
+message CreateAttemptRequest {
+  common.HistoryAttempt attempt = 1;
+}
+
+message CreateAttemptResponse {
+  common.HistoryAttempt attempt = 1;
+  string error_message = 2;
+}
+
+message DeleteAttemptRequest {
+  uint64 attempt_id = 1;
+}
+
+message DeleteAttemptResponse {
+  string error_message = 1;
+}
+
+service HistoryCrudService {
+  rpc GetAttempt(GetAttemptRequest) returns (GetAttemptResponse);
+  rpc GetAttempts(GetAttemptsRequest) returns (GetAttemptsResponse);
+  rpc CreateAttempt(CreateAttemptRequest) returns (CreateAttemptResponse);
+  rpc DeleteAttempt(DeleteAttemptRequest) returns (DeleteAttemptResponse);
+}

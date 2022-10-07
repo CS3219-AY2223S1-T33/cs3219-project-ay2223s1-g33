@@ -3,110 +3,179 @@ package worker
 import (
 	"cs3219-project-ay2223s1-g33/matchmaker/common"
 	"cs3219-project-ay2223s1-g33/matchmaker/mocks"
-	"errors"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSimpleMatching(t *testing.T) {
-	easyChan := make(chan *string, 10)
-	medChan := make(chan *string, 10)
-	hardChan := make(chan *string, 10)
-
-	worker := matchWorker{
-		queues: &common.QueueBuffers{
-			EasyQueue:   easyChan,
-			MediumQueue: medChan,
-			HardQueue:   hardChan,
-		},
-		queueMessageLifespan: 30 * time.Second,
-	}
-
-	executor := worker.createMatchingContext()
-	chans := []chan *string{easyChan, medChan, hardChan}
-
-	for _, c := range chans {
-		c <- pointerStringOf("A")
-		assert.Nil(t, executor())
-		c <- pointerStringOf("B")
-		match := executor()
-		assert.NotNil(t, match)
-		assert.Equal(t, "A", *match.userA)
-		assert.Equal(t, "B", *match.userB)
-	}
-}
-
-func TestQueueIsolation(t *testing.T) {
-	easyChan := make(chan *string, 10)
-	medChan := make(chan *string, 10)
-	hardChan := make(chan *string, 10)
-
-	worker := matchWorker{
-		queues: &common.QueueBuffers{
-			EasyQueue:   easyChan,
-			MediumQueue: medChan,
-			HardQueue:   hardChan,
-		},
-		queueMessageLifespan: 30 * time.Second,
-	}
-
-	executor := worker.createMatchingContext()
-
-	easyChan <- pointerStringOf("A")
-	medChan <- pointerStringOf("B")
-	hardChan <- pointerStringOf("C")
-
-	assert.Nil(t, executor()) // Ingest A
-	assert.Nil(t, executor()) // Ingest B
-	assert.Nil(t, executor()) // Ingest C
-	hardChan <- pointerStringOf("E")
-	hardChan <- pointerStringOf("F")
-
-	match := executor() // Ingest E
-	assert.NotNil(t, match)
-	assert.Equal(t, "C", *match.userA)
-	assert.Equal(t, "E", *match.userB)
-	assert.Nil(t, executor()) // Ingest F
-
-	medChan <- pointerStringOf("G")
-	match = executor() // Ingest G
-	assert.NotNil(t, match)
-	assert.Equal(t, "B", *match.userA)
-	assert.Equal(t, "G", *match.userB)
-}
-
-func TestUploadMatch(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	redisClient := mocks.NewMockRedisMatchmakerClient(ctrl)
+	mockHandler := mocks.NewMockMatchResultHandler(ctrl)
+	worker := matchWorker{}
+
+	gomock.InOrder(
+		mockHandler.EXPECT().HandleMatches(gomock.Eq([]*common.QueueItemsMatch{
+			{
+				UserA: &common.QueueItem{
+					Username:     "A",
+					Difficulties: []int{1},
+				},
+				UserB: &common.QueueItem{
+					Username:     "B",
+					Difficulties: []int{1},
+				},
+				Difficulty: 1,
+			},
+		})),
+		mockHandler.EXPECT().HandleMatches(gomock.Eq([]*common.QueueItemsMatch{
+			{
+				UserA: &common.QueueItem{
+					Username:     "A",
+					Difficulties: []int{2},
+				},
+				UserB: &common.QueueItem{
+					Username:     "B",
+					Difficulties: []int{2},
+				},
+				Difficulty: 2,
+			},
+		})),
+		mockHandler.EXPECT().HandleMatches(gomock.Eq([]*common.QueueItemsMatch{
+			{
+				UserA: &common.QueueItem{
+					Username:     "A",
+					Difficulties: []int{3},
+				},
+				UserB: &common.QueueItem{
+					Username:     "B",
+					Difficulties: []int{3},
+				},
+				Difficulty: 3,
+			},
+		})),
+	)
+
+	items := []*common.QueueItem{
+		{
+			Username:     "A",
+			Difficulties: []int{1},
+		},
+		{
+			Username:     "B",
+			Difficulties: []int{1},
+		},
+	}
+	worker.HandleQueueItems(items)
+	worker.PipeTo(mockHandler)
+
+	for i := 0; i < 3; i++ {
+		items = []*common.QueueItem{
+			{
+				Username:     "A",
+				Difficulties: []int{i + 1},
+			},
+			{
+				Username:     "B",
+				Difficulties: []int{i + 1},
+			},
+		}
+		worker.HandleQueueItems(items)
+	}
+}
+
+func TestMultiDifficultyMatching(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockHandler := mocks.NewMockMatchResultHandler(ctrl)
 	worker := matchWorker{
-		redisClient: redisClient,
+		outputHandler: mockHandler,
 	}
 
 	gomock.InOrder(
-		redisClient.EXPECT().UploadMatch("A", "ASDF"),
-		redisClient.EXPECT().UploadMatch("B", "ASDF"),
-		redisClient.EXPECT().UploadMatch("A", "ASDF").Return(errors.New("Test error")),
-		redisClient.EXPECT().UploadMatch("A", "ASDF"),
-		redisClient.EXPECT().UploadMatch("B", "ASDF").Return(errors.New("Test error")),
+		mockHandler.EXPECT().HandleMatches(gomock.Any()).Do(func(matches []*common.QueueItemsMatch) {
+			assert.Equal(t, 2, len(matches))
+
+			t.Log(matches[0].UserA.Username)
+			t.Log(matches[0].UserB.Username)
+			assert.Equal(t, "B", matches[0].UserA.Username)
+			assert.Equal(t, "C", matches[0].UserB.Username)
+			assert.Equal(t, 3, matches[0].Difficulty)
+
+			assert.Equal(t, "A", matches[1].UserA.Username)
+			assert.Equal(t, "D", matches[1].UserB.Username)
+			assert.Equal(t, 1, matches[1].Difficulty)
+		}),
 	)
 
-	match := &MatchmakerMatch{
-		userA: pointerStringOf("A"),
-		userB: pointerStringOf("B"),
-		token: pointerStringOf("ASDF"),
+	items := []*common.QueueItem{
+		{
+			Username:     "A",
+			Difficulties: []int{1, 2},
+		},
+		{
+			Username:     "B",
+			Difficulties: []int{3},
+		},
+		{
+			Username:     "C",
+			Difficulties: []int{2, 3},
+		},
+		{
+			Username:     "D",
+			Difficulties: []int{1},
+		},
+		{
+			Username:     "E",
+			Difficulties: []int{3, 1},
+		},
 	}
 
-	worker.uploadMatch(nil)
-	worker.uploadMatch(match)
-	worker.uploadMatch(match)
-	worker.uploadMatch(match)
+	worker.HandleQueueItems(items)
 }
 
-func pointerStringOf(value string) *string {
-	return &value
+func TestQueueIsolation(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockHandler := mocks.NewMockMatchResultHandler(ctrl)
+	mockHandler.EXPECT().HandleMatches(gomock.Eq([]*common.QueueItemsMatch{})).Times(6)
+	worker := matchWorker{
+		outputHandler: mockHandler,
+	}
+
+	for i := 0; i < 3; i++ {
+		difficultyA := i + 1
+		difficultyB := ((i + 1) % 3) + 1
+		items := []*common.QueueItem{
+			{
+				Username:     "A",
+				Difficulties: []int{difficultyA},
+			},
+			{
+				Username:     "B",
+				Difficulties: []int{difficultyB},
+			},
+		}
+		worker.HandleQueueItems(items)
+	}
+
+	for i := 0; i < 3; i++ {
+		difficultyA := i + 1
+		difficultyB := ((i + 2) % 3) + 1
+		items := []*common.QueueItem{
+			{
+				Username:     "A",
+				Difficulties: []int{difficultyA},
+			},
+			{
+				Username:     "B",
+				Difficulties: []int{difficultyB},
+			},
+		}
+		worker.HandleQueueItems(items)
+	}
 }

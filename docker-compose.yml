@@ -1,10 +1,9 @@
 version: '3.8'
 services:
   frontend:
-    platform: linux/amd64
     build:
       context: .
-      dockerfile: frontend.dockerfile
+      dockerfile: ./frontend/Dockerfile
 
     restart: always
 
@@ -23,7 +22,7 @@ services:
 
     build:
       context: .
-      dockerfile: user-service.dockerfile
+      dockerfile: ./user-service/Dockerfile
 
     ports:
       - "8081:8081"
@@ -39,12 +38,11 @@ services:
       - "host.docker.internal:host-gateway"
 
   matching-service:
-    platform: linux/amd64
     env_file: config_env/matching-service.env
 
     build:
       context: .
-      dockerfile: matching-service.dockerfile
+      dockerfile: ./matching-service/Dockerfile
 
     ports:
       - "8082:8082"
@@ -59,34 +57,32 @@ services:
       - "host.docker.internal:host-gateway"
 
   collab-service:
-    platform: linux/amd64
     env_file: config_env/collab-service.env
 
     build:
       context: .
-      dockerfile: collab-service.dockerfile
+      dockerfile: ./collab-service/Dockerfile
 
     ports:
-      - "8083:8083"
       - "4003:4003"
 
     expose:
-      - "8083"
       - "4003"
 
     volumes:
       - .:/app/collab-service/build
       - /app/collab-service/node_modules
+
   question-service:
-    platform: linux/amd64
     env_file: config_env/question-service.env
 
     build:
       context: .
-      dockerfile: question-service.dockerfile
+      dockerfile: ./question-service/Dockerfile
 
     ports:
       - "8084:8084"
+      - "4004:4004"
 
     expose:
       - "8084"
@@ -97,6 +93,7 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
   matchmaker:
     platform: linux/amd64
     env_file: config_env/matchmaker.env
@@ -120,6 +117,20 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  history-service:
+    platform: linux/amd64
+    env_file: config_env/history-service.env
+
+    build:
+      context: .
+      dockerfile: history-service/Dockerfile
+
+    ports:
+      - "4005:4005"
+      - "8085:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   gateway:
     platform: linux/amd64
     env_file: config_env/gateway.env
@@ -130,18 +141,6 @@ services:
 
     ports:
       - "5001:5000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-  tunnel-dummy:
-    platform: linux/amd64
-
-    build:
-      context: ./tunnel-placeholder
-      dockerfile: Dockerfile
-
-    ports:
-      - "4002:4002"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

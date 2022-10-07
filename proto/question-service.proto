@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package user_service;
+package question_service;
 option go_package = "cs3219-project-ay2223s1-g33/proto";
 
 import "types.proto";

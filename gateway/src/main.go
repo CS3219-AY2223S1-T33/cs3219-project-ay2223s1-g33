@@ -4,6 +4,7 @@ import (
 	"context"
 	"cs3219-project-ay2223s1-g33/gateway/auth"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -11,12 +12,19 @@ import (
 )
 
 func main() {
-	log.Println("Starting GRPC Gateway")
+	log.Printf("Starting GRPC Gateway [V%d.%d.%d]\n", VersionMajor, VersionMinor, VersionRevision)
 	config := loadConfig()
 
-	if err := run(config); err != nil {
-		log.Fatal(err)
+	if config == nil {
+		log.Fatalln("Gateway not configured")
 	}
+
+	log.Printf("Listening on port %d\n", config.Port)
+
+	if err := run(config); err != nil {
+		log.Fatalln(err)
+	}
+
 	log.Println("GRPC Gateway Death")
 }
 
@@ -52,5 +60,5 @@ func run(config *GatewayConfiguration) error {
 	corsMux := corsObj.Handler(prefixRouter)
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(":5000", corsMux)
+	return http.ListenAndServe(fmt.Sprintf(":%d", config.Port), corsMux)
 }

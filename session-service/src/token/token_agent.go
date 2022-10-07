@@ -1,6 +1,9 @@
 package token
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type TokenAgent interface {
 	CreateToken(data *TokenData) (string, error)
@@ -14,6 +17,8 @@ type tokenAgent struct {
 	jwtAgent  JwtAgent
 }
 
+const blacklistKeyFormat = "%s-%d"
+
 func CreateTokenAgent(secret string, tokenValidity time.Duration, blacklist TokenBlacklist) TokenAgent {
 	return &tokenAgent{
 		blacklist: blacklist,
@@ -26,7 +31,13 @@ func (agent *tokenAgent) CreateToken(data *TokenData) (string, error) {
 }
 
 func (agent *tokenAgent) ValidateToken(token string) (*TokenData, error) {
-	isBlacklisted, err := agent.blacklist.IsTokenBlacklisted(token)
+	tokenData, issuedAt, err := agent.jwtAgent.VerifyToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
+	isBlacklisted, err := agent.blacklist.IsTokenBlacklisted(blacklistKey)
 	if err != nil {
 		return nil, err
 	}
@@ -35,13 +46,25 @@ func (agent *tokenAgent) ValidateToken(token string) (*TokenData, error) {
 		return nil, InvalidTokenError{}
 	}
 
-	return agent.jwtAgent.VerifyToken(token)
+	return tokenData, nil
 }
 
 func (agent *tokenAgent) BlacklistToken(token string) error {
-	return agent.blacklist.AddToken(token)
+	tokenData, issuedAt, err := agent.jwtAgent.VerifyToken(token)
+	if err != nil {
+		return err
+	}
+
+	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
+	return agent.blacklist.AddToken(blacklistKey)
 }
 
 func (agent *tokenAgent) UnblacklistToken(token string) error {
-	return agent.blacklist.RemoveToken(token)
+	tokenData, issuedAt, err := agent.jwtAgent.VerifyToken(token)
+	if err != nil {
+		return err
+	}
+
+	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
+	return agent.blacklist.RemoveToken(blacklistKey)
 }

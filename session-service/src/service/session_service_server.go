@@ -17,11 +17,11 @@ type SessionService struct {
 	addBlacklistHandler  server.ApiHandler[pb.AddBlacklistRequest, pb.AddBlacklistResponse]
 }
 
-func CreateSessionService(tokenAgent token.TokenAgent) *SessionService {
+func CreateSessionService(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) *SessionService {
 	return &SessionService{
-		createTokenHandler:   handlers.CreateCreateTokenHandler(tokenAgent),
-		validateTokenHandler: handlers.CreateValidateTokenHandler(tokenAgent),
-		addBlacklistHandler:  handlers.CreateAddBlacklistHandler(tokenAgent),
+		createTokenHandler:   handlers.NewCreateTokenHandler(sessionAgent, refreshAgent),
+		validateTokenHandler: handlers.NewValidateTokenHandler(sessionAgent, refreshAgent),
+		addBlacklistHandler:  handlers.NewAddBlacklistHandler(sessionAgent, refreshAgent),
 	}
 }
 
