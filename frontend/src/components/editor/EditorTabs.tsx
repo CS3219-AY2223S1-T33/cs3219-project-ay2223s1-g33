@@ -5,6 +5,8 @@ import {
   TabPanels,
   TabPanel,
   Text,
+  Button,
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";
@@ -14,11 +16,10 @@ import { DUMMY_HISTORY } from "../../utils/mockData";
 
 type Props = {
   question: Question | undefined;
+  getQuestion: () => void;
 };
 
-function EditorTabs({ question }: Props) {
-  // TODO Remove when implementation properly done
-  // ! Using Dummy Question
+function EditorTabs({ question, getQuestion }: Props) {
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
       <TabList>
@@ -33,7 +34,10 @@ function EditorTabs({ question }: Props) {
           {question ? (
             <QuestionSection question={question} />
           ) : (
-            <Text>Error: No question received.</Text>
+            <VStack align="center" spacing={6}>
+              <Text>Error: No question received.</Text>
+              <Button onClick={getQuestion}>Get Question</Button>
+            </VStack>
           )}
         </TabPanel>
         <TabPanel key="chat_section">

@@ -4,6 +4,11 @@ declare interface IStorage {
   getAttemptStore(): IAttemptStore;
 }
 
+declare type AttemptStoreSearchResult = {
+  attempts: StoredAttempt[];
+  totalCount: number;
+};
+
 declare interface IAttemptStore {
   addAttempt(attempt: StoredAttempt): Promise<StoredAttempt>;
   removeAttempt(id: number): Promise<void>;
@@ -12,18 +17,18 @@ declare interface IAttemptStore {
     userId: number,
     limit: number,
     offset: number,
-  ): Promise<StoredAttempt[]>;
+  ): Promise<AttemptStoreSearchResult>;
   getAttemptByUsername(
     username: string,
     limit: number,
     offset: number,
-  ): Promise<StoredAttempt[]>;
+  ): Promise<AttemptStoreSearchResult>;
   getAttemptByUsernameAndQuestionId(
     username: string,
     questionId: number,
     limit: number,
     offset: number,
-  ): Promise<StoredAttempt[]>;
+  ): Promise<AttemptStoreSearchResult>;
 }
 
-export { IStorage, IAttemptStore };
+export { IStorage, IAttemptStore, AttemptStoreSearchResult };

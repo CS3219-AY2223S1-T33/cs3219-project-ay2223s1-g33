@@ -23,6 +23,7 @@ import { DUMMY_QUESTION } from "../utils/mockData";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
+type ErrorMessage = { errorMsg: string };
 
 let isInit = false;
 function Session() {
@@ -33,12 +34,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal,
+    onClose: onCloseLeaveModal
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal,
+    onClose: onCloseDisconnectModal
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -50,9 +51,7 @@ function Session() {
 
   const [wsStatus, setWsStatus] = useState("Not Connected");
   const [selectedLang, setSelectedLang] = useState<Language>("javascript");
-  const [question, setQuestion] = useState<Question | undefined>(
-    DUMMY_QUESTION
-  );
+  const [question, setQuestion] = useState<Question | undefined>();
 
   const [code, setCode] = useState("");
 
@@ -74,7 +73,6 @@ function Session() {
             setWsStatus("Connected");
             break;
           case "connecting":
-            // If it came from a disconnected state, skip
             if (wsStatus !== "Disconnected") {
               return;
             }
@@ -82,22 +80,26 @@ function Session() {
             break;
           default:
             setWsStatus("Disconnected");
-            // Opens a modal to show that they got disconnected
-            // leaveSessionHandler() will handle the cleanup of ws and yJS
             onOpenDisconnectModal();
             break;
         }
       });
 
+      // eslint-disable-next-line
+      ws.on("terminate_with_error", (error: ErrorMessage) => {
+        setWsStatus("Disconnected");
+        onOpenDisconnectModal();
+      });
+
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`,
+          title: `${joinedNickname.nickname} has joined the room!`
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`,
+          title: `${leftNickname.nickname} has left the room.`
         });
       });
 
@@ -106,10 +108,9 @@ function Session() {
         setSelectedLang(language);
       });
 
-      // TODO: Collab-svc integration
       ws.on("question_get", (q: { question: string }) => {
         const questionObj: Question = Question.fromJsonString(q.question);
-        // Update question Obj
+        toast.sendInfoMessage("Question loaded");
         setQuestion(questionObj);
       });
 
@@ -120,7 +121,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -164,6 +165,14 @@ function Session() {
     saveFile(code, selectedLang);
   };
 
+  const getQuestionHandler = () => {
+    if (!provider) {
+      return;
+    }
+
+    provider.sendQuestionRequest();
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -177,7 +186,7 @@ function Session() {
       <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
-        <EditorTabs question={question} />
+        <EditorTabs question={question} getQuestion={getQuestionHandler} />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}

@@ -36,6 +36,11 @@ export const matchingSlice = createSlice({
       const newValue = !state.diffSelected[index];
       state.diffSelected.splice(index, 1, newValue);
     },
+    reset: (state) => {
+      state.inQueue = initialState.inQueue;
+      state.diffSelected = initialState.diffSelected;
+      state.roomToken = initialState.roomToken;
+    },
   },
 });
 
@@ -45,5 +50,6 @@ export const {
   leaveRoom,
   leaveQueue,
   toggleDifficulty,
+  reset,
 } = matchingSlice.actions;
 export default matchingSlice.reducer;
