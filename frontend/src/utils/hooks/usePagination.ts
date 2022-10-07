@@ -10,7 +10,6 @@ type PaginationProps<T, U, V> = {
 };
 
 const PER_PAGE = 10;
-let isReq = false;
 const usePagination = <T, U, V>({ fetchUrl, requestFactory, responseExtractor }: PaginationProps<T, U, V>) => {
 	const [items, setItems] = useState<T[]>([]);
 	const [offset, setOffset] = useState(0);
@@ -28,9 +27,6 @@ const usePagination = <T, U, V>({ fetchUrl, requestFactory, responseExtractor }:
 			});
 
 	useEffect(() => {
-		if (isReq) {
-			return;
-		}
 		const request = requestFactory(offset, PER_PAGE);
 		fetchData(request, (res) => {
 			const updatedItems = responseExtractor(res.data);
@@ -39,8 +35,6 @@ const usePagination = <T, U, V>({ fetchUrl, requestFactory, responseExtractor }:
 			setTotalPages(Math.ceil(updatedItems.total / PER_PAGE) + 1);
 			setHasNext(offset + PER_PAGE < updatedItems.total);
 		});
-		isReq = true;
-		// return () => {};
 	}, []);
 
 	const nextPage = () => {
@@ -52,6 +46,9 @@ const usePagination = <T, U, V>({ fetchUrl, requestFactory, responseExtractor }:
 			setOffset(newOffset);
 			setHasNext(newOffset + PER_PAGE < total);
 			setHasPrevious(true);
+			if (updatedItems.total !== total) {
+				setTotal(updatedItems.total);
+			}
 		});
 	};
 
@@ -64,6 +61,9 @@ const usePagination = <T, U, V>({ fetchUrl, requestFactory, responseExtractor }:
 			setOffset(newOffset);
 			setHasNext(true);
 			setHasPrevious(newOffset > 0);
+			if (updatedItems.total !== total) {
+				setTotal(updatedItems.total);
+			}
 		});
 	};
 
@@ -75,6 +75,7 @@ const usePagination = <T, U, V>({ fetchUrl, requestFactory, responseExtractor }:
 		hasPrevious,
 		nextPage,
 		previousPage,
+		total,
 	};
 };
 

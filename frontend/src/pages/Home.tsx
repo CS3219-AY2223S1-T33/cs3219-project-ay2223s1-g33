@@ -6,7 +6,7 @@ import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
 import QueueForm from "../components/form/QueueForm";
 import HistoryTable from "../components/history/HistoryTable";
-import { DUMMY_HISTORY } from "../utils/mockData";
+// import { DUMMY_HISTORY } from "../utils/mockData";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);
@@ -14,22 +14,19 @@ function Home() {
   return (
     <>
       <Navbar />
-      {/* Expected Responsive problems to happen here */}
+      {/* TODO Expected Responsive problems to happen here */}
       <Grid
-        templateColumns="2fr 1fr"
+        templateColumns="70% 30%"
         gap={10}
-        minW="65vw"
-        maxW="80vw"
+        minW="70vw"
+        maxW="85vw"
         mx="auto"
         my={16}
       >
         <Box>
           <Heading>Attempt History</Heading>
           <Box borderRadius="md" boxShadow="lg" p={8}>
-            <HistoryTable
-              hiddenColumns={hiddenColumns}
-              historyAttempts={DUMMY_HISTORY}
-            />
+            <HistoryTable hiddenColumns={hiddenColumns} />
           </Box>
         </Box>
 

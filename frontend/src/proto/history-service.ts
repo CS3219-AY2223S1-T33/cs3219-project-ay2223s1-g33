@@ -40,7 +40,11 @@ export interface GetAttemptHistoryResponse {
      */
     attempts: HistoryAttempt[];
     /**
-     * @generated from protobuf field: string error_message = 2;
+     * @generated from protobuf field: int32 total_count = 2;
+     */
+    totalCount: number;
+    /**
+     * @generated from protobuf field: string error_message = 3;
      */
     errorMessage: string;
 }
@@ -110,11 +114,12 @@ class GetAttemptHistoryResponse$Type extends MessageType<GetAttemptHistoryRespon
     constructor() {
         super("history_service.GetAttemptHistoryResponse", [
             { no: 1, name: "attempts", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => HistoryAttempt },
-            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "total_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 3, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<GetAttemptHistoryResponse>): GetAttemptHistoryResponse {
-        const message = { attempts: [], errorMessage: "" };
+        const message = { attempts: [], totalCount: 0, errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<GetAttemptHistoryResponse>(this, message, value);
@@ -128,7 +133,10 @@ class GetAttemptHistoryResponse$Type extends MessageType<GetAttemptHistoryRespon
                 case /* repeated common.HistoryAttempt attempts */ 1:
                     message.attempts.push(HistoryAttempt.internalBinaryRead(reader, reader.uint32(), options));
                     break;
-                case /* string error_message */ 2:
+                case /* int32 total_count */ 2:
+                    message.totalCount = reader.int32();
+                    break;
+                case /* string error_message */ 3:
                     message.errorMessage = reader.string();
                     break;
                 default:
@@ -146,9 +154,12 @@ class GetAttemptHistoryResponse$Type extends MessageType<GetAttemptHistoryRespon
         /* repeated common.HistoryAttempt attempts = 1; */
         for (let i = 0; i < message.attempts.length; i++)
             HistoryAttempt.internalBinaryWrite(message.attempts[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* string error_message = 2; */
+        /* int32 total_count = 2; */
+        if (message.totalCount !== 0)
+            writer.tag(2, WireType.Varint).int32(message.totalCount);
+        /* string error_message = 3; */
         if (message.errorMessage !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+            writer.tag(3, WireType.LengthDelimited).string(message.errorMessage);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

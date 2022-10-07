@@ -1,10 +1,9 @@
 /* eslint react/destructuring-assignment: 0 */
 /* eslint react/prop-types: 0 */
 /* eslint react/no-unstable-nested-components: 0 */
-import React from "react";
+import React, { useState } from "react";
 import { useTable, Column, useSortBy } from "react-table";
 import {
-  Box,
   Text,
   Table,
   Thead,
@@ -16,7 +15,8 @@ import {
   Code,
   Flex,
   useDisclosure,
-  Button
+  Button,
+  TableContainer
 } from "@chakra-ui/react";
 import {
   ArrowLeftIcon,
@@ -29,62 +29,34 @@ import { HistoryAttempt, QuestionDifficulty } from "../../proto/types";
 import HistoryAttemptModal from "../modal/HistoryAttemptModal";
 import difficultyColor from "../../utils/diffcultyColors";
 import usePagination from "../../utils/hooks/usePagination";
-import {
-  GetAttemptHistoryRequest,
-  GetAttemptHistoryResponse
-} from "../../proto/history-service";
 import { RootState } from "../../app/store";
+import {
+  createAttemptHistoryExtractor,
+  createAttemptHistoryReqFactory
+} from "../../utils/builderUtils";
 
 type Props = {
-  questionId: number;
-  historyAttempts: HistoryAttempt[];
+  questionId?: number;
   hiddenColumns: string[];
 };
 
-function HistoryTable({ historyAttempts, hiddenColumns, questionId }: Props) {
-  const requestFactory = (offset: number, limit: number) => {
-    const req: GetAttemptHistoryRequest = {
-      offset,
-      limit,
-      questionId
-    };
-    return req;
-  };
-
-  const responseExtractor = (data: GetAttemptHistoryResponse) => {
-    const { errorMessage } = data;
-    if (errorMessage !== "") {
-      throw new Error(errorMessage);
-    }
-
-    // TODO total missing - need pull from main
-    const { attempts } = data;
-    return { items: attempts, total: 25 };
-  };
+function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
+  const currUser = useSelector((state: RootState) => state.user.user);
 
   const pagination = usePagination({
     fetchUrl: "/api/user/history",
-    requestFactory,
-    responseExtractor
+    requestFactory: createAttemptHistoryReqFactory(questionId),
+    responseExtractor: createAttemptHistoryExtractor()
   });
-  const [userHistory, setUserHistory] = React.useState<HistoryAttempt[]>([]);
-  const [modalHistoryAttempt, setModalHistoryAttempt] = React.useState<
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [modalHistoryAttempt, setModalHistoryAttempt] = useState<
     HistoryAttempt | undefined
   >();
 
-  const {
-    isOpen: isHistoryModalOpen,
-    onOpen: onOpenHistoryModal,
-    onClose: onCloseHistoryModal
-  } = useDisclosure();
   const onHistoryAttemptClick = (historyAttempt: HistoryAttempt) => {
     setModalHistoryAttempt(historyAttempt);
-    onOpenHistoryModal();
+    onOpen();
   };
-  const currUser = useSelector((state: RootState) => state.user.user);
-  React.useEffect(() => {
-    setUserHistory(historyAttempts);
-  }, []);
 
   const columns: Column<HistoryAttempt>[] = React.useMemo(
     () => [
@@ -136,10 +108,8 @@ function HistoryTable({ historyAttempts, hiddenColumns, questionId }: Props) {
         )
       }
     ],
-    []
+    [currUser]
   );
-
-  const data = React.useMemo(() => userHistory, [userHistory]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable(
@@ -159,106 +129,110 @@ function HistoryTable({ historyAttempts, hiddenColumns, questionId }: Props) {
       useSortBy
     );
 
-  return (
-    <Box>
-      {data.length === 0 ? (
-        <Text>No history</Text>
-      ) : (
-        <>
-          <Table overflow="auto" {...getTableProps()}>
-            <Thead>
-              {
-                // Loop over the header rows
-                headerGroups.map((headerGroup) => (
-                  // Apply the header row props
-                  <Tr {...headerGroup.getHeaderGroupProps()}>
-                    {
-                      // Loop over the headers in each row
-                      headerGroup.headers.map((column) => (
-                        // Apply the header cell props
-                        // <Th {...column.getHeaderProps()}>.
+  if (pagination.total === 0) {
+    const text =
+      questionId > 0
+        ? "No attempt history for this question"
+        : "No attempt history";
+    return <Text fontSize="xl">{text}</Text>;
+  }
 
-                        <Th
-                          {...column.getHeaderProps(
-                            column.getSortByToggleProps()
+  return (
+    <>
+      <TableContainer>
+        <Table overflow="auto" {...getTableProps()}>
+          <Thead>
+            {
+              // Loop over the header rows
+              headerGroups.map((headerGroup) => (
+                // Apply the header row props
+                <Tr {...headerGroup.getHeaderGroupProps()}>
+                  {
+                    // Loop over the headers in each row
+                    headerGroup.headers.map((column) => (
+                      // Apply the header cell props
+                      // <Th {...column.getHeaderProps()}>.
+
+                      <Th
+                        {...column.getHeaderProps(
+                          column.getSortByToggleProps()
+                        )}
+                      >
+                        {column.render("Header")}
+                        <chakra.span pl="4">
+                          {column.isSorted && column.isSortedDesc ? (
+                            <TriangleDownIcon aria-label="sorted descending" />
+                          ) : (
+                            ""
                           )}
-                        >
-                          {column.render("Header")}
-                          <chakra.span pl="4">
-                            {column.isSorted && column.isSortedDesc ? (
-                              <TriangleDownIcon aria-label="sorted descending" />
-                            ) : (
-                              ""
-                            )}
-                          </chakra.span>
-                          <chakra.span pl="4">
-                            {column.isSorted &&
-                            column.isSortedDesc === false ? (
-                              <TriangleUpIcon aria-label="sorted ascending" />
-                            ) : (
-                              ""
-                            )}
-                          </chakra.span>
-                        </Th>
+                        </chakra.span>
+                        <chakra.span pl="4">
+                          {column.isSorted && column.isSortedDesc === false ? (
+                            <TriangleUpIcon aria-label="sorted ascending" />
+                          ) : (
+                            ""
+                          )}
+                        </chakra.span>
+                      </Th>
+                    ))
+                  }
+                </Tr>
+              ))
+            }
+          </Thead>
+          {/* Apply the table body props */}
+          <Tbody {...getTableBodyProps()}>
+            {
+              // Loop over the table rows
+              rows.map((row) => {
+                // Prepare the row for display
+                prepareRow(row);
+                return (
+                  // Apply the row props
+                  <Tr {...row.getRowProps()}>
+                    {
+                      // Loop over the rows cells
+                      row.cells.map((cell) => (
+                        // Apply the cell props
+                        <Td {...cell.getCellProps()}>
+                          {
+                            // Render the cell contents
+                            cell.render("Cell")
+                          }
+                        </Td>
                       ))
                     }
                   </Tr>
-                ))
-              }
-            </Thead>
-            {/* Apply the table body props */}
-            <Tbody {...getTableBodyProps()}>
-              {
-                // Loop over the table rows
-                rows.map((row) => {
-                  // Prepare the row for display
-                  prepareRow(row);
-                  return (
-                    // Apply the row props
-                    <Tr {...row.getRowProps()}>
-                      {
-                        // Loop over the rows cells
-                        row.cells.map((cell) => (
-                          // Apply the cell props
-                          <Td {...cell.getCellProps()}>
-                            {
-                              // Render the cell contents
-                              cell.render("Cell")
-                            }
-                          </Td>
-                        ))
-                      }
-                    </Tr>
-                  );
-                })
-              }
-            </Tbody>
-          </Table>
-          <Flex w="100%">
-            <Button
-              leftIcon={<ArrowLeftIcon />}
-              isDisabled={!pagination.hasPrevious}
-              onClick={pagination.previousPage}
-            >
-              Previous
-            </Button>
-            <Text>{pagination.page}</Text>
-            <Button
-              rightIcon={<ArrowRightIcon />}
-              isDisabled={!pagination.hasNext}
-              onClick={pagination.nextPage}
-            >
-              Next
-            </Button>
-          </Flex>
-        </>
-      )}
+                );
+              })
+            }
+          </Tbody>
+        </Table>
+      </TableContainer>
+      <Flex w="100%">
+        <Button
+          leftIcon={<ArrowLeftIcon />}
+          isDisabled={!pagination.hasPrevious}
+          onClick={pagination.previousPage}
+        >
+          Previous
+        </Button>
+        <Text>{pagination.page}</Text>
+        <Button
+          rightIcon={<ArrowRightIcon />}
+          isDisabled={!pagination.hasNext}
+          onClick={pagination.nextPage}
+        >
+          Next
+        </Button>
+      </Flex>
+      {/* History modal */}
       <HistoryAttemptModal
         historyAttempt={modalHistoryAttempt}
-        isOpen={isHistoryModalOpen}
-        onClose={onCloseHistoryModal}
+        isOpen={isOpen}
+        onClose={onClose}
       />
-    </Box>
+    </>
   );
 }
 

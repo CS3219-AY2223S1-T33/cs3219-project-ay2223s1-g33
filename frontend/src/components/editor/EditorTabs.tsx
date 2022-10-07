@@ -49,8 +49,6 @@ function EditorTabs({ question, getQuestion }: Props) {
             <HistoryTable
               questionId={question.questionId}
               hiddenColumns={hiddenColumns}
-              // historyAttempts={DUMMY_HISTORY}
-              historyAttempts={[]}
             />
           ) : (
             <Text>No question provided</Text>
