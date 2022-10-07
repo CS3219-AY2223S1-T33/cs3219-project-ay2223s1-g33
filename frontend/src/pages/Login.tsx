@@ -9,12 +9,10 @@ import {
   Input,
   Stack,
   Text,
-  // useToast
 } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import React from "react";
 import { useForm } from "react-hook-form";
-// import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { login } from "../feature/user/userSlice";
 import axios from "../axios";
@@ -125,7 +123,6 @@ function Login() {
               >
                 Sign in
               </Button>
-
               <Text align="center">
                 Not a user? <Link to="/register">Register</Link>
               </Text>
