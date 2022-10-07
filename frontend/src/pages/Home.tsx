@@ -6,7 +6,6 @@ import { RootState } from "../app/store";
 import Countdown from "../components/matching/Countdown";
 import QueueForm from "../components/form/QueueForm";
 import HistoryTable from "../components/history/HistoryTable";
-// import { DUMMY_HISTORY } from "../utils/mockData";
 
 function Home() {
   const inQueue = useSelector((state: RootState) => state.matching.inQueue);

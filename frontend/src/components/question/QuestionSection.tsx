@@ -2,7 +2,7 @@ import { Box, Divider, Heading, Text, VStack } from "@chakra-ui/react";
 import React from "react";
 import ConstraintsList from "./ConstraintsList";
 import { QuestionDifficulty, Question } from "../../proto/types";
-import difficultyColor from "../../utils/diffcultyColors";
+import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
 
 type Props = {
@@ -25,15 +25,9 @@ function QuestionSection({ question }: Props) {
         </Heading>
       </Box>
       <Divider py={4} />
-      <VStack
-        spacing={4}
-        // pt={4}
-        id="question-content"
-        alignItems="flex-start"
-      >
-        {/* To HW: Maybe VStack it? */}
+      <VStack spacing={4} id="question-content" alignItems="flex-start">
         {contentDecode.question.split("\n").map((ln: string) => (
-          <Text textAlign="left">{ln}</Text>
+          <Text>{ln}</Text>
         ))}
       </VStack>
       <ExampleList examples={contentDecode.example} />
