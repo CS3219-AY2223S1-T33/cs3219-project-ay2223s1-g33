@@ -40,6 +40,7 @@ import Logger from '../utils/logger';
 import { IHistoryAgent } from '../history_client/history_agent_types';
 import createHistoryService from '../history_client/history_agent';
 import { CreateAttemptResponse } from '../proto/history-crud-service';
+import HistoryBuilder from '../history_handler/history_builder';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -56,6 +57,8 @@ class CollabTunnelController {
   questionAgent: IQuestionAgent;
 
   historyAgent: IHistoryAgent;
+
+  historyBuilder: HistoryBuilder;
 
   constructor(redisUrl: string, questionUrl: string, historyUrl: string, roomSecret: string) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
@@ -75,6 +78,8 @@ class CollabTunnelController {
     this.questionAgent = createQuestionService(questionUrl);
 
     this.historyAgent = createHistoryService(historyUrl);
+
+    this.historyBuilder = new HistoryBuilder();
   }
 
   /**
@@ -117,6 +122,7 @@ class CollabTunnelController {
         redisPubSubAdapter,
         username,
         nickname,
+        this.historyBuilder,
         this.historyAgent,
       ),
     );
@@ -158,6 +164,8 @@ class CollabTunnelController {
    * @param nickname
    * @param call
    * @param pubsub
+   * @param historyBuilder
+   * @param historyAgent
    */
   static async handleWrite(
     message: TunnelMessage,
@@ -165,7 +173,8 @@ class CollabTunnelController {
     nickname: string,
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
-    history: IHistoryAgent,
+    historyBuilder: HistoryBuilder,
+    historyAgent: IHistoryAgent,
   ) {
     // Prevent self echo
     if (message.sender === username) {
@@ -189,9 +198,9 @@ class CollabTunnelController {
         break;
       case ConnectionOpCode.ROOM_HELLO: // Receive 'Who Am I', Save attempt
         Logger.info(`${username} received WMI from ${message.sender}`);
-        history.setUsers([username, message.sender]);
-        res = await history.uploadHistoryAttempt();
-        Logger.info(res.errorMessage);
+        historyBuilder.setUsers([username, message.sender]);
+        res = await historyAgent.uploadHistoryAttempt(historyBuilder.buildHistoryAttempt());
+        Logger.info(`Attempt was saved - ${!res.errorMessage}`);
         break;
       default:
         Logger.error('Unknown connection flag');
@@ -206,17 +215,27 @@ class CollabTunnelController {
    * @param pubsub
    * @param username
    * @param nickname
-   * @param history
+   * @param historyBuilder
+   * @param historyAgent
    */
   static createCallWriter(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
     username: string,
     nickname: string,
-    history: IHistoryAgent,
+    historyBuilder: HistoryBuilder,
+    historyAgent: IHistoryAgent,
   ): (data: TunnelMessage) => void {
     return async (message: TunnelMessage): Promise<void> => {
-      await CollabTunnelController.handleWrite(message, username, nickname, call, pubsub, history);
+      await CollabTunnelController.handleWrite(
+        message,
+        username,
+        nickname,
+        call,
+        pubsub,
+        historyBuilder,
+        historyAgent,
+      );
     };
   }
 
@@ -281,8 +300,8 @@ class CollabTunnelController {
         break;
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${username} requested for saving code`);
-        this.historyAgent.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
-        this.historyAgent.setLangContent(request.data);
+        this.historyBuilder.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
+        this.historyBuilder.setLangContent(request.data);
         await pubsub.pushMessage(createDiscoverMessage(username));
         break;
       default: // Normal data, push to publisher
