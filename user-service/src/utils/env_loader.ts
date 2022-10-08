@@ -4,6 +4,11 @@ type EnvironmentConfig = {
   readonly SESSION_SERVICE_URL: string,
   readonly HTTP_PORT: number,
   readonly GRPC_PORT: number,
+
+  readonly DATABASE_DBHOST: string,
+  readonly DATABASE_USERNAME: string,
+  readonly DATABASE_PASSWORD: string,
+  readonly DATABASE_NAME: string,
 };
 
 function requireExists(key: string): void {
@@ -59,5 +64,10 @@ export default function loadEnvironment(): EnvironmentConfig {
     SESSION_SERVICE_URL: requireString('SESSION_SERVICE_URL'),
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8081),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),
+
+    DATABASE_DBHOST: requireString('DATABASE_DBHOST'),
+    DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
+    DATABASE_PASSWORD: requireString('DATABASE_PASSWORD'),
+    DATABASE_NAME: requireString('DATABASE_NAME'),
   };
 }

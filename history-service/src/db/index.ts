@@ -1,35 +1,21 @@
 import 'reflect-metadata';
 import { DataSource, Repository } from 'typeorm';
-import { config } from 'dotenv';
 
-import UserEntity from './User';
-import QuestionEntity from './Question';
-import HistoryEntity from './History';
-import PasswordResetEntity from './PasswordResetToken';
+import HistoryEntity from './history_entity';
+import HistoryOwnerEntity from './history_owner_entity';
+import Logger from '../utils/logger';
 
 type DataSourceConfig = {
-  DATABASE_DBHOST: string,
-  DATABASE_USERNAME: string,
-  DATABASE_PASSWORD: string,
-  DATABASE_NAME: string,
+  readonly DATABASE_DBHOST: string,
+  readonly DATABASE_USERNAME: string,
+  readonly DATABASE_PASSWORD: string,
+  readonly DATABASE_NAME: string,
 };
 
 interface IDatabase {
   getDataSource(): DataSource;
-  getUserRepo(): Repository<UserEntity>;
   getHistoryRepo(): Repository<HistoryEntity>;
-  getPasswordResetTokenRepo(): Repository<PasswordResetEntity>;
-  getQuestionRepo(): Repository<QuestionEntity>;
-}
-
-function loadEnvironmentConfig(): DataSourceConfig {
-  config();
-  return {
-    DATABASE_DBHOST: process.env.DATABASE_DBHOST!,
-    DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
-    DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
-    DATABASE_NAME: process.env.DATABASE_NAME!,
-  };
+  getHistoryOwnerRepo(): Repository<HistoryOwnerEntity>;
 }
 
 class Database implements IDatabase {
@@ -39,7 +25,7 @@ class Database implements IDatabase {
 
   static instance: Database;
 
-  private constructor(dbConfig: DataSourceConfig) {
+  constructor(dbConfig: DataSourceConfig) {
     this.dbConfig = dbConfig;
     this.dataSource = this.createDataSource();
   }
@@ -48,20 +34,12 @@ class Database implements IDatabase {
     return this.dataSource;
   }
 
-  getUserRepo(): Repository<UserEntity> {
-    return this.dataSource.getRepository(UserEntity);
-  }
-
   getHistoryRepo(): Repository<HistoryEntity> {
     return this.dataSource.getRepository(HistoryEntity);
   }
 
-  getPasswordResetTokenRepo(): Repository<PasswordResetEntity> {
-    return this.dataSource.getRepository(PasswordResetEntity);
-  }
-
-  getQuestionRepo(): Repository<QuestionEntity> {
-    return this.dataSource.getRepository(QuestionEntity);
+  getHistoryOwnerRepo(): Repository<HistoryOwnerEntity> {
+    return this.dataSource.getRepository(HistoryOwnerEntity);
   }
 
   private createDataSource(): DataSource {
@@ -74,7 +52,10 @@ class Database implements IDatabase {
       database: this.dbConfig.DATABASE_NAME,
       synchronize: false,
       logging: false,
-      entities: [UserEntity, QuestionEntity, HistoryEntity, PasswordResetEntity],
+      entities: [
+        HistoryEntity,
+        HistoryOwnerEntity,
+      ],
       subscribers: [],
       migrations: [],
     });
@@ -89,31 +70,21 @@ class Database implements IDatabase {
         throw new Error(`[Database] Error during Data Source initialization: ${err}`);
       }
 
-      console.log('[Database] Data Source has been initialized!');
+      Logger.info('[Database] Data Source has been initialized!');
       return dataSource;
     }
     return this.dataSource;
   }
-
-  static getInstance(): Database {
-    if (!Database.instance) {
-      const dbConfig = loadEnvironmentConfig();
-      Database.instance = new Database(dbConfig);
-    }
-    return Database.instance;
-  }
 }
 
-Database.getInstance().initializeDataSource();
-
-function getDatabase(): IDatabase {
-  return Database.getInstance();
+async function connectDatabase(config: DataSourceConfig): Promise<IDatabase> {
+  const db = new Database(config);
+  await db.initializeDataSource();
+  return db;
 }
 
 export {
-  getDatabase,
-  UserEntity,
-  HistoryEntity,
-  QuestionEntity,
-  PasswordResetEntity,
+  DataSourceConfig,
+  IDatabase,
+  connectDatabase,
 };

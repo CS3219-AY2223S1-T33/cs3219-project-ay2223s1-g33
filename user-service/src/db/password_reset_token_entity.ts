@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import UserEntity from './User';
+import UserEntity from './user_entity';
 
 @Entity('password_reset_tokens')
 export default class PasswordResetTokenEntity {
