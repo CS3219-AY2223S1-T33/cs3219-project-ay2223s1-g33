@@ -1,13 +1,22 @@
-import { HistoryAttempt } from '../../proto/types';
+import { HistoryAttempt, User } from '../../proto/types';
 import { GetAttemptsRequest, GetAttemptsResponse } from '../../proto/history-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IAttemptStore, AttemptStoreSearchResult } from '../../storage/storage';
 import { convertToProtoAttempt } from '../../model/attempt_store_model';
+import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
+import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
+import BaseHandler from './base_handler';
 
-class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsResponse> {
+class GetAttemptsHandler extends BaseHandler
+  implements IApiHandler<GetAttemptsRequest, GetAttemptsResponse> {
   attemptStore: IAttemptStore;
 
-  constructor(storage: IStorage) {
+  constructor(
+    storage: IStorage,
+    userGrpcClient: UserCrudServiceClient,
+    questionGrpcClient: QuestionServiceClient,
+  ) {
+    super(userGrpcClient, questionGrpcClient);
     this.attemptStore = storage.getAttemptStore();
   }
 
@@ -30,38 +39,47 @@ class GetAttemptsHandler implements IApiHandler<GetAttemptsRequest, GetAttemptsR
       return GetAttemptsHandler.buildErrorResponse('UserId or Username must be supplied');
     }
 
+    let { userId } = request;
+    if (request.username) {
+      // Convert to user ID
+      const userObject = await super.getUser(User.create({
+        username: request.username,
+      }));
+
+      if (!userObject || !userObject.userInfo) {
+        return GetAttemptsHandler.buildErrorResponse('Username is invalid');
+      }
+
+      userId = userObject.userInfo?.userId;
+    }
+
     let result: AttemptStoreSearchResult;
 
     if (request.questionId) {
-      if (!request.username) {
-        return GetAttemptsHandler.buildErrorResponse('Username must be supplied for questionId filter');
-      }
-      result = await this.attemptStore.getAttemptByUsernameAndQuestionId(
-        request.username,
+      result = await this.attemptStore.getAttemptByUserIdAndQuestionId(
+        userId,
         request.questionId,
         limit,
         offset,
       );
-    } else if (request.userId) {
-      result = await this.attemptStore.getAttemptByUserId(
-        request.userId,
-        limit,
-        offset,
-      );
-    } else if (request.username) {
-      result = await this.attemptStore.getAttemptByUsername(
-        request.username,
-        limit,
-        offset,
-      );
     } else {
-      return GetAttemptsHandler.buildErrorResponse('Malformed request');
+      result = await this.attemptStore.getAttemptByUserId(
+        userId,
+        limit,
+        offset,
+      );
     }
+
+    const nicknameMapPromise = super.createNicknameMap(result.attempts);
+    const questionMapPromise = super.createQuestionMap(result.attempts);
+
+    const nicknameMap = await nicknameMapPromise;
+    const questionMap = await questionMapPromise;
 
     return {
       response: {
         attempts: result.attempts
-          .map((x) => convertToProtoAttempt(x))
+          .map((x) => convertToProtoAttempt(x, nicknameMap, questionMap))
           .filter((x) => x !== undefined)
           .map((x) => x as HistoryAttempt),
         totalCount: result.totalCount,

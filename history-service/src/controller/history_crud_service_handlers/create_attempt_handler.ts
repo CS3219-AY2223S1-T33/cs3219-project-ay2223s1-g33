@@ -3,23 +3,28 @@ import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_serve
 import { IStorage, IAttemptStore } from '../../storage/storage';
 import { StoredAttempt, convertToProtoAttempt, convertToStoredAttempt } from '../../model/attempt_store_model';
 import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
-import { PasswordUser, User } from '../../proto/types';
+import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
+import { PasswordUser, Question, User } from '../../proto/types';
+import BaseHandler from './base_handler';
 
-class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAttemptResponse> {
+class CreateAttemptHandler extends BaseHandler
+  implements IApiHandler<CreateAttemptRequest, CreateAttemptResponse> {
   attemptStore: IAttemptStore;
 
-  grpcClient: UserCrudServiceClient;
-
-  constructor(storage: IStorage, grpcClient: UserCrudServiceClient) {
+  constructor(
+    storage: IStorage,
+    userGrpcClient: UserCrudServiceClient,
+    questionGrpcClient: QuestionServiceClient,
+  ) {
+    super(userGrpcClient, questionGrpcClient);
     this.attemptStore = storage.getAttemptStore();
-    this.grpcClient = grpcClient;
   }
 
   async handle(apiRequest: ApiRequest<CreateAttemptRequest>):
   Promise<ApiResponse<CreateAttemptResponse>> {
     const { request } = apiRequest;
 
-    if (!request.attempt) {
+    if (!request.attempt || !request.attempt.question) {
       return CreateAttemptHandler.buildErrorResponse('Invalid attempt information');
     }
 
@@ -30,6 +35,14 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
       .map((x) => (x as User));
     const userIds = validUsers.map((x) => x.userId);
     const userUsernames = validUsers.map((x) => x.username);
+
+    const question = await super.getQuestion(Question.create({
+      questionId: request.attempt.question?.questionId,
+    }));
+
+    if (!question) {
+      return CreateAttemptHandler.buildErrorResponse('Invalid question id');
+    }
 
     const convertedAttempt = convertToStoredAttempt(request.attempt, userIds);
     if (!convertedAttempt) {
@@ -44,7 +57,14 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
       return CreateAttemptHandler.buildErrorResponse(`${err}`);
     }
 
-    const resultAttempt = convertToProtoAttempt(attempt);
+    const nicknameMap: { [key: number]: string } = {};
+    validUsers.forEach((user) => {
+      nicknameMap[user.userId] = user.nickname;
+    });
+    const questionMap: { [key: number]: Question } = {};
+    questionMap[question.questionId] = question;
+
+    const resultAttempt = convertToProtoAttempt(attempt, nicknameMap, questionMap);
     if (!resultAttempt) {
       return CreateAttemptHandler.buildErrorResponse('An internal error occurred');
     }
@@ -64,25 +84,7 @@ class CreateAttemptHandler implements IApiHandler<CreateAttemptRequest, CreateAt
       const searchUserObject: User = User.create();
       searchUserObject.username = x;
 
-      return new Promise<PasswordUser | undefined>((resolve, reject) => {
-        this.grpcClient.getUser(
-          {
-            user: searchUserObject,
-          },
-          (err, value) => {
-            if (!value) {
-              reject(err);
-              return;
-            }
-
-            if (!value.user && value.errorMessage !== '') {
-              reject(value.errorMessage);
-              return;
-            }
-            resolve(value.user);
-          },
-        );
-      });
+      return super.getUser(searchUserObject);
     });
 
     const users = await Promise.all(promises);

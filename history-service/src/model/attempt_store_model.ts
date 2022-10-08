@@ -1,6 +1,6 @@
-import { UserEntity } from '../db';
-import HistoryAttemptEntity from '../db/History';
-import { HistoryAttempt } from '../proto/types';
+import HistoryAttemptEntity from '../db/history_entity';
+import HistoryOwnerEntity from '../db/history_owner_entity';
+import { HistoryAttempt, Question } from '../proto/types';
 
 declare type StoredAttempt = HistoryAttemptEntity;
 
@@ -12,44 +12,46 @@ function convertToStoredAttempt(
     return undefined;
   }
 
-  const userObjects: UserEntity[] = users.map((x): UserEntity => ({
+  const userObjects: HistoryOwnerEntity[] = users.map((x): HistoryOwnerEntity => ({
     userId: x,
-    username: '',
-    nickname: '',
-    password: '',
-    isActive: true,
-    createDateTime: new Date(),
-    updateDateTime: new Date(),
   }));
 
   return {
     attemptId: attempt.attemptId,
-    question: {
-      questionId: attempt.question?.questionId,
-      name: '',
-      difficulty: 0,
-      content: '',
-      solution: '',
-    },
+    questionId: attempt.question.questionId,
     users: userObjects,
     submission: attempt.submission,
     language: attempt.language,
   };
 }
 
-function convertToProtoAttempt(attempt: HistoryAttemptEntity): (HistoryAttempt | undefined) {
+function convertToProtoAttempt(
+  attempt: HistoryAttemptEntity,
+  usernameMap: { [key: number]: string },
+  questionMap: { [key: number]: Question },
+): (HistoryAttempt | undefined) {
   if (!attempt.createDateTime) {
     return undefined;
   }
 
   let users: string[] = [];
   if (attempt.users) {
-    users = attempt.users.map((user) => user.username);
+    users = attempt.users.map((owner): string => {
+      if (!owner.userId) {
+        return '';
+      }
+
+      if (!(owner.userId in usernameMap)) {
+        return '';
+      }
+
+      return usernameMap[owner.userId];
+    }).filter((x) => x.length > 0);
   }
 
   return {
     attemptId: attempt.attemptId,
-    question: attempt.question,
+    question: questionMap[attempt.questionId],
     submission: attempt.submission,
     language: attempt.language,
     timestamp: Math.floor(attempt.createDateTime.getTime() / 1000),

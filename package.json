@@ -3,16 +3,14 @@
   "version": "1.0.0",
   "description": "This is a template repository for CS3219 project.",
   "config": {
-    "proto_output_ts": "./user-service ./matching-service ./frontend/ ./collab-service ./db ./question-service ./history-service",
-    "proto_output_go": "./session-service ./gateway",
-    "schema_output": "./user-service/src/db ./question-service/src/db ./history-service/src/db"
+    "proto_output_ts": "./user-service ./matching-service ./frontend/ ./collab-service ./question-service ./history-service",
+    "proto_output_go": "./session-service ./gateway"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh && chmod 755 ./scripts/gen-gateway.sh",
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output_ts",
     "gen-proto-go": "./scripts/gen-proto-go.sh proto $npm_package_config_proto_output_go",
-    "sync-schema": "./scripts/sync-db-definitions.sh $npm_package_config_schema_output",
     "gen-gateway": "./scripts/gen-gateway.sh proto ./gateway",
     "gen-y-websocket": "./scripts/gen-y-websocket.sh"
   },
