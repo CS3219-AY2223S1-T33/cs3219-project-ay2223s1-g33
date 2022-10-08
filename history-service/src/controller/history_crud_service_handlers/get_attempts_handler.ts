@@ -53,8 +53,6 @@ class GetAttemptsHandler extends BaseHandler
       userId = userObject.userInfo?.userId;
     }
 
-    console.log(`user ID: ${userId}`);
-
     let result: AttemptStoreSearchResult;
 
     if (request.questionId) {
@@ -77,8 +75,6 @@ class GetAttemptsHandler extends BaseHandler
 
     const nicknameMap = await nicknameMapPromise;
     const questionMap = await questionMapPromise;
-
-    console.log(`Found ${result.attempts.length} records`);
 
     return {
       response: {
