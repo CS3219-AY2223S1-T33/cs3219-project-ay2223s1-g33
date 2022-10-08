@@ -14,6 +14,7 @@ const streamServer = createStreamServer(envConfig.GRPC_PORT);
 const collabController = createCollabTunnelController(
   envConfig.REDIS_SERVER_URL,
   envConfig.QUESTION_SERVER_URL,
+  envConfig.HISTORY_SERVER_URL,
   envConfig.JWT_ROOM_SECRET,
 );
 

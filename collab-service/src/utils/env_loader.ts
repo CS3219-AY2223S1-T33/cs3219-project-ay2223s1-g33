@@ -4,6 +4,7 @@ type EnvironmentConfig = {
   readonly JWT_ROOM_SECRET: string;
   readonly REDIS_SERVER_URL: string;
   readonly QUESTION_SERVER_URL: string;
+  readonly HISTORY_SERVER_URL: string;
   readonly GRPC_PORT: number;
 };
 
@@ -59,6 +60,7 @@ export default function loadEnvironment(): EnvironmentConfig {
     JWT_ROOM_SECRET: requireString('JWT_ROOM_SECRET'),
     REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
     QUESTION_SERVER_URL: requireString('QUESTION_SERVER_URL'),
+    HISTORY_SERVER_URL: requireString('HISTORY_SERVER_URL'),
     GRPC_PORT: requireInt('GRPC_PORT', 4003),
   };
 }

@@ -2,14 +2,14 @@ import { Metadata, ServerDuplexStream } from '@grpc/grpc-js';
 import { createClient, RedisClientType } from 'redis';
 import {
   createAckMessage,
-  createDataMessage,
+  createDataMessage, createDiscoverMessage, createHelloMessage,
   createJoinMessage,
 } from '../message_handler/internal/internal_message_builder';
 import {
   createDisconnectedPackage,
   createQuestionRcvPackage,
   readConnectionOpCode,
-  OPCODE_QUESTION_REQ,
+  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ,
 } from '../message_handler/room/connect_message_builder';
 import {
   makeUnauthorizedResponse,
@@ -37,6 +37,9 @@ import {
   TunnelMessage,
 } from '../message_handler/internal/internal_message_types';
 import Logger from '../utils/logger';
+import { IHistoryAgent } from '../history_client/history_agent_types';
+import createHistoryService from '../history_client/history_agent';
+import { CreateAttemptResponse } from '../proto/history-crud-service';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -52,7 +55,9 @@ class CollabTunnelController {
 
   questionAgent: IQuestionAgent;
 
-  constructor(redisUrl: string, questionUrl: string, roomSecret: string) {
+  historyAgent: IHistoryAgent;
+
+  constructor(redisUrl: string, questionUrl: string, historyUrl: string, roomSecret: string) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
     this.pub = createClient({
       url: redisUrl,
@@ -68,6 +73,8 @@ class CollabTunnelController {
     this.topicPool = createRedisTopicPool(sub);
 
     this.questionAgent = createQuestionService(questionUrl);
+
+    this.historyAgent = createHistoryService(historyUrl);
   }
 
   /**
@@ -105,7 +112,13 @@ class CollabTunnelController {
     );
 
     await redisPubSubAdapter.addOnMessageListener(
-      CollabTunnelController.createCallWriter(call, redisPubSubAdapter, username, nickname),
+      CollabTunnelController.createCallWriter(
+        call,
+        redisPubSubAdapter,
+        username,
+        nickname,
+        this.historyAgent,
+      ),
     );
 
     // Connection discovery, Send A
@@ -152,29 +165,39 @@ class CollabTunnelController {
     nickname: string,
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
+    history: IHistoryAgent,
   ) {
     // Prevent self echo
     if (message.sender === username) {
       return;
     }
-    // Handle internal message cases
+    // Handle internal message cases;
+    let res: CreateAttemptResponse;
     switch (message.flag) {
-      case ConnectionOpCode.DATA: // Receive normal, Send normal
-        call.write(makeDataResponse(message.data));
+      case ConnectionOpCode.DATA: // Receive normal, Do nothing
         break;
       case ConnectionOpCode.JOIN: // Receive A, Send B
         Logger.info(`${username} received JOIN from ${message.sender}`);
         await pubsub.pushMessage(createAckMessage(username, nickname));
-        call.write(makeDataResponse(message.data));
         break;
       case ConnectionOpCode.ACK: // Receive B, Send 'Connected'
         Logger.info(`${username} received ACK from ${message.sender}`);
-        call.write(makeDataResponse(message.data));
+        break;
+      case ConnectionOpCode.ROOM_DISCOVER: // Receive ARP discovery, Send 'Who Am I'
+        Logger.info(`${username} received ARP from ${message.sender}`);
+        await pubsub.pushMessage(createHelloMessage(username));
+        break;
+      case ConnectionOpCode.ROOM_HELLO: // Receive 'Who Am I', Save attempt
+        Logger.info(`${username} received WMI from ${message.sender}`);
+        history.setUsers([username, message.sender]);
+        res = await history.uploadHistoryAttempt();
+        Logger.info(res.errorMessage);
         break;
       default:
         Logger.error('Unknown connection flag');
-        break;
+        return;
     }
+    call.write(makeDataResponse(message.data));
   }
 
   /**
@@ -183,15 +206,17 @@ class CollabTunnelController {
    * @param pubsub
    * @param username
    * @param nickname
+   * @param history
    */
   static createCallWriter(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
     username: string,
     nickname: string,
+    history: IHistoryAgent,
   ): (data: TunnelMessage) => void {
     return async (message: TunnelMessage): Promise<void> => {
-      await CollabTunnelController.handleWrite(message, username, nickname, call, pubsub);
+      await CollabTunnelController.handleWrite(message, username, nickname, call, pubsub, history);
     };
   }
 
@@ -226,10 +251,6 @@ class CollabTunnelController {
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
     const finalQuestion = await getQuestionRedis(roomId, this.pub);
-    if (finalQuestion === null) {
-      Logger.error(`No question of room ${roomId} found`);
-      return;
-    }
     call.write(makeDataResponse(createQuestionRcvPackage(finalQuestion)));
   }
 
@@ -252,17 +273,21 @@ class CollabTunnelController {
     if (isHeartbeat(request.flags)) {
       return;
     }
-    let dataToSend;
     // Handle external connection message cases
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send back to user
         Logger.info(`${username} requested for question`);
         await this.sendQuestionFromRedis(roomId, call);
-        return;
+        break;
+      case OPCODE_SAVE_CODE_REQ: // Snapshot code
+        Logger.info(`${username} requested for saving code`);
+        this.historyAgent.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
+        this.historyAgent.setLangContent(request.data);
+        await pubsub.pushMessage(createDiscoverMessage(username));
+        break;
       default: // Normal data, push to publisher
-        dataToSend = request.data;
+        await pubsub.pushMessage(createDataMessage(username, request.data));
     }
-    await pubsub.pushMessage(createDataMessage(username, dataToSend));
   }
 
   /**
@@ -283,9 +308,13 @@ class CollabTunnelController {
   }
 }
 
-function createCollabTunnelController(redisUrl: string, questionUrl: string, roomSecret: string)
-  : CollabTunnelController {
-  return new CollabTunnelController(redisUrl, questionUrl, roomSecret);
+function createCollabTunnelController(
+  redisUrl: string,
+  questionUrl: string,
+  historyUrl: string,
+  roomSecret: string,
+): CollabTunnelController {
+  return new CollabTunnelController(redisUrl, questionUrl, historyUrl, roomSecret);
 }
 
 export {

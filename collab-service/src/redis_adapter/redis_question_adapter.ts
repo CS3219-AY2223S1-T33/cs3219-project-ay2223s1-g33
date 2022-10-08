@@ -1,5 +1,6 @@
 import { RedisClientType } from 'redis';
 import { Question } from '../proto/types';
+import Logger from '../utils/logger';
 
 const redisPrefix = 'collab-qns';
 
@@ -28,8 +29,13 @@ async function setQuestionRedis(
 async function getQuestionRedis(
   key: string,
   publisher: RedisClientType,
-): Promise<string | null> {
-  return publisher.get(`${redisPrefix}-${key}`);
+): Promise<string> {
+  const qns = await publisher.get(`${redisPrefix}-${key}`);
+  if (qns) {
+    return qns;
+  }
+  Logger.error(`No question of room ${key} found`);
+  return '';
 }
 
 export {
