@@ -123,7 +123,7 @@ class AttemptStore implements IAttemptStore {
       .getHistoryRepo()
       .createQueryBuilder('histories')
       .innerJoinAndSelect('histories.users', 'history_owners')
-      .where('history_owners.user_id = :userId = :userId', { userId })
+      .where('history_owners.user_id = :userId', { userId })
       .andWhere('question_id = :questionId', { questionId })
       .getCount();
 
