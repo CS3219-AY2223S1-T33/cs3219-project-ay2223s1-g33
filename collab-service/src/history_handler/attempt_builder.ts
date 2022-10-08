@@ -1,7 +1,8 @@
 import { HistoryAttempt, Question } from '../proto/types';
 import { decodeAttempt } from '../message_handler/room/connect_message_builder';
+import IAttemptBuilder from './attempt_builder_types';
 
-class HistoryBuilder {
+class AttemptBuilder implements IAttemptBuilder {
   question: Question | undefined;
 
   lang: string;
@@ -34,14 +35,30 @@ class HistoryBuilder {
     this.submission = content;
   }
 
+  reset() {
+    this.question = undefined;
+    this.lang = '';
+    this.submission = '';
+    this.users = [];
+  }
+
   buildHistoryAttempt(): HistoryAttempt {
-    return HistoryAttempt.create({
+    const attempt = HistoryAttempt.create({
       question: this.question,
       language: this.lang,
       submission: this.submission,
       users: this.users,
     });
+    this.reset();
+    return attempt;
   }
 }
 
-export default HistoryBuilder;
+function createAttemptBuilder() {
+  return new AttemptBuilder();
+}
+
+export {
+  AttemptBuilder,
+  createAttemptBuilder,
+};

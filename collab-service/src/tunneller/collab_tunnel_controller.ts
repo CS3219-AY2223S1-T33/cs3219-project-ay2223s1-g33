@@ -9,7 +9,7 @@ import {
   createDisconnectedPackage,
   createQuestionRcvPackage,
   readConnectionOpCode,
-  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ,
+  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ, createSaveCodeAckPackage,
 } from '../message_handler/room/connect_message_builder';
 import {
   makeUnauthorizedResponse,
@@ -40,7 +40,8 @@ import Logger from '../utils/logger';
 import { IHistoryAgent } from '../history_client/history_agent_types';
 import createHistoryService from '../history_client/history_agent';
 import { CreateAttemptResponse } from '../proto/history-crud-service';
-import HistoryBuilder from '../history_handler/history_builder';
+import IAttemptBuilder from '../history_handler/attempt_builder_types';
+import { createAttemptBuilder } from '../history_handler/attempt_builder';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -57,8 +58,6 @@ class CollabTunnelController {
   questionAgent: IQuestionAgent;
 
   historyAgent: IHistoryAgent;
-
-  historyBuilder: HistoryBuilder;
 
   constructor(redisUrl: string, questionUrl: string, historyUrl: string, roomSecret: string) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
@@ -78,8 +77,6 @@ class CollabTunnelController {
     this.questionAgent = createQuestionService(questionUrl);
 
     this.historyAgent = createHistoryService(historyUrl);
-
-    this.historyBuilder = new HistoryBuilder();
   }
 
   /**
@@ -116,13 +113,15 @@ class CollabTunnelController {
       new CollabTunnelSerializer(),
     );
 
+    const attemptBuilder = createAttemptBuilder();
+
     await redisPubSubAdapter.addOnMessageListener(
       CollabTunnelController.createCallWriter(
         call,
         redisPubSubAdapter,
         username,
         nickname,
-        this.historyBuilder,
+        attemptBuilder,
         this.historyAgent,
       ),
     );
@@ -140,7 +139,7 @@ class CollabTunnelController {
 
     // When data is detected
     call.on('data', (request: CollabTunnelRequest) => {
-      this.handleIncomingData(username, roomId, request, call, redisPubSubAdapter);
+      this.handleIncomingData(username, roomId, request, call, redisPubSubAdapter, attemptBuilder);
     });
 
     // When stream closes
@@ -173,7 +172,7 @@ class CollabTunnelController {
     nickname: string,
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
-    historyBuilder: HistoryBuilder,
+    historyBuilder: IAttemptBuilder,
     historyAgent: IHistoryAgent,
   ) {
     // Prevent self echo
@@ -181,6 +180,7 @@ class CollabTunnelController {
       return;
     }
     // Handle internal message cases;
+    let dataToSend = message.data;
     let res: CreateAttemptResponse;
     switch (message.flag) {
       case ConnectionOpCode.DATA: // Receive normal, Do nothing
@@ -189,7 +189,7 @@ class CollabTunnelController {
         Logger.info(`${username} received JOIN from ${message.sender}`);
         await pubsub.pushMessage(createAckMessage(username, nickname));
         break;
-      case ConnectionOpCode.ACK: // Receive B, Send 'Connected'
+      case ConnectionOpCode.ACK: // Receive B, 'Connected'
         Logger.info(`${username} received ACK from ${message.sender}`);
         break;
       case ConnectionOpCode.ROOM_DISCOVER: // Receive ARP discovery, Send 'Who Am I'
@@ -198,15 +198,21 @@ class CollabTunnelController {
         break;
       case ConnectionOpCode.ROOM_HELLO: // Receive 'Who Am I', Save attempt
         Logger.info(`${username} received WMI from ${message.sender}`);
+        // Complete saving snapshot
         historyBuilder.setUsers([username, message.sender]);
         res = await historyAgent.uploadHistoryAttempt(historyBuilder.buildHistoryAttempt());
-        Logger.info(`Attempt was saved - ${!res.errorMessage}`);
+        if (res.errorMessage) {
+          Logger.error(res.errorMessage);
+          return;
+        }
+        dataToSend = createSaveCodeAckPackage();
+        await pubsub.pushMessage(createDataMessage(username, dataToSend));
         break;
       default:
         Logger.error('Unknown connection flag');
         return;
     }
-    call.write(makeDataResponse(message.data));
+    call.write(makeDataResponse(dataToSend));
   }
 
   /**
@@ -215,7 +221,7 @@ class CollabTunnelController {
    * @param pubsub
    * @param username
    * @param nickname
-   * @param historyBuilder
+   * @param builder
    * @param historyAgent
    */
   static createCallWriter(
@@ -223,7 +229,7 @@ class CollabTunnelController {
     pubsub: TunnelPubSub<TunnelMessage>,
     username: string,
     nickname: string,
-    historyBuilder: HistoryBuilder,
+    builder: IAttemptBuilder,
     historyAgent: IHistoryAgent,
   ): (data: TunnelMessage) => void {
     return async (message: TunnelMessage): Promise<void> => {
@@ -233,7 +239,7 @@ class CollabTunnelController {
         nickname,
         call,
         pubsub,
-        historyBuilder,
+        builder,
         historyAgent,
       );
     };
@@ -280,6 +286,7 @@ class CollabTunnelController {
    * @param request
    * @param call
    * @param pubsub
+   * @param builder
    */
   async handleIncomingData(
     username: string,
@@ -287,6 +294,7 @@ class CollabTunnelController {
     request: CollabTunnelRequest,
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
+    builder: IAttemptBuilder,
   ) {
     // Ignore heartbeat
     if (isHeartbeat(request.flags)) {
@@ -300,8 +308,9 @@ class CollabTunnelController {
         break;
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${username} requested for saving code`);
-        this.historyBuilder.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
-        this.historyBuilder.setLangContent(request.data);
+        // Prepare saving snapshot
+        builder.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
+        builder.setLangContent(request.data);
         await pubsub.pushMessage(createDiscoverMessage(username));
         break;
       default: // Normal data, push to publisher

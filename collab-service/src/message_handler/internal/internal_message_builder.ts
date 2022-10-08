@@ -2,7 +2,6 @@ import { ConnectionOpCode, TunnelMessage } from './internal_message_types';
 import {
   createConnectedPackage,
   createSaveCodeReqPackage,
-  createSaveCodeAckPackage,
 } from '../room/connect_message_builder';
 
 function createJoinMessage(username: string, nickname: string): TunnelMessage {
@@ -40,7 +39,7 @@ function createDiscoverMessage(username: string): TunnelMessage {
 function createHelloMessage(username: string): TunnelMessage {
   return {
     sender: username,
-    data: createSaveCodeAckPackage(),
+    data: Buffer.from([]),
     flag: ConnectionOpCode.ROOM_HELLO,
   };
 }
