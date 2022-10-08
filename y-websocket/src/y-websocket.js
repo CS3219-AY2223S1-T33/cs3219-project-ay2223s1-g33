@@ -91,6 +91,10 @@ messageHandlers[QUESTION_RCV] = (_encoder, decoder, provider, _emitSynced, _mess
 };
 
 messageHandlers[SAVECODE_ACK] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+	provider.emit("savecode_send", []);
+};
+
+messageHandlers[SAVECODE_ACK] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
 	provider.emit("savecode_ack", []);
 };
 

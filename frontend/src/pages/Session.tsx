@@ -121,6 +121,11 @@ function Session() {
         setQuestion(questionObj);
       });
 
+      ws.on("savecode_send", () => {
+        toast.sendInfoMessage("Your partner is saving this attempt");
+        setIsEditorLocked.on();
+      });
+
       ws.on("savecode_ack", () => {
         toast.sendInfoMessage("Code saved");
         setIsEditorLocked.off();
