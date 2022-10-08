@@ -1,5 +1,5 @@
 /* eslint class-methods-use-this: 0 */
-import { getDatabase, QuestionEntity } from '../db';
+import { IDatabase, QuestionEntity } from '../db';
 import { StoredQuestion } from '../model/question_store_model';
 import { QuestionDifficulty } from '../proto/types';
 import { IQuestionStore } from './storage';
@@ -7,6 +7,12 @@ import { IQuestionStore } from './storage';
 const returnValues = ['questionId', 'name', 'difficulty', 'content', 'solution'];
 
 class QuestionStore implements IQuestionStore {
+  private dbConn: IDatabase;
+
+  constructor(dbConn: IDatabase) {
+    this.dbConn = dbConn;
+  }
+
   async addQuestion(question: StoredQuestion): Promise<StoredQuestion> {
     const { name, difficulty } = question;
 
@@ -14,7 +20,7 @@ class QuestionStore implements IQuestionStore {
       throw new Error('Question must have a difficulty');
     }
 
-    const isExist = await getDatabase()
+    const isExist = await this.dbConn
       .getQuestionRepo()
       .findOneBy({ name });
 
@@ -23,7 +29,7 @@ class QuestionStore implements IQuestionStore {
     }
 
     const insertResult: QuestionEntity = (
-      await getDatabase()
+      await this.dbConn
         .getQuestionRepo()
         .createQueryBuilder()
         .insert()
@@ -39,7 +45,7 @@ class QuestionStore implements IQuestionStore {
   }
 
   async removeQuestion(questionId: number): Promise<void> {
-    await getDatabase()
+    await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .delete()
@@ -51,7 +57,7 @@ class QuestionStore implements IQuestionStore {
   async replaceQuestion(question: StoredQuestion): Promise<void> {
     const { name, questionId } = question;
 
-    const isExist = await getDatabase()
+    const isExist = await this.dbConn
       .getQuestionRepo()
       .findOneBy({ name });
 
@@ -59,7 +65,7 @@ class QuestionStore implements IQuestionStore {
       throw new Error('Question with same name already exists');
     }
 
-    await getDatabase()
+    await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .update(QuestionEntity)
@@ -69,7 +75,7 @@ class QuestionStore implements IQuestionStore {
   }
 
   async getQuestion(questionId: number): Promise<StoredQuestion | undefined> {
-    const selectResult: QuestionEntity | null = await getDatabase()
+    const selectResult: QuestionEntity | null = await this.dbConn
       .getQuestionRepo()
       .createQueryBuilder('question')
       .where('question.questionId = :questionId', { questionId })
@@ -85,7 +91,7 @@ class QuestionStore implements IQuestionStore {
   }
 
   async getQuestionByName(name: string): Promise<StoredQuestion | undefined> {
-    const selectResult: QuestionEntity | null = await getDatabase()
+    const selectResult: QuestionEntity | null = await this.dbConn
       .getQuestionRepo()
       .createQueryBuilder('question')
       .where('question.name = :name', { name })
@@ -102,7 +108,7 @@ class QuestionStore implements IQuestionStore {
 
   async getRandomQuestionByDifficulty(diffciulty: QuestionDifficulty):
   Promise<StoredQuestion | undefined> {
-    const selectResult: QuestionEntity | null = await getDatabase()
+    const selectResult: QuestionEntity | null = await this.dbConn
       .getQuestionRepo()
       .createQueryBuilder('question')
       .where('question.difficulty = :diffciulty', { diffciulty })
@@ -120,7 +126,7 @@ class QuestionStore implements IQuestionStore {
   }
 
   async getAllQuestion(): Promise<StoredQuestion[]> {
-    const selectResult: QuestionEntity[] = await getDatabase()
+    const selectResult: QuestionEntity[] = await this.dbConn
       .getQuestionRepo()
       .createQueryBuilder('question')
       .getMany();
