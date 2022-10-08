@@ -10,14 +10,12 @@ RUN apk add --no-cache bash && apk add libc6-compat && apk add gcompat
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Generate protobuff & database schema
-RUN mkdir -p /app/user-service user-service/src/proto user-service/src/db
+# Generate protobuff
+RUN mkdir -p /app/user-service user-service/src/proto
 COPY proto proto/
 COPY scripts scripts/
-COPY db db/
 COPY user-service/proto-emit.cfg user-service
 RUN npm run-script gen-proto
-RUN npm run-script sync-schema
 
 FROM node:alpine
 WORKDIR /app/user-service
@@ -30,8 +28,6 @@ COPY user-service .
 COPY user-service/src user-service/src
 RUN true
 COPY --from=0 /app/user-service/src/proto ./src/proto/
-RUN true
-COPY --from=0 /app/user-service/src/db ./src/db/
 
 # Build project
 RUN npm run-script build

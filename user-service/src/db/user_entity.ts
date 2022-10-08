@@ -3,15 +3,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
 } from 'typeorm';
 import { User } from '../proto/types';
-import PasswordResetTokenEntity from './PasswordResetToken';
-import HistoryAttemptEntity from './History';
+import PasswordResetTokenEntity from './password_reset_token_entity';
 
 @Entity('users')
 export default class UserEntity implements User {
@@ -30,9 +28,6 @@ export default class UserEntity implements User {
 
   @Column({ default: true, name: 'is_active' })
     isActive!: boolean;
-
-  @ManyToMany(() => HistoryAttemptEntity)
-    histories?: HistoryAttemptEntity[];
 
   @OneToMany(() => PasswordResetTokenEntity, (passwordResetToken) => passwordResetToken.user)
     passwordResetTokens?: PasswordResetTokenEntity[];
