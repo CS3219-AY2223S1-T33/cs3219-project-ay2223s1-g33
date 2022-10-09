@@ -95,7 +95,8 @@ messageHandlers[SAVECODE_SEND] = (_encoder, decoder, provider, _emitSynced, _mes
 };
 
 messageHandlers[SAVECODE_ACK] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
-	provider.emit("savecode_ack", []);
+	const errorMsg = decoding.readVarString(decoder);
+	provider.emit("savecode_ack", [{ errorMsg }]);
 };
 
 // @todo - this should depend on awareness.outdatedTime
