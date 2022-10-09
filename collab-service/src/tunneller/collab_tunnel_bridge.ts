@@ -21,7 +21,6 @@ import {
   readConnectionOpCode,
 } from '../message_handler/room/connect_message_builder';
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
-import { HistoryAttempt } from '../proto/types';
 
 const SUBMISSION_WAIT = 4 * 1000;
 
@@ -147,13 +146,6 @@ class CollabTunnelBridge {
     const questionResponse = await getQuestionRedis(this.roomId, this.redis);
     this.attemptCache.setQuestion(questionResponse);
     this.attemptCache.setLangContent(request.data);
-    this.attemptCache.setUploader(async (msg: HistoryAttempt) => {
-      const res = await this.historyAgent.uploadHistoryAttempt(msg);
-      if (res.errorMessage) {
-        Logger.error(res.errorMessage);
-      }
-      return res;
-    });
 
     // Retrieve other user
     await this.pubsub.pushMessage(createDiscoverMessage(this.username));
@@ -203,7 +195,8 @@ class CollabTunnelBridge {
       Logger.error('Attempt is not valid');
       return createSaveCodeFailedPackage();
     }
-    const attemptResponse = await this.attemptCache.executeUploader();
+    const attempt = await this.attemptCache.getHistoryAttempt();
+    const attemptResponse = await this.historyAgent.uploadHistoryAttempt(attempt);
     if (attemptResponse.errorMessage) {
       Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
     }

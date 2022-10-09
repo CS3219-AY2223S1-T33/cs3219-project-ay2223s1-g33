@@ -1,6 +1,5 @@
 import IAttemptCache from './attempt_cache_types';
 import { HistoryAttempt, Question } from '../proto/types';
-import { CreateAttemptResponse } from '../proto/history-crud-service';
 import decodeAttempt from './attempt_decoder';
 
 /**
@@ -16,14 +15,11 @@ class AttemptCache implements IAttemptCache {
 
   users: string[];
 
-  call: ((attempt: HistoryAttempt) => Promise<CreateAttemptResponse>) | undefined;
-
   constructor() {
     this.question = undefined;
     this.lang = '';
     this.submission = '';
     this.users = [];
-    this.call = undefined;
   }
 
   setQuestion(qns: string) {
@@ -47,10 +43,6 @@ class AttemptCache implements IAttemptCache {
     this.submission = content;
   }
 
-  setUploader(call: (attempt: HistoryAttempt) => Promise<CreateAttemptResponse>) {
-    this.call = call;
-  }
-
   /**
    * Checks if cache has all fields populated
    */
@@ -60,7 +52,6 @@ class AttemptCache implements IAttemptCache {
     || this.lang === ''
     || this.submission === ''
     || !this.users.length
-    || this.call === undefined
     );
   }
 
@@ -73,7 +64,6 @@ class AttemptCache implements IAttemptCache {
       && this.lang === ''
       && this.submission === ''
       && !this.users.length
-      && this.call === undefined
     );
   }
 
@@ -85,7 +75,6 @@ class AttemptCache implements IAttemptCache {
     this.lang = '';
     this.submission = '';
     this.users = [];
-    this.call = undefined;
   }
 
   /**
@@ -102,18 +91,6 @@ class AttemptCache implements IAttemptCache {
     });
     this.reset();
     return attempt;
-  }
-
-  /**
-   * Executes call lambda
-   */
-  async executeUploader(): Promise<CreateAttemptResponse> {
-    if (this.call === undefined) {
-      return CreateAttemptResponse.create({
-        errorMessage: 'Uploader undefined',
-      });
-    }
-    return this.call(this.getHistoryAttempt());
   }
 }
 

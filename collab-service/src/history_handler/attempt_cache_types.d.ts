@@ -1,5 +1,4 @@
 import { HistoryAttempt } from '../proto/types';
-import { CreateAttemptResponse } from '../proto/history-crud-service';
 
 declare interface IAttemptCache {
   setQuestion(qns: string)
@@ -8,8 +7,7 @@ declare interface IAttemptCache {
   isValid(): boolean
   isEmpty(): boolean;
   reset();
-  setUploader(call: (attempt: HistoryAttempt) => Promise<CreateAttemptResponse>)
-  executeUploader(): Promise<CreateAttemptResponse>
+  getHistoryAttempt(): HistoryAttempt
 }
 
 export default IAttemptCache;

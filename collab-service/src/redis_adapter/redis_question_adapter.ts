@@ -3,7 +3,7 @@ import { Question } from '../proto/types';
 import Logger from '../utils/logger';
 
 const REDIS_PREFIX = 'collab-qns';
-const HEARTBEAT_INTERVAL = 20;
+const HEARTBEAT_INTERVAL = 25;
 
 /**
  * Sets question into Redis of given key
