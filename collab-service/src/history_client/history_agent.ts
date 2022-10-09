@@ -25,7 +25,7 @@ class HistoryAgent implements IHistoryAgent {
           attempt: userAttempt,
         },
         {
-          deadline: getGrpcDeadline(1),
+          deadline: getGrpcDeadline(),
         },
         (err, value) => {
           if (value) {
