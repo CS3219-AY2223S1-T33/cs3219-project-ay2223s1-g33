@@ -5,7 +5,7 @@ declare interface IAttemptCache {
   setQuestion(qns: string)
   setUsers(username: string[])
   setLangContent(data: Uint8Array)
-  isNotValid(): boolean
+  isValid(): boolean
   setUploader(call: (attempt: HistoryAttempt) => Promise<CreateAttemptResponse>)
   executeUploader(): Promise<CreateAttemptResponse>
 }

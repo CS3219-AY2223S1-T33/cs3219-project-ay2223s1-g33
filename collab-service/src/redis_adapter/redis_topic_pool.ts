@@ -1,9 +1,12 @@
 import { RedisClientType } from 'redis';
 import Logger from '../utils/logger';
 
+export const POOL_UN_SUBBED = 0;
+export const POOL_STILL_SUBBED = 1;
+
 interface RedisTopicPool {
   registerTopic(topic: string, listener: (msg: string) => void): void;
-  unregisterTopic(topic: string, listener: (msg: string) => void): void;
+  unregisterTopic(topic: string, listener: (msg: string) => void): Promise<number>;
 }
 
 class RedisTopicPoolManager implements RedisTopicPool {
@@ -29,21 +32,23 @@ class RedisTopicPoolManager implements RedisTopicPool {
     }
   }
 
-  async unregisterTopic(topic: string, listener: (msg: string) => void) {
+  async unregisterTopic(topic: string, listener: (msg: string) => void): Promise<number> {
     if (!(topic in this.topicListeners) || this.topicListeners[topic].length < 1) {
-      return;
+      return POOL_STILL_SUBBED;
     }
 
     const listeners = this.topicListeners[topic];
     const indexOfListener = listeners.indexOf(listener);
     if (indexOfListener < 0) {
-      return;
+      return POOL_STILL_SUBBED;
     }
 
     listeners.splice(indexOfListener, 1);
     if (listeners.length === 0) {
       await this.unsubscribeTopic(topic);
+      return POOL_UN_SUBBED;
     }
+    return POOL_STILL_SUBBED;
   }
 
   createMuxHandler(topic: string): (msg: string) => void {

@@ -6,17 +6,22 @@ import {
 } from '../message_handler/internal/internal_message_builder';
 import {
   createDisconnectedPackage, createQuestionRcvPackage, readConnectionOpCode,
-  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ, createSaveCodeAckPackage,
+  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ, createSaveCodeAckPackage, createSaveCodeFailedPackage,
 } from '../message_handler/room/connect_message_builder';
 import {
   makeUnauthorizedResponse, makeDataResponse,
   makeHeartbeatResponse, isHeartbeat,
 } from '../message_handler/room/response_message_builder';
 import { createRedisPubSubAdapter, TunnelPubSub } from '../redis_adapter/redis_pubsub_adapter';
-import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
+import {
+  createRedisTopicPool,
+  POOL_UN_SUBBED,
+  RedisTopicPool,
+} from '../redis_adapter/redis_topic_pool';
 import createRoomSessionService from '../room_auth/room_session_agent';
 import createQuestionService from '../question_client/question_agent';
 import {
+  delQuestionRedis,
   getQuestionRedis,
   setQuestionRedis,
 } from '../redis_adapter/redis_question_adapter';
@@ -138,16 +143,20 @@ class CollabTunnelController {
     });
 
     // When stream closes
-    call.on('end', () => {
+    call.on('end', async () => {
       clearInterval(heartbeatWorker);
 
       // Send 'Disconnected'
-      redisPubSubAdapter.pushMessage(
+      await redisPubSubAdapter.pushMessage(
         createDataMessage(username, createDisconnectedPackage(nickname)),
       );
 
       const endFunc = () => call.end();
-      redisPubSubAdapter.clean(endFunc);
+      const status = await redisPubSubAdapter.clean(endFunc);
+      if (status === POOL_UN_SUBBED) {
+        Logger.info(`Clearing ${roomId} question`);
+        await delQuestionRedis(roomId, this.pub);
+      }
     });
   }
 
@@ -193,17 +202,16 @@ class CollabTunnelController {
         Logger.info(`${username} received WMI from ${message.sender}`);
         // Complete saving snapshot
         attemptCache.setUsers([username, message.sender]);
-        if (attemptCache.isNotValid()) {
+        if (attemptCache.isValid()) {
+          attemptResponse = await attemptCache.executeUploader();
+          if (attemptResponse.errorMessage) {
+            Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
+          }
+          dataToSend = createSaveCodeAckPackage(attemptResponse.errorMessage);
+        } else {
           Logger.error('Attempt is not valid');
-          dataToSend = createSaveCodeAckPackage('Attempt is not valid');
-          await pubsub.pushMessage(createDataMessage(username, dataToSend));
-          break;
+          dataToSend = createSaveCodeFailedPackage();
         }
-        attemptResponse = await attemptCache.executeUploader();
-        if (attemptResponse.errorMessage) {
-          Logger.error(`Attempt submission ${attemptResponse.errorMessage}`);
-        }
-        dataToSend = createSaveCodeAckPackage(attemptResponse.errorMessage);
         await pubsub.pushMessage(createDataMessage(username, dataToSend));
         break;
       default:
@@ -311,7 +319,7 @@ class CollabTunnelController {
         // Prepare saving snapshot
         questionResponse = await getQuestionRedis(roomId, this.pub);
         if (!questionResponse) {
-          call.write(makeDataResponse(createSaveCodeAckPackage('No question')));
+          call.write(makeDataResponse(createSaveCodeFailedPackage()));
           return;
         }
         attemptCache.setQuestion(questionResponse);

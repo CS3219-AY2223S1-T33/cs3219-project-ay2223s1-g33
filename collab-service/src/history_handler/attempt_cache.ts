@@ -44,11 +44,11 @@ class AttemptCache implements IAttemptCache {
   }
 
   /**
-   * Checks if cache doesn't have all fields populated
+   * Checks if cache has all fields populated
    * @return isValid
    */
-  isNotValid(): boolean {
-    return (
+  isValid(): boolean {
+    return !(
       this.question === undefined
     || this.lang === ''
     || this.submission === ''

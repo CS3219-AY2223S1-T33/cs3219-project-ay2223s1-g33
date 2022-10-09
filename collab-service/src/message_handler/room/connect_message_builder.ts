@@ -41,6 +41,10 @@ function createSaveCodeAckPackage(response: string): Uint8Array {
   return encodeContentOpcode(response, OPCODE_SAVE_CODE_ACK);
 }
 
+function createSaveCodeFailedPackage(): Uint8Array {
+  return encodeContentOpcode('Save Failed', OPCODE_SAVE_CODE_ACK);
+}
+
 /**
  * Extracts opcode of given data package
  * @param data
@@ -55,5 +59,6 @@ export {
   createQuestionRcvPackage,
   createSaveCodeReqPackage,
   createSaveCodeAckPackage,
+  createSaveCodeFailedPackage,
   readConnectionOpCode,
 };
