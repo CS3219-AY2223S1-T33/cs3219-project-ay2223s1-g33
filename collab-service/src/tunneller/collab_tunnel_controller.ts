@@ -17,7 +17,6 @@ import { CollabTunnelRequest, CollabTunnelResponse } from '../proto/collab-servi
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { IQuestionAgent } from '../question_client/question_agent_types';
 import createHistoryAgent from '../history_client/history_agent';
-import { createAttemptCache } from '../history_handler/attempt_cache';
 import { TunnelMessage } from '../message_handler/internal/internal_message_types';
 import createCollabTunnelBridge from './collab_tunnel_bridge';
 
@@ -91,13 +90,10 @@ class CollabTunnelController {
       new CollabTunnelSerializer(),
     );
 
-    const attemptCache = createAttemptCache();
-
     const tunnelBridge = createCollabTunnelBridge(
       call,
       redisPubSubAdapter,
       this.pub,
-      attemptCache,
       this.questionAgent,
       this.historyAgent,
       username,

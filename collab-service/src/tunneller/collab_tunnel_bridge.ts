@@ -20,6 +20,7 @@ import {
   readConnectionOpCode,
 } from '../message_handler/room/connect_message_builder';
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
+import { createAttemptCache } from '../history_handler/attempt_cache';
 
 const SUBMISSION_WAIT = 4 * 1000;
 
@@ -46,7 +47,6 @@ class CollabTunnelBridge {
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
     redis: RedisClientType,
-    attemptCache: IAttemptCache,
     questionAgent: IQuestionAgent,
     historyAgent: IHistoryAgent,
     username: string,
@@ -56,7 +56,7 @@ class CollabTunnelBridge {
     this.call = call;
     this.pubsub = pubsub;
     this.redis = redis;
-    this.attemptCache = attemptCache;
+    this.attemptCache = createAttemptCache();
     this.questionAgent = questionAgent;
     this.historyAgent = historyAgent;
     this.username = username;
@@ -207,7 +207,6 @@ export default function createCollabTunnelBridge(
   call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   pubsub: TunnelPubSub<TunnelMessage>,
   redis: RedisClientType,
-  attemptCache: IAttemptCache,
   questionAgent: IQuestionAgent,
   historyAgent: IHistoryAgent,
   username: string,
@@ -218,7 +217,6 @@ export default function createCollabTunnelBridge(
     call,
     pubsub,
     redis,
-    attemptCache,
     questionAgent,
     historyAgent,
     username,
