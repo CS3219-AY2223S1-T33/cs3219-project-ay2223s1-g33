@@ -68,8 +68,7 @@ jobs:
       
       - name: 'Run Frontend CI script'
         run: ./scripts/frontend-ci.sh
-        env:
-          CI: true
+
   test-go:
     runs-on: ubuntu-latest
     steps:

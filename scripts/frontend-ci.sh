@@ -24,7 +24,7 @@ npm run-script test
 command_success $?
 
 echo "Build application"
-npm run-script build
+CI=false npm run-script build
 command_success $?
 
 echo "End of frontend CI"
