@@ -40,7 +40,7 @@ async function getQuestionRedis(
 }
 
 /**
- * Gets question from Redis of given key
+ * Refreshes expiration of Redis question of given key
  * @param key
  * @param publisher
  */
