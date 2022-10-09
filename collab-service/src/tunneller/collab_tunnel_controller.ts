@@ -174,7 +174,7 @@ class CollabTunnelController {
     }
     // Handle internal message cases;
     let dataToSend = message.data;
-    let res: CreateAttemptResponse;
+    let attemptResponse: CreateAttemptResponse;
     switch (message.flag) {
       case ConnectionOpCode.DATA: // Receive normal, Do nothing
         break;
@@ -193,13 +193,17 @@ class CollabTunnelController {
         Logger.info(`${username} received WMI from ${message.sender}`);
         // Complete saving snapshot
         attemptCache.setUsers([username, message.sender]);
-        if (!attemptCache.isValid()) {
-          Logger.error('Attempt is not ready');
-          return;
+        if (attemptCache.isNotValid()) {
+          Logger.error('Attempt is not valid');
+          dataToSend = createSaveCodeAckPackage('Attempt is not valid');
+          await pubsub.pushMessage(createDataMessage(username, dataToSend));
+          break;
         }
-        res = await attemptCache.uploadHistoryAttempt();
-        Logger.info(res.errorMessage);
-        dataToSend = createSaveCodeAckPackage(res.errorMessage);
+        attemptResponse = await attemptCache.executeUploader();
+        if (attemptResponse.errorMessage) {
+          Logger.error(`Attempt submission ${attemptResponse.errorMessage}`);
+        }
+        dataToSend = createSaveCodeAckPackage(attemptResponse.errorMessage);
         await pubsub.pushMessage(createDataMessage(username, dataToSend));
         break;
       default:
@@ -247,12 +251,16 @@ class CollabTunnelController {
     roomId: string,
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
-    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
-    if (question === undefined) {
+    const questionResponse = await this.questionAgent.getQuestionByDifficulty(difficulty);
+    if (questionResponse.errorMessage) {
+      Logger.error(`Question retrieval ${questionResponse.errorMessage}`);
+      return;
+    }
+    if (questionResponse.question === undefined) {
       Logger.error(`No question of difficulty ${difficulty} found`);
       return;
     }
-    await setQuestionRedis(roomId, question, this.pub);
+    await setQuestionRedis(roomId, questionResponse.question, this.pub);
     await this.sendQuestionFromRedis(roomId, call);
   }
 
@@ -292,6 +300,7 @@ class CollabTunnelController {
       return;
     }
     // Handle external connection message cases
+    let questionResponse: string;
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send back to user
         Logger.info(`${username} requested for question`);
@@ -300,13 +309,16 @@ class CollabTunnelController {
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${username} requested for saving code`);
         // Prepare saving snapshot
-        attemptCache.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
+        questionResponse = await getQuestionRedis(roomId, this.pub);
+        if (!questionResponse) {
+          call.write(makeDataResponse(createSaveCodeAckPackage('No question')));
+          return;
+        }
+        attemptCache.setQuestion(questionResponse);
         attemptCache.setLangContent(request.data);
         attemptCache.setUploader(this.createUploader());
         // Retrieve other user
         await pubsub.pushMessage(createDiscoverMessage(username));
-        // todo: send ack within time period, grpc client -> call options = deadline property
-        // todo: add empty string if there is no issue, if have give message
         break;
       default: // Normal data, push to publisher
         await pubsub.pushMessage(createDataMessage(username, request.data));
@@ -314,7 +326,7 @@ class CollabTunnelController {
   }
 
   /**
-   * Creates encapsulated lambda for uploaded an attempt to client
+   * Creates encapsulated lambda for uploading an attempt to client
    */
   createUploader() {
     return async (attempt: HistoryAttempt): Promise<CreateAttemptResponse> => {

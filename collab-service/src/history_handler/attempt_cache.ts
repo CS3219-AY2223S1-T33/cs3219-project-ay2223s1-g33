@@ -19,10 +19,11 @@ class AttemptCache implements IAttemptCache {
     this.lang = '';
     this.submission = '';
     this.users = [];
+    this.call = undefined;
   }
 
-  setQuestion(qns: Question) {
-    this.question = qns;
+  setQuestion(qns: string) {
+    this.question = JSON.parse(qns);
   }
 
   setUsers(username: string[]) {
@@ -43,13 +44,17 @@ class AttemptCache implements IAttemptCache {
   }
 
   /**
-   * Checks if cache has all fields populated
+   * Checks if cache doesn't have all fields populated
    * @return isValid
    */
-  isValid(): boolean {
-    return !(
+  isNotValid(): boolean {
+    return (
       this.question === undefined
-      || !this.lang || !this.submission || !this.users || this.call === undefined);
+    || this.lang === ''
+    || this.submission === ''
+    || this.users.length !== 2
+    || this.call === undefined
+    );
   }
 
   /**
@@ -79,9 +84,14 @@ class AttemptCache implements IAttemptCache {
     return attempt;
   }
 
-  async uploadHistoryAttempt(): Promise<CreateAttemptResponse> {
+  /**
+   * Executes call lambda
+   */
+  async executeUploader(): Promise<CreateAttemptResponse> {
     if (this.call === undefined) {
-      return CreateAttemptResponse.create();
+      return CreateAttemptResponse.create({
+        errorMessage: 'Uploader undefined',
+      });
     }
     return this.call(this.getHistoryAttempt());
   }

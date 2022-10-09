@@ -1,10 +1,18 @@
-import { ChannelCredentials } from '@grpc/grpc-js';
+import { ChannelCredentials, ServiceError } from '@grpc/grpc-js';
+import { IQuestionAgent } from './question_agent_types';
 import {
   IQuestionServiceClient,
   QuestionServiceClient,
 } from '../proto/question-service.grpc-client';
 import { Question, QuestionDifficulty } from '../proto/types';
-import { IQuestionAgent } from './question_agent_types';
+import { GetQuestionResponse } from '../proto/question-service';
+import getGrpcDeadline from '../utils/grpc_deadline';
+
+function buildErrorMessage(err: ServiceError): GetQuestionResponse {
+  return GetQuestionResponse.create({
+    errorMessage: err.details,
+  });
+}
 
 class QuestionAgent implements IQuestionAgent {
   questionClient: IQuestionServiceClient;
@@ -18,7 +26,7 @@ class QuestionAgent implements IQuestionAgent {
     );
   }
 
-  getQuestionByDifficulty(difficulty: QuestionDifficulty): Promise<Question | undefined> {
+  getQuestionByDifficulty(difficulty: QuestionDifficulty): Promise<GetQuestionResponse> {
     const questionRequest: Question = {
       questionId: 0,
       difficulty,
@@ -27,16 +35,22 @@ class QuestionAgent implements IQuestionAgent {
       content: '',
     };
 
-    return new Promise<Question | undefined>((resolve, reject) => {
+    return new Promise<GetQuestionResponse>((resolve, reject) => {
       this.questionClient.getQuestion(
         {
           question: questionRequest,
         },
+        {
+          deadline: getGrpcDeadline(),
+        },
         (err, value) => {
           if (value) {
-            resolve(value.question);
+            resolve(value);
+          } else if (err) {
+            resolve(buildErrorMessage(err));
+          } else {
+            reject();
           }
-          reject(err);
         },
       );
     });
