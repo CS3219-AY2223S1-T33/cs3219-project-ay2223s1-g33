@@ -1,5 +1,5 @@
 import { StoredUser } from '../../src/model/user_store_model';
-import { User } from '../../src/proto/types';
+import { PasswordUser, User } from '../../src/proto/types';
 
 function makeMockUserStorage() {
   return {
@@ -12,11 +12,53 @@ function makeMockUserStorage() {
   };
 }
 
+function makeMockAuthAgent() {
+  return {
+    createToken: jest.fn(),
+    invalidateToken: jest.fn(),
+  };
+}
+
+function makeMockHashAgent() {
+  return {
+    validatePassword: jest.fn(),
+    hashPassword: jest.fn(),
+  };
+}
+
+function makeMockUserCrudService() {
+  return {
+    getUser: jest.fn(),
+    createUser: jest.fn(),
+    editUser: jest.fn(),
+    deleteUser: jest.fn(),
+  };
+}
+
+function makeMockLoopbackChannel() {
+  return {
+    registerServiceRoutes: jest.fn(),
+    callRoute: jest.fn(),
+  };
+}
+
 function makeTestUser(userId: number, username: string, nickname: string): User {
   return {
     userId,
     username,
     nickname,
+  };
+}
+
+function makeTestPasswordUser(
+  userId: number,
+  username: string,
+  nickname: string,
+  password: string,
+): PasswordUser {
+  return {
+    userInfo: makeTestUser(userId, username, nickname),
+    password,
   };
 }
 
@@ -48,7 +90,12 @@ const testData = {
 
 export {
   makeMockUserStorage,
+  makeMockAuthAgent,
+  makeMockHashAgent,
+  makeMockUserCrudService,
+  makeMockLoopbackChannel,
   makeTestUser,
+  makeTestPasswordUser,
   makeStoredUser,
   testData,
 };

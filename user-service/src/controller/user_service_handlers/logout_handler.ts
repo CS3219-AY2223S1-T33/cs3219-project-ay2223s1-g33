@@ -1,7 +1,7 @@
 import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
-import Constants from '../../utils/constants';
+import GatewayConstants from '../../utils/gateway_constants';
 
 class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   authService: IAuthenticationAgent;
@@ -11,20 +11,25 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   }
 
   async handle(request: ApiRequest<LogoutRequest>): Promise<ApiResponse<LogoutResponse>> {
-    if (!(Constants.GATEWAY_HEADER_REFRESH_TOKEN in request.headers)
-      || !(Constants.GATEWAY_HEADER_SESSION_TOKEN in request.headers)) {
+    if (!(GatewayConstants.GATEWAY_HEADER_REFRESH_TOKEN in request.headers)
+      || !(GatewayConstants.GATEWAY_HEADER_SESSION_TOKEN in request.headers)) {
       return LogoutHandler.buildErrorResponse(
         LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
         'Bad request from gateway',
       );
     }
-    const sessionToken = request.headers[Constants.GATEWAY_HEADER_SESSION_TOKEN][0];
-    const refreshToken = request.headers[Constants.GATEWAY_HEADER_REFRESH_TOKEN][0];
+    const sessionToken = request.headers[GatewayConstants.GATEWAY_HEADER_SESSION_TOKEN][0];
+    const refreshToken = request.headers[GatewayConstants.GATEWAY_HEADER_REFRESH_TOKEN][0];
 
-    const success = await this.authService.invalidateToken({
-      sessionToken,
-      refreshToken,
-    });
+    let success = false;
+    try {
+      success = await this.authService.invalidateToken({
+        sessionToken,
+        refreshToken,
+      });
+    } catch {
+      success = false;
+    }
 
     if (!success) {
       return LogoutHandler.buildErrorResponse(
@@ -40,8 +45,8 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
       },
       headers: {
         'Set-Cookie': [
-          `${Constants.COOKIE_SESSION_TOKEN}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`,
-          `${Constants.COOKIE_REFRESH_TOKEN}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly`,
+          `${GatewayConstants.COOKIE_SESSION_TOKEN}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`,
+          `${GatewayConstants.COOKIE_REFRESH_TOKEN}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly`,
         ],
       },
     };

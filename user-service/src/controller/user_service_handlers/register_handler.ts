@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import Validator from 'validator';
 import { RegisterErrorCode, RegisterRequest, RegisterResponse } from '../../proto/user-service';
 import {
@@ -10,6 +9,7 @@ import {
 import { PasswordUser } from '../../proto/types';
 import { CreateUserRequest, CreateUserResponse } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
+import IHashAgent from '../../auth/hash_agent_types.d.ts';
 
 function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResponse> {
   return {
@@ -21,8 +21,11 @@ function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResp
 class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> {
   rpcClient: ILoopbackServiceChannel<IUserCrudService>;
 
-  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>) {
+  hashAgent: IHashAgent;
+
+  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>, hashAgent: IHashAgent) {
     this.rpcClient = rpcClient;
+    this.hashAgent = hashAgent;
   }
 
   async handle(request: ApiRequest<RegisterRequest>): Promise<ApiResponse<RegisterResponse>> {
@@ -36,7 +39,7 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
       );
     }
 
-    const hash = await bcrypt.hash(validatedRequest.password, 8);
+    const hash = await this.hashAgent.hashPassword(validatedRequest.password);
     const userObject: PasswordUser = {
       userInfo: {
         userId: 0,
@@ -50,6 +53,13 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
     try {
       response = await this.createUser(userObject);
     } catch (err) {
+      return RegisterHandler.buildErrorResponse(
+        RegisterErrorCode.REGISTER_ERROR_INTERNAL_ERROR,
+        'An internal error occurred',
+      );
+    }
+
+    if (response.errorMessage !== '') {
       return RegisterHandler.buildErrorResponse(
         RegisterErrorCode.REGISTER_ERROR_INTERNAL_ERROR,
         'An internal error occurred',
