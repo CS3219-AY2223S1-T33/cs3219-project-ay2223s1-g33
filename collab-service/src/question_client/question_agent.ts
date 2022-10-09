@@ -1,10 +1,11 @@
 import { ChannelCredentials } from '@grpc/grpc-js';
+import { IQuestionAgent } from './question_agent_types';
 import {
   IQuestionServiceClient,
   QuestionServiceClient,
 } from '../proto/question-service.grpc-client';
 import { Question, QuestionDifficulty } from '../proto/types';
-import { IQuestionAgent } from './question_agent_types';
+import getGrpcDeadline from '../utils/grpc_deadline';
 
 class QuestionAgent implements IQuestionAgent {
   questionClient: IQuestionServiceClient;
@@ -32,11 +33,17 @@ class QuestionAgent implements IQuestionAgent {
         {
           question: questionRequest,
         },
+        {
+          deadline: getGrpcDeadline(),
+        },
         (err, value) => {
           if (value) {
             resolve(value.question);
+          } else if (err) {
+            resolve(undefined);
+          } else {
+            reject();
           }
-          reject(err);
         },
       );
     });

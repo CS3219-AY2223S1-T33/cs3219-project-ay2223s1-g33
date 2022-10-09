@@ -90,8 +90,13 @@ messageHandlers[QUESTION_RCV] = (_encoder, decoder, provider, _emitSynced, _mess
 	provider.emit("question_get", [{ question }]);
 };
 
+messageHandlers[SAVECODE_SEND] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+	provider.emit("savecode_send", []);
+};
+
 messageHandlers[SAVECODE_ACK] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
-	console.warn("[WIP]: SAVECODE_ACK");
+	const errorMsg = decoding.readVarString(decoder);
+	provider.emit("savecode_ack", [{ errorMsg }]);
 };
 
 // @todo - this should depend on awareness.outdatedTime
@@ -503,10 +508,11 @@ export class WebsocketProvider extends Observable {
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
 
-	// sendSaveCode(/** @type {string} */ content) {
-	//   const encoder = encoding.createEncoder()
-	//   encoding.writeVarUint(encoder, SAVECODE_SEND)
-	//   encoding.writeVarString(encoder, content)
-	//   broadcastMessage(this, encoding.toUint8Array(encoder))
-	// }
+	sendCodeSnapshot(/** @type {string} */ content, /** @type {string} */ language) {
+		const encoder = encoding.createEncoder();
+		encoding.writeUint8(encoder, SAVECODE_SEND);
+		encoding.writeVarString(encoder, language);
+		encoding.writeVarString(encoder, content);
+		broadcastMessage(this, encoding.toUint8Array(encoder));
+	}
 }

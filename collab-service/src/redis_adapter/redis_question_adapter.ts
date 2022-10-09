@@ -1,7 +1,9 @@
 import { RedisClientType } from 'redis';
 import { Question } from '../proto/types';
+import Logger from '../utils/logger';
 
-const redisPrefix = 'collab-qns';
+const REDIS_PREFIX = 'collab-qns';
+const REFRESH_INTERVAL = 3 * 20;
 
 /**
  * Sets question into Redis of given key
@@ -14,8 +16,8 @@ async function setQuestionRedis(
   question: Question,
   publisher: RedisClientType,
 ) {
-  await publisher.set(`${redisPrefix}-${key}`, JSON.stringify(question), {
-    EX: 300,
+  await publisher.set(`${REDIS_PREFIX}-${key}`, JSON.stringify(question), {
+    EX: REFRESH_INTERVAL,
     NX: true,
   });
 }
@@ -28,11 +30,29 @@ async function setQuestionRedis(
 async function getQuestionRedis(
   key: string,
   publisher: RedisClientType,
-): Promise<string | null> {
-  return publisher.get(`${redisPrefix}-${key}`);
+): Promise<string> {
+  const qns = await publisher.get(`${REDIS_PREFIX}-${key}`);
+  if (qns) {
+    return qns;
+  }
+  Logger.error(`No question of room ${key} found`);
+  return '';
+}
+
+/**
+ * Refreshes expiration of Redis question of given key
+ * @param key
+ * @param publisher
+ */
+async function refreshRedisQuestionExpiry(
+  key: string,
+  publisher: RedisClientType,
+) {
+  await publisher.expire(`${REDIS_PREFIX}-${key}`, REFRESH_INTERVAL);
 }
 
 export {
   setQuestionRedis,
   getQuestionRedis,
+  refreshRedisQuestionExpiry,
 };
