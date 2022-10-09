@@ -19,7 +19,7 @@ class EditUserHandler implements IApiHandler<EditUserRequest, EditUserResponse> 
 
   async handle(request: ApiRequest<EditUserRequest>): Promise<ApiResponse<EditUserResponse>> {
     const requestObject = request.request;
-    if (!requestObject.user) {
+    if (!requestObject.user || !requestObject.user.userInfo) {
       return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',
@@ -28,6 +28,16 @@ class EditUserHandler implements IApiHandler<EditUserRequest, EditUserResponse> 
 
     const userModel = convertPasswordUserToStoredUser(requestObject.user);
     if (!userModel) {
+      return getHeaderlessResponse({
+        user: undefined,
+        errorMessage: 'Invalid user information',
+      });
+    }
+
+    if (userModel.userId === 0
+      || userModel.password.length === 0
+      || userModel.nickname.length === 0
+      || userModel.username.length === 0) {
       return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',

@@ -18,6 +18,7 @@ import { IAuthenticationAgent } from '../auth/authentication_agent_types';
 import LogoutHandler from './user_service_handlers/logout_handler';
 import GetUserProfileHandler from './user_service_handlers/get_user_profile_handler';
 import { IUserCrudService } from '../proto/user-crud-service.grpc-server';
+import createHashAgent from '../auth/hash_agent';
 
 class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
@@ -30,14 +31,15 @@ class UserServiceApi implements ApiService<IUserService> {
     authService: IAuthenticationAgent,
     crudLoopback: ILoopbackServiceChannel<IUserCrudService>,
   ) {
+    const hashAgent = createHashAgent();
     const handlerDefinitions: ServiceHandlerDefinition<IUserService> = {
       register: fromApiHandler(
-        new RegisterHandler(crudLoopback),
+        new RegisterHandler(crudLoopback, hashAgent),
         RegisterRequest,
         RegisterResponse,
       ),
       login: fromApiHandler(
-        new LoginHandler(crudLoopback, authService),
+        new LoginHandler(crudLoopback, authService, hashAgent),
         LoginRequest,
         LoginResponse,
       ),
@@ -47,7 +49,7 @@ class UserServiceApi implements ApiService<IUserService> {
         LogoutResponse,
       ),
       getUserProfile: fromApiHandler(
-        new GetUserProfileHandler(crudLoopback, authService),
+        new GetUserProfileHandler(crudLoopback),
         GetUserProfileRequest,
         GetUserProfileResponse,
       ),

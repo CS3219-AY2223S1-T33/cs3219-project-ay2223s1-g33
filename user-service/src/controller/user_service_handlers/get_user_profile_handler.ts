@@ -6,9 +6,9 @@ import {
   ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { PasswordUser, User } from '../../proto/types';
-import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
+import GatewayConstants from '../../utils/gateway_constants';
 
 function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUserProfileResponse> {
   return {
@@ -17,30 +17,35 @@ function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUse
   };
 }
 
-const gatewayHeaderUsername = 'grpc-x-bearer-username';
-
 class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUserProfileResponse> {
   rpcClient: ILoopbackServiceChannel<IUserCrudService>;
 
-  authService: IAuthenticationAgent;
-
   constructor(
     rpcClient: ILoopbackServiceChannel<IUserCrudService>,
-    authService: IAuthenticationAgent,
   ) {
     this.rpcClient = rpcClient;
-    this.authService = authService;
   }
 
   async handle(request: ApiRequest<GetUserProfileRequest>)
     : Promise<ApiResponse<GetUserProfileResponse>> {
-    if (!(gatewayHeaderUsername in request.headers)) {
+    if (!(GatewayConstants.GATEWAY_HEADER_USERNAME in request.headers)) {
       return GetUserProfileHandler.buildErrorResponse('Bad request from gateway');
     }
 
-    const username = request.headers[gatewayHeaderUsername][0];
+    const username = request.headers[GatewayConstants.GATEWAY_HEADER_USERNAME][0];
+    if (username.length === 0) {
+      return GetUserProfileHandler.buildErrorResponse('Bad request from gateway');
+    }
 
-    const user = await this.getUserByUsername(username);
+    let user: (PasswordUser | undefined);
+    try {
+      user = await this.getUserByUsername(username);
+    } catch {
+      return GetUserProfileHandler.buildErrorResponse(
+        'Cannot contact downstream',
+      );
+    }
+
     if (!user) {
       return GetUserProfileHandler.buildErrorResponse(
         'Internal Server Error',

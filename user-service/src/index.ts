@@ -41,7 +41,6 @@ async function run() {
 
   const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
   loopbackCrudApi.registerServiceRoutes(userCrudApi);
-
   apiServer.registerServiceRoutes(new UserServiceApi(authService, loopbackCrudApi));
   apiServer.bind();
 }
