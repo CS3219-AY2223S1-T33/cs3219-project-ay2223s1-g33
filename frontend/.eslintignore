@@ -1,3 +1,4 @@
+build/
 serviceWorker.ts
 test-utils.tsx
 src/proto/*.ts
