@@ -20,7 +20,7 @@ import {
 import createRoomSessionService from '../room_auth/room_session_agent';
 import createQuestionService from '../question_client/question_agent';
 import {
-  getQuestionRedis,
+  getQuestionRedis, heartbeatQuestionRedis,
   setQuestionRedis,
 } from '../redis_adapter/redis_question_adapter';
 import CollabTunnelSerializer from './collab_tunnel_serializer';
@@ -130,9 +130,10 @@ class CollabTunnelController {
     // Retrieve and send question
     this.handleQuestion(difficulty, roomId, call);
 
-    // Upkeep gateway connection
+    // Upkeep gateway connection & question in redis
     const heartbeatWorker = setInterval(() => {
       call.write(makeHeartbeatResponse());
+      heartbeatQuestionRedis(roomId, this.pub);
     }, HEARTBEAT_INTERVAL);
 
     // When data is detected
