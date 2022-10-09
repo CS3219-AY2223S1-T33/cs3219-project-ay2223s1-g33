@@ -1,5 +1,4 @@
-import CreateUserHandler from '../../../src/controller/user_crud_service_handlers/create_user_handler';
-import { CreateUserRequest } from '../../../src/proto/user-crud-service';
+import { EditUserRequest } from '../../../src/proto/user-crud-service';
 import { IStorage } from '../../../src/storage/storage';
 import { ApiRequest } from '../../../src/api_server/api_server_types';
 import { User } from '../../../src/proto/types';
@@ -9,12 +8,17 @@ import {
   makeTestUser,
   testData,
 } from '../test_util';
+import EditUserHandler from '../../../src/controller/user_crud_service_handlers/edit_user_handler';
 
-describe('Create User Handler', () => {
-  const { testUsername1, testNickname1, testPassword1 } = testData;
+describe('Edit User Handler', () => {
+  const {
+    testUsername2,
+    testPassword2,
+    testNickname2,
+  } = testData;
 
   const makeRequest = (user: (User | undefined), password: string):
-  ApiRequest<CreateUserRequest> => ({
+  ApiRequest<EditUserRequest> => ({
     request: {
       user: {
         userInfo: user,
@@ -24,24 +28,27 @@ describe('Create User Handler', () => {
     headers: {},
   });
 
-  test('Successful User Creation', async () => {
+  test('Successful User Modification', async () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
     };
 
-    const storedUserResult = makeStoredUser(10, testUsername1, testNickname1, testPassword1);
+    const userId = 10;
+    const storedUserResult = makeStoredUser(userId, testUsername2, testNickname2, testPassword2);
+    mockStore.replaceUser.mockReturnValue(Promise.resolve(storedUserResult));
+    const handler = new EditUserHandler(storage);
 
-    mockStore.addUser.mockReturnValue(Promise.resolve(storedUserResult));
-    const handler = new CreateUserHandler(storage);
-
-    const request = makeRequest(makeTestUser(0, testUsername1, testNickname1), testPassword1);
+    const request = makeRequest(makeTestUser(userId, testUsername2, testNickname2), testPassword2);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBe('');
-    expect(response.response.user!.userInfo!.userId).toBe(10);
-    expect(response.response.user!.userInfo!.nickname).toBe(testNickname1);
-    expect(response.response.user!.userInfo!.username).toBe(testUsername1);
-    expect(mockStore.addUser.mock.calls.length).toBe(1);
+    expect(response.response.user!.userInfo!.userId).toBe(userId);
+    expect(response.response.user!.userInfo!.nickname).toBe(testNickname2);
+    expect(response.response.user!.userInfo!.username).toBe(testUsername2);
+    expect(response.response.user!.password).toBe(testPassword2);
+
+    expect(mockStore.replaceUser.mock.calls.length).toBe(1);
+    expect(mockStore.replaceUser.mock.calls[0][0]).toStrictEqual(storedUserResult);
   });
 
   test('Bad Request', async () => {
@@ -50,36 +57,36 @@ describe('Create User Handler', () => {
       getUserStore: jest.fn(() => mockStore),
     };
 
-    const storedUserResult = makeStoredUser(10, testUsername1, testNickname1, testPassword1);
-    mockStore.addUser.mockReturnValue(Promise.resolve(storedUserResult));
-    const handler = new CreateUserHandler(storage);
+    const userId = 10;
+    const storedUserResult = makeStoredUser(userId, testUsername2, testNickname2, testPassword2);
+    mockStore.replaceUser.mockReturnValue(Promise.resolve(storedUserResult));
+    const handler = new EditUserHandler(storage);
 
-    let request = makeRequest(makeTestUser(0, testUsername1, ''), testPassword1);
+    let request = makeRequest(makeTestUser(0, testUsername2, testNickname2), testPassword2);
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
     expect(mockStore.addUser.mock.calls.length).toBe(0);
 
-    request = makeRequest(makeTestUser(0, '', testNickname1), testPassword1);
+    request = makeRequest(makeTestUser(userId, '', testNickname2), testPassword2);
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
     expect(mockStore.addUser.mock.calls.length).toBe(0);
 
-    request = makeRequest(makeTestUser(0, testUsername1, testNickname1), '');
+    request = makeRequest(makeTestUser(userId, testUsername2, ''), testPassword2);
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
     expect(mockStore.addUser.mock.calls.length).toBe(0);
 
-    request.request.user!.password = testPassword1;
-    request.request.user!.userInfo = undefined;
+    request = makeRequest(makeTestUser(userId, testUsername2, testNickname2), '');
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
     expect(mockStore.addUser.mock.calls.length).toBe(0);
 
-    request = makeRequest(undefined, testPassword1);
+    request = makeRequest(undefined, testPassword2);
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
@@ -93,13 +100,13 @@ describe('Create User Handler', () => {
       getUserStore: jest.fn(() => mockStore),
     };
 
-    mockStore.addUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });
-    const handler = new CreateUserHandler(storage);
+    mockStore.replaceUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });
+    const handler = new EditUserHandler(storage);
 
-    const request = makeRequest(makeTestUser(0, testUsername1, testNickname1), testPassword1);
+    const request = makeRequest(makeTestUser(10, testUsername2, testNickname2), testPassword2);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
-    expect(mockStore.addUser.mock.calls.length).toBe(1);
+    expect(mockStore.replaceUser.mock.calls.length).toBe(1);
   });
 });

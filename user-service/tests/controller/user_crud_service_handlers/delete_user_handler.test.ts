@@ -7,6 +7,13 @@ import DeleteUserHandler from '../../../src/controller/user_crud_service_handler
 describe('Delete User Handler', () => {
   const { testUserId1 } = testData;
 
+  const makeRequest = (userId: number): ApiRequest<DeleteUserRequest> => ({
+    request: {
+      userId,
+    },
+    headers: {},
+  });
+
   test('Successful User Delete', async () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
@@ -14,12 +21,7 @@ describe('Delete User Handler', () => {
     };
 
     const handler = new DeleteUserHandler(storage);
-    const request: ApiRequest<DeleteUserRequest> = {
-      request: {
-        userId: testUserId1,
-      },
-      headers: {},
-    };
+    const request = makeRequest(testUserId1);
 
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBe('');
@@ -34,13 +36,7 @@ describe('Delete User Handler', () => {
     };
 
     const handler = new DeleteUserHandler(storage);
-    const request: ApiRequest<DeleteUserRequest> = {
-      request: {
-        userId: -1,
-      },
-      headers: {},
-    };
-
+    const request = makeRequest(-1);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
   });
@@ -55,13 +51,7 @@ describe('Delete User Handler', () => {
     mockStore.removeUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });
     const handler = new DeleteUserHandler(storage);
 
-    const request: ApiRequest<DeleteUserRequest> = {
-      request: {
-        userId: testUserId1,
-      },
-      headers: {},
-    };
-
+    const request = makeRequest(testUserId1);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(mockStore.removeUser.mock.lastCall![0]).toBe(testUserId1);
