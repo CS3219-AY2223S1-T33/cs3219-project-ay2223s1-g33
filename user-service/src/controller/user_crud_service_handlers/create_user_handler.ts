@@ -23,7 +23,7 @@ class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResp
 
   async handle(request: ApiRequest<CreateUserRequest>): Promise<ApiResponse<CreateUserResponse>> {
     const requestObject = request.request;
-    if (!requestObject.user) {
+    if (!requestObject.user || !requestObject.user.userInfo) {
       return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',
@@ -32,6 +32,15 @@ class CreateUserHandler implements IApiHandler<CreateUserRequest, CreateUserResp
 
     const userModel = convertPasswordUserToStoredUser(requestObject.user);
     if (!userModel) {
+      return getHeaderlessResponse({
+        user: undefined,
+        errorMessage: 'Invalid user information',
+      });
+    }
+
+    if (userModel.password.length === 0
+      || userModel.nickname.length === 0
+      || userModel.username.length === 0) {
       return getHeaderlessResponse({
         user: undefined,
         errorMessage: 'Invalid user information',

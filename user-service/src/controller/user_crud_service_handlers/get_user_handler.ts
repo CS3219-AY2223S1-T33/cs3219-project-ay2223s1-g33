@@ -19,27 +19,48 @@ class GetUserHandler implements IApiHandler<GetUserRequest, GetUserResponse> {
 
   async handle(request: ApiRequest<GetUserRequest>): Promise<ApiResponse<GetUserResponse>> {
     const requestObject = request.request;
-    if (requestObject.user) {
-      if (requestObject.user.username !== '') {
-        const user = await this.userStore.getUserByUsername(requestObject.user.username);
-        return getHeaderlessResponse({
-          user: convertStoredUserToPasswordUser(user),
-          errorMessage: '',
-        });
-      }
 
-      if (requestObject.user.userId > 0) {
-        const user = await this.userStore.getUser(requestObject.user.userId);
-        return getHeaderlessResponse({
-          user: convertStoredUserToPasswordUser(user),
-          errorMessage: '',
-        });
+    if (!requestObject.user) {
+      return getHeaderlessResponse({
+        user: undefined,
+        errorMessage: 'Malformed request 1',
+      });
+    }
+
+    const hasUsername = requestObject.user.username !== '';
+    const hasId = requestObject.user.userId > 0;
+
+    if ((!hasUsername && !hasId) || (hasUsername && hasId)) {
+      return getHeaderlessResponse({
+        user: undefined,
+        errorMessage: 'Malformed request 2',
+      });
+    }
+
+    let user;
+    try {
+      if (hasUsername) {
+        user = await this.userStore.getUserByUsername(requestObject.user.username);
+      } else if (hasId) {
+        user = await this.userStore.getUser(requestObject.user.userId);
       }
+    } catch {
+      return getHeaderlessResponse({
+        user: undefined,
+        errorMessage: 'Database Error',
+      });
+    }
+
+    if (!user) {
+      return getHeaderlessResponse({
+        user: undefined,
+        errorMessage: 'Internal Error',
+      });
     }
 
     return getHeaderlessResponse({
-      user: undefined,
-      errorMessage: 'Malformed request',
+      user: convertStoredUserToPasswordUser(user),
+      errorMessage: '',
     });
   }
 }

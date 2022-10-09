@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import Validator from 'validator';
 import { LoginErrorCode, LoginRequest, LoginResponse } from '../../proto/user-service';
 import {
@@ -8,22 +7,27 @@ import {
   ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { PasswordUser, User } from '../../proto/types';
-import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
-import Constants from '../../utils/constants';
+import { IAuthenticationAgent, TokenPair } from '../../auth/authentication_agent_types';
+import GatewayConstants from '../../utils/gateway_constants';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
+import IHashAgent from '../../auth/hash_agent_types.d';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: ILoopbackServiceChannel<IUserCrudService>;
 
-  authService: IAuthenticationAgent;
+  authAgent: IAuthenticationAgent;
+
+  hashAgent: IHashAgent;
 
   constructor(
     rpcClient: ILoopbackServiceChannel<IUserCrudService>,
-    authService: IAuthenticationAgent,
+    authAgent: IAuthenticationAgent,
+    hashAgent: IHashAgent,
   ) {
     this.rpcClient = rpcClient;
-    this.authService = authService;
+    this.authAgent = authAgent;
+    this.hashAgent = hashAgent;
   }
 
   async handle(request: ApiRequest<LoginRequest>): Promise<ApiResponse<LoginResponse>> {
@@ -54,7 +58,11 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    const isLoginSuccessful = await bcrypt.compare(validatedRequest.password, user.password);
+    const isLoginSuccessful = await this.hashAgent.validatePassword(
+      validatedRequest.password,
+      user.password,
+    );
+
     if (!isLoginSuccessful) {
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
@@ -62,10 +70,18 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    const token = await this.authService.createToken({
-      username: user.userInfo?.username,
-      nickname: user.userInfo?.nickname,
-    });
+    let token: TokenPair;
+    try {
+      token = await this.authAgent.createToken({
+        username: user.userInfo?.username,
+        nickname: user.userInfo?.nickname,
+      });
+    } catch {
+      return LoginHandler.buildErrorResponse(
+        LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR,
+        'Internal Error',
+      );
+    }
 
     return {
       response: {
@@ -75,8 +91,8 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       },
       headers: {
         'Set-Cookie': [
-          `${Constants.COOKIE_SESSION_TOKEN}=${token.sessionToken}; Path=/`,
-          `${Constants.COOKIE_REFRESH_TOKEN}=${token.refreshToken}; Path=/; HttpOnly`,
+          `${GatewayConstants.COOKIE_SESSION_TOKEN}=${token.sessionToken}; Path=/`,
+          `${GatewayConstants.COOKIE_REFRESH_TOKEN}=${token.refreshToken}; Path=/; HttpOnly`,
         ],
       },
     };

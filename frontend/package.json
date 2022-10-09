@@ -45,7 +45,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -68,6 +68,8 @@
     ]
   },
   "devDependencies": {
+    "@protobuf-ts/runtime": "^2.8.1",
+    "@protobuf-ts/runtime-rpc": "^2.8.1",
     "@types/file-saver": "^2.0.5",
     "@types/react-table": "^7.7.12",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
