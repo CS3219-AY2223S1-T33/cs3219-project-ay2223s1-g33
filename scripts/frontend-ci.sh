@@ -20,11 +20,11 @@ npm run-script lint
 command_success $?
 
 echo "Run tests"
-CI=true npm run-script test
+npm run-script test
 command_success $?
 
 echo "Build application"
-CI=true npm run-script build
+npm run-script build
 command_success $?
 
 echo "End of frontend CI"
