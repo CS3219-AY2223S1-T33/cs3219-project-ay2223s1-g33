@@ -5,7 +5,6 @@ import {
   QuestionServiceClient,
 } from '../proto/question-service.grpc-client';
 import { Question, QuestionDifficulty } from '../proto/types';
-import { GetQuestionResponse } from '../proto/question-service';
 import getGrpcDeadline from '../utils/grpc_deadline';
 
 class QuestionAgent implements IQuestionAgent {
