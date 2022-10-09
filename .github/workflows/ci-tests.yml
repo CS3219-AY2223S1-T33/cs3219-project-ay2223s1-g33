@@ -44,6 +44,12 @@ jobs:
         with:
           path: collab-service/node_modules
           key: collab-service-cache
+      
+      - name: 'Restore Frontend Cache'
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: frontend-cache
 
       - name: 'Setup CI script'
         run: chmod 755 ./scripts/run-ci.sh
@@ -56,6 +62,12 @@ jobs:
 
       - name: Run repository-wide tests
         run: ./scripts/run-ci.sh
+      
+      - name: 'Setup Frontend CI script'
+        run: chmod 755 ./scripts/frontend-ci.sh
+      
+      - name: 'Run Frontend CI script'
+        run: ./scripts/frontend-ci.sh
   test-go:
     runs-on: ubuntu-latest
     steps:

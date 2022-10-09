@@ -8,7 +8,6 @@ command_success() {
 
 PROJECT_ROOT=`pwd`
 
-# Build y-websocket package
 echo "Generating y-websocket folder"
 npm run-script gen-y-websocket
 
