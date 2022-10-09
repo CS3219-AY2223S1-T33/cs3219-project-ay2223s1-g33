@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import IHashAgent from './hash_agent_types.d.ts';
+import IHashAgent from './hash_agent_types.d';
 
 class HashAgent {
   // eslint-disable-next-line class-methods-use-this

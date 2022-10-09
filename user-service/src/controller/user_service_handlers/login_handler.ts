@@ -11,7 +11,7 @@ import { IAuthenticationAgent, TokenPair } from '../../auth/authentication_agent
 import GatewayConstants from '../../utils/gateway_constants';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
-import IHashAgent from '../../auth/hash_agent_types.d.ts';
+import IHashAgent from '../../auth/hash_agent_types.d';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcClient: ILoopbackServiceChannel<IUserCrudService>;

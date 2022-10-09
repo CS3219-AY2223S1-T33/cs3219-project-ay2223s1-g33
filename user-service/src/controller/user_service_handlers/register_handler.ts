@@ -9,7 +9,7 @@ import {
 import { PasswordUser } from '../../proto/types';
 import { CreateUserRequest, CreateUserResponse } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
-import IHashAgent from '../../auth/hash_agent_types.d.ts';
+import IHashAgent from '../../auth/hash_agent_types.d';
 
 function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResponse> {
   return {
