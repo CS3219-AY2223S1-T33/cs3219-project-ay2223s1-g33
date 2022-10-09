@@ -46,6 +46,7 @@ const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
 const PROXY_HEADER_ROOM_TOKEN = 'X-Gateway-Proxy-Room-Token';
 const HEARTBEAT_INTERVAL = 20000;
+const SUBMISSION_WAIT = 4 * 1000;
 
 class CollabTunnelController {
   pub: RedisClientType;
@@ -207,25 +208,6 @@ class CollabTunnelController {
   }
 
   /**
-   * Saves attempt to history.
-   * @param attemptCache
-   */
-  static async saveAttempt(
-    attemptCache: IAttemptCache,
-  ): Promise<Uint8Array> {
-    // Complete saving snapshot
-    if (!attemptCache.isValid()) {
-      Logger.error('Attempt is not valid');
-      return createSaveCodeFailedPackage();
-    }
-    const attemptResponse = await attemptCache.executeUploader();
-    if (attemptResponse.errorMessage) {
-      Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
-    }
-    return createSaveCodeAckPackage(attemptResponse.errorMessage);
-  }
-
-  /**
    * Creates encapsulated lambda for writing subscribed data to client
    * @param call
    * @param pubsub
@@ -257,8 +239,9 @@ class CollabTunnelController {
    * @param difficulty
    * @param roomId
    * @param call
+   * @private
    */
-  async handleQuestion(
+  private async handleQuestion(
     difficulty: number,
     roomId: string,
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
@@ -273,7 +256,7 @@ class CollabTunnelController {
   }
 
   /**
-   * Creates and sends question stored in Redis
+   * Creates and sends question stored in Redis to client
    * @param roomId
    * @param call
    * @private
@@ -287,7 +270,7 @@ class CollabTunnelController {
   }
 
   /**
-   * Handles data package to be sent based on package received
+   * Handles data package sent by client based on package opcode received
    * @param username
    * @param roomId
    * @param request
@@ -308,8 +291,6 @@ class CollabTunnelController {
       return;
     }
     // Handle external connection message cases
-    let questionResponse: string;
-    let dataToSend: Uint8Array;
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send back to user
         Logger.info(`${username} requested for question`);
@@ -317,25 +298,49 @@ class CollabTunnelController {
         break;
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${username} requested for saving code`);
-        // Prepare saving snapshot
-        questionResponse = await getQuestionRedis(roomId, this.pub);
-        attemptCache.setQuestion(questionResponse);
-        attemptCache.setLangContent(request.data);
-        attemptCache.setUploader(this.createUploader());
-        // Retrieve other user
-        await pubsub.pushMessage(createDiscoverMessage(username));
-        // Wait 4 seconds, check if users were retrieved
-        await new Promise((resolve) => {
-          setTimeout(resolve, 4 * 1000);
-        });
-        if (!attemptCache.hasReset()) {
-          attemptCache.setUsers([username]);
-          dataToSend = await CollabTunnelController.saveAttempt(attemptCache);
-          call.write(makeDataResponse(dataToSend));
-        }
+        await this.handleIncomingSaveRequest(roomId, attemptCache, request, pubsub, username, call);
         break;
       default: // Normal data, push to publisher
         await pubsub.pushMessage(createDataMessage(username, request.data));
+    }
+  }
+
+  /**
+   * Handles save code request by client
+   * @param roomId
+   * @param attemptCache
+   * @param request
+   * @param pubsub
+   * @param username
+   * @param call
+   * @private
+   */
+  private async handleIncomingSaveRequest(
+    roomId: string,
+    attemptCache: IAttemptCache,
+    request: CollabTunnelRequest,
+    pubsub: TunnelPubSub<TunnelMessage>,
+    username: string,
+    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+  ) {
+    // Prepare saving snapshot
+    const questionResponse = await getQuestionRedis(roomId, this.pub);
+    attemptCache.setQuestion(questionResponse);
+    attemptCache.setLangContent(request.data);
+    attemptCache.setUploader(this.createUploader());
+
+    // Retrieve other user
+    await pubsub.pushMessage(createDiscoverMessage(username));
+
+    // Wait for other user response
+    await new Promise((resolve) => {
+      setTimeout(resolve, SUBMISSION_WAIT);
+    });
+    // If no response, start individual submission
+    if (!attemptCache.isEmpty()) {
+      attemptCache.setUsers([username]);
+      const dataToSend = await CollabTunnelController.saveAttempt(attemptCache);
+      call.write(makeDataResponse(dataToSend));
     }
   }
 
@@ -348,13 +353,35 @@ class CollabTunnelController {
       if (res.errorMessage) {
         Logger.error(res.errorMessage);
       }
+      // Returns attempt response
       return res;
     };
   }
 
   /**
+   * Saves attempt to history.
+   * @param attemptCache Current cache of attempt
+   * @return response package
+   */
+  static async saveAttempt(
+    attemptCache: IAttemptCache,
+  ): Promise<Uint8Array> {
+    // Complete saving snapshot
+    if (!attemptCache.isValid()) {
+      Logger.error('Attempt is not valid');
+      return createSaveCodeFailedPackage();
+    }
+    const attemptResponse = await attemptCache.executeUploader();
+    if (attemptResponse.errorMessage) {
+      Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
+    }
+    return createSaveCodeAckPackage(attemptResponse.errorMessage);
+  }
+
+  /**
    * Extracts room token, username and nickname of user from metadata
    * @param data
+   * @return tuple of  room token, username and nickname
    */
   static extractMetadata(
     data: Metadata,

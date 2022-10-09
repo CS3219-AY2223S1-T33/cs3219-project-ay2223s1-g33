@@ -49,7 +49,6 @@ class AttemptCache implements IAttemptCache {
 
   /**
    * Checks if cache has all fields populated
-   * @return isValid
    */
   isValid(): boolean {
     return !(
@@ -62,20 +61,9 @@ class AttemptCache implements IAttemptCache {
   }
 
   /**
-   * Clears all fields
+   * Checks if all fields are cleared
    */
-  reset() {
-    this.question = undefined;
-    this.lang = '';
-    this.submission = '';
-    this.users = [];
-    this.call = undefined;
-  }
-
-  /**
-   * Clears all fields
-   */
-  hasReset(): boolean {
+  isEmpty(): boolean {
     return (
       this.question === undefined
       && this.lang === ''
@@ -86,11 +74,22 @@ class AttemptCache implements IAttemptCache {
   }
 
   /**
+   * Resets all fields
+   */
+  reset() {
+    this.question = undefined;
+    this.lang = '';
+    this.submission = '';
+    this.users = [];
+    this.call = undefined;
+  }
+
+  /**
    * Generate history attempt object from cached fields
    * @private
    * @return attempt
    */
-  private getHistoryAttempt(): HistoryAttempt {
+  getHistoryAttempt(): HistoryAttempt {
     const attempt = HistoryAttempt.create({
       question: this.question,
       language: this.lang,
