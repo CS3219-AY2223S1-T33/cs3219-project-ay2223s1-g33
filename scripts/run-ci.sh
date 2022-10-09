@@ -4,7 +4,7 @@ source "$(dirname "$0")/ci-config.sh"
 PID_LIST=()
 
 for P in ${DIRECTORIES[@]}; do
-    bash ./run-ci-node.sh $P &
+    bash $(dirname "$0")/run-ci-node.sh $P &
     PID="$!"
     PID_LIST+=($!)
 done
