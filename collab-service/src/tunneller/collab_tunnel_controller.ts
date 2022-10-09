@@ -35,8 +35,9 @@ import Logger from '../utils/logger';
 import { IHistoryAgent } from '../history_client/history_agent_types';
 import createHistoryService from '../history_client/history_agent';
 import { CreateAttemptResponse } from '../proto/history-crud-service';
-import IAttemptBuilder from '../history_handler/attempt_builder_types';
-import { createAttemptBuilder } from '../history_handler/attempt_builder';
+import IAttemptCache from '../history_handler/attempt_cache_types';
+import { createAttemptCache } from '../history_handler/attempt_cache';
+import { HistoryAttempt } from '../proto/types';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -108,16 +109,15 @@ class CollabTunnelController {
       new CollabTunnelSerializer(),
     );
 
-    const attemptBuilder = createAttemptBuilder();
+    const attemptCache = createAttemptCache();
 
     await redisPubSubAdapter.addOnMessageListener(
       CollabTunnelController.createCallWriter(
         call,
         redisPubSubAdapter,
+        attemptCache,
         username,
         nickname,
-        attemptBuilder,
-        this.historyAgent,
       ),
     );
 
@@ -134,7 +134,7 @@ class CollabTunnelController {
 
     // When data is detected
     call.on('data', (request: CollabTunnelRequest) => {
-      this.handleIncomingData(username, roomId, request, call, redisPubSubAdapter, attemptBuilder);
+      this.handleIncomingData(call, redisPubSubAdapter, attemptCache, username, roomId, request);
     });
 
     // When stream closes
@@ -153,22 +153,20 @@ class CollabTunnelController {
 
   /**
    * Handles subscribed message received from pubsub
+   * @param call
+   * @param pubsub
+   * @param attemptCache
    * @param message
    * @param username
    * @param nickname
-   * @param call
-   * @param pubsub
-   * @param historyBuilder
-   * @param historyAgent
    */
   static async handleWrite(
+    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+    pubsub: TunnelPubSub<TunnelMessage>,
+    attemptCache: IAttemptCache,
     message: TunnelMessage,
     username: string,
     nickname: string,
-    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
-    pubsub: TunnelPubSub<TunnelMessage>,
-    historyBuilder: IAttemptBuilder,
-    historyAgent: IHistoryAgent,
   ) {
     // Prevent self echo
     if (message.sender === username) {
@@ -194,13 +192,14 @@ class CollabTunnelController {
       case ConnectionOpCode.ROOM_HELLO: // Receive 'Who Am I', Save attempt
         Logger.info(`${username} received WMI from ${message.sender}`);
         // Complete saving snapshot
-        historyBuilder.setUsers([username, message.sender]);
-        res = await historyAgent.uploadHistoryAttempt(historyBuilder.buildHistoryAttempt());
-        if (res.errorMessage) {
-          Logger.error(res.errorMessage);
+        attemptCache.setUsers([username, message.sender]);
+        if (!attemptCache.isValid()) {
+          Logger.error('Attempt is not ready');
           return;
         }
-        dataToSend = createSaveCodeAckPackage();
+        res = await attemptCache.uploadHistoryAttempt();
+        Logger.info(res.errorMessage);
+        dataToSend = createSaveCodeAckPackage(res.errorMessage);
         await pubsub.pushMessage(createDataMessage(username, dataToSend));
         break;
       default:
@@ -214,28 +213,25 @@ class CollabTunnelController {
    * Creates encapsulated lambda for writing subscribed data to client
    * @param call
    * @param pubsub
+   * @param attemptCache
    * @param username
    * @param nickname
-   * @param builder
-   * @param historyAgent
    */
   static createCallWriter(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
+    attemptCache: IAttemptCache,
     username: string,
     nickname: string,
-    builder: IAttemptBuilder,
-    historyAgent: IHistoryAgent,
   ): (data: TunnelMessage) => void {
     return async (message: TunnelMessage): Promise<void> => {
       await CollabTunnelController.handleWrite(
+        call,
+        pubsub,
+        attemptCache,
         message,
         username,
         nickname,
-        call,
-        pubsub,
-        builder,
-        historyAgent,
       );
     };
   }
@@ -281,15 +277,15 @@ class CollabTunnelController {
    * @param request
    * @param call
    * @param pubsub
-   * @param builder
+   * @param attemptCache
    */
   async handleIncomingData(
+    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
+    pubsub: TunnelPubSub<TunnelMessage>,
+    attemptCache: IAttemptCache,
     username: string,
     roomId: string,
     request: CollabTunnelRequest,
-    call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
-    pubsub: TunnelPubSub<TunnelMessage>,
-    builder: IAttemptBuilder,
   ) {
     // Ignore heartbeat
     if (isHeartbeat(request.flags)) {
@@ -304,13 +300,30 @@ class CollabTunnelController {
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${username} requested for saving code`);
         // Prepare saving snapshot
-        builder.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
-        builder.setLangContent(request.data);
+        attemptCache.setQuestion(JSON.parse(await getQuestionRedis(roomId, this.pub)));
+        attemptCache.setLangContent(request.data);
+        attemptCache.setUploader(this.createUploader());
+        // Retrieve other user
         await pubsub.pushMessage(createDiscoverMessage(username));
+        // todo: send ack within time period, grpc client -> call options = deadline property
+        // todo: add empty string if there is no issue, if have give message
         break;
       default: // Normal data, push to publisher
         await pubsub.pushMessage(createDataMessage(username, request.data));
     }
+  }
+
+  /**
+   * Creates encapsulated lambda for uploaded an attempt to client
+   */
+  createUploader() {
+    return async (attempt: HistoryAttempt): Promise<CreateAttemptResponse> => {
+      const res = await this.historyAgent.uploadHistoryAttempt(attempt);
+      if (res.errorMessage) {
+        Logger.error(res.errorMessage);
+      }
+      return res;
+    };
   }
 
   /**

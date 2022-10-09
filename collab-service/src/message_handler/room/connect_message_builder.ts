@@ -1,5 +1,4 @@
 import * as encoding from 'lib0/encoding';
-import * as decoding from 'lib0/decoding';
 
 export const OPCODE_TERMINATE_WITH_ERROR = 4;
 export const OPCODE_USER_JOIN = 5;
@@ -38,18 +37,8 @@ function createSaveCodeReqPackage(): Uint8Array {
   return encodeOpcodeOnly(OPCODE_SAVE_CODE_REQ);
 }
 
-function createSaveCodeAckPackage(): Uint8Array {
-  return encodeOpcodeOnly(OPCODE_SAVE_CODE_ACK);
-}
-
-function decodeAttempt(data: Uint8Array) {
-  const decoder = decoding.createDecoder(data.slice(1, data.length)); // Skip opcode
-  const lang = decoding.readVarString(decoder);
-  const content = decoding.readVarString(decoder);
-  return {
-    lang,
-    content,
-  };
+function createSaveCodeAckPackage(response: string): Uint8Array {
+  return encodeContentOpcode(response, OPCODE_SAVE_CODE_ACK);
 }
 
 /**
@@ -67,5 +56,4 @@ export {
   createSaveCodeReqPackage,
   createSaveCodeAckPackage,
   readConnectionOpCode,
-  decodeAttempt,
 };
