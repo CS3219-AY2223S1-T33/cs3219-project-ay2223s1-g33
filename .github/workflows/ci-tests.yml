@@ -2,6 +2,37 @@ name: ci-tests
 on: [push, pull_request]
 
 jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@main
+
+      - name: Set up repository
+        uses: actions/checkout@main
+        with:
+          ref: main
+
+      - name: Merge to main branch
+        run: git checkout --progress --force ${{ github.sha }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 'Restore Frontend Cache'
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: frontend-cache
+
+      - name: 'Setup Frontend CI script'
+        run: chmod 755 ./scripts/frontend-ci.sh
+      
+      - name: 'Run Frontend CI script'
+        run: ./scripts/frontend-ci.sh
+
   test-node:
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +75,7 @@ jobs:
         with:
           path: collab-service/node_modules
           key: collab-service-cache
-
+      
       - name: 'Setup CI script'
         run: chmod 755 ./scripts/run-ci.sh
 
@@ -56,6 +87,7 @@ jobs:
 
       - name: Run repository-wide tests
         run: ./scripts/run-ci.sh
+
   test-go:
     runs-on: ubuntu-latest
     steps:
