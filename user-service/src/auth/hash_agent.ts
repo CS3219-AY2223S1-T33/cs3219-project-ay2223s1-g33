@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import IHashAgent from './hash_agent_types.d';
 
-class HashAgent {
+class HashAgent implements IHashAgent {
   // eslint-disable-next-line class-methods-use-this
   async validatePassword(password: string, storedPassword: string): Promise<boolean> {
     const result = await bcrypt.compare(password, storedPassword);
