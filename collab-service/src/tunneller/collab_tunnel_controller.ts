@@ -19,9 +19,8 @@ import { IQuestionAgent } from '../question_client/question_agent_types';
 import { IHistoryAgent } from '../history_client/history_agent_types';
 import createHistoryService from '../history_client/history_agent';
 import { createAttemptCache } from '../history_handler/attempt_cache';
-import createCallWriter from './handler/call_write_handler';
-import { handleQuestion } from './handler/question_get_set_handler';
-import handleIncomingData from './handler/incoming_data_handler';
+import { TunnelMessage } from '../message_handler/internal/internal_message_types';
+import createCollabTunnelBridge from './collab_tunnel_bridge';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -95,21 +94,27 @@ class CollabTunnelController {
 
     const attemptCache = createAttemptCache();
 
+    const tunnelBridge = createCollabTunnelBridge(
+      call,
+      redisPubSubAdapter,
+      this.pub,
+      attemptCache,
+      this.questionAgent,
+      this.historyAgent,
+      username,
+      nickname,
+      roomId,
+    );
+
     await redisPubSubAdapter.addOnMessageListener(
-      createCallWriter(
-        call,
-        redisPubSubAdapter,
-        attemptCache,
-        username,
-        nickname,
-      ),
+      (message: TunnelMessage) => tunnelBridge.handleRedisMessages(message),
     );
 
     // Connection discovery, Send A
     await redisPubSubAdapter.pushMessage(createJoinMessage(username, nickname));
 
     // Retrieve and send question
-    handleQuestion(call, this.questionAgent, this.pub, difficulty, roomId);
+    tunnelBridge.generateQuestion(difficulty);
 
     // Upkeep gateway connection & question in redis
     const heartbeatWorker = setInterval(() => {
@@ -118,18 +123,7 @@ class CollabTunnelController {
     }, HEARTBEAT_INTERVAL);
 
     // When data is detected
-    call.on('data', (request: CollabTunnelRequest) => {
-      handleIncomingData(
-        call,
-        redisPubSubAdapter,
-        this.pub,
-        attemptCache,
-        this.historyAgent,
-        username,
-        roomId,
-        request,
-      );
-    });
+    call.on('data', (request: CollabTunnelRequest) => tunnelBridge.handleClientMessage(request));
 
     // When stream closes
     call.on('end', () => {
