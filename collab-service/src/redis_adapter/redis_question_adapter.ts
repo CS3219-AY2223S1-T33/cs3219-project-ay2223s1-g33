@@ -3,7 +3,7 @@ import { Question } from '../proto/types';
 import Logger from '../utils/logger';
 
 const REDIS_PREFIX = 'collab-qns';
-const HEARTBEAT_INTERVAL = 25;
+const REFRESH_INTERVAL = 3 * 20;
 
 /**
  * Sets question into Redis of given key
@@ -17,7 +17,7 @@ async function setQuestionRedis(
   publisher: RedisClientType,
 ) {
   await publisher.set(`${REDIS_PREFIX}-${key}`, JSON.stringify(question), {
-    EX: HEARTBEAT_INTERVAL,
+    EX: REFRESH_INTERVAL,
     NX: true,
   });
 }
@@ -44,15 +44,15 @@ async function getQuestionRedis(
  * @param key
  * @param publisher
  */
-async function heartbeatQuestionRedis(
+async function refreshRedisQuestionExpiry(
   key: string,
   publisher: RedisClientType,
 ) {
-  await publisher.expire(`${REDIS_PREFIX}-${key}`, HEARTBEAT_INTERVAL);
+  await publisher.expire(`${REDIS_PREFIX}-${key}`, REFRESH_INTERVAL);
 }
 
 export {
   setQuestionRedis,
   getQuestionRedis,
-  heartbeatQuestionRedis,
+  refreshRedisQuestionExpiry,
 };

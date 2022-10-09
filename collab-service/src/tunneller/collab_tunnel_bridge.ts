@@ -7,7 +7,6 @@ import {
   TunnelMessage,
 } from '../message_handler/internal/internal_message_types';
 import IAttemptCache from '../history_handler/attempt_cache_types';
-import { IHistoryAgent } from '../history_client/history_agent_types';
 import { IQuestionAgent } from '../question_client/question_agent_types';
 import Logger from '../utils/logger';
 import {
@@ -167,12 +166,12 @@ class CollabTunnelBridge {
    * @param difficulty
    */
   async generateQuestion(difficulty: number) {
-    const questionResponse = await this.questionAgent.getQuestionByDifficulty(difficulty);
-    if (questionResponse.errorMessage || questionResponse.question === undefined) {
-      Logger.error(`Question: ${questionResponse.errorMessage}`);
+    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
+    if (question === undefined) {
+      Logger.error(`No question of ${difficulty} was found`);
       return;
     }
-    await setQuestionRedis(this.roomId, questionResponse.question, this.redis);
+    await setQuestionRedis(this.roomId, question, this.redis);
     await this.writeQuestionToClient();
   }
 
@@ -196,11 +195,11 @@ class CollabTunnelBridge {
       return createSaveCodeFailedPackage();
     }
     const attempt = await this.attemptCache.getHistoryAttempt();
-    const attemptResponse = await this.historyAgent.uploadHistoryAttempt(attempt);
-    if (attemptResponse.errorMessage) {
-      Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
+    const message = await this.historyAgent.uploadHistoryAttempt(attempt);
+    if (message) {
+      Logger.error(`Attempt: ${message}`);
     }
-    return createSaveCodeAckPackage(attemptResponse.errorMessage);
+    return createSaveCodeAckPackage(message);
   }
 }
 

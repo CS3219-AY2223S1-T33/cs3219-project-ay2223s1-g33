@@ -8,12 +8,6 @@ import { Question, QuestionDifficulty } from '../proto/types';
 import { GetQuestionResponse } from '../proto/question-service';
 import getGrpcDeadline from '../utils/grpc_deadline';
 
-function buildErrorMessage(): GetQuestionResponse {
-  return GetQuestionResponse.create({
-    errorMessage: 'Question failed',
-  });
-}
-
 class QuestionAgent implements IQuestionAgent {
   questionClient: IQuestionServiceClient;
 
@@ -26,7 +20,7 @@ class QuestionAgent implements IQuestionAgent {
     );
   }
 
-  getQuestionByDifficulty(difficulty: QuestionDifficulty): Promise<GetQuestionResponse> {
+  getQuestionByDifficulty(difficulty: QuestionDifficulty): Promise<Question | undefined> {
     const questionRequest: Question = {
       questionId: 0,
       difficulty,
@@ -35,7 +29,7 @@ class QuestionAgent implements IQuestionAgent {
       content: '',
     };
 
-    return new Promise<GetQuestionResponse>((resolve, reject) => {
+    return new Promise<Question | undefined>((resolve, reject) => {
       this.questionClient.getQuestion(
         {
           question: questionRequest,
@@ -45,9 +39,9 @@ class QuestionAgent implements IQuestionAgent {
         },
         (err, value) => {
           if (value) {
-            resolve(value);
+            resolve(value.question);
           } else if (err) {
-            resolve(buildErrorMessage());
+            resolve(undefined);
           } else {
             reject();
           }

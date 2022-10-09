@@ -11,13 +11,12 @@ import { createRedisPubSubAdapter } from '../redis_adapter/redis_pubsub_adapter'
 import { createRedisTopicPool, RedisTopicPool } from '../redis_adapter/redis_topic_pool';
 import createRoomSessionService from '../room_auth/room_session_agent';
 import createQuestionService from '../question_client/question_agent';
-import { heartbeatQuestionRedis } from '../redis_adapter/redis_question_adapter';
+import { refreshRedisQuestionExpiry } from '../redis_adapter/redis_question_adapter';
 import CollabTunnelSerializer from './collab_tunnel_serializer';
 import { CollabTunnelRequest, CollabTunnelResponse } from '../proto/collab-service';
 import { IRoomSessionAgent } from '../room_auth/room_session_agent_types';
 import { IQuestionAgent } from '../question_client/question_agent_types';
-import { IHistoryAgent } from '../history_client/history_agent_types';
-import createHistoryService from '../history_client/history_agent';
+import createHistoryAgent from '../history_client/history_agent';
 import { createAttemptCache } from '../history_handler/attempt_cache';
 import { TunnelMessage } from '../message_handler/internal/internal_message_types';
 import createCollabTunnelBridge from './collab_tunnel_bridge';
@@ -55,7 +54,7 @@ class CollabTunnelController {
 
     this.questionAgent = createQuestionService(questionUrl);
 
-    this.historyAgent = createHistoryService(historyUrl);
+    this.historyAgent = createHistoryAgent(historyUrl);
   }
 
   /**
@@ -119,7 +118,7 @@ class CollabTunnelController {
     // Upkeep gateway connection & question in redis
     const heartbeatWorker = setInterval(() => {
       call.write(makeHeartbeatResponse());
-      heartbeatQuestionRedis(roomId, this.pub);
+      refreshRedisQuestionExpiry(roomId, this.pub);
     }, HEARTBEAT_INTERVAL);
 
     // When data is detected

@@ -16,9 +16,7 @@ function encodeContentOpcode(content: string, opcode: number): Uint8Array {
 }
 
 function encodeOpcodeOnly(opcode: number): Uint8Array {
-  const encoder = encoding.createEncoder();
-  encoding.writeUint8(encoder, opcode);
-  return encoding.toUint8Array(encoder);
+  return new Uint8Array([opcode]);
 }
 
 function createConnectedPackage(username: string): Uint8Array {

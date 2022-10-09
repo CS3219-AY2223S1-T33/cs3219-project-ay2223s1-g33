@@ -1,18 +1,10 @@
 import { ChannelCredentials } from '@grpc/grpc-js';
-import { IHistoryAgent } from './history_agent_types';
 import {
   IHistoryCrudServiceClient,
   HistoryCrudServiceClient,
 } from '../proto/history-crud-service.grpc-client';
 import { HistoryAttempt } from '../proto/types';
-import { CreateAttemptResponse } from '../proto/history-crud-service';
 import getGrpcDeadline from '../utils/grpc_deadline';
-
-function buildErrorMessage(): CreateAttemptResponse {
-  return CreateAttemptResponse.create({
-    errorMessage: 'Saving failed',
-  });
-}
 
 class HistoryAgent implements IHistoryAgent {
   historyClient: IHistoryCrudServiceClient;
@@ -26,20 +18,20 @@ class HistoryAgent implements IHistoryAgent {
     );
   }
 
-  uploadHistoryAttempt(userAttempt: HistoryAttempt): Promise<CreateAttemptResponse> {
-    return new Promise<CreateAttemptResponse>((resolve, reject) => {
+  uploadHistoryAttempt(userAttempt: HistoryAttempt): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       this.historyClient.createAttempt(
         {
           attempt: userAttempt,
         },
         {
-          deadline: getGrpcDeadline(),
+          deadline: getGrpcDeadline(1),
         },
         (err, value) => {
           if (value) {
-            resolve(value);
+            resolve('');
           } else if (err) {
-            resolve(buildErrorMessage());
+            resolve('Saved failed');
           } else {
             reject();
           }
@@ -49,10 +41,10 @@ class HistoryAgent implements IHistoryAgent {
   }
 }
 
-function createHistoryService(
+function createHistoryAgent(
   historyURL: string,
 ): IHistoryAgent {
   return new HistoryAgent(historyURL);
 }
 
-export default createHistoryService;
+export default createHistoryAgent;
