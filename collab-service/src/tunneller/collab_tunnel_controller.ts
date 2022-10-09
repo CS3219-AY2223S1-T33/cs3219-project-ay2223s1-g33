@@ -15,13 +15,11 @@ import {
 import { createRedisPubSubAdapter, TunnelPubSub } from '../redis_adapter/redis_pubsub_adapter';
 import {
   createRedisTopicPool,
-  POOL_UN_SUBBED,
   RedisTopicPool,
 } from '../redis_adapter/redis_topic_pool';
 import createRoomSessionService from '../room_auth/room_session_agent';
 import createQuestionService from '../question_client/question_agent';
 import {
-  delQuestionRedis,
   getQuestionRedis,
   setQuestionRedis,
 } from '../redis_adapter/redis_question_adapter';
@@ -143,20 +141,16 @@ class CollabTunnelController {
     });
 
     // When stream closes
-    call.on('end', async () => {
+    call.on('end', () => {
       clearInterval(heartbeatWorker);
 
       // Send 'Disconnected'
-      await redisPubSubAdapter.pushMessage(
+      redisPubSubAdapter.pushMessage(
         createDataMessage(username, createDisconnectedPackage(nickname)),
       );
 
       const endFunc = () => call.end();
-      const status = await redisPubSubAdapter.clean(endFunc);
-      if (status === POOL_UN_SUBBED) {
-        Logger.info(`Clearing ${roomId} question`);
-        await delQuestionRedis(roomId, this.pub);
-      }
+      redisPubSubAdapter.clean(endFunc);
     });
   }
 

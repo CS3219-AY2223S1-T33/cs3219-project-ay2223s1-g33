@@ -1,7 +1,7 @@
 import { RedisClientType } from 'redis';
 import Logger from '../utils/logger';
 import { TunnelPubSub, TunnelSerializer } from './redis_pubsub_types';
-import { POOL_STILL_SUBBED, RedisTopicPool } from './redis_topic_pool';
+import { RedisTopicPool } from './redis_topic_pool';
 
 class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
   redisPub: RedisClientType;
@@ -57,13 +57,13 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
 
   async clean(
     call: () => void,
-  ): Promise<number> {
+  ): Promise<void> {
     if (this.handler === undefined) {
-      return POOL_STILL_SUBBED;
+      return;
     }
     Logger.info(`User ${this.username} unregistered event ${this.topic}`);
     call();
-    return this.redisTopicPool.unregisterTopic(`pubsub-${this.topic}`, this.handler);
+    this.redisTopicPool.unregisterTopic(`pubsub-${this.topic}`, this.handler);
   }
 }
 

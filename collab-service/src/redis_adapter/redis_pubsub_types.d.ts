@@ -7,7 +7,7 @@ declare interface TunnelPubSub<T> {
 
   clean(
     call: () => void,
-  ): Promise<number>;
+  ): Promise<void>;
 }
 
 declare interface TunnelSerializer<T> {

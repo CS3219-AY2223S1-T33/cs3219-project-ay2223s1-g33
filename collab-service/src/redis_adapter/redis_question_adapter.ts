@@ -16,7 +16,7 @@ async function setQuestionRedis(
   publisher: RedisClientType,
 ) {
   await publisher.set(`${redisPrefix}-${key}`, JSON.stringify(question), {
-    EX: 3000,
+    EX: 300,
     NX: true,
   });
 }
@@ -38,20 +38,7 @@ async function getQuestionRedis(
   return '';
 }
 
-/**
- * Deletes question from Redis of given key
- * @param key
- * @param publisher
- */
-async function delQuestionRedis(
-  key: string,
-  publisher: RedisClientType,
-) {
-  await publisher.del(`${redisPrefix}-${key}`);
-}
-
 export {
   setQuestionRedis,
   getQuestionRedis,
-  delQuestionRedis,
 };
