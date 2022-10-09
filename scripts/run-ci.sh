@@ -13,7 +13,7 @@ EXIT_CODE=0
 
 for PID in ${PID_LIST[*]}; do
     CODE=wait $PID
-    if ! $CODE; then
+    if [ $CODE -ne 0 ]; then
         EXIT_CODE=$CODE
     fi
 done
