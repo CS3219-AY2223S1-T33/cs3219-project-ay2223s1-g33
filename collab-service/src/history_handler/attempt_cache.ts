@@ -3,6 +3,10 @@ import { HistoryAttempt, Question } from '../proto/types';
 import { CreateAttemptResponse } from '../proto/history-crud-service';
 import decodeAttempt from './attempt_decoder';
 
+/**
+ * Intermediate representation of a code submission.
+ * Temporary storage & validator of history attempt.
+ */
 class AttemptCache implements IAttemptCache {
   question: Question | undefined;
 
