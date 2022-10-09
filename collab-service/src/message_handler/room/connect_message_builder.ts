@@ -42,7 +42,7 @@ function createSaveCodeAckPackage(response: string): Uint8Array {
 }
 
 function createSaveCodeFailedPackage(): Uint8Array {
-  return encodeContentOpcode('Save Failed', OPCODE_SAVE_CODE_ACK);
+  return encodeContentOpcode('Save failed', OPCODE_SAVE_CODE_ACK);
 }
 
 /**

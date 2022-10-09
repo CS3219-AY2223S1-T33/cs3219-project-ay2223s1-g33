@@ -23,7 +23,11 @@ class AttemptCache implements IAttemptCache {
   }
 
   setQuestion(qns: string) {
-    this.question = JSON.parse(qns);
+    if (!qns) {
+      this.question = undefined;
+    } else {
+      this.question = JSON.parse(qns);
+    }
   }
 
   setUsers(username: string[]) {
@@ -52,7 +56,7 @@ class AttemptCache implements IAttemptCache {
       this.question === undefined
     || this.lang === ''
     || this.submission === ''
-    || this.users.length !== 2
+    || !this.users.length
     || this.call === undefined
     );
   }
@@ -66,6 +70,19 @@ class AttemptCache implements IAttemptCache {
     this.submission = '';
     this.users = [];
     this.call = undefined;
+  }
+
+  /**
+   * Clears all fields
+   */
+  hasReset(): boolean {
+    return (
+      this.question === undefined
+      && this.lang === ''
+      && this.submission === ''
+      && !this.users.length
+      && this.call === undefined
+    );
   }
 
   /**

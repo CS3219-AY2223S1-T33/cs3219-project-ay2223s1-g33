@@ -1,4 +1,4 @@
-import { ChannelCredentials, ServiceError } from '@grpc/grpc-js';
+import { ChannelCredentials } from '@grpc/grpc-js';
 import { IHistoryAgent } from './history_agent_types';
 import {
   IHistoryCrudServiceClient,
@@ -8,9 +8,9 @@ import { HistoryAttempt } from '../proto/types';
 import { CreateAttemptResponse } from '../proto/history-crud-service';
 import getGrpcDeadline from '../utils/grpc_deadline';
 
-function buildErrorMessage(err: ServiceError): CreateAttemptResponse {
+function buildErrorMessage(): CreateAttemptResponse {
   return CreateAttemptResponse.create({
-    errorMessage: err.details,
+    errorMessage: 'Saving failed',
   });
 }
 
@@ -39,7 +39,7 @@ class HistoryAgent implements IHistoryAgent {
           if (value) {
             resolve(value);
           } else if (err) {
-            resolve(buildErrorMessage(err));
+            resolve(buildErrorMessage());
           } else {
             reject();
           }

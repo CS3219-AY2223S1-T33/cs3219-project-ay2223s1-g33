@@ -178,7 +178,6 @@ class CollabTunnelController {
     }
     // Handle internal message cases;
     let dataToSend = message.data;
-    let attemptResponse: CreateAttemptResponse;
     switch (message.flag) {
       case ConnectionOpCode.DATA: // Receive normal, Do nothing
         break;
@@ -197,16 +196,7 @@ class CollabTunnelController {
         Logger.info(`${username} received WMI from ${message.sender}`);
         // Complete saving snapshot
         attemptCache.setUsers([username, message.sender]);
-        if (attemptCache.isValid()) {
-          attemptResponse = await attemptCache.executeUploader();
-          if (attemptResponse.errorMessage) {
-            Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
-          }
-          dataToSend = createSaveCodeAckPackage(attemptResponse.errorMessage);
-        } else {
-          Logger.error('Attempt is not valid');
-          dataToSend = createSaveCodeFailedPackage();
-        }
+        dataToSend = await this.saveAttempt(attemptCache);
         await pubsub.pushMessage(createDataMessage(username, dataToSend));
         break;
       default:
@@ -214,6 +204,25 @@ class CollabTunnelController {
         return;
     }
     call.write(makeDataResponse(dataToSend));
+  }
+
+  /**
+   * Saves attempt to history.
+   * @param attemptCache
+   */
+  static async saveAttempt(
+    attemptCache: IAttemptCache,
+  ): Promise<Uint8Array> {
+    // Complete saving snapshot
+    if (!attemptCache.isValid()) {
+      Logger.error('Attempt is not valid');
+      return createSaveCodeFailedPackage();
+    }
+    const attemptResponse = await attemptCache.executeUploader();
+    if (attemptResponse.errorMessage) {
+      Logger.error(`Attempt: ${attemptResponse.errorMessage}`);
+    }
+    return createSaveCodeAckPackage(attemptResponse.errorMessage);
   }
 
   /**
@@ -255,12 +264,8 @@ class CollabTunnelController {
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
   ) {
     const questionResponse = await this.questionAgent.getQuestionByDifficulty(difficulty);
-    if (questionResponse.errorMessage) {
-      Logger.error(`Question retrieval ${questionResponse.errorMessage}`);
-      return;
-    }
-    if (questionResponse.question === undefined) {
-      Logger.error(`No question of difficulty ${difficulty} found`);
+    if (questionResponse.errorMessage || questionResponse.question === undefined) {
+      Logger.error(`Question: ${questionResponse.errorMessage}`);
       return;
     }
     await setQuestionRedis(roomId, questionResponse.question, this.pub);
@@ -304,6 +309,7 @@ class CollabTunnelController {
     }
     // Handle external connection message cases
     let questionResponse: string;
+    let dataToSend: Uint8Array;
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send back to user
         Logger.info(`${username} requested for question`);
@@ -313,15 +319,20 @@ class CollabTunnelController {
         Logger.info(`${username} requested for saving code`);
         // Prepare saving snapshot
         questionResponse = await getQuestionRedis(roomId, this.pub);
-        if (!questionResponse) {
-          call.write(makeDataResponse(createSaveCodeFailedPackage()));
-          return;
-        }
         attemptCache.setQuestion(questionResponse);
         attemptCache.setLangContent(request.data);
         attemptCache.setUploader(this.createUploader());
         // Retrieve other user
         await pubsub.pushMessage(createDiscoverMessage(username));
+        // Wait 4 seconds, check if users were retrieved
+        await new Promise((resolve) => {
+          setTimeout(resolve, 4 * 1000);
+        });
+        if (!attemptCache.hasReset()) {
+          attemptCache.setUsers([username]);
+          dataToSend = await CollabTunnelController.saveAttempt(attemptCache);
+          call.write(makeDataResponse(dataToSend));
+        }
         break;
       default: // Normal data, push to publisher
         await pubsub.pushMessage(createDataMessage(username, request.data));

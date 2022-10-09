@@ -1,4 +1,4 @@
-import { ChannelCredentials, ServiceError } from '@grpc/grpc-js';
+import { ChannelCredentials } from '@grpc/grpc-js';
 import { IQuestionAgent } from './question_agent_types';
 import {
   IQuestionServiceClient,
@@ -8,9 +8,9 @@ import { Question, QuestionDifficulty } from '../proto/types';
 import { GetQuestionResponse } from '../proto/question-service';
 import getGrpcDeadline from '../utils/grpc_deadline';
 
-function buildErrorMessage(err: ServiceError): GetQuestionResponse {
+function buildErrorMessage(): GetQuestionResponse {
   return GetQuestionResponse.create({
-    errorMessage: err.details,
+    errorMessage: 'Question failed',
   });
 }
 
@@ -47,7 +47,7 @@ class QuestionAgent implements IQuestionAgent {
           if (value) {
             resolve(value);
           } else if (err) {
-            resolve(buildErrorMessage(err));
+            resolve(buildErrorMessage());
           } else {
             reject();
           }
