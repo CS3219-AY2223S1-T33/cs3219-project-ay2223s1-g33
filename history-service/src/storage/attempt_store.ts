@@ -56,8 +56,9 @@ class AttemptStore implements IAttemptStore {
     const selectResult: StoredAttempt | null = await this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
+      .innerJoinAndSelect('histories.users', 'history_owners')
       .addSelect('histories.submission')
-      .where('attempt_id = :attemptId', { attemptId })
+      .where('histories.attempt_id = :attemptId', { attemptId })
       .getOne();
 
     if (!selectResult) {
