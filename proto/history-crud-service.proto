@@ -7,6 +7,7 @@ import "types.proto";
 
 message GetAttemptRequest {
   uint64 attempt_id = 1;
+  string username = 2;
 }
 
 message GetAttemptResponse {
