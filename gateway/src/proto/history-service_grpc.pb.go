@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HistoryServiceClient interface {
 	GetAttemptHistory(ctx context.Context, in *GetAttemptHistoryRequest, opts ...grpc.CallOption) (*GetAttemptHistoryResponse, error)
+	GetAttemptSubmission(ctx context.Context, in *GetAttemptSubmissionRequest, opts ...grpc.CallOption) (*GetAttemptSubmissionResponse, error)
 }
 
 type historyServiceClient struct {
@@ -42,11 +43,21 @@ func (c *historyServiceClient) GetAttemptHistory(ctx context.Context, in *GetAtt
 	return out, nil
 }
 
+func (c *historyServiceClient) GetAttemptSubmission(ctx context.Context, in *GetAttemptSubmissionRequest, opts ...grpc.CallOption) (*GetAttemptSubmissionResponse, error) {
+	out := new(GetAttemptSubmissionResponse)
+	err := c.cc.Invoke(ctx, "/history_service.HistoryService/GetAttemptSubmission", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HistoryServiceServer is the server API for HistoryService service.
 // All implementations must embed UnimplementedHistoryServiceServer
 // for forward compatibility
 type HistoryServiceServer interface {
 	GetAttemptHistory(context.Context, *GetAttemptHistoryRequest) (*GetAttemptHistoryResponse, error)
+	GetAttemptSubmission(context.Context, *GetAttemptSubmissionRequest) (*GetAttemptSubmissionResponse, error)
 	mustEmbedUnimplementedHistoryServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedHistoryServiceServer struct {
 
 func (UnimplementedHistoryServiceServer) GetAttemptHistory(context.Context, *GetAttemptHistoryRequest) (*GetAttemptHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttemptHistory not implemented")
+}
+func (UnimplementedHistoryServiceServer) GetAttemptSubmission(context.Context, *GetAttemptSubmissionRequest) (*GetAttemptSubmissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttemptSubmission not implemented")
 }
 func (UnimplementedHistoryServiceServer) mustEmbedUnimplementedHistoryServiceServer() {}
 
@@ -88,6 +102,24 @@ func _HistoryService_GetAttemptHistory_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HistoryService_GetAttemptSubmission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAttemptSubmissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryServiceServer).GetAttemptSubmission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/history_service.HistoryService/GetAttemptSubmission",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryServiceServer).GetAttemptSubmission(ctx, req.(*GetAttemptSubmissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HistoryService_ServiceDesc is the grpc.ServiceDesc for HistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var HistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAttemptHistory",
 			Handler:    _HistoryService_GetAttemptHistory_Handler,
+		},
+		{
+			MethodName: "GetAttemptSubmission",
+			Handler:    _HistoryService_GetAttemptSubmission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

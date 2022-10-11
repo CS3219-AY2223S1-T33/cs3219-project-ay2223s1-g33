@@ -21,6 +21,7 @@ message GetAttemptsRequest {
   uint64 user_id = 3;
   string username = 4;
   uint64 question_id = 5;
+  bool should_omit_submission = 6;
 }
 
 message GetAttemptsResponse {

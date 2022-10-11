@@ -18,6 +18,16 @@ message GetAttemptHistoryResponse {
   string error_message = 3;
 }
 
+message GetAttemptSubmissionRequest {
+  uint64 attempt_id = 1;
+}
+
+message GetAttemptSubmissionResponse {
+  common.HistoryAttempt attempt = 1;
+  string error_message = 2;
+}
+
 service HistoryService {
   rpc GetAttemptHistory(GetAttemptHistoryRequest) returns (GetAttemptHistoryResponse);
+  rpc GetAttemptSubmission(GetAttemptSubmissionRequest) returns (GetAttemptSubmissionResponse);
 }
