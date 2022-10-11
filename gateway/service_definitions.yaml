@@ -30,3 +30,7 @@ http:
     - selector: history_service.HistoryService.GetAttemptHistory
       post: /api/user/history
       body: "*"
+
+    - selector: history_service.HistoryService.GetAttemptSubmission
+      post: /api/user/history/submission
+      body: "*"

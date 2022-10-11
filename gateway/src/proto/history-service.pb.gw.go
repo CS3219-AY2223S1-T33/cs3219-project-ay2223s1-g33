@@ -138,7 +138,7 @@ func RegisterHistoryServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptSubmission", runtime.WithHTTPPathPattern("/history_service.HistoryService/GetAttemptSubmission"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptSubmission", runtime.WithHTTPPathPattern("/api/user/history/submission"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -224,7 +224,7 @@ func RegisterHistoryServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptSubmission", runtime.WithHTTPPathPattern("/history_service.HistoryService/GetAttemptSubmission"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/history_service.HistoryService/GetAttemptSubmission", runtime.WithHTTPPathPattern("/api/user/history/submission"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -246,7 +246,7 @@ func RegisterHistoryServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 var (
 	pattern_HistoryService_GetAttemptHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "history"}, ""))
 
-	pattern_HistoryService_GetAttemptSubmission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"history_service.HistoryService", "GetAttemptSubmission"}, ""))
+	pattern_HistoryService_GetAttemptSubmission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "user", "history", "submission"}, ""))
 )
 
 var (
