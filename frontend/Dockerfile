@@ -22,7 +22,7 @@ WORKDIR /app/frontend
 
 # Install project dependencies
 COPY frontend/package.json .
-COPY frontend/y-websocket-peerprep-* .
+COPY frontend/y-websocket-peerprep-*.tgz .
 RUN npm install
 
 COPY frontend .
