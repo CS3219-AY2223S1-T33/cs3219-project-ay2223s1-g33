@@ -11,28 +11,38 @@ import Constants from './constants';
 import Logger from './utils/logger';
 import LoopbackApiChannel from './api_server/loopback_channel';
 import { IUserCrudService } from './proto/user-crud-service.grpc-server';
+import { connectDatabase } from './db';
 
-const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
-Logger.info(`Starting User Service [V${version}]`);
-const envConfig = loadEnvironment();
+function printVersion() {
+  const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
+  Logger.info(`Starting User Service [V${version}]`);
+}
 
-const dataStore: AppStorage = new AppStorage();
-const authService: IAuthenticationAgent = createAuthenticationService(
-  envConfig.SESSION_SERVICE_URL,
-);
+async function run() {
+  printVersion();
 
-const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
-const expressApp = apiServer.getHttpServer();
+  const envConfig = loadEnvironment();
+  const dbConnection = await connectDatabase(envConfig);
+  const dataStore: AppStorage = new AppStorage(dbConnection);
 
-expressApp.get('/', (_: Request, resp: Response) => {
-  resp.status(200).send('Welcome to User Service');
-});
+  const authService: IAuthenticationAgent = createAuthenticationService(
+    envConfig.SESSION_SERVICE_URL,
+  );
 
-const userCrudApi = new UserCrudServiceApi(dataStore);
-apiServer.registerServiceRoutes(userCrudApi);
+  const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
+  const expressApp = apiServer.getHttpServer();
 
-const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
-loopbackCrudApi.registerServiceRoutes(userCrudApi);
+  expressApp.get('/', (_: Request, resp: Response) => {
+    resp.status(200).send('Welcome to User Service');
+  });
 
-apiServer.registerServiceRoutes(new UserServiceApi(authService, loopbackCrudApi));
-apiServer.bind();
+  const userCrudApi = new UserCrudServiceApi(dataStore);
+  apiServer.registerServiceRoutes(userCrudApi);
+
+  const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
+  loopbackCrudApi.registerServiceRoutes(userCrudApi);
+  apiServer.registerServiceRoutes(new UserServiceApi(authService, loopbackCrudApi));
+  apiServer.bind();
+}
+
+run();

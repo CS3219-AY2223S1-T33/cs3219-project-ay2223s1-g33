@@ -46,7 +46,15 @@ for P in ${OUTPUT_DIR[@]}; do
                 echo "Emitting filtered set to ${CONFIG_OUT_DIR}"
                 FILTERS=(${EMIT_FILTER//,/ })
                 for F in ${FILTERS[@]}; do
-                    find $OUT_DIR -name "${F}*.go" -exec cp {} "$CONFIG_OUT_DIR" \;
+                    STUBS=(${F//./ })
+                    find $OUT_DIR -name "${STUBS[0]}.pb.go" -exec cp {} "$CONFIG_OUT_DIR" \;
+                    for i in "${!STUBS[@]}"; do 
+                        if [ $i -eq 0 ]; then
+                            continue
+                        fi
+                        find $OUT_DIR -name "${STUBS[0]}_grpc.pb.go" -exec cp {} "$CONFIG_OUT_DIR" \;
+                        break
+                    done
                 done
             else
                 echo "Emitting all proto to ${CONFIG_OUT_DIR}"

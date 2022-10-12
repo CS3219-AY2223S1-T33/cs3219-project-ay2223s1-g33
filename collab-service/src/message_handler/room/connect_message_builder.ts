@@ -5,7 +5,7 @@ export const OPCODE_USER_JOIN = 5;
 export const OPCODE_USER_LEAVE = 6;
 export const OPCODE_QUESTION_REQ = 8;
 export const OPCODE_QUESTION_RCV = 9;
-export const OPCODE_SAVE_CODE_SEND = 10;
+export const OPCODE_SAVE_CODE_REQ = 10;
 export const OPCODE_SAVE_CODE_ACK = 11;
 
 function encodeContentOpcode(content: string, opcode: number): Uint8Array {
@@ -13,6 +13,10 @@ function encodeContentOpcode(content: string, opcode: number): Uint8Array {
   encoding.writeUint8(encoder, opcode);
   encoding.writeVarString(encoder, content);
   return encoding.toUint8Array(encoder);
+}
+
+function encodeOpcodeOnly(opcode: number): Uint8Array {
+  return new Uint8Array([opcode]);
 }
 
 function createConnectedPackage(username: string): Uint8Array {
@@ -27,6 +31,18 @@ function createQuestionRcvPackage(question: string): Uint8Array {
   return encodeContentOpcode(question, OPCODE_QUESTION_RCV);
 }
 
+function createSaveCodeReqPackage(): Uint8Array {
+  return encodeOpcodeOnly(OPCODE_SAVE_CODE_REQ);
+}
+
+function createSaveCodeAckPackage(response: string): Uint8Array {
+  return encodeContentOpcode(response, OPCODE_SAVE_CODE_ACK);
+}
+
+function createSaveCodeFailedPackage(): Uint8Array {
+  return encodeContentOpcode('Save failed', OPCODE_SAVE_CODE_ACK);
+}
+
 /**
  * Extracts opcode of given data package
  * @param data
@@ -39,5 +55,8 @@ export {
   createConnectedPackage,
   createDisconnectedPackage,
   createQuestionRcvPackage,
+  createSaveCodeReqPackage,
+  createSaveCodeAckPackage,
+  createSaveCodeFailedPackage,
   readConnectionOpCode,
 };

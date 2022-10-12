@@ -25,7 +25,13 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
       });
     }
 
-    await this.userStore.removeUser(requestObject.userId);
+    try {
+      await this.userStore.removeUser(requestObject.userId);
+    } catch {
+      return getHeaderlessResponse({
+        errorMessage: 'Database Error',
+      });
+    }
 
     return getHeaderlessResponse({
       errorMessage: '',

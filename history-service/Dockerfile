@@ -11,14 +11,12 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # Generate protobuff & database schema
-RUN mkdir -p history-service history-service/src/proto history-service/src/db
+RUN mkdir -p history-service history-service/src/proto
 COPY proto proto/
 COPY scripts scripts/
-COPY db db/
 COPY history-service/proto-emit.cfg history-service
 
 RUN npm run-script gen-proto
-RUN npm run-script sync-schema
 
 FROM node:alpine
 WORKDIR /app/history-service
@@ -30,8 +28,6 @@ COPY history-service .
 COPY history-service/src ./src/
 RUN true
 COPY --from=0 /app/history-service/src/proto/ ./src/proto/
-RUN true
-COPY --from=0 /app/history-service/src/db/ ./src/db/
 
 # Build project
 RUN npm run-script build

@@ -7,38 +7,35 @@ import {
 import { IMessageType } from '@protobuf-ts/runtime';
 import { Express } from 'express';
 
-declare interface IApiServer {
-  getHttpServer(): Express;
-  getGrpcServer(): GrpcServer;
-  bind(): void;
-  registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void;
-}
+declare type ApiHeaderMap = { [key: string]: string[] };
 
 declare type ApiRequest<RequestType> = {
   request: RequestType;
-  headers: { [key: string]: string[] };
+  headers: ApiHeaderMap;
 };
 
 declare type ApiResponse<ResponseType> = {
   response: ResponseType;
-  headers: { [key: string]: string[] };
+  headers: ApiHeaderMap;
 };
 
 declare type HTTPResponse = {
   jsonResponse: any;
-  headers: { [key: string]: string[] };
+  headers: ApiHeaderMap;
 };
 
 declare interface IApiHandler<RequestType, ResponseType> {
   handle(request: ApiRequest<RequestType>): Promise<ApiResponse<ResponseType>>;
 }
 
+declare type GRPCRouteHandler<T, V> = handleUnaryCall<T, V>;
+declare type HTTPRouteHandler = (json: any, headers: ApiHeaderMap) => Promise<HTTPResponse>;
 declare type LoopbackRouteHandler = (req: object) => Promise<object>;
 
 declare type ApiCallHandler<RequestType, ResponseType> = {
   handler: IApiHandler<RequestType, ResponseType>;
-  grpcRouteHandler: handleUnaryCall<RequestType, ResponseType>;
-  httpRouteHandler: (json: any, headers: { [key: string]: string[] }) => Promise<HTTPResponse>;
+  grpcRouteHandler: GRPCRouteHandler<RequestType, ResponseType>;
+  httpRouteHandler: HTTPRouteHandler;
   loopbackRouteHandler: LoopbackRouteHandler;
 };
 
@@ -52,7 +49,14 @@ declare interface ApiService<T extends UntypedServiceImplementation> {
   readonly serviceImplementation: T;
 }
 
-declare interface ILoopbackServiceChannel<T extends UntypedServiceImplementation> {
+declare interface IApiServer {
+  getHttpServer(): Express;
+  getGrpcServer(): GrpcServer;
+  bind(): void;
+  registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void;
+}
+
+declare interface ILoopbackServiceChannel<T = UntypedServiceImplementation> {
   registerServiceRoutes(apiService: ApiService<T>): void;
   callRoute<R extends object, U extends object>(
     route: string,
@@ -70,6 +74,9 @@ export {
   ApiRequest,
   ApiResponse,
   HTTPResponse,
+  HTTPRouteHandler,
+  GRPCRouteHandler,
   LoopbackRouteHandler,
   ILoopbackServiceChannel,
+  ApiHeaderMap,
 };

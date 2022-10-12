@@ -1,16 +1,22 @@
 /* eslint class-methods-use-this: 0 */
-import { getDatabase } from '../db';
-import HistoryAttemptEntity from '../db/History';
+import { IDatabase } from '../db';
+import HistoryAttemptEntity from '../db/history_entity';
 import { StoredAttempt } from '../model/attempt_store_model';
 import { IAttemptStore, AttemptStoreSearchResult } from './storage';
 
 // const returnValues = ['attempt_id', 'create_timestamp', 'update_timestamp'];
 
 class AttemptStore implements IAttemptStore {
-  async addAttempt(attempt: StoredAttempt): Promise<StoredAttempt> {
-    const { question, language, submission } = attempt;
+  private dbConn: IDatabase;
 
-    if (question === undefined || question.questionId <= 0) {
+  constructor(dbConn: IDatabase) {
+    this.dbConn = dbConn;
+  }
+
+  async addAttempt(attempt: StoredAttempt): Promise<StoredAttempt> {
+    const { questionId, language, submission } = attempt;
+
+    if (questionId <= 0) {
       throw new Error('No Question Provided');
     }
 
@@ -23,7 +29,7 @@ class AttemptStore implements IAttemptStore {
     }
 
     const insertedItem = (
-      await getDatabase()
+      await this.dbConn
         .getHistoryRepo()
         .save([attempt])
     )[0];
@@ -39,7 +45,7 @@ class AttemptStore implements IAttemptStore {
   }
 
   async removeAttempt(attemptId: number): Promise<void> {
-    await getDatabase()
+    await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .delete()
@@ -49,7 +55,7 @@ class AttemptStore implements IAttemptStore {
   }
 
   async getAttempt(attemptId: number): Promise<StoredAttempt | undefined> {
-    const selectResult: StoredAttempt | null = await getDatabase()
+    const selectResult: StoredAttempt | null = await this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
       .where('attempt_id = :attemptId', { attemptId })
@@ -70,21 +76,21 @@ class AttemptStore implements IAttemptStore {
     limit: number,
     offset: number,
   ): Promise<AttemptStoreSearchResult> {
-    const selectResultPromise = getDatabase()
+    const selectResultPromise = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'users')
-      .innerJoinAndSelect('histories.question', 'question')
-      .where('users.userId = :userId', { userId })
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .where('history_owners.user_id = :userId', { userId })
+      .orderBy('histories.attempt_id')
       .limit(limit)
       .offset(offset)
       .getMany();
 
-    const totalCountPromise = getDatabase()
+    const totalCountPromise = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'users')
-      .where('users.userId = :userId', { userId })
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .where('history_owners.user_id = :userId', { userId })
       .getCount();
 
     const selectResult = await selectResultPromise;
@@ -96,61 +102,29 @@ class AttemptStore implements IAttemptStore {
     };
   }
 
-  async getAttemptByUsername(
-    username: string,
-    limit: number,
-    offset: number,
-  ): Promise<AttemptStoreSearchResult> {
-    const selectResultPromise = getDatabase()
-      .getHistoryRepo()
-      .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'users')
-      .innerJoinAndSelect('histories.question', 'question')
-      .where('users.username = :username', { username })
-      .limit(limit)
-      .offset(offset)
-      .getMany();
-
-    const totalCountPromise = getDatabase()
-      .getHistoryRepo()
-      .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'users')
-      .where('users.username = :username', { username })
-      .getCount();
-
-    const selectResult = await selectResultPromise;
-    const totalCount = await totalCountPromise;
-
-    return {
-      attempts: selectResult,
-      totalCount,
-    };
-  }
-
-  async getAttemptByUsernameAndQuestionId(
-    username: string,
+  async getAttemptByUserIdAndQuestionId(
+    userId: number,
     questionId: number,
     limit: number,
     offset: number,
   ): Promise<AttemptStoreSearchResult> {
-    const selectResultPromise = getDatabase()
+    const selectResultPromise = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'users')
-      .innerJoinAndSelect('histories.question', 'question')
-      .where('users.username = :username', { username })
-      .andWhere('question.questionId = :questionId', { questionId })
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .where('history_owners.user_id = :userId', { userId })
+      .andWhere('question_id = :questionId', { questionId })
+      .orderBy('histories.attempt_id')
       .limit(limit)
       .offset(offset)
       .getMany();
 
-    const totalCountPromise = getDatabase()
+    const totalCountPromise = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'users')
-      .innerJoinAndSelect('histories.question', 'question')
-      .where('users.username = :username', { username })
-      .andWhere('question.questionId = :questionId', { questionId })
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .where('history_owners.user_id = :userId', { userId })
+      .andWhere('question_id = :questionId', { questionId })
       .getCount();
 
     const selectResult = await selectResultPromise;

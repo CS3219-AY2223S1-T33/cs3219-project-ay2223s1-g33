@@ -18,6 +18,7 @@ import { IStorage } from '../storage/storage';
 import CreateAttemptHandler from './history_crud_service_handlers/create_attempt_handler';
 import DeleteAttemptHandler from './history_crud_service_handlers/delete_attempt_handler';
 import { UserCrudServiceClient } from '../proto/user-crud-service.grpc-client';
+import { QuestionServiceClient } from '../proto/question-service.grpc-client';
 
 class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IHistoryCrudService>;
@@ -26,9 +27,16 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
 
   serviceImplementation: IHistoryCrudService;
 
-  constructor(storage: IStorage, userServiceUrl: string) {
-    const grpcClient = new UserCrudServiceClient(
+  constructor(storage: IStorage, userServiceUrl: string, questionServiceUrl: string) {
+    const userGrpcClient = new UserCrudServiceClient(
       userServiceUrl,
+      ChannelCredentials.createInsecure(),
+      {},
+      {},
+    );
+
+    const questionGrpcClient = new QuestionServiceClient(
+      questionServiceUrl,
       ChannelCredentials.createInsecure(),
       {},
       {},
@@ -36,17 +44,17 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
 
     const handlerDefinitions: ServiceHandlerDefinition<IHistoryCrudService> = {
       getAttempt: fromApiHandler(
-        new GetAttemptHandler(storage),
+        new GetAttemptHandler(storage, userGrpcClient, questionGrpcClient),
         GetAttemptRequest,
         GetAttemptResponse,
       ),
       getAttempts: fromApiHandler(
-        new GetAttemptsHandler(storage),
+        new GetAttemptsHandler(storage, userGrpcClient, questionGrpcClient),
         GetAttemptsRequest,
         GetAttemptsResponse,
       ),
       createAttempt: fromApiHandler(
-        new CreateAttemptHandler(storage, grpcClient),
+        new CreateAttemptHandler(storage, userGrpcClient, questionGrpcClient),
         CreateAttemptRequest,
         CreateAttemptResponse,
       ),

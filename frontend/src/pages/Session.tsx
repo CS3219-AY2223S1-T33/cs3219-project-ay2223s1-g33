@@ -1,4 +1,12 @@
-import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
+import {
+  Flex,
+  Button,
+  Text,
+  useDisclosure,
+  Box,
+  Grid,
+  useBoolean
+} from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
@@ -51,7 +59,7 @@ function Session() {
   const [wsStatus, setWsStatus] = useState("Not Connected");
   const [selectedLang, setSelectedLang] = useState<Language>("javascript");
   const [question, setQuestion] = useState<Question | undefined>();
-
+  const [isEditorLocked, setIsEditorLocked] = useBoolean(false);
   const [code, setCode] = useState("");
 
   useEffect(() => {
@@ -113,6 +121,21 @@ function Session() {
         setQuestion(questionObj);
       });
 
+      ws.on("savecode_send", () => {
+        toast.sendInfoMessage("Your partner is saving this attempt");
+        setIsEditorLocked.on();
+      });
+
+      ws.on("savecode_ack", (e: ErrorMessage) => {
+        const { errorMsg } = e;
+        if (errorMsg === "") {
+          toast.sendInfoMessage("Code saved");
+        } else {
+          toast.sendErrorMessage(errorMsg);
+        }
+        setIsEditorLocked.off();
+      });
+
       return ws;
     };
 
@@ -172,6 +195,16 @@ function Session() {
     provider.sendQuestionRequest();
   };
 
+  const sendCodeSnapshotHandler = () => {
+    if (!provider) {
+      return;
+    }
+
+    toast.sendInfoMessage("Saving code");
+    setIsEditorLocked.on();
+    provider.sendCodeSnapshot(code, selectedLang);
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -216,6 +249,7 @@ function Session() {
               nickname={nickname}
               selectedLang={selectedLang}
               onCodeUpdate={updateCodeHandler}
+              isEditable={!isEditorLocked}
             />
           )}
           {/* Test case window */}
@@ -223,7 +257,12 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
-              <Button onClick={() => console.log("WIP")}>Submit code</Button>
+              <Button
+                onClick={sendCodeSnapshotHandler}
+                isDisabled={isEditorLocked}
+              >
+                {isEditorLocked ? "Submitting..." : "Submit code"}
+              </Button>
             </Flex>
           </Grid>
         </Grid>

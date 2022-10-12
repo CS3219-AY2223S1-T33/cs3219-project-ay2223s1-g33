@@ -18,13 +18,8 @@ declare interface IAttemptStore {
     limit: number,
     offset: number,
   ): Promise<AttemptStoreSearchResult>;
-  getAttemptByUsername(
-    username: string,
-    limit: number,
-    offset: number,
-  ): Promise<AttemptStoreSearchResult>;
-  getAttemptByUsernameAndQuestionId(
-    username: string,
+  getAttemptByUserIdAndQuestionId(
+    userId: number,
     questionId: number,
     limit: number,
     offset: number,

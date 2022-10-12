@@ -2,11 +2,20 @@ import { GetAttemptRequest, GetAttemptResponse } from '../../proto/history-crud-
 import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IAttemptStore } from '../../storage/storage';
 import { convertToProtoAttempt } from '../../model/attempt_store_model';
+import BaseHandler from './base_handler';
+import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
+import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
 
-class GetAttemptHandler implements IApiHandler<GetAttemptRequest, GetAttemptResponse> {
+class GetAttemptHandler extends BaseHandler
+  implements IApiHandler<GetAttemptRequest, GetAttemptResponse> {
   attemptStore: IAttemptStore;
 
-  constructor(storage: IStorage) {
+  constructor(
+    storage: IStorage,
+    userGrpcClient: UserCrudServiceClient,
+    questionGrpcClient: QuestionServiceClient,
+  ) {
+    super(userGrpcClient, questionGrpcClient);
     this.attemptStore = storage.getAttemptStore();
   }
 
@@ -22,7 +31,13 @@ class GetAttemptHandler implements IApiHandler<GetAttemptRequest, GetAttemptResp
       return GetAttemptHandler.buildErrorResponse('No such attempt found');
     }
 
-    const resultObject = convertToProtoAttempt(attemptObject);
+    const nicknameMapPromise = super.createNicknameMap([attemptObject]);
+    const questionMapPromise = super.createQuestionMap([attemptObject]);
+
+    const nicknameMap = await nicknameMapPromise;
+    const questionMap = await questionMapPromise;
+
+    const resultObject = convertToProtoAttempt(attemptObject, nicknameMap, questionMap);
     if (!resultObject) {
       return GetAttemptHandler.buildErrorResponse('An internal error occurred');
     }

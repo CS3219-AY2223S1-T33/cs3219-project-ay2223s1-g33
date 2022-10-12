@@ -1,11 +1,12 @@
 import { IStorage } from './storage';
 import QuestionStore from './question_store';
+import { IDatabase } from '../db';
 
 class AppStorage implements IStorage {
   questionStore: QuestionStore;
 
-  constructor() {
-    this.questionStore = new QuestionStore();
+  constructor(dbConn: IDatabase) {
+    this.questionStore = new QuestionStore(dbConn);
   }
 
   getQuestionStore(): QuestionStore {

@@ -16,6 +16,7 @@ type Props = {
   nickname: string;
   selectedLang: Language;
   onCodeUpdate: (c: string, update: ViewUpdate) => void;
+  isEditable: boolean;
 };
 
 function Editor({
@@ -25,13 +26,14 @@ function Editor({
   nickname,
   selectedLang,
   onCodeUpdate,
+  isEditable
 }: Props) {
   useEffect(() => {
     if (!providerSet) {
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333",
+        colorLight: "#6eeb8333"
       });
       providerSet = true;
     }
@@ -47,6 +49,7 @@ function Editor({
       height="100%"
       extensions={[lang, yCollab(yText, provider.awareness, { undoManager })]}
       onChange={onCodeUpdate}
+      editable={isEditable}
     />
   );
 }

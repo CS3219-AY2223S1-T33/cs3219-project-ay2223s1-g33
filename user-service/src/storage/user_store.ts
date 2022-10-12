@@ -1,14 +1,20 @@
 /* eslint class-methods-use-this: 0 */
-import { getDatabase, UserEntity } from '../db';
+import { IDatabase, UserEntity } from '../db';
 import { StoredUser } from '../model/user_store_model';
 import { IUserStore } from './storage';
 
 const returnValues = ['username', 'password', 'nickname'];
 class UserStore implements IUserStore {
+  private dbConn: IDatabase;
+
+  constructor(dbConn: IDatabase) {
+    this.dbConn = dbConn;
+  }
+
   async addUser(user: StoredUser): Promise<StoredUser> {
     const { username, password, nickname } = user;
 
-    const isExist = await getDatabase()
+    const isExist = await this.dbConn
       .getUserRepo()
       .findOneBy({ username });
 
@@ -17,7 +23,7 @@ class UserStore implements IUserStore {
     }
 
     const insertResult: UserEntity = (
-      await getDatabase()
+      await this.dbConn
         .getDataSource()
         .createQueryBuilder()
         .insert()
@@ -34,7 +40,7 @@ class UserStore implements IUserStore {
   }
 
   async removeUser(userId: number): Promise<void> {
-    await getDatabase()
+    await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .delete()
@@ -48,7 +54,7 @@ class UserStore implements IUserStore {
       userId, username, password, nickname,
     } = user;
 
-    const isExist = await getDatabase()
+    const isExist = await this.dbConn
       .getUserRepo()
       .findOneBy({ username });
 
@@ -56,7 +62,7 @@ class UserStore implements IUserStore {
       throw new Error('User with same username already exists');
     }
 
-    await getDatabase()
+    await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .update(UserEntity)
@@ -70,7 +76,7 @@ class UserStore implements IUserStore {
   }
 
   async getUser(userId: number): Promise<StoredUser | undefined> {
-    const selectResult: UserEntity | null = await getDatabase()
+    const selectResult: UserEntity | null = await this.dbConn
       .getUserRepo()
       .createQueryBuilder('user')
       .where('user.userId = :userId', { userId })
@@ -86,7 +92,7 @@ class UserStore implements IUserStore {
   }
 
   async getUserByUsername(username: string): Promise<StoredUser | undefined> {
-    const selectResult: UserEntity | null = await getDatabase()
+    const selectResult: UserEntity | null = await this.dbConn
       .getUserRepo()
       .createQueryBuilder('user')
       .where('user.username = :username', { username })
@@ -102,7 +108,7 @@ class UserStore implements IUserStore {
   }
 
   async getAllUsers(): Promise<StoredUser[]> {
-    const selectResult: UserEntity[] = await getDatabase()
+    const selectResult: UserEntity[] = await this.dbConn
       .getUserRepo()
       .createQueryBuilder('user')
       .getMany();

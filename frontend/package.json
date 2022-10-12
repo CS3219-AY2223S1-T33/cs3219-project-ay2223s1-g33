@@ -35,16 +35,17 @@
     "react-redux": "^8.0.2",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "react-table": "^7.8.0",
     "typescript": "^4.8.2",
     "web-vitals": "^2.1.4",
     "y-codemirror.next": "^0.3.2",
-    "y-websocket-peerprep": "file:y-websocket-peerprep-1.4.5.tgz",
+    "y-websocket-peerprep": "file:y-websocket-peerprep-2.0.0.tgz",
     "yjs": "13.5.41"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -67,7 +68,10 @@
     ]
   },
   "devDependencies": {
+    "@protobuf-ts/runtime": "^2.8.1",
+    "@protobuf-ts/runtime-rpc": "^2.8.1",
     "@types/file-saver": "^2.0.5",
+    "@types/react-table": "^7.7.12",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "eslint": "^8.23.0",
