@@ -12,10 +12,9 @@ env:
   ECS_CLUSTER: cs3219-cluster
 
 jobs:
-  deploy:
-    name: Deploy to AWS ECS
+  build:
+    name: Build and Upload Images
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Set up repository
@@ -110,7 +109,14 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
           echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
+  
+  deploy:
+    name: Deploy to AWS ECS
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
 
+    steps:
       - name: Update task definition for session-service
         id: task-def-session-service
         uses: aws-actions/amazon-ecs-render-task-definition@v1
