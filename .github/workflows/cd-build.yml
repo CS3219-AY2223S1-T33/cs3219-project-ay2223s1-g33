@@ -18,15 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      session-service-image: ${{ steps.publish-image.outputs.session-service-image }}
-      question-service-image: ${{ steps.publish-image.outputs.question-service-image }}
-      matchmaker-image: ${{ steps.publish-image.outputs.matchmaker-image }}
-      user-service-image: ${{ steps.publish-image.outputs.user-service-image }}
-      matchmaking-service-image: ${{ steps.publish-image.outputs.matching-service-image }}
-      collab-service-image: ${{ steps.publish-image.outputs.collab-service-image }}
-      frontend-image: ${{ steps.publish-image.outputs.frontend-image }}
-      gateway-image: ${{ steps.publish-image.outputs.gateway-image }} 
-      history-service-image: ${{ steps.publish-image.outputs.history-service-image }} 
+      github-sha: ${{ github.sha }}
 
     steps:
       - name: Set up repository
@@ -114,41 +106,32 @@ jobs:
           
           # frontend
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
-          echo "::set-output name=frontend-image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
 
           # question-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
-          echo "::set-output name=question-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG"
 
           # matching-service 
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
-          echo "::set-output name=matching-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG"
 
           # collab-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
-          echo "::set-output name=collab-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG"
 
           # user-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
-          echo "::set-output name=user-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG"
 
           # history-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
-          echo "::set-output name=history-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG"
-
+          
           # go services
 
           # matchmaker
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
-          echo "::set-output name=matchmaker-image::$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG"
 
           # gateway
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
-          echo "::set-output name=gateway-image::$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG"
 
           # session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
-          echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
 
   deploy:
     name: Deploy to AWS ECS
@@ -157,111 +140,6 @@ jobs:
     environment: production
 
     steps:
-
-      - name: Update task definition for session-service
-        id: task-def-session-service
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: .aws/task-definition.json
-          container-name: session-service
-          image: ${{ needs.build.outputs.session-service-image }}
-          environment-variables: |
-            REDIS_SERVER=redis:6379
-            REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
-            SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
-
-      - name: Update task definition for question-service
-        id: task-def-question-service
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-session-service.outputs.task-definition }}
-          container-name: question-service
-          image: ${{ needs.build.outputs.question-service-image }}
-          environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-
-      - name: Update task definition for matchmaker
-        id: task-def-matchmaker
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-question-service.outputs.task-definition }}
-          container-name: matchmaker
-          image: ${{ needs.build.outputs.matchmaker-image }}
-          environment-variables: |
-            REDIS_SERVER=redis:6379
-
-      - name: Update task definition for user-service
-        id: task-def-user-service
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-matchmaker.outputs.task-definition }}
-          container-name: user-service
-          image: ${{ needs.build.outputs.user-service-image }}
-          environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            SESSION_SERVICE_URL=session-service:4100
-
-      - name: Update task definition for matching-service
-        id: task-def-matching-service
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-user-service.outputs.task-definition }}
-          container-name: matching-service
-          image: ${{ needs.build.outputs.matching-service-image }}
-          environment-variables: |
-            REDIS_SERVER_URL=redis:6379
-            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
-            JWT_SIGNING_SECRET=${{ secrets.JWT_SIGNING_SECRET }}
-
-      - name: Update task definition for collab-service
-        id: task-def-collab-service
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-matching-service.outputs.task-definition }}
-          container-name: collab-service
-          image: ${{ needs.build.outputs.collab-service-image }}
-          environment-variables: |
-            REDIS_SERVER_URL=redis:6379
-            QUESTION_SERVER_URL=question-service:4004
-            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
-            HISTORY_SERVER_URL=history-service:4005
-
-      - name: Update task definition for frontend
-        id: task-def-frontend
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-collab-service.outputs.task-definition }}
-          container-name: frontend
-          image: ${{ needs.build.outputs.frontend-image }}
-          
-      - name: Update task definition for gateway
-        id: task-def-gateway
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
-          container-name: gateway
-          image: ${{ needs.build.outputs.gateway-image }}      
-
-      - name: Update task definition for history-service
-        id: task-def-history-service
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-gateway.outputs.task-definition }}
-          container-name: history-service
-          image: ${{ needs.build.outputs.history-service-image }}  
-          environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            USER_SERVICE_URL=user-service:4000
-            QUESTION_SERVICE_URL=question-service:4004
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
@@ -273,6 +151,138 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
+
+      - name: Update task definition for session-service
+        id: task-def-session-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/task-definition.json
+          container-name: session-service
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
+          environment-variables: |
+            REDIS_SERVER=redis:6379
+            REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
+            SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
+
+      - name: Update task definition for question-service
+        id: task-def-question-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-session-service.outputs.task-definition }}
+          container-name: question-service
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+
+      - name: Update task definition for matchmaker
+        id: task-def-matchmaker
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-question-service.outputs.task-definition }}
+          container-name: matchmaker
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
+          environment-variables: |
+            REDIS_SERVER=redis:6379
+
+      - name: Update task definition for user-service
+        id: task-def-user-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        with:
+          task-definition: ${{ steps.task-def-matchmaker.outputs.task-definition }}
+          container-name: user-service
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            SESSION_SERVICE_URL=session-service:4100
+
+      - name: Update task definition for matching-service
+        id: task-def-matching-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-user-service.outputs.task-definition }}
+          container-name: matching-service
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
+          environment-variables: |
+            REDIS_SERVER_URL=redis:6379
+            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
+            JWT_SIGNING_SECRET=${{ secrets.JWT_SIGNING_SECRET }}
+
+      - name: Update task definition for collab-service
+        id: task-def-collab-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-matching-service.outputs.task-definition }}
+          container-name: collab-service
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
+          environment-variables: |
+            REDIS_SERVER_URL=redis:6379
+            QUESTION_SERVER_URL=question-service:4004
+            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
+            HISTORY_SERVER_URL=history-service:4005
+
+      - name: Update task definition for frontend
+        id: task-def-frontend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-collab-service.outputs.task-definition }}
+          container-name: frontend
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
+          
+      - name: Update task definition for gateway
+        id: task-def-gateway
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
+          container-name: gateway
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG     
+
+      - name: Update task definition for history-service
+        id: task-def-history-service
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.build.outputs.github-sha }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-gateway.outputs.task-definition }}
+          container-name: history-service
+          image: $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
+          environment-variables: |
+            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            USER_SERVICE_URL=user-service:4000
+            QUESTION_SERVICE_URL=question-service:4004
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
