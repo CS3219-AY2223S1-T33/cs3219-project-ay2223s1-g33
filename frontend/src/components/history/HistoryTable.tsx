@@ -57,7 +57,9 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   >();
 
   const { isOpen, onOpen, onClose } = useDisclosure({
-    onClose: () => { setModalHistoryAttempt(undefined); },
+    onClose: () => {
+      setModalHistoryAttempt(undefined);
+    },
   });
 
   const onHistoryAttemptClick = (historyAttempt: HistoryAttempt) => {

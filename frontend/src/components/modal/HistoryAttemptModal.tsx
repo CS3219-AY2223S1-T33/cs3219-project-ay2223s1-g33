@@ -16,7 +16,10 @@ import HistorySection from "../history/HistorySection";
 import saveFile from "../../utils/fileDownloadUtil";
 import { Language } from "../../types";
 import { HistoryAttempt } from "../../proto/types";
-import { GetAttemptSubmissionRequest, GetAttemptSubmissionResponse } from "../../proto/history-service";
+import {
+  GetAttemptSubmissionRequest,
+  GetAttemptSubmissionResponse,
+} from "../../proto/history-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 
 type Props = {
@@ -36,7 +39,9 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
   const toast = useFixedToast();
   const [submission, setSubmission] = useState<string | undefined>();
 
-  const loadSubmission = async (targetAttemptId: number): Promise<HistoryAttempt> => {
+  const loadSubmission = async (
+    targetAttemptId: number
+  ): Promise<HistoryAttempt> => {
     const request: GetAttemptSubmissionRequest = {
       attemptId: targetAttemptId,
     };
@@ -45,11 +50,11 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
       request,
       {
         withCredentials: true,
-      },
+      }
     );
-    
+
     const { errorMessage } = res.data;
-    if (errorMessage !== '') {
+    if (errorMessage !== "") {
       throw new Error(errorMessage);
     }
 
@@ -59,17 +64,17 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
     }
 
     return attempt;
-  }
+  };
 
   useEffect(() => {
     if (historyAttempt) {
       loadSubmission(historyAttempt.attemptId)
-      .then((attempt) => {
-        setSubmission(attempt.submission);
-      })
-      .catch((err) => {
-        toast.sendErrorMessage(err.message);
-      });
+        .then((attempt) => {
+          setSubmission(attempt.submission);
+        })
+        .catch((err) => {
+          toast.sendErrorMessage(err.message);
+        });
     } else {
       setSubmission(undefined);
     }
