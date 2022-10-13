@@ -67,9 +67,28 @@ message GetUserProfileResponse {
   string error_message = 2;
 }
 
+message ResetPasswordRequest {
+  string username = 1;
+}
+
+message ResetPasswordResponse {
+  string error_message = 1;
+}
+
+message ConsumePasswordResetTokenRequest {
+  string token = 1;
+  string new_password = 2;
+}
+
+message ConsumePasswordResetTokenResponse {
+  string error_message = 1;
+}
+
 service UserService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc ConsumePasswordResetToken(ConsumePasswordResetTokenRequest) returns (ConsumePasswordResetTokenResponse);
 }
