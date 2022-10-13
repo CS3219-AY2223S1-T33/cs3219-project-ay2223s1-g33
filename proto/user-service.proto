@@ -26,6 +26,18 @@ enum LogoutErrorCode {
   LOGOUT_ERROR_INTERNAL_ERROR = 101;
 }
 
+enum ResetPasswordErrorCode {
+  RESET_PASSWORD_ERROR_NONE = 0;
+  RESET_PASSWORD_ERROR_BAD_REQUEST = 100;
+  RESET_PASSWORD_ERROR_INTERNAL_ERROR = 101;
+}
+
+enum ConsumeResetTokenErrorCode {
+  CONSUME_RESET_TOKEN_ERROR_NONE = 0;
+  CONSUME_RESET_TOKEN_ERROR_BAD_REQUEST = 100;
+  CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR = 101;
+}
+
 message UserCredentials {
   string username = 1;
   string password = 2;
@@ -72,16 +84,18 @@ message ResetPasswordRequest {
 }
 
 message ResetPasswordResponse {
-  string error_message = 1;
+  ResetPasswordErrorCode error_code = 1;
+  string error_message = 2;
 }
 
-message ConsumePasswordResetTokenRequest {
+message ConsumeResetTokenRequest {
   string token = 1;
   string new_password = 2;
 }
 
-message ConsumePasswordResetTokenResponse {
-  string error_message = 1;
+message ConsumeResetTokenResponse {
+  ConsumeResetTokenErrorCode error_code = 1;
+  string error_message = 2;
 }
 
 service UserService {
@@ -90,5 +104,5 @@ service UserService {
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
-  rpc ConsumePasswordResetToken(ConsumePasswordResetTokenRequest) returns (ConsumePasswordResetTokenResponse);
+  rpc ConsumeResetToken(ConsumeResetTokenRequest) returns (ConsumeResetTokenResponse);
 }

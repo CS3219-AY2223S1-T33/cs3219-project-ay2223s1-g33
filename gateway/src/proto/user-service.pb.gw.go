@@ -201,8 +201,8 @@ func local_request_UserService_ResetPassword_0(ctx context.Context, marshaler ru
 
 }
 
-func request_UserService_ConsumePasswordResetToken_0(ctx context.Context, marshaler runtime.Marshaler, client UserServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ConsumePasswordResetTokenRequest
+func request_UserService_ConsumeResetToken_0(ctx context.Context, marshaler runtime.Marshaler, client UserServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ConsumeResetTokenRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -213,13 +213,13 @@ func request_UserService_ConsumePasswordResetToken_0(ctx context.Context, marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.ConsumePasswordResetToken(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ConsumeResetToken(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_UserService_ConsumePasswordResetToken_0(ctx context.Context, marshaler runtime.Marshaler, server UserServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ConsumePasswordResetTokenRequest
+func local_request_UserService_ConsumeResetToken_0(ctx context.Context, marshaler runtime.Marshaler, server UserServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ConsumeResetTokenRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -230,7 +230,7 @@ func local_request_UserService_ConsumePasswordResetToken_0(ctx context.Context, 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.ConsumePasswordResetToken(ctx, &protoReq)
+	msg, err := server.ConsumeResetToken(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -366,7 +366,7 @@ func RegisterUserServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	mux.Handle("POST", pattern_UserService_ConsumePasswordResetToken_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_UserService_ConsumeResetToken_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -374,12 +374,12 @@ func RegisterUserServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_service.UserService/ConsumePasswordResetToken", runtime.WithHTTPPathPattern("/user_service.UserService/ConsumePasswordResetToken"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_service.UserService/ConsumeResetToken", runtime.WithHTTPPathPattern("/user_service.UserService/ConsumeResetToken"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_UserService_ConsumePasswordResetToken_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_UserService_ConsumeResetToken_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -387,7 +387,7 @@ func RegisterUserServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 			return
 		}
 
-		forward_UserService_ConsumePasswordResetToken_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_UserService_ConsumeResetToken_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -542,25 +542,25 @@ func RegisterUserServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
-	mux.Handle("POST", pattern_UserService_ConsumePasswordResetToken_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_UserService_ConsumeResetToken_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_service.UserService/ConsumePasswordResetToken", runtime.WithHTTPPathPattern("/user_service.UserService/ConsumePasswordResetToken"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_service.UserService/ConsumeResetToken", runtime.WithHTTPPathPattern("/user_service.UserService/ConsumeResetToken"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_UserService_ConsumePasswordResetToken_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_UserService_ConsumeResetToken_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_UserService_ConsumePasswordResetToken_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_UserService_ConsumeResetToken_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -578,7 +578,7 @@ var (
 
 	pattern_UserService_ResetPassword_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user_service.UserService", "ResetPassword"}, ""))
 
-	pattern_UserService_ConsumePasswordResetToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user_service.UserService", "ConsumePasswordResetToken"}, ""))
+	pattern_UserService_ConsumeResetToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user_service.UserService", "ConsumeResetToken"}, ""))
 )
 
 var (
@@ -592,5 +592,5 @@ var (
 
 	forward_UserService_ResetPassword_0 = runtime.ForwardResponseMessage
 
-	forward_UserService_ConsumePasswordResetToken_0 = runtime.ForwardResponseMessage
+	forward_UserService_ConsumeResetToken_0 = runtime.ForwardResponseMessage
 )

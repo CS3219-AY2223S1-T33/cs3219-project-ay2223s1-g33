@@ -27,7 +27,7 @@ type UserServiceClient interface {
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	GetUserProfile(ctx context.Context, in *GetUserProfileRequest, opts ...grpc.CallOption) (*GetUserProfileResponse, error)
 	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error)
-	ConsumePasswordResetToken(ctx context.Context, in *ConsumePasswordResetTokenRequest, opts ...grpc.CallOption) (*ConsumePasswordResetTokenResponse, error)
+	ConsumeResetToken(ctx context.Context, in *ConsumeResetTokenRequest, opts ...grpc.CallOption) (*ConsumeResetTokenResponse, error)
 }
 
 type userServiceClient struct {
@@ -83,9 +83,9 @@ func (c *userServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 	return out, nil
 }
 
-func (c *userServiceClient) ConsumePasswordResetToken(ctx context.Context, in *ConsumePasswordResetTokenRequest, opts ...grpc.CallOption) (*ConsumePasswordResetTokenResponse, error) {
-	out := new(ConsumePasswordResetTokenResponse)
-	err := c.cc.Invoke(ctx, "/user_service.UserService/ConsumePasswordResetToken", in, out, opts...)
+func (c *userServiceClient) ConsumeResetToken(ctx context.Context, in *ConsumeResetTokenRequest, opts ...grpc.CallOption) (*ConsumeResetTokenResponse, error) {
+	out := new(ConsumeResetTokenResponse)
+	err := c.cc.Invoke(ctx, "/user_service.UserService/ConsumeResetToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ type UserServiceServer interface {
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	GetUserProfile(context.Context, *GetUserProfileRequest) (*GetUserProfileResponse, error)
 	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
-	ConsumePasswordResetToken(context.Context, *ConsumePasswordResetTokenRequest) (*ConsumePasswordResetTokenResponse, error)
+	ConsumeResetToken(context.Context, *ConsumeResetTokenRequest) (*ConsumeResetTokenResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -124,8 +124,8 @@ func (UnimplementedUserServiceServer) GetUserProfile(context.Context, *GetUserPr
 func (UnimplementedUserServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
 }
-func (UnimplementedUserServiceServer) ConsumePasswordResetToken(context.Context, *ConsumePasswordResetTokenRequest) (*ConsumePasswordResetTokenResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConsumePasswordResetToken not implemented")
+func (UnimplementedUserServiceServer) ConsumeResetToken(context.Context, *ConsumeResetTokenRequest) (*ConsumeResetTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConsumeResetToken not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -230,20 +230,20 @@ func _UserService_ResetPassword_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_ConsumePasswordResetToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConsumePasswordResetTokenRequest)
+func _UserService_ConsumeResetToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConsumeResetTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).ConsumePasswordResetToken(ctx, in)
+		return srv.(UserServiceServer).ConsumeResetToken(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user_service.UserService/ConsumePasswordResetToken",
+		FullMethod: "/user_service.UserService/ConsumeResetToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ConsumePasswordResetToken(ctx, req.(*ConsumePasswordResetTokenRequest))
+		return srv.(UserServiceServer).ConsumeResetToken(ctx, req.(*ConsumeResetTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -276,8 +276,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_ResetPassword_Handler,
 		},
 		{
-			MethodName: "ConsumePasswordResetToken",
-			Handler:    _UserService_ConsumePasswordResetToken_Handler,
+			MethodName: "ConsumeResetToken",
+			Handler:    _UserService_ConsumeResetToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
