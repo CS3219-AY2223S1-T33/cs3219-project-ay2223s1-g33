@@ -12,10 +12,9 @@ env:
   ECS_CLUSTER: cs3219-cluster
 
 jobs:
-  deploy:
-    name: Deploy to AWS ECS
+  build:
+    name: Build and Upload Images
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Set up repository
@@ -110,7 +109,14 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
           echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
+  
+  deploy:
+    name: Deploy to AWS ECS
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
 
+    steps:
       - name: Update task definition for session-service
         id: task-def-session-service
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -183,6 +189,7 @@ jobs:
             REDIS_SERVER_URL=redis:6379
             QUESTION_SERVER_URL=question-service:4004
             JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
+            HISTORY_SERVER_URL=history-service:4005
 
       - name: Update task definition for frontend
         id: task-def-frontend
@@ -213,6 +220,7 @@ jobs:
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
             USER_SERVICE_URL=user-service:4000
+            QUESTION_SERVICE_URL=question-service:4004
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
