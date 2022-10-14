@@ -40,12 +40,13 @@ message DeleteUserResponse {
   string error_message = 1;
 }
 
-message GetResetTokenRequest {
-  common.PasswordResetToken token = 1;
+message GetResetTokensRequest {
+  string token_string = 1;
+  string username = 2;
 }
 
-message GetResetTokenResponse {
-  common.PasswordResetToken token = 1;
+message GetResetTokensResponse {
+  repeated common.PasswordResetToken tokens = 1;
   string error_message = 2;
 }
 
@@ -72,7 +73,7 @@ service UserCrudService {
   rpc EditUser(EditUserRequest) returns (EditUserResponse);
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 
-  rpc GetResetToken(GetResetTokenRequest) returns (GetResetTokenResponse);
+  rpc GetResetTokens(GetResetTokensRequest) returns (GetResetTokensResponse);
   rpc CreateResetToken(CreateResetTokenRequest) returns (CreateResetTokenResponse);
   rpc DeleteResetToken(DeleteResetTokenRequest) returns (DeleteResetTokenResponse);
 }

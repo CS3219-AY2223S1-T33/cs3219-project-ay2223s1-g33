@@ -6,8 +6,8 @@ import { DeleteResetTokenResponse } from "./user-crud-service";
 import { DeleteResetTokenRequest } from "./user-crud-service";
 import { CreateResetTokenResponse } from "./user-crud-service";
 import { CreateResetTokenRequest } from "./user-crud-service";
-import { GetResetTokenResponse } from "./user-crud-service";
-import { GetResetTokenRequest } from "./user-crud-service";
+import { GetResetTokensResponse } from "./user-crud-service";
+import { GetResetTokensRequest } from "./user-crud-service";
 import { DeleteUserResponse } from "./user-crud-service";
 import { DeleteUserRequest } from "./user-crud-service";
 import { EditUserResponse } from "./user-crud-service";
@@ -38,9 +38,9 @@ export interface IUserCrudService extends grpc.UntypedServiceImplementation {
      */
     deleteUser: grpc.handleUnaryCall<DeleteUserRequest, DeleteUserResponse>;
     /**
-     * @generated from protobuf rpc: GetResetToken(user_crud_service.GetResetTokenRequest) returns (user_crud_service.GetResetTokenResponse);
+     * @generated from protobuf rpc: GetResetTokens(user_crud_service.GetResetTokensRequest) returns (user_crud_service.GetResetTokensResponse);
      */
-    getResetToken: grpc.handleUnaryCall<GetResetTokenRequest, GetResetTokenResponse>;
+    getResetTokens: grpc.handleUnaryCall<GetResetTokensRequest, GetResetTokensResponse>;
     /**
      * @generated from protobuf rpc: CreateResetToken(user_crud_service.CreateResetTokenRequest) returns (user_crud_service.CreateResetTokenResponse);
      */
@@ -102,15 +102,15 @@ export const userCrudServiceDefinition: grpc.ServiceDefinition<IUserCrudService>
         responseSerialize: value => Buffer.from(DeleteUserResponse.toBinary(value)),
         requestSerialize: value => Buffer.from(DeleteUserRequest.toBinary(value))
     },
-    getResetToken: {
-        path: "/user_crud_service.UserCrudService/GetResetToken",
-        originalName: "GetResetToken",
+    getResetTokens: {
+        path: "/user_crud_service.UserCrudService/GetResetTokens",
+        originalName: "GetResetTokens",
         requestStream: false,
         responseStream: false,
-        responseDeserialize: bytes => GetResetTokenResponse.fromBinary(bytes),
-        requestDeserialize: bytes => GetResetTokenRequest.fromBinary(bytes),
-        responseSerialize: value => Buffer.from(GetResetTokenResponse.toBinary(value)),
-        requestSerialize: value => Buffer.from(GetResetTokenRequest.toBinary(value))
+        responseDeserialize: bytes => GetResetTokensResponse.fromBinary(bytes),
+        requestDeserialize: bytes => GetResetTokensRequest.fromBinary(bytes),
+        responseSerialize: value => Buffer.from(GetResetTokensResponse.toBinary(value)),
+        requestSerialize: value => Buffer.from(GetResetTokensRequest.toBinary(value))
     },
     createResetToken: {
         path: "/user_crud_service.UserCrudService/CreateResetToken",
