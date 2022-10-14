@@ -4,8 +4,6 @@ import HistoryAttemptEntity from '../db/history_entity';
 import { StoredAttempt } from '../model/attempt_store_model';
 import { IAttemptStore, AttemptStoreSearchResult } from './storage';
 
-// const returnValues = ['attempt_id', 'create_timestamp', 'update_timestamp'];
-
 class AttemptStore implements IAttemptStore {
   private dbConn: IDatabase;
 
@@ -24,7 +22,7 @@ class AttemptStore implements IAttemptStore {
       throw new Error('No Language Provided');
     }
 
-    if (submission.length === 0) {
+    if (!submission || submission.length === 0) {
       throw new Error('No Submission Data Provided');
     }
 
@@ -58,7 +56,9 @@ class AttemptStore implements IAttemptStore {
     const selectResult: StoredAttempt | null = await this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
-      .where('attempt_id = :attemptId', { attemptId })
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .addSelect('histories.submission')
+      .where('histories.attempt_id = :attemptId', { attemptId })
       .getOne();
 
     if (!selectResult) {
@@ -71,25 +71,30 @@ class AttemptStore implements IAttemptStore {
     return deepCopyOfItem;
   }
 
-  async getAttemptByUserId(
+  async getAttemptsByUserId(
     userId: number,
     limit: number,
     offset: number,
+    shouldOmitSubmission: boolean,
   ): Promise<AttemptStoreSearchResult> {
-    const selectResultPromise = this.dbConn
+    let selectQuery = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
       .innerJoinAndSelect('histories.users', 'history_owners')
       .where('history_owners.user_id = :userId', { userId })
       .orderBy('histories.attempt_id')
       .limit(limit)
-      .offset(offset)
-      .getMany();
+      .offset(offset);
 
+    if (!shouldOmitSubmission) {
+      selectQuery = selectQuery.addSelect('histories.submission');
+    }
+
+    const selectResultPromise = selectQuery.getMany();
     const totalCountPromise = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
-      .innerJoinAndSelect('histories.users', 'history_owners')
+      .innerJoin('histories.users', 'history_owners')
       .where('history_owners.user_id = :userId', { userId })
       .getCount();
 
@@ -102,13 +107,14 @@ class AttemptStore implements IAttemptStore {
     };
   }
 
-  async getAttemptByUserIdAndQuestionId(
+  async getAttemptsByUserIdAndQuestionId(
     userId: number,
     questionId: number,
     limit: number,
     offset: number,
+    shouldOmitSubmission: boolean,
   ): Promise<AttemptStoreSearchResult> {
-    const selectResultPromise = this.dbConn
+    let selectQuery = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
       .innerJoinAndSelect('histories.users', 'history_owners')
@@ -116,9 +122,13 @@ class AttemptStore implements IAttemptStore {
       .andWhere('question_id = :questionId', { questionId })
       .orderBy('histories.attempt_id')
       .limit(limit)
-      .offset(offset)
-      .getMany();
+      .offset(offset);
 
+    if (!shouldOmitSubmission) {
+      selectQuery = selectQuery.addSelect('histories.submission');
+    }
+
+    const selectResultPromise = selectQuery.getMany();
     const totalCountPromise = this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')

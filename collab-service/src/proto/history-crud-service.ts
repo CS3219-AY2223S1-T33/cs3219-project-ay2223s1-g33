@@ -22,6 +22,10 @@ export interface GetAttemptRequest {
      * @generated from protobuf field: uint64 attempt_id = 1;
      */
     attemptId: number;
+    /**
+     * @generated from protobuf field: string username = 2;
+     */
+    username: string;
 }
 /**
  * @generated from protobuf message history_crud_service.GetAttemptResponse
@@ -60,6 +64,10 @@ export interface GetAttemptsRequest {
      * @generated from protobuf field: uint64 question_id = 5;
      */
     questionId: number;
+    /**
+     * @generated from protobuf field: bool should_omit_submission = 6;
+     */
+    shouldOmitSubmission: boolean;
 }
 /**
  * @generated from protobuf message history_crud_service.GetAttemptsResponse
@@ -122,11 +130,12 @@ export interface DeleteAttemptResponse {
 class GetAttemptRequest$Type extends MessageType<GetAttemptRequest> {
     constructor() {
         super("history_crud_service.GetAttemptRequest", [
-            { no: 1, name: "attempt_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+            { no: 1, name: "attempt_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<GetAttemptRequest>): GetAttemptRequest {
-        const message = { attemptId: 0 };
+        const message = { attemptId: 0, username: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<GetAttemptRequest>(this, message, value);
@@ -139,6 +148,9 @@ class GetAttemptRequest$Type extends MessageType<GetAttemptRequest> {
             switch (fieldNo) {
                 case /* uint64 attempt_id */ 1:
                     message.attemptId = reader.uint64().toNumber();
+                    break;
+                case /* string username */ 2:
+                    message.username = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -155,6 +167,9 @@ class GetAttemptRequest$Type extends MessageType<GetAttemptRequest> {
         /* uint64 attempt_id = 1; */
         if (message.attemptId !== 0)
             writer.tag(1, WireType.Varint).uint64(message.attemptId);
+        /* string username = 2; */
+        if (message.username !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.username);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -227,11 +242,12 @@ class GetAttemptsRequest$Type extends MessageType<GetAttemptsRequest> {
             { no: 2, name: "offset", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 3, name: "user_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
             { no: 4, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+            { no: 5, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 6, name: "should_omit_submission", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<GetAttemptsRequest>): GetAttemptsRequest {
-        const message = { limit: 0, offset: 0, userId: 0, username: "", questionId: 0 };
+        const message = { limit: 0, offset: 0, userId: 0, username: "", questionId: 0, shouldOmitSubmission: false };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<GetAttemptsRequest>(this, message, value);
@@ -256,6 +272,9 @@ class GetAttemptsRequest$Type extends MessageType<GetAttemptsRequest> {
                     break;
                 case /* uint64 question_id */ 5:
                     message.questionId = reader.uint64().toNumber();
+                    break;
+                case /* bool should_omit_submission */ 6:
+                    message.shouldOmitSubmission = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -284,6 +303,9 @@ class GetAttemptsRequest$Type extends MessageType<GetAttemptsRequest> {
         /* uint64 question_id = 5; */
         if (message.questionId !== 0)
             writer.tag(5, WireType.Varint).uint64(message.questionId);
+        /* bool should_omit_submission = 6; */
+        if (message.shouldOmitSubmission !== false)
+            writer.tag(6, WireType.Varint).bool(message.shouldOmitSubmission);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

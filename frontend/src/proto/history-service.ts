@@ -48,6 +48,28 @@ export interface GetAttemptHistoryResponse {
      */
     errorMessage: string;
 }
+/**
+ * @generated from protobuf message history_service.GetAttemptSubmissionRequest
+ */
+export interface GetAttemptSubmissionRequest {
+    /**
+     * @generated from protobuf field: uint64 attempt_id = 1;
+     */
+    attemptId: number;
+}
+/**
+ * @generated from protobuf message history_service.GetAttemptSubmissionResponse
+ */
+export interface GetAttemptSubmissionResponse {
+    /**
+     * @generated from protobuf field: common.HistoryAttempt attempt = 1;
+     */
+    attempt?: HistoryAttempt;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class GetAttemptHistoryRequest$Type extends MessageType<GetAttemptHistoryRequest> {
     constructor() {
@@ -170,9 +192,111 @@ class GetAttemptHistoryResponse$Type extends MessageType<GetAttemptHistoryRespon
  * @generated MessageType for protobuf message history_service.GetAttemptHistoryResponse
  */
 export const GetAttemptHistoryResponse = new GetAttemptHistoryResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetAttemptSubmissionRequest$Type extends MessageType<GetAttemptSubmissionRequest> {
+    constructor() {
+        super("history_service.GetAttemptSubmissionRequest", [
+            { no: 1, name: "attempt_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetAttemptSubmissionRequest>): GetAttemptSubmissionRequest {
+        const message = { attemptId: 0 };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetAttemptSubmissionRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetAttemptSubmissionRequest): GetAttemptSubmissionRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint64 attempt_id */ 1:
+                    message.attemptId = reader.uint64().toNumber();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetAttemptSubmissionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint64 attempt_id = 1; */
+        if (message.attemptId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.attemptId);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_service.GetAttemptSubmissionRequest
+ */
+export const GetAttemptSubmissionRequest = new GetAttemptSubmissionRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetAttemptSubmissionResponse$Type extends MessageType<GetAttemptSubmissionResponse> {
+    constructor() {
+        super("history_service.GetAttemptSubmissionResponse", [
+            { no: 1, name: "attempt", kind: "message", T: () => HistoryAttempt },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetAttemptSubmissionResponse>): GetAttemptSubmissionResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetAttemptSubmissionResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetAttemptSubmissionResponse): GetAttemptSubmissionResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.HistoryAttempt attempt */ 1:
+                    message.attempt = HistoryAttempt.internalBinaryRead(reader, reader.uint32(), options, message.attempt);
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetAttemptSubmissionResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.HistoryAttempt attempt = 1; */
+        if (message.attempt)
+            HistoryAttempt.internalBinaryWrite(message.attempt, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_service.GetAttemptSubmissionResponse
+ */
+export const GetAttemptSubmissionResponse = new GetAttemptSubmissionResponse$Type();
 /**
  * @generated ServiceType for protobuf service history_service.HistoryService
  */
 export const HistoryService = new ServiceType("history_service.HistoryService", [
-    { name: "GetAttemptHistory", options: {}, I: GetAttemptHistoryRequest, O: GetAttemptHistoryResponse }
+    { name: "GetAttemptHistory", options: {}, I: GetAttemptHistoryRequest, O: GetAttemptHistoryResponse },
+    { name: "GetAttemptSubmission", options: {}, I: GetAttemptSubmissionRequest, O: GetAttemptSubmissionResponse }
 ]);

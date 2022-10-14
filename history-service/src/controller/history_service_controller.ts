@@ -4,7 +4,13 @@ import { ServiceHandlerDefinition, ApiService, ILoopbackServiceChannel } from '.
 import { fromApiHandler } from '../api_server/api_server_helpers';
 import GetAttemptHistoryHandler from './history_service_handlers/get_attempt_history_handler';
 import { IHistoryCrudService } from '../proto/history-crud-service.grpc-server';
-import { GetAttemptHistoryRequest, GetAttemptHistoryResponse } from '../proto/history-service';
+import {
+  GetAttemptHistoryRequest,
+  GetAttemptHistoryResponse,
+  GetAttemptSubmissionRequest,
+  GetAttemptSubmissionResponse,
+} from '../proto/history-service';
+import GetAttemptSubmissionHandler from './history_service_handlers/get_attempt_submission_handler';
 
 class HistoryServiceApi implements ApiService<IHistoryService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IHistoryService>;
@@ -20,10 +26,16 @@ class HistoryServiceApi implements ApiService<IHistoryService> {
         GetAttemptHistoryRequest,
         GetAttemptHistoryResponse,
       ),
+      getAttemptSubmission: fromApiHandler(
+        new GetAttemptSubmissionHandler(crudLoopback),
+        GetAttemptSubmissionRequest,
+        GetAttemptSubmissionResponse,
+      ),
     };
 
     const historyService: IHistoryService = {
       getAttemptHistory: handlerDefinitions.getAttemptHistory.grpcRouteHandler,
+      getAttemptSubmission: handlerDefinitions.getAttemptSubmission.grpcRouteHandler,
     };
 
     this.serviceHandlerDefinition = handlerDefinitions;
