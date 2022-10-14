@@ -17,13 +17,17 @@ import {
 } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordResetToken, User } from '../../proto/types';
+import IHashAgent from '../../auth/hash_agent_types';
 
 class ConsumeResetTokenHandler
 implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
   rpcClient: ILoopbackServiceChannel<IUserCrudService>;
 
-  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>) {
+  hashAgent: IHashAgent;
+
+  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>, hashAgent: IHashAgent) {
     this.rpcClient = rpcClient;
+    this.hashAgent = hashAgent;
   }
 
   async handle(request: ApiRequest<ConsumeResetTokenRequest>):
@@ -54,7 +58,8 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       );
     }
 
-    const isSuccessful = await this.changeUserPassword(tokenObject.userId, newPassword);
+    const hashedPassword = await this.hashAgent.hashPassword(newPassword);
+    const isSuccessful = await this.changeUserPassword(tokenObject.userId, hashedPassword);
     if (!isSuccessful) {
       return ConsumeResetTokenHandler.buildErrorResponse(
         ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
@@ -76,7 +81,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
 
     const queryResponse = await this.rpcClient
       .callRoute<GetResetTokensRequest, GetResetTokensResponse>(
-      'getUser',
+      'getResetTokens',
       crudQueryRequest,
       GetResetTokensResponse,
     );

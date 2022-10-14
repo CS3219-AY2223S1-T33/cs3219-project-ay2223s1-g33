@@ -1,3 +1,4 @@
+import Validator from 'validator';
 import { randomBytes } from 'crypto';
 import { ResetPasswordRequest, ResetPasswordResponse, ResetPasswordErrorCode } from '../../proto/user-service';
 import {
@@ -19,6 +20,7 @@ import {
   GetUserResponse,
 } from '../../proto/user-crud-service';
 import { User } from '../../proto/types';
+import Logger from '../../utils/logger';
 
 const MAX_ACTIVE_TOKENS = 3;
 
@@ -32,10 +34,17 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
     this.rpcClient = rpcClient;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   async handle(request: ApiRequest<ResetPasswordRequest>):
   Promise<ApiResponse<ResetPasswordResponse>> {
-    const { username } = request.request;
+    const validatedRequest = ResetPasswordHandler.validateRequest(request.request.username);
+    if (validatedRequest instanceof Error) {
+      return ResetPasswordHandler.buildErrorResponse(
+        ResetPasswordErrorCode.RESET_PASSWORD_ERROR_BAD_REQUEST,
+        validatedRequest.message,
+      );
+    }
+
+    const { username } = validatedRequest;
     const userObject = await this.getUserByUsername(username);
     if (!userObject) {
       return ResetPasswordHandler.buildErrorResponse(
@@ -65,18 +74,11 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
       );
     }
 
-    const isEamilSendSuccess = await this.emailClient.sendResetEmail(
+    this.emailClient.sendResetEmail(
       username,
       userObject.nickname,
       token,
-    );
-
-    if (!isEamilSendSuccess) {
-      return ResetPasswordHandler.buildErrorResponse(
-        ResetPasswordErrorCode.RESET_PASSWORD_ERROR_INTERNAL_ERROR,
-        'Email Sending Failed',
-      );
-    }
+    ).catch((err) => Logger.warn(`Failed to send email: ${err}`));
 
     return {
       response: ResetPasswordResponse.create(),
@@ -159,8 +161,27 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
     return queryResponse.user.userInfo;
   }
 
+  static validateRequest(username: string): (ValidatedRequest | Error) {
+    if (Validator.isEmpty(username)) {
+      return new Error('Empty username provided');
+    }
+
+    if (!Validator.isEmail(username)) {
+      return new Error('Username must be a valid email');
+    }
+
+    const sanitizedEmail = Validator.normalizeEmail(username);
+    if (!sanitizedEmail) {
+      return new Error('Username must be a valid email');
+    }
+
+    return {
+      username: sanitizedEmail,
+    };
+  }
+
   static generateToken(): string {
-    return randomBytes(96).toString('base64');
+    return randomBytes(96).toString('hex');
   }
 
   static buildErrorResponse(errorCode: ResetPasswordErrorCode, errorMessage: string)
@@ -174,5 +195,9 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
     };
   }
 }
+
+type ValidatedRequest = {
+  username: string,
+};
 
 export default ResetPasswordHandler;

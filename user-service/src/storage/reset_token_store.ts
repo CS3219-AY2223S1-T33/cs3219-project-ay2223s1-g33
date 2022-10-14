@@ -16,7 +16,15 @@ class ResetTokenStore implements IResetTokenStore {
     try {
       await this.dbConn
         .getPasswordResetTokenRepo()
-        .insert(token);
+        .createQueryBuilder()
+        .insert()
+        .into(PasswordResetTokenEntity)
+        .values({
+          token: token.token,
+          user: token.user,
+          expiresAt: token.expiresAt,
+        })
+        .execute();
     } catch (ex) {
       Logger.warn(`${ex}`);
       return false;
@@ -39,16 +47,16 @@ class ResetTokenStore implements IResetTokenStore {
     return true;
   }
 
-  async getToken(tokenId: string): Promise<StoredResetToken | null> {
+  async getToken(tokenString: string): Promise<StoredResetToken | null> {
     let token: PasswordResetTokenEntity | null = null;
 
     try {
       token = await this.dbConn.getPasswordResetTokenRepo()
         .findOne({
           where: {
-            id: tokenId,
+            token: tokenString,
           },
-          relations: ['users'],
+          relations: ['user'],
         });
     } catch (ex) {
       Logger.warn(`${ex}`);
@@ -60,7 +68,7 @@ class ResetTokenStore implements IResetTokenStore {
     }
 
     return {
-      token: token.id,
+      token: token.token,
       user: token.user,
       expiresAt: token.expiresAt,
     };
@@ -77,7 +85,7 @@ class ResetTokenStore implements IResetTokenStore {
               username,
             },
           },
-          relations: ['users'],
+          relations: ['user'],
           order: {
             createDateTime: 'ASC',
           },
@@ -92,7 +100,7 @@ class ResetTokenStore implements IResetTokenStore {
     }
 
     return tokens.map((token) => ({
-      token: token.id,
+      token: token.token,
       user: token.user,
       expiresAt: token.expiresAt,
     }));
