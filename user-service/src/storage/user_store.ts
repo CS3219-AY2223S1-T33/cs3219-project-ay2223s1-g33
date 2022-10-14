@@ -54,11 +54,11 @@ class UserStore implements IUserStore {
       userId, username, password, nickname,
     } = user;
 
-    const isExist = await this.dbConn
+    const userObject = await this.dbConn
       .getUserRepo()
       .findOneBy({ username });
 
-    if (isExist) {
+    if (userObject && userObject.userId !== userId) {
       throw new Error('User with same username already exists');
     }
 
