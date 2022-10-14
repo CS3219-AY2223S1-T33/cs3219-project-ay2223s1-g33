@@ -23,7 +23,7 @@ import { IStorage } from '../storage/storage';
 import CreateUserHandler from './user_crud_service_handlers/create_user_handler';
 import EditUserHandler from './user_crud_service_handlers/edit_user_handler';
 import DeleteUserHandler from './user_crud_service_handlers/delete_user_handler';
-import GetResetTokenHandler from './user_crud_service_handlers/get_reset_token_handler';
+import GetResetTokensHandler from './user_crud_service_handlers/get_reset_tokens_handler';
 import CreateResetTokenHandler from './user_crud_service_handlers/create_reset_token_handler';
 import DeleteResetTokenHandler from './user_crud_service_handlers/delete_reset_token_handler';
 
@@ -50,7 +50,7 @@ class UserCrudServiceApi implements ApiService<IUserCrudService> {
       ),
 
       getResetTokens: fromApiHandler(
-        new GetResetTokenHandler(storage),
+        new GetResetTokensHandler(storage),
         GetResetTokensRequest,
         GetResetTokensResponse,
       ),

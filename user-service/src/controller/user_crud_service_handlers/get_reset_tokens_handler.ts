@@ -19,7 +19,7 @@ function buildErrorResponse(errorMessage: string): ApiResponse<GetResetTokensRes
   });
 }
 
-class GetResetTokenHandler implements IApiHandler<GetResetTokensRequest, GetResetTokensResponse> {
+class GetResetTokensHandler implements IApiHandler<GetResetTokensRequest, GetResetTokensResponse> {
   resetTokenStore: IResetTokenStore;
 
   constructor(storage: IStorage) {
@@ -62,4 +62,4 @@ class GetResetTokenHandler implements IApiHandler<GetResetTokensRequest, GetRese
   }
 }
 
-export default GetResetTokenHandler;
+export default GetResetTokensHandler;
