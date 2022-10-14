@@ -78,6 +78,9 @@ class ResetTokenStore implements IResetTokenStore {
             },
           },
           relations: ['users'],
+          order: {
+            createDateTime: 'ASC',
+          },
         });
     } catch (ex) {
       Logger.warn(`${ex}`);
