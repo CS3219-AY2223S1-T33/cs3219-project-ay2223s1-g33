@@ -1,3 +1,4 @@
+import { RedisClientType } from 'redis';
 import { DeleteUserRequest, DeleteUserResponse } from '../../proto/user-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage';
@@ -12,8 +13,11 @@ function getHeaderlessResponse(resp: DeleteUserResponse): ApiResponse<DeleteUser
 class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResponse> {
   userStore: IUserStore;
 
-  constructor(storage: IStorage) {
+  redis: RedisClientType;
+
+  constructor(storage: IStorage, redis: RedisClientType) {
     this.userStore = storage.getUserStore();
+    this.redis = redis;
   }
 
   async handle(request: ApiRequest<DeleteUserRequest>): Promise<ApiResponse<DeleteUserResponse>> {

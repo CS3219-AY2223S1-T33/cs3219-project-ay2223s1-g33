@@ -1,4 +1,5 @@
 import { ServiceDefinition } from '@grpc/grpc-js';
+import { RedisClientType } from 'redis';
 import { IUserCrudService, userCrudServiceDefinition } from '../proto/user-crud-service.grpc-server';
 import {
   CreateUserRequest,
@@ -25,7 +26,7 @@ class UserCrudServiceApi implements ApiService<IUserCrudService> {
 
   serviceImplementation: IUserCrudService;
 
-  constructor(storage: IStorage) {
+  constructor(storage: IStorage, redis: RedisClientType) {
     const handlerDefinitions: ServiceHandlerDefinition<IUserCrudService> = {
       getUser: fromApiHandler(new GetUserHandler(storage), GetUserRequest, GetUserResponse),
       createUser: fromApiHandler(
@@ -35,7 +36,7 @@ class UserCrudServiceApi implements ApiService<IUserCrudService> {
       ),
       editUser: fromApiHandler(new EditUserHandler(storage), EditUserRequest, EditUserResponse),
       deleteUser: fromApiHandler(
-        new DeleteUserHandler(storage),
+        new DeleteUserHandler(storage, redis),
         DeleteUserRequest,
         DeleteUserResponse,
       ),

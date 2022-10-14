@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { createClient, RedisClientType } from 'redis';
 import getApiServer from './api_server/api_server';
 import createAuthenticationService from './auth/authentication_agent';
 import { IAuthenticationAgent } from './auth/authentication_agent_types';
@@ -24,6 +25,10 @@ async function run() {
   const envConfig = loadEnvironment();
   const dbConnection = await connectDatabase(envConfig);
   const dataStore: AppStorage = new AppStorage(dbConnection);
+  const redis: RedisClientType = createClient({
+    url: envConfig.REDIS_SERVER_URL,
+  });
+  await redis.connect();
 
   const authService: IAuthenticationAgent = createAuthenticationService(
     envConfig.SESSION_SERVICE_URL,
@@ -36,7 +41,7 @@ async function run() {
     resp.status(200).send('Welcome to User Service');
   });
 
-  const userCrudApi = new UserCrudServiceApi(dataStore);
+  const userCrudApi = new UserCrudServiceApi(dataStore, redis);
   apiServer.registerServiceRoutes(userCrudApi);
 
   const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
