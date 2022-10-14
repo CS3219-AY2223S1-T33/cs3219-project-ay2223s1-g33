@@ -13,16 +13,18 @@ declare interface IAttemptStore {
   addAttempt(attempt: StoredAttempt): Promise<StoredAttempt>;
   removeAttempt(id: number): Promise<void>;
   getAttempt(id: number): Promise<StoredAttempt | undefined>;
-  getAttemptByUserId(
+  getAttemptsByUserId(
     userId: number,
     limit: number,
     offset: number,
+    shouldOmitSubmission: boolean,
   ): Promise<AttemptStoreSearchResult>;
-  getAttemptByUserIdAndQuestionId(
+  getAttemptsByUserIdAndQuestionId(
     userId: number,
     questionId: number,
     limit: number,
     offset: number,
+    shouldOmitSubmission: boolean,
   ): Promise<AttemptStoreSearchResult>;
 }
 

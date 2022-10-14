@@ -52,7 +52,7 @@ function convertToProtoAttempt(
   return {
     attemptId: attempt.attemptId,
     question: questionMap[attempt.questionId],
-    submission: attempt.submission,
+    submission: attempt.submission ? attempt.submission : '',
     language: attempt.language,
     timestamp: Math.floor(attempt.createDateTime.getTime() / 1000),
     users,

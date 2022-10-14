@@ -22,8 +22,8 @@ export default class HistoryAttemptEntity {
   @Column({ name: 'question_id' })
     questionId!: number;
 
-  @Column()
-    submission!: string;
+  @Column({ select: false })
+    submission?: string;
 
   @Column()
     language!: string;

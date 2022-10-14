@@ -1,8 +1,9 @@
 import { Code, Divider, Heading, VStack } from "@chakra-ui/react";
 import React from "react";
+import LoadingSection from "../ui/LoadingSection";
 
 type Props = {
-  submission: string;
+  submission: string | undefined;
 };
 
 function HistorySection({ submission }: Props) {
@@ -12,7 +13,13 @@ function HistorySection({ submission }: Props) {
         Code Submitted
       </Heading>
       <Divider />
-      <Code overflow="scroll">{submission}</Code>
+      {submission ? (
+        <LoadingSection message="Loading Submission..." />
+      ) : (
+        <Code width="100%" overflow="scroll">
+          {submission}
+        </Code>
+      )}
     </VStack>
   );
 }

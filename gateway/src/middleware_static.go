@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func AttachStaticServe(server string) http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.EscapedPath()
+
+		if !(strings.HasPrefix(path, "/static") || path == "/favicon.ico") {
+			path = "/"
+		}
+
 		resp, err := http.Get(fmt.Sprintf("http://%s%s", server, path))
 		if err != nil {
 			w.WriteHeader(404)
