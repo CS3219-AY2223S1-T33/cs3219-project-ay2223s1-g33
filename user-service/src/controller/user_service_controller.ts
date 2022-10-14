@@ -4,6 +4,8 @@ import { ServiceHandlerDefinition, ApiService, ILoopbackServiceChannel } from '.
 import { fromApiHandler } from '../api_server/api_server_helpers';
 import RegisterHandler from './user_service_handlers/register_handler';
 import {
+  ConsumeResetTokenRequest,
+  ConsumeResetTokenResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   LoginRequest,
@@ -12,6 +14,8 @@ import {
   LogoutResponse,
   RegisterRequest,
   RegisterResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
 } from '../proto/user-service';
 import LoginHandler from './user_service_handlers/login_handler';
 import { IAuthenticationAgent } from '../auth/authentication_agent_types';
@@ -19,6 +23,8 @@ import LogoutHandler from './user_service_handlers/logout_handler';
 import GetUserProfileHandler from './user_service_handlers/get_user_profile_handler';
 import { IUserCrudService } from '../proto/user-crud-service.grpc-server';
 import createHashAgent from '../auth/hash_agent';
+import ResetPasswordHandler from './user_service_handlers/reset_password_handler';
+import ConsumeResetTokenHandler from './user_service_handlers/consume_reset_token_handler';
 
 class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
@@ -53,6 +59,16 @@ class UserServiceApi implements ApiService<IUserService> {
         GetUserProfileRequest,
         GetUserProfileResponse,
       ),
+      resetPassword: fromApiHandler(
+        new ResetPasswordHandler(),
+        ResetPasswordRequest,
+        ResetPasswordResponse,
+      ),
+      consumeResetToken: fromApiHandler(
+        new ConsumeResetTokenHandler(),
+        ConsumeResetTokenRequest,
+        ConsumeResetTokenResponse,
+      ),
     };
 
     const userService: IUserService = {
@@ -60,6 +76,8 @@ class UserServiceApi implements ApiService<IUserService> {
       login: handlerDefinitions.login.grpcRouteHandler,
       logout: handlerDefinitions.logout.grpcRouteHandler,
       getUserProfile: handlerDefinitions.getUserProfile.grpcRouteHandler,
+      resetPassword: handlerDefinitions.resetPassword.grpcRouteHandler,
+      consumeResetToken: handlerDefinitions.consumeResetToken.grpcRouteHandler,
     };
 
     this.serviceHandlerDefinition = handlerDefinitions;
