@@ -1,5 +1,5 @@
 declare type EmailMetadata = {
-  sender: string;
+  sender?: string;
   target: string;
   subject: string;
 };

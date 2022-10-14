@@ -40,11 +40,11 @@ class SMTPAdapter implements IEmailAdapter {
   async sendEmail(metadata: EmailMetadata, body: EmailBody): Promise<boolean> {
     try {
       await this.transporter.sendMail({
-        from: metadata.sender, // sender address
-        to: metadata.target, // list of receivers
-        subject: metadata.subject, // Subject line
-        text: body.text, // plain text body
-        html: body.html, // html body
+        from: metadata.sender ? metadata.sender : this.credentials.username,
+        to: metadata.target,
+        subject: metadata.subject,
+        text: body.text,
+        html: body.html,
       });
     } catch (ex) {
       Logger.warn(`Email Sending Failed With Error ${ex}`);
