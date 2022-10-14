@@ -51,10 +51,16 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
     requestFactory: createAttemptHistoryReqFactory(questionId),
     responseExtractor: createAttemptHistoryExtractor(),
   });
-  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const [modalHistoryAttempt, setModalHistoryAttempt] = useState<
     HistoryAttempt | undefined
   >();
+
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    onClose: () => {
+      setModalHistoryAttempt(undefined);
+    },
+  });
 
   const onHistoryAttemptClick = (historyAttempt: HistoryAttempt) => {
     setModalHistoryAttempt(historyAttempt);

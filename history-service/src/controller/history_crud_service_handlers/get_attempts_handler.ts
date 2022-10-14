@@ -56,17 +56,19 @@ class GetAttemptsHandler extends BaseHandler
     let result: AttemptStoreSearchResult;
 
     if (request.questionId) {
-      result = await this.attemptStore.getAttemptByUserIdAndQuestionId(
+      result = await this.attemptStore.getAttemptsByUserIdAndQuestionId(
         userId,
         request.questionId,
         limit,
         offset,
+        request.shouldOmitSubmission,
       );
     } else {
-      result = await this.attemptStore.getAttemptByUserId(
+      result = await this.attemptStore.getAttemptsByUserId(
         userId,
         limit,
         offset,
+        request.shouldOmitSubmission,
       );
     }
 
