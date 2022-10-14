@@ -1,6 +1,6 @@
 /* eslint class-methods-use-this: 0 */
 import { IDatabase, UserEntity } from '../db';
-import { StoredUser } from '../model/user_store_model';
+import StoredUser from '../model/user_store_model';
 import { IUserStore } from './storage';
 
 const returnValues = ['username', 'password', 'nickname'];

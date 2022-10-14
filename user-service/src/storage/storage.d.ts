@@ -1,7 +1,9 @@
-import { StoredUser } from '../model/user_store_model';
+import StoredResetToken from '../model/reset_token_model';
+import StoredUser from '../model/user_store_model';
 
 declare interface IStorage {
   getUserStore(): IUserStore;
+  getResetTokenStore(): IResetTokenStore;
 }
 
 declare interface IUserStore {
@@ -13,4 +15,11 @@ declare interface IUserStore {
   getAllUsers(): Promise<StoredUser[]>;
 }
 
-export { IStorage, IUserStore };
+declare interface IResetTokenStore {
+  addResetToken(token: StoredResetToken): Promise<boolean>;
+  removeResetToken(tokenId: string): Promise<void>;
+  getToken(tokenId: string): Promise<StoredResetToken?>;
+  getTokensByUsername(username: string): Promise<StoredResetToken[]>;
+}
+
+export { IStorage, IUserStore, IResetTokenStore };
