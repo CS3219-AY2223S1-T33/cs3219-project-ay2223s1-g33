@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   JoinColumn,
+  Column,
 } from 'typeorm';
 import UserEntity from './user_entity';
 
@@ -14,9 +15,12 @@ export default class PasswordResetTokenEntity {
   @PrimaryGeneratedColumn({ name: 'token_id' })
     id!: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.passwordResetTokens)
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
     user!: UserEntity;
+
+  @Column({ name: 'expires_at' })
+    expiresAt!: Date;
 
   @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime!: Date;

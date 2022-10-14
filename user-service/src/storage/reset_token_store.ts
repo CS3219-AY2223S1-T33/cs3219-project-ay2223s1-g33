@@ -25,7 +25,7 @@ class ResetTokenStore implements IResetTokenStore {
     return true;
   }
 
-  async removeResetToken(tokenId: string): Promise<void> {
+  async removeResetToken(tokenId: string): Promise<boolean> {
     try {
       await this.dbConn.getPasswordResetTokenRepo()
         .createQueryBuilder()
@@ -34,7 +34,9 @@ class ResetTokenStore implements IResetTokenStore {
         .execute();
     } catch (ex) {
       Logger.warn(`${ex}`);
+      return false;
     }
+    return true;
   }
 
   async getToken(tokenId: string): Promise<StoredResetToken | null> {
