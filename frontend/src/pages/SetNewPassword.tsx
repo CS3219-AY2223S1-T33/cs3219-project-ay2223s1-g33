@@ -6,26 +6,31 @@ import {
   FormControl,
   FormLabel,
   Input,
+  InputGroup,
+  InputRightElement,
   Button,
+  useBoolean,
   Text,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import React from "react";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import React, { useEffect } from "react";
 import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import Link from "../components/ui/Link";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "../axios";
-import useFixedToast from "../utils/hooks/useFixedToast";
+import Link from "../components/ui/Link";
 import {
-  ResetPasswordRequest,
-  ResetPasswordResponse,
+  ConsumeResetTokenRequest,
+  ConsumeResetTokenResponse,
 } from "../proto/user-service";
+import useFixedToast from "../utils/hooks/useFixedToast";
 
-function ResetPassword() {
+function SetNewPassword() {
   const {
     register,
     handleSubmit,
@@ -33,17 +38,31 @@ function ResetPassword() {
   } = useForm();
 
   const toast = useFixedToast();
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useBoolean();
+  const [searchParams] = useSearchParams();
+
+  const token = searchParams.get("token")!;
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/login", { replace: true });
+    }
+  }, []);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
-    const { email } = data;
+    const { newPassword } = data;
 
-    const resetPasswordRequest: ResetPasswordRequest = { username: email };
+    const consumeResetTokenRequest: ConsumeResetTokenRequest = {
+      token,
+      newPassword,
+    };
 
     // Send registration request to the server
     axios
-      .post<ResetPasswordResponse>(
-        "/api/user/resetPassword",
-        resetPasswordRequest
+      .post<ConsumeResetTokenResponse>(
+        "/api/user/consumeResetToken",
+        consumeResetTokenRequest
       )
       .then((res) => {
         const { data: resData } = res;
@@ -54,9 +73,7 @@ function ResetPassword() {
           throw new Error(resData.errorMessage);
         }
 
-        toast.sendSuccessMessage(
-          "If an account exist, a reset password email will be sent."
-        );
+        toast.sendSuccessMessage("Your password is reset! Click on the link below to login.");
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
@@ -81,16 +98,28 @@ function ResetPassword() {
         <Box rounded="lg" bg="white" boxShadow="lg" p={8}>
           <form onSubmit={handleSubmit(validFormHandler, invalidFormHandler)}>
             <Stack spacing={4}>
-              <FormControl id="email" isInvalid={!!errors.email}>
-                <FormLabel>Email address</FormLabel>
-                <Input
-                  type="email"
-                  {...register("email", {
-                    required: "Please enter your email.",
-                  })}
-                />
+              <FormControl id="password" isInvalid={!!errors.password}>
+                <FormLabel>New Password</FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    {...register("password", {
+                      required: "Please enter your password",
+                      minLength: {
+                        value: 8,
+                        message:
+                          "Please make sure your password is at least 8 characters long.",
+                      },
+                    })}
+                  />
+                  <InputRightElement h="full">
+                    <Button variant="ghost" onClick={setShowPassword.toggle}>
+                      {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
                 <FormErrorMessage>
-                  {errors.email?.message as string}
+                  {errors.password?.message as string}
                 </FormErrorMessage>
               </FormControl>
 
@@ -121,4 +150,4 @@ function ResetPassword() {
   );
 }
 
-export default ResetPassword;
+export default SetNewPassword;
