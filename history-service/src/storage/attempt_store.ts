@@ -164,6 +164,9 @@ class AttemptStore implements IAttemptStore {
     const deletedUserAttempts = resultAttemptId.map(
       (res: { attempt_id: number; }) => res.attempt_id,
     );
+    if (!deletedUserAttempts.length) {
+      return;
+    }
 
     // Retrieve deleted owner's attempts that has other owners
     const otherUserAttempts: HistoryAttemptEntity[] = await this.dbConn

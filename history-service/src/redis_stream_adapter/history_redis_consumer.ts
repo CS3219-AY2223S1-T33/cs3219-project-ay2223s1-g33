@@ -2,13 +2,15 @@ import { RedisClientType } from 'redis';
 import { IAttemptStore } from '../storage/storage';
 import createRedisConsumer from './redis_consumer';
 
+const uuid = require('uuid');
+
 const STREAMS_KEY_QUESTION = 'stream-delete-question';
 const STREAMS_KEY_USER = 'stream-delete-user';
 
-const CONSUMER_GROUP_QUESTION = 'stream-delete-question-consumer';
-const CONSUMER_GROUP_USER = 'stream-delete-user-consumer';
+const CONSUMER_GROUP_QUESTION = 'delete-question-history-service';
+const CONSUMER_GROUP_USER = 'delete-user-history-service';
 
-const CONSUMER_NAME = 'stream-consumer-history-service';
+const CONSUMER_NAME = uuid.v4();
 
 class HistoryRedisConsumer {
   questionConsumer: IStreamConsumer;
