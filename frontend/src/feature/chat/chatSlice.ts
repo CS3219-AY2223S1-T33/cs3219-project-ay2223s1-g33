@@ -2,30 +2,30 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Chat {
-	from: string;
-	message: string;
+  from: string;
+  message: string;
 }
 
 interface ChatState {
-	chat: Chat[];
+  chat: Chat[];
 }
 
 const initialState: ChatState = {
-	chat: [],
+  chat: [],
 };
 
 export const chatSlice = createSlice({
-	name: "chat",
-	initialState,
-	reducers: {
-		addMessage: (state, action: PayloadAction<Chat>) => {
-			const newChat = [...state.chat, action.payload];
-			state.chat = newChat;
-		},
-		clearChat: (state) => {
-			state.chat = initialState.chat;
-		},
-	},
+  name: "chat",
+  initialState,
+  reducers: {
+    addMessage: (state, action: PayloadAction<Chat>) => {
+      const newChat = action.payload;
+      state.chat.unshift(newChat);
+    },
+    clearChat: (state) => {
+      state.chat = initialState.chat;
+    },
+  },
 });
 
 export const { clearChat, addMessage } = chatSlice.actions;

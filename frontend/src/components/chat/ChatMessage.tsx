@@ -10,7 +10,7 @@ function ChatMessage({ message }: Props) {
   const { message: content, from } = message;
 
   return (
-    <Flex direction="column">
+    <Flex direction="column" py={2} borderBottom="1px solid gray">
       <Text fontWeight="bold">{from}</Text>
       <Text>{content}</Text>
     </Flex>

@@ -48,7 +48,11 @@ function ChatInput({ sendTextMessage }: Props) {
         onChange={inputChangeHandler}
         onKeyDown={keyDownHandler}
       />
-      <Button rightIcon={<MdSend />} onClick={sendMessageHandler}>
+      <Button
+        rightIcon={<MdSend />}
+        onClick={sendMessageHandler}
+        disabled={inputMsg.length === 0}
+      >
         Send
       </Button>
     </Grid>
