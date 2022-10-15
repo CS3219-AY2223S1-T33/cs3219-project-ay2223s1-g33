@@ -3,6 +3,7 @@ import { IDatabase } from '../db';
 import HistoryAttemptEntity from '../db/history_entity';
 import { StoredAttempt } from '../model/attempt_store_model';
 import { IAttemptStore, AttemptStoreSearchResult } from './storage';
+import HistoryOwnerEntity from '../db/history_owner_entity';
 
 class AttemptStore implements IAttemptStore {
   private dbConn: IDatabase;
@@ -144,6 +145,42 @@ class AttemptStore implements IAttemptStore {
       attempts: selectResult,
       totalCount,
     };
+  }
+
+  async removeHistoryOwner(userId: number): Promise<void> {
+    // Delete HistoryOwner and retrieve attempts
+    const returnAttemptId = 'attempt_id';
+    // eslint-disable-next-line no-console
+    console.log(`Removing owner ${userId} ...`);
+    const userAttemptIds: string[] = (await this.dbConn
+      .getDataSource()
+      .createQueryBuilder()
+      .delete()
+      .from(HistoryOwnerEntity)
+      .where('user_id = :userId', { userId })
+      .returning(returnAttemptId)
+      .execute()
+    ).raw[0];
+    // eslint-disable-next-line no-console
+    console.log(userAttemptIds);
+
+    const attempts: HistoryAttemptEntity[] = await this.dbConn
+      .getHistoryRepo()
+      .createQueryBuilder('histories')
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .where('histories.attempt_id IN (:...userAttemptIds)', { userAttemptIds })
+      .getRawMany<HistoryAttemptEntity>();
+    // eslint-disable-next-line no-console
+    console.log(attempts);
+
+    attempts.forEach((attempt) => {
+      // No users remaining, delete HistoryAttempt
+      if (attempt.users === undefined || attempt.users.length === 0) {
+        // eslint-disable-next-line no-console
+        console.log(`Removing attempt ${attempt.attemptId} ...`);
+        this.removeAttempt(attempt.attemptId);
+      }
+    });
   }
 }
 
