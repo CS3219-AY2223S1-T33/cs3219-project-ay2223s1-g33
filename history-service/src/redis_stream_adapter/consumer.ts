@@ -1,15 +1,15 @@
 import { commandOptions, RedisClientType } from 'redis';
 import AppStorage from '../storage/app_storage';
 
-const async = require('async');
-
 async function runRedisStreamConsumer(redis: RedisClientType, appStorage: AppStorage) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const attemptStore = appStorage.getAttemptStore();
   const STREAMS_KEY = 'stream-delete-user';
-  async.forever(
-    async (next: () => void) => {
-      const messages = await redis.xRead(
+
+  while (true) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const response = await redis.xRead(
         // @ts-ignore
         commandOptions({ isolated: true }),
         {
@@ -21,14 +21,15 @@ async function runRedisStreamConsumer(redis: RedisClientType, appStorage: AppSto
           BLOCK: 1000,
         },
       );
-      if (messages) {
-        // eslint-disable-next-line no-console
-        console.log(messages);
-        // Todo remove from attemptStore
+      if (response) {
+        const id = response[0].messages[0].message.userId;
+        attemptStore.removeHistoryOwner(Number(id));
       }
-      next();
-    },
-  );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
 }
 
 export default runRedisStreamConsumer;

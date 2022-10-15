@@ -150,9 +150,7 @@ class AttemptStore implements IAttemptStore {
   async removeHistoryOwner(userId: number): Promise<void> {
     // Delete HistoryOwner and retrieve attempts
     const returnAttemptId = 'attempt_id';
-    // eslint-disable-next-line no-console
-    console.log(`Removing owner ${userId} ...`);
-    const userAttemptIds: string[] = (await this.dbConn
+    const resultAttemptId: { attempt_id: number; }[] = (await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .delete()
@@ -160,25 +158,28 @@ class AttemptStore implements IAttemptStore {
       .where('user_id = :userId', { userId })
       .returning(returnAttemptId)
       .execute()
-    ).raw[0];
-    // eslint-disable-next-line no-console
-    console.log(userAttemptIds);
+    ).raw;
+    if (!resultAttemptId) {
+      return;
+    }
+    const deletedUserAttempts = resultAttemptId.map(
+      (res: { attempt_id: number; }) => res.attempt_id,
+    );
 
-    const attempts: HistoryAttemptEntity[] = await this.dbConn
+    // Retrieve attempts that has other users
+    const otherUserAttempts: HistoryAttemptEntity[] = await this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
       .innerJoinAndSelect('histories.users', 'history_owners')
-      .where('histories.attempt_id IN (:...userAttemptIds)', { userAttemptIds })
-      .getRawMany<HistoryAttemptEntity>();
-    // eslint-disable-next-line no-console
-    console.log(attempts);
+      .where('histories.attempt_id IN (:...listOfIds)', { listOfIds: deletedUserAttempts })
+      .getMany();
+    const attemptsWithOtherUser = new Set();
+    otherUserAttempts.map((res: HistoryAttemptEntity) => attemptsWithOtherUser.add(res.attemptId));
 
-    attempts.forEach((attempt) => {
-      // No users remaining, delete HistoryAttempt
-      if (attempt.users === undefined || attempt.users.length === 0) {
-        // eslint-disable-next-line no-console
-        console.log(`Removing attempt ${attempt.attemptId} ...`);
-        this.removeAttempt(attempt.attemptId);
+    // Only delete attempts with no users
+    deletedUserAttempts.forEach((attemptId) => {
+      if (!attemptsWithOtherUser.has(attemptId)) {
+        this.removeAttempt(attemptId);
       }
     });
   }
