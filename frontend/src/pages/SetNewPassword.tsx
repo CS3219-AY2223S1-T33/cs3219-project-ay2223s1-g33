@@ -11,7 +11,7 @@ import {
   Button,
   useBoolean,
   Text,
-  FormErrorMessage,
+  FormErrorMessage
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import React, { useEffect } from "react";
@@ -19,14 +19,14 @@ import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm,
+  useForm
 } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "../axios";
 import Link from "../components/ui/Link";
 import {
   ConsumeResetTokenRequest,
-  ConsumeResetTokenResponse,
+  ConsumeResetTokenResponse
 } from "../proto/user-service";
 import useFixedToast from "../utils/hooks/useFixedToast";
 
@@ -34,7 +34,7 @@ function SetNewPassword() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm();
 
   const toast = useFixedToast();
@@ -51,11 +51,11 @@ function SetNewPassword() {
   }, []);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
-    const { newPassword } = data;
+    const { password: newPassword } = data;
 
     const consumeResetTokenRequest: ConsumeResetTokenRequest = {
       token,
-      newPassword,
+      newPassword
     };
 
     // Send registration request to the server
@@ -73,7 +73,9 @@ function SetNewPassword() {
           throw new Error(resData.errorMessage);
         }
 
-        toast.sendSuccessMessage("Your password is reset! Click on the link below to login.");
+        toast.sendSuccessMessage(
+          "Your password is reset! Click on the link below to login."
+        );
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
@@ -84,7 +86,7 @@ function SetNewPassword() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!",
+        title: "Oops!"
       }
     );
   };
@@ -108,8 +110,8 @@ function SetNewPassword() {
                       minLength: {
                         value: 8,
                         message:
-                          "Please make sure your password is at least 8 characters long.",
-                      },
+                          "Please make sure your password is at least 8 characters long."
+                      }
                     })}
                   />
                   <InputRightElement h="full">
@@ -130,7 +132,7 @@ function SetNewPassword() {
                   bg="blue.400"
                   color="white"
                   _hover={{
-                    bg: "blue.500",
+                    bg: "blue.500"
                   }}
                   type="submit"
                 >

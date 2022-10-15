@@ -10,7 +10,7 @@ function UnprotectedRoute() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/reset" element={<ResetPassword />} />
-      <Route path="/setnewpassword" element={<SetNewPassword />} />
+      <Route path="/resetToken" element={<SetNewPassword />} />
       <Route path="/register" element={<Register />} />
       <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
