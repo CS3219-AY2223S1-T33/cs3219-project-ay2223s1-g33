@@ -349,7 +349,7 @@ func RegisterUserServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_service.UserService/ResetPassword", runtime.WithHTTPPathPattern("/user_service.UserService/ResetPassword"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_service.UserService/ResetPassword", runtime.WithHTTPPathPattern("/api/reset"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -374,7 +374,7 @@ func RegisterUserServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_service.UserService/ConsumeResetToken", runtime.WithHTTPPathPattern("/user_service.UserService/ConsumeResetToken"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/user_service.UserService/ConsumeResetToken", runtime.WithHTTPPathPattern("/api/reset/confirm"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -526,7 +526,7 @@ func RegisterUserServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_service.UserService/ResetPassword", runtime.WithHTTPPathPattern("/user_service.UserService/ResetPassword"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_service.UserService/ResetPassword", runtime.WithHTTPPathPattern("/api/reset"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -548,7 +548,7 @@ func RegisterUserServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_service.UserService/ConsumeResetToken", runtime.WithHTTPPathPattern("/user_service.UserService/ConsumeResetToken"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/user_service.UserService/ConsumeResetToken", runtime.WithHTTPPathPattern("/api/reset/confirm"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -576,9 +576,9 @@ var (
 
 	pattern_UserService_GetUserProfile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "user", "profile"}, ""))
 
-	pattern_UserService_ResetPassword_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user_service.UserService", "ResetPassword"}, ""))
+	pattern_UserService_ResetPassword_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"api", "reset"}, ""))
 
-	pattern_UserService_ConsumeResetToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user_service.UserService", "ConsumeResetToken"}, ""))
+	pattern_UserService_ConsumeResetToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "reset", "confirm"}, ""))
 )
 
 var (
