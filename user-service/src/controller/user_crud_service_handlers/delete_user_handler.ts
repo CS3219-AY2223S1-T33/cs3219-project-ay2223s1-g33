@@ -1,4 +1,3 @@
-import { commandOptions, RedisClientType } from 'redis';
 import { DeleteUserRequest, DeleteUserResponse } from '../../proto/user-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage';
@@ -13,11 +12,11 @@ function getHeaderlessResponse(resp: DeleteUserResponse): ApiResponse<DeleteUser
 class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResponse> {
   userStore: IUserStore;
 
-  redis: RedisClientType;
+  redisStream: IStreamProducer;
 
-  constructor(storage: IStorage, redis: RedisClientType) {
+  constructor(storage: IStorage, redisStream: IStreamProducer) {
     this.userStore = storage.getUserStore();
-    this.redis = redis;
+    this.redisStream = redisStream;
   }
 
   async handle(request: ApiRequest<DeleteUserRequest>): Promise<ApiResponse<DeleteUserResponse>> {
@@ -30,12 +29,7 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
     }
 
     // Push delete-change to PubSub
-    const STREAMS_KEY = 'stream-delete-user';
-    await this.redis.xAdd(
-      STREAMS_KEY,
-      '*',
-      { userId: requestObject.userId.toString() },
-    );
+    this.redisStream.pushStream(requestObject.userId.toString());
 
     try {
       await this.userStore.removeUser(requestObject.userId);

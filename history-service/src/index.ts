@@ -11,7 +11,7 @@ import { IHistoryCrudService } from './proto/history-crud-service.grpc-server';
 import Constants from './constants';
 import Logger from './utils/logger';
 import { connectDatabase } from './db';
-import createHistoryConsumer from './redis_stream_adapter/history_consumer';
+import createUserDeleteConsumer from './redis_stream_adapter/user_delete_consumer';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -29,8 +29,8 @@ async function run() {
     url: envConfig.REDIS_SERVER_URL,
   });
   await redis.connect();
-  const redisStream: IStreamConsumer = createHistoryConsumer(redis, dataStore);
-  redisStream.runConsumer();
+  const redisUserStream = createUserDeleteConsumer(redis, dataStore.getAttemptStore());
+  redisUserStream.runConsumer();
 
   const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
   const expressApp = apiServer.getHttpServer();

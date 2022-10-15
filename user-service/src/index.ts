@@ -15,6 +15,7 @@ import { IUserCrudService } from './proto/user-crud-service.grpc-server';
 import { connectDatabase } from './db';
 import createSMTPAdapter from './adapter/smtp_adapter';
 import { createEmailSender } from './email/email_sender';
+import createUserDeleteProducer from './redis_stream_adapter/user_delete_producer';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -31,6 +32,7 @@ async function run() {
     url: envConfig.REDIS_SERVER_URL,
   });
   await redis.connect();
+  const redisUserStream = createUserDeleteProducer(redis);
 
   const authService: IAuthenticationAgent = createAuthenticationService(
     envConfig.SESSION_SERVICE_URL,
@@ -54,7 +56,7 @@ async function run() {
     resp.status(200).send('Welcome to User Service');
   });
 
-  const userCrudApi = new UserCrudServiceApi(dataStore, redis);
+  const userCrudApi = new UserCrudServiceApi(dataStore, redisUserStream);
   apiServer.registerServiceRoutes(userCrudApi);
 
   const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();

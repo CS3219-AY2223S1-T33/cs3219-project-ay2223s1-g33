@@ -1,18 +1,17 @@
 import { commandOptions, RedisClientType } from 'redis';
-import AppStorage from '../storage/app_storage';
 import Logger from '../utils/logger';
 import { IAttemptStore } from '../storage/storage';
 
-const STREAM_KEY = 'stream-delete-user';
+const STREAMS_KEY = 'stream-delete-user';
 
-class HistoryConsumer implements IStreamConsumer {
+class UserDeleteConsumer implements IStreamConsumer {
   redis: RedisClientType;
 
   storage: IAttemptStore;
 
-  constructor(redis: RedisClientType, appStorage: AppStorage) {
+  constructor(redis: RedisClientType, storage: IAttemptStore) {
     this.redis = redis;
-    this.storage = appStorage.getAttemptStore();
+    this.storage = storage;
   }
 
   async runConsumer() {
@@ -24,7 +23,7 @@ class HistoryConsumer implements IStreamConsumer {
           // @ts-ignore
           commandOptions({ isolated: true }),
           {
-            key: STREAM_KEY,
+            key: STREAMS_KEY,
             id: '$',
           },
           {
@@ -43,8 +42,8 @@ class HistoryConsumer implements IStreamConsumer {
   }
 }
 
-function createHistoryConsumer(redis: RedisClientType, appStorage: AppStorage) {
-  return new HistoryConsumer(redis, appStorage);
+function createUserDeleteConsumer(redis: RedisClientType, storage: IAttemptStore): IStreamConsumer {
+  return new UserDeleteConsumer(redis, storage);
 }
 
-export default createHistoryConsumer;
+export default createUserDeleteConsumer;
