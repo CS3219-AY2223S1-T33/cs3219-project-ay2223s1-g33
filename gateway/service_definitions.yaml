@@ -19,6 +19,14 @@ http:
       post: /api/user/profile
       body: "*"
 
+    - selector: user_service.UserService.ResetPassword
+      post: /api/reset
+      body: "*"
+    
+    - selector: user_service.UserService.ConsumeResetToken
+      post: /api/reset/confirm
+      body: "*"
+
     - selector: matching_service.QueueService.JoinQueue
       post: /api/queue/join
       body: "*"
