@@ -3,13 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
 } from 'typeorm';
 import { User } from '../proto/types';
-import PasswordResetTokenEntity from './password_reset_token_entity';
 
 @Entity('users')
 export default class UserEntity implements User {
@@ -29,12 +27,9 @@ export default class UserEntity implements User {
   @Column({ default: true, name: 'is_active' })
     isActive!: boolean;
 
-  @OneToMany(() => PasswordResetTokenEntity, (passwordResetToken) => passwordResetToken.user)
-    passwordResetTokens?: PasswordResetTokenEntity[];
-
   @CreateDateColumn({ name: 'create_timestamp' })
-    createDateTime!: Date;
+    createDateTime?: Date;
 
   @UpdateDateColumn({ name: 'update_timestamp' })
-    updateDateTime!: Date;
+    updateDateTime?: Date;
 }

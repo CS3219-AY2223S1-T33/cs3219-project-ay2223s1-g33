@@ -5,6 +5,12 @@
 import { UserCrudService } from "./user-crud-service";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
+import type { DeleteResetTokenResponse } from "./user-crud-service";
+import type { DeleteResetTokenRequest } from "./user-crud-service";
+import type { CreateResetTokenResponse } from "./user-crud-service";
+import type { CreateResetTokenRequest } from "./user-crud-service";
+import type { GetResetTokensResponse } from "./user-crud-service";
+import type { GetResetTokensRequest } from "./user-crud-service";
 import type { DeleteUserResponse } from "./user-crud-service";
 import type { DeleteUserRequest } from "./user-crud-service";
 import type { EditUserResponse } from "./user-crud-service";
@@ -46,6 +52,27 @@ export interface IUserCrudServiceClient {
     deleteUser(input: DeleteUserRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
     deleteUser(input: DeleteUserRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
     deleteUser(input: DeleteUserRequest, callback: (err: grpc.ServiceError | null, value?: DeleteUserResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: GetResetTokens(user_crud_service.GetResetTokensRequest) returns (user_crud_service.GetResetTokensResponse);
+     */
+    getResetTokens(input: GetResetTokensRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void): grpc.ClientUnaryCall;
+    getResetTokens(input: GetResetTokensRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void): grpc.ClientUnaryCall;
+    getResetTokens(input: GetResetTokensRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void): grpc.ClientUnaryCall;
+    getResetTokens(input: GetResetTokensRequest, callback: (err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: CreateResetToken(user_crud_service.CreateResetTokenRequest) returns (user_crud_service.CreateResetTokenResponse);
+     */
+    createResetToken(input: CreateResetTokenRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void): grpc.ClientUnaryCall;
+    createResetToken(input: CreateResetTokenRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void): grpc.ClientUnaryCall;
+    createResetToken(input: CreateResetTokenRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void): grpc.ClientUnaryCall;
+    createResetToken(input: CreateResetTokenRequest, callback: (err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: DeleteResetToken(user_crud_service.DeleteResetTokenRequest) returns (user_crud_service.DeleteResetTokenResponse);
+     */
+    deleteResetToken(input: DeleteResetTokenRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void): grpc.ClientUnaryCall;
+    deleteResetToken(input: DeleteResetTokenRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void): grpc.ClientUnaryCall;
+    deleteResetToken(input: DeleteResetTokenRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void): grpc.ClientUnaryCall;
+    deleteResetToken(input: DeleteResetTokenRequest, callback: (err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service user_crud_service.UserCrudService
@@ -83,5 +110,26 @@ export class UserCrudServiceClient extends grpc.Client implements IUserCrudServi
     deleteUser(input: DeleteUserRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteUserResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteUserResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteUserResponse) => void)): grpc.ClientUnaryCall {
         const method = UserCrudService.methods[3];
         return this.makeUnaryRequest<DeleteUserRequest, DeleteUserResponse>(`/${UserCrudService.typeName}/${method.name}`, (value: DeleteUserRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteUserResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: GetResetTokens(user_crud_service.GetResetTokensRequest) returns (user_crud_service.GetResetTokensResponse);
+     */
+    getResetTokens(input: GetResetTokensRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: GetResetTokensResponse) => void)): grpc.ClientUnaryCall {
+        const method = UserCrudService.methods[4];
+        return this.makeUnaryRequest<GetResetTokensRequest, GetResetTokensResponse>(`/${UserCrudService.typeName}/${method.name}`, (value: GetResetTokensRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): GetResetTokensResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: CreateResetToken(user_crud_service.CreateResetTokenRequest) returns (user_crud_service.CreateResetTokenResponse);
+     */
+    createResetToken(input: CreateResetTokenRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: CreateResetTokenResponse) => void)): grpc.ClientUnaryCall {
+        const method = UserCrudService.methods[5];
+        return this.makeUnaryRequest<CreateResetTokenRequest, CreateResetTokenResponse>(`/${UserCrudService.typeName}/${method.name}`, (value: CreateResetTokenRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): CreateResetTokenResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: DeleteResetToken(user_crud_service.DeleteResetTokenRequest) returns (user_crud_service.DeleteResetTokenResponse);
+     */
+    deleteResetToken(input: DeleteResetTokenRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteResetTokenResponse) => void)): grpc.ClientUnaryCall {
+        const method = UserCrudService.methods[6];
+        return this.makeUnaryRequest<DeleteResetTokenRequest, DeleteResetTokenResponse>(`/${UserCrudService.typeName}/${method.name}`, (value: DeleteResetTokenRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteResetTokenResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }

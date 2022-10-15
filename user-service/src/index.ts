@@ -13,6 +13,8 @@ import Logger from './utils/logger';
 import LoopbackApiChannel from './api_server/loopback_channel';
 import { IUserCrudService } from './proto/user-crud-service.grpc-server';
 import { connectDatabase } from './db';
+import createSMTPAdapter from './adapter/smtp_adapter';
+import { createEmailSender } from './email/email_sender';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -34,6 +36,17 @@ async function run() {
     envConfig.SESSION_SERVICE_URL,
   );
 
+  const emailAdapter = createSMTPAdapter({
+    service: envConfig.EMAIL_SERVICE,
+    server: envConfig.EMAIL_SERVER,
+    port: envConfig.EMAIL_PORT,
+    isSecure: envConfig.EMAIL_IS_SECURE,
+  }, {
+    username: envConfig.EMAIL_USERNAME,
+    password: envConfig.EMAIL_PASSWORD,
+  });
+  const emailSender = createEmailSender(emailAdapter, envConfig.RESET_PASSWORD_URL);
+
   const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
   const expressApp = apiServer.getHttpServer();
 
@@ -46,7 +59,11 @@ async function run() {
 
   const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
   loopbackCrudApi.registerServiceRoutes(userCrudApi);
-  apiServer.registerServiceRoutes(new UserServiceApi(authService, loopbackCrudApi));
+  apiServer.registerServiceRoutes(new UserServiceApi(
+    authService,
+    emailSender,
+    loopbackCrudApi,
+  ));
   apiServer.bind();
 }
 
