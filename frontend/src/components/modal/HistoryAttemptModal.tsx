@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Modal,
@@ -10,11 +10,17 @@ import {
   ModalFooter,
   HStack,
 } from "@chakra-ui/react";
+import axios from "axios";
 import QuestionSection from "../question/QuestionSection";
 import HistorySection from "../history/HistorySection";
 import saveFile from "../../utils/fileDownloadUtil";
 import { Language } from "../../types";
 import { HistoryAttempt } from "../../proto/types";
+import {
+  GetAttemptSubmissionRequest,
+  GetAttemptSubmissionResponse,
+} from "../../proto/history-service";
+import useFixedToast from "../../utils/hooks/useFixedToast";
 
 type Props = {
   historyAttempt: HistoryAttempt | undefined;
@@ -28,10 +34,57 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
     return null;
   }
 
-  const { attemptId, users, question, submission } = historyAttempt;
+  const { attemptId, users, question } = historyAttempt;
   const header = `Attempt #${attemptId} by ${users.join(", ")}`;
+  const toast = useFixedToast();
+  const [submission, setSubmission] = useState<string | undefined>();
+
+  const loadSubmission = async (
+    targetAttemptId: number
+  ): Promise<HistoryAttempt> => {
+    const request: GetAttemptSubmissionRequest = {
+      attemptId: targetAttemptId,
+    };
+    const res = await axios.post<GetAttemptSubmissionResponse>(
+      "/api/user/history/submission",
+      request,
+      {
+        withCredentials: true,
+      }
+    );
+
+    const { errorMessage } = res.data;
+    if (errorMessage !== "") {
+      throw new Error(errorMessage);
+    }
+
+    const { attempt } = res.data;
+    if (!attempt) {
+      throw new Error("Something went wrong.");
+    }
+
+    return attempt;
+  };
+
+  useEffect(() => {
+    if (historyAttempt) {
+      loadSubmission(historyAttempt.attemptId)
+        .then((attempt) => {
+          setSubmission(attempt.submission);
+        })
+        .catch((err) => {
+          toast.sendErrorMessage(err.message);
+        });
+    } else {
+      setSubmission(undefined);
+    }
+  }, [historyAttempt]);
 
   const saveFileHandler = () => {
+    if (!submission) {
+      return;
+    }
+
     saveFile(submission, historyAttempt.language as Language);
   };
 

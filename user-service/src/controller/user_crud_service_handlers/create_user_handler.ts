@@ -5,7 +5,7 @@ import {
   convertPasswordUserToStoredUser,
   convertStoredUserToPasswordUser,
 } from '../../model/user_helper';
-import { StoredUser } from '../../model/user_store_model';
+import StoredUser from '../../model/user_store_model';
 
 function getHeaderlessResponse(resp: CreateUserResponse): ApiResponse<CreateUserResponse> {
   return {

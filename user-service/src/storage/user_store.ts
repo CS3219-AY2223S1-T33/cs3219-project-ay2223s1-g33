@@ -1,6 +1,6 @@
 /* eslint class-methods-use-this: 0 */
 import { IDatabase, UserEntity } from '../db';
-import { StoredUser } from '../model/user_store_model';
+import StoredUser from '../model/user_store_model';
 import { IUserStore } from './storage';
 
 const returnValues = ['username', 'password', 'nickname'];
@@ -54,11 +54,11 @@ class UserStore implements IUserStore {
       userId, username, password, nickname,
     } = user;
 
-    const isExist = await this.dbConn
+    const userObject = await this.dbConn
       .getUserRepo()
       .findOneBy({ username });
 
-    if (isExist) {
+    if (userObject && userObject.userId !== userId) {
       throw new Error('User with same username already exists');
     }
 

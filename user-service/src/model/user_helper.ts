@@ -1,5 +1,5 @@
 import { PasswordUser } from '../proto/types';
-import { StoredUser } from './user_store_model';
+import StoredUser from './user_store_model';
 
 function convertPasswordUserToStoredUser(user: PasswordUser | undefined): StoredUser | undefined {
   if (!user) {

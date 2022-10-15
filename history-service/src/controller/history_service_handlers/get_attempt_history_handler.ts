@@ -49,6 +49,7 @@ implements IApiHandler<GetAttemptHistoryRequest, GetAttemptHistoryResponse> {
       questionId,
       username,
       userId: 0,
+      shouldOmitSubmission: true,
     };
 
     let crudResult: GetAttemptsResponse;

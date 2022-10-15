@@ -42,7 +42,8 @@ export default class BaseHandler {
     return resultMap;
   }
 
-  async createNicknameMap(attempts: HistoryAttemptEntity[]): Promise<{ [key: number]: string }> {
+  async fetchUsersFor(attempts: HistoryAttemptEntity[]):
+  Promise<(PasswordUser | undefined)[]> {
     const userIdsToQuery = new Set<number>();
 
     attempts.forEach((attempt) => {
@@ -68,9 +69,13 @@ export default class BaseHandler {
     });
 
     const result = await Promise.all(promises);
+    return result;
+  }
 
+  // eslint-disable-next-line class-methods-use-this
+  createNicknameMapFrom(users: (PasswordUser | undefined)[]): { [key: number]: string } {
     const resultMap: { [key: number]: string } = {};
-    Array.from(result).forEach((user) => {
+    Array.from(users).forEach((user) => {
       if (!user || !user.userInfo) {
         return;
       }
@@ -79,6 +84,11 @@ export default class BaseHandler {
     });
 
     return resultMap;
+  }
+
+  async createNicknameMap(attempts: HistoryAttemptEntity[]): Promise<{ [key: number]: string }> {
+    const users = await this.fetchUsersFor(attempts);
+    return this.createNicknameMapFrom(users);
   }
 
   async getUser(searchObject: User): Promise<PasswordUser | undefined> {

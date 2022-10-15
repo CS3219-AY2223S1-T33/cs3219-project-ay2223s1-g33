@@ -125,6 +125,8 @@ function Login() {
               </Button>
               <Text align="center">
                 Not a user? <Link to="/register">Register</Link>
+                <br />
+                Forget password? <Link to="/reset">Reset</Link>
               </Text>
             </Stack>
           </form>

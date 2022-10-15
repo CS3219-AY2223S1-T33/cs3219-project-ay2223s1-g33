@@ -5,7 +5,4 @@ declare type StoredUser = {
   nickname: string;
 };
 
-export {
-  // eslint-disable-next-line import/prefer-default-export
-  StoredUser,
-};
+export default StoredUser;

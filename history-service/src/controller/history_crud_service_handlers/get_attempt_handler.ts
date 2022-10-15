@@ -31,24 +31,41 @@ class GetAttemptHandler extends BaseHandler
       return GetAttemptHandler.buildErrorResponse('No such attempt found');
     }
 
-    const nicknameMapPromise = super.createNicknameMap([attemptObject]);
+    const userObjectPromise = super.fetchUsersFor([attemptObject]);
     const questionMapPromise = super.createQuestionMap([attemptObject]);
 
-    const nicknameMap = await nicknameMapPromise;
+    const userObjects = await userObjectPromise;
     const questionMap = await questionMapPromise;
 
-    const resultObject = convertToProtoAttempt(attemptObject, nicknameMap, questionMap);
+    if (request.username !== '') {
+      const match = userObjects.find((x) => {
+        if (!x || !x.userInfo) {
+          return false;
+        }
+        return x.userInfo.username === request.username;
+      });
+
+      if (!match) {
+        return GetAttemptHandler.buildHeaderlessResponse({
+          attempt: undefined,
+          errorMessage: '',
+        });
+      }
+    }
+
+    const resultObject = convertToProtoAttempt(
+      attemptObject,
+      super.createNicknameMapFrom(userObjects),
+      questionMap,
+    );
     if (!resultObject) {
       return GetAttemptHandler.buildErrorResponse('An internal error occurred');
     }
 
-    return {
-      headers: {},
-      response: {
-        attempt: resultObject,
-        errorMessage: '',
-      },
-    };
+    return GetAttemptHandler.buildHeaderlessResponse({
+      attempt: resultObject,
+      errorMessage: '',
+    });
   }
 
   static buildErrorResponse(errorMessage: string): ApiResponse<GetAttemptResponse> {
@@ -57,6 +74,13 @@ class GetAttemptHandler extends BaseHandler
         errorMessage,
         attempt: undefined,
       },
+      headers: {},
+    };
+  }
+
+  static buildHeaderlessResponse(response: GetAttemptResponse): ApiResponse<GetAttemptResponse> {
+    return {
+      response,
       headers: {},
     };
   }

@@ -19,6 +19,14 @@ http:
       post: /api/user/profile
       body: "*"
 
+    - selector: user_service.UserService.ResetPassword
+      post: /api/reset
+      body: "*"
+    
+    - selector: user_service.UserService.ConsumeResetToken
+      post: /api/reset/confirm
+      body: "*"
+
     - selector: matching_service.QueueService.JoinQueue
       post: /api/queue/join
       body: "*"
@@ -29,4 +37,8 @@ http:
     
     - selector: history_service.HistoryService.GetAttemptHistory
       post: /api/user/history
+      body: "*"
+
+    - selector: history_service.HistoryService.GetAttemptSubmission
+      post: /api/user/history/submission
       body: "*"
