@@ -5,7 +5,7 @@ import {
   useDisclosure,
   Box,
   Grid,
-  useBoolean,
+  useBoolean
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +27,7 @@ import { selectUser } from "../feature/user/userSlice";
 import { Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
+import { addMessage, Chat, clearChat } from "../feature/chat/chatSlice";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -41,12 +42,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal,
+    onClose: onCloseLeaveModal
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal,
+    onClose: onCloseDisconnectModal
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -100,13 +101,13 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`,
+          title: `${joinedNickname.nickname} has joined the room!`
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`,
+          title: `${leftNickname.nickname} has left the room.`
         });
       });
 
@@ -136,6 +137,11 @@ function Session() {
         setIsEditorLocked.off();
       });
 
+      ws.on("message_receive", (e: Chat) => {
+        console.log("Rvc text msg from websocket:", e);
+        dispatch(addMessage(e));
+      });
+
       return ws;
     };
 
@@ -143,7 +149,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -172,6 +178,8 @@ function Session() {
     yDoc?.destroy();
     // Clears the room session token
     dispatch(leaveRoom());
+    // Clears the session chat
+    dispatch(clearChat());
 
     // Just in case when use joins a brand new session
     isInit = false;
@@ -209,6 +217,14 @@ function Session() {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
 
+  const sendTextMessageHandler = (content: string) => {
+    if (!provider) {
+      return;
+    }
+
+    provider.sendTextMessage(nickname, content);
+  };
+
   // Ensures that the yDoc components are ready before passing to Editor
   const collabDefined = yText && provider && undoManager;
 
@@ -218,7 +234,11 @@ function Session() {
       <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
-        <EditorTabs question={question} getQuestion={getQuestionHandler} />
+        <EditorTabs
+          question={question}
+          getQuestion={getQuestionHandler}
+          sendTextMessage={sendTextMessageHandler}
+        />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}
@@ -257,6 +277,13 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
+              <Button
+                onClick={() =>
+                  provider?.sendTextMessage(nickname, "Hello world")
+                }
+              >
+                Send Message
+              </Button>
               <Button
                 onClick={sendCodeSnapshotHandler}
                 isDisabled={isEditorLocked}

@@ -6,21 +6,23 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";
 import QuestionSection from "../question/QuestionSection";
 import HistoryTable from "../history/HistoryTable";
+import ChatSection from "../chat/ChatSection";
 
 type Props = {
   question: Question | undefined;
   getQuestion: () => void;
+  sendTextMessage: (content: string) => void;
 };
 
 const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
-function EditorTabs({ question, getQuestion }: Props) {
+function EditorTabs({ question, getQuestion, sendTextMessage }: Props) {
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
       <TabList>
@@ -42,7 +44,7 @@ function EditorTabs({ question, getQuestion }: Props) {
           )}
         </TabPanel>
         <TabPanel key="chat_section">
-          <Text>Chat section</Text>
+          <ChatSection sendTextMessage={sendTextMessage} />
         </TabPanel>
         <TabPanel key="history_section">
           {question ? (

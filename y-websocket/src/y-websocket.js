@@ -101,8 +101,9 @@ messageHandlers[SAVECODE_ACK] = (_encoder, decoder, provider, _emitSynced, _mess
 };
 
 messageHandlers[TEXTMSG_SEND] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
-	const content = decoding.readVarString(decoder);
-	provider.emit("message_receive", [{ content }]);
+	const from = decoding.readVarString(decoder);
+	const message = decoding.readVarString(decoder);
+	provider.emit("message_receive", [{ from, message }]);
 };
 
 // @todo - this should depend on awareness.outdatedTime
@@ -522,9 +523,10 @@ export class WebsocketProvider extends Observable {
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
 
-	sendTextMessage(/** @type {string} */ content) {
+	sendTextMessage(/**@type {string} */ from, /** @type {string} */ content) {
 		const encoder = encoding.createEncoder();
 		encoding.writeUint8(encoder, TEXTMSG_SEND);
+		encoding.writeVarString(encoder, from);
 		encoding.writeVarString(encoder, content);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
