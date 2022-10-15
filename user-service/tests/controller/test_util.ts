@@ -88,6 +88,12 @@ const testData = {
   testPassword2: 'Password2',
 };
 
+function makeRedisStreamProducer() {
+  return {
+    pushStream: jest.fn(),
+  };
+}
+
 export {
   makeMockUserStorage,
   makeMockAuthAgent,
@@ -97,5 +103,6 @@ export {
   makeTestUser,
   makeTestPasswordUser,
   makeStoredUser,
+  makeRedisStreamProducer,
   testData,
 };

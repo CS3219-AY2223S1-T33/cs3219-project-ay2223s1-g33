@@ -1,11 +1,12 @@
 import { DeleteUserRequest } from '../../../src/proto/user-crud-service';
 import { IStorage } from '../../../src/storage/storage';
 import { ApiRequest } from '../../../src/api_server/api_server_types';
-import { makeMockUserStorage, testData } from '../test_util';
+import { makeMockUserStorage, makeRedisStreamProducer, testData } from '../test_util';
 import DeleteUserHandler from '../../../src/controller/user_crud_service_handlers/delete_user_handler';
 
 describe('Delete User Handler', () => {
   const { testUserId1 } = testData;
+  const redis = makeRedisStreamProducer();
 
   const makeRequest = (userId: number): ApiRequest<DeleteUserRequest> => ({
     request: {
@@ -21,7 +22,7 @@ describe('Delete User Handler', () => {
       getResetTokenStore: jest.fn(),
     };
 
-    const handler = new DeleteUserHandler(storage);
+    const handler = new DeleteUserHandler(storage, redis);
     const request = makeRequest(testUserId1);
 
     const response = await handler.handle(request);
@@ -37,7 +38,7 @@ describe('Delete User Handler', () => {
       getResetTokenStore: jest.fn(),
     };
 
-    const handler = new DeleteUserHandler(storage);
+    const handler = new DeleteUserHandler(storage, redis);
     const request = makeRequest(-1);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -52,7 +53,7 @@ describe('Delete User Handler', () => {
     };
 
     mockStore.removeUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });
-    const handler = new DeleteUserHandler(storage);
+    const handler = new DeleteUserHandler(storage, redis);
 
     const request = makeRequest(testUserId1);
     const response = await handler.handle(request);
