@@ -8,8 +8,7 @@ const STREAMS_KEY_USER = 'stream-delete-user';
 const CONSUMER_GROUP_QUESTION = 'stream-delete-question-consumer';
 const CONSUMER_GROUP_USER = 'stream-delete-user-consumer';
 
-const CONSUMER_NAME_QUESTION = 'stream-consumer-question-service';
-const CONSUMER_NAME_USER = 'stream-consumer-question-service';
+const CONSUMER_NAME = 'stream-consumer-history-service';
 
 class HistoryRedisConsumer {
   questionConsumer: IStreamConsumer;
@@ -26,13 +25,13 @@ class HistoryRedisConsumer {
       redis,
       STREAMS_KEY_QUESTION,
       CONSUMER_GROUP_QUESTION,
-      CONSUMER_NAME_QUESTION,
+      CONSUMER_NAME,
     );
     this.userConsumer = createRedisConsumer(
       redis,
       STREAMS_KEY_USER,
       CONSUMER_GROUP_USER,
-      CONSUMER_NAME_USER,
+      CONSUMER_NAME,
     );
     this.storage = storage;
   }
