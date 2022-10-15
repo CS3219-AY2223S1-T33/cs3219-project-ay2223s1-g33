@@ -28,11 +28,10 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
       });
     }
 
-    // Push delete-change to PubSub
-    this.redisStream.pushStream(requestObject.userId.toString());
-
     try {
       await this.userStore.removeUser(requestObject.userId);
+      // Push delete-change to Stream
+      this.redisStream.pushStream(requestObject.userId.toString());
     } catch {
       return getHeaderlessResponse({
         errorMessage: 'Database Error',
