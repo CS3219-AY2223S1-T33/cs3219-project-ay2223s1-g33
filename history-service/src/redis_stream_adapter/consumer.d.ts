@@ -1,3 +1,3 @@
 declare interface IStreamConsumer {
-  runConsumer();
+  runConsumer(call: (response: { [property: string]: string }) => void);
 }
