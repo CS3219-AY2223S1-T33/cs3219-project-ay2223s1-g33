@@ -12,6 +12,7 @@ import Constants from './constants';
 import Logger from './utils/logger';
 import { connectDatabase } from './db';
 import createUserDeleteConsumer from './redis_stream_adapter/user_delete_consumer';
+import createQuestionDeleteConsumer from './redis_stream_adapter/question_delete_consumer';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -30,7 +31,10 @@ async function run() {
   });
   await redis.connect();
   const redisUserStream = createUserDeleteConsumer(redis, dataStore.getAttemptStore());
+  const redisQuestionStream = createQuestionDeleteConsumer(redis, dataStore.getAttemptStore());
+
   redisUserStream.runConsumer();
+  redisQuestionStream.runConsumer();
 
   const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
   const expressApp = apiServer.getHttpServer();

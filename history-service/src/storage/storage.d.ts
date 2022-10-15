@@ -27,6 +27,7 @@ declare interface IAttemptStore {
     shouldOmitSubmission: boolean,
   ): Promise<AttemptStoreSearchResult>;
   removeHistoryOwner(userId: number): Promise<void>;
+  removeHistoryByQuestionId(questionId: number): Promise<void>;
 }
 
 export { IStorage, IAttemptStore, AttemptStoreSearchResult };

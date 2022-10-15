@@ -2,13 +2,13 @@ import { commandOptions, RedisClientType } from 'redis';
 import Logger from '../utils/logger';
 import { IAttemptStore } from '../storage/storage';
 
-const STREAMS_KEY = 'stream-delete-user';
+const STREAMS_KEY = 'stream-delete-question';
 
-const CONSUMER_GROUP = 'stream-delete-user-consumer';
+const CONSUMER_GROUP = 'stream-delete-question-consumer';
 
 const CONSUMER_NAME = 'stream-consumer-question-service';
 
-class UserDeleteConsumer implements IStreamConsumer {
+class QuestionDeleteConsumer implements IStreamConsumer {
   redis: RedisClientType;
 
   storage: IAttemptStore;
@@ -23,9 +23,9 @@ class UserDeleteConsumer implements IStreamConsumer {
       await this.redis.xGroupCreate(STREAMS_KEY, CONSUMER_GROUP, '0', {
         MKSTREAM: true,
       });
-      Logger.info('Created Redis User consumer group.');
+      Logger.info('Created Redis Question consumer group.');
     } catch (e) {
-      Logger.info('Consumer Redis User group already exists, skipped creation.');
+      Logger.info('Consumer Redis Question group already exists, skipped creation.');
     }
 
     while (true) {
@@ -48,21 +48,24 @@ class UserDeleteConsumer implements IStreamConsumer {
           },
         );
         if (response) {
-          const { userId } = response[0].messages[0].message;
-          this.storage.removeHistoryOwner(Number(userId));
+          console.log(JSON.stringify(response));
+
+          const { questionId } = response[0].messages[0].message;
+          this.storage.removeHistoryByQuestionId(Number(questionId));
 
           const entryId = response[0].messages[0].id;
           this.redis.xAck(STREAMS_KEY, CONSUMER_GROUP, entryId);
         }
       } catch (err) {
-        Logger.error('Redis User consumer failed');
+        Logger.error('Redis Question consumer failed');
       }
     }
   }
 }
 
-function createUserDeleteConsumer(redis: RedisClientType, storage: IAttemptStore): IStreamConsumer {
-  return new UserDeleteConsumer(redis, storage);
+function createQuestionDeleteConsumer(redis: RedisClientType, storage: IAttemptStore)
+  : IStreamConsumer {
+  return new QuestionDeleteConsumer(redis, storage);
 }
 
-export default createUserDeleteConsumer;
+export default createQuestionDeleteConsumer;

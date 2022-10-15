@@ -184,6 +184,17 @@ class AttemptStore implements IAttemptStore {
       }
     });
   }
+
+  async removeHistoryByQuestionId(questionId: number): Promise<void> {
+    // Remove attempts of question id, DB cascades deletes owners
+    await this.dbConn
+      .getDataSource()
+      .createQueryBuilder()
+      .delete()
+      .from(HistoryAttemptEntity)
+      .where('question_id = :questionId', { questionId })
+      .execute();
+  }
 }
 
 export default AttemptStore;
