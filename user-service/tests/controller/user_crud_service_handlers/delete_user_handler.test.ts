@@ -18,6 +18,7 @@ describe('Delete User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     const handler = new DeleteUserHandler(storage);
@@ -33,6 +34,7 @@ describe('Delete User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     const handler = new DeleteUserHandler(storage);
@@ -46,6 +48,7 @@ describe('Delete User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     mockStore.removeUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });

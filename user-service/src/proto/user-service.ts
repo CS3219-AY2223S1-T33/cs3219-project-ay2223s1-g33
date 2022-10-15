@@ -116,6 +116,54 @@ export interface GetUserProfileResponse {
     errorMessage: string;
 }
 /**
+ * @generated from protobuf message user_service.ResetPasswordRequest
+ */
+export interface ResetPasswordRequest {
+    /**
+     * @generated from protobuf field: string username = 1;
+     */
+    username: string;
+}
+/**
+ * @generated from protobuf message user_service.ResetPasswordResponse
+ */
+export interface ResetPasswordResponse {
+    /**
+     * @generated from protobuf field: user_service.ResetPasswordErrorCode error_code = 1;
+     */
+    errorCode: ResetPasswordErrorCode;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message user_service.ConsumeResetTokenRequest
+ */
+export interface ConsumeResetTokenRequest {
+    /**
+     * @generated from protobuf field: string token = 1;
+     */
+    token: string;
+    /**
+     * @generated from protobuf field: string new_password = 2;
+     */
+    newPassword: string;
+}
+/**
+ * @generated from protobuf message user_service.ConsumeResetTokenResponse
+ */
+export interface ConsumeResetTokenResponse {
+    /**
+     * @generated from protobuf field: user_service.ConsumeResetTokenErrorCode error_code = 1;
+     */
+    errorCode: ConsumeResetTokenErrorCode;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
  * @generated from protobuf enum user_service.LoginErrorCode
  */
 export enum LoginErrorCode {
@@ -177,6 +225,40 @@ export enum LogoutErrorCode {
      * @generated from protobuf enum value: LOGOUT_ERROR_INTERNAL_ERROR = 101;
      */
     LOGOUT_ERROR_INTERNAL_ERROR = 101
+}
+/**
+ * @generated from protobuf enum user_service.ResetPasswordErrorCode
+ */
+export enum ResetPasswordErrorCode {
+    /**
+     * @generated from protobuf enum value: RESET_PASSWORD_ERROR_NONE = 0;
+     */
+    RESET_PASSWORD_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: RESET_PASSWORD_ERROR_BAD_REQUEST = 100;
+     */
+    RESET_PASSWORD_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: RESET_PASSWORD_ERROR_INTERNAL_ERROR = 101;
+     */
+    RESET_PASSWORD_ERROR_INTERNAL_ERROR = 101
+}
+/**
+ * @generated from protobuf enum user_service.ConsumeResetTokenErrorCode
+ */
+export enum ConsumeResetTokenErrorCode {
+    /**
+     * @generated from protobuf enum value: CONSUME_RESET_TOKEN_ERROR_NONE = 0;
+     */
+    CONSUME_RESET_TOKEN_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: CONSUME_RESET_TOKEN_ERROR_BAD_REQUEST = 100;
+     */
+    CONSUME_RESET_TOKEN_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR = 101;
+     */
+    CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR = 101
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class UserCredentials$Type extends MessageType<UserCredentials> {
@@ -608,6 +690,215 @@ class GetUserProfileResponse$Type extends MessageType<GetUserProfileResponse> {
  * @generated MessageType for protobuf message user_service.GetUserProfileResponse
  */
 export const GetUserProfileResponse = new GetUserProfileResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ResetPasswordRequest$Type extends MessageType<ResetPasswordRequest> {
+    constructor() {
+        super("user_service.ResetPasswordRequest", [
+            { no: 1, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ResetPasswordRequest>): ResetPasswordRequest {
+        const message = { username: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ResetPasswordRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ResetPasswordRequest): ResetPasswordRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string username */ 1:
+                    message.username = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ResetPasswordRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string username = 1; */
+        if (message.username !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.username);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ResetPasswordRequest
+ */
+export const ResetPasswordRequest = new ResetPasswordRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ResetPasswordResponse$Type extends MessageType<ResetPasswordResponse> {
+    constructor() {
+        super("user_service.ResetPasswordResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_service.ResetPasswordErrorCode", ResetPasswordErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ResetPasswordResponse>): ResetPasswordResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ResetPasswordResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ResetPasswordResponse): ResetPasswordResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_service.ResetPasswordErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ResetPasswordResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.ResetPasswordErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ResetPasswordResponse
+ */
+export const ResetPasswordResponse = new ResetPasswordResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ConsumeResetTokenRequest$Type extends MessageType<ConsumeResetTokenRequest> {
+    constructor() {
+        super("user_service.ConsumeResetTokenRequest", [
+            { no: 1, name: "token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "new_password", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ConsumeResetTokenRequest>): ConsumeResetTokenRequest {
+        const message = { token: "", newPassword: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ConsumeResetTokenRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ConsumeResetTokenRequest): ConsumeResetTokenRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string token */ 1:
+                    message.token = reader.string();
+                    break;
+                case /* string new_password */ 2:
+                    message.newPassword = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ConsumeResetTokenRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string token = 1; */
+        if (message.token !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.token);
+        /* string new_password = 2; */
+        if (message.newPassword !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.newPassword);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ConsumeResetTokenRequest
+ */
+export const ConsumeResetTokenRequest = new ConsumeResetTokenRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ConsumeResetTokenResponse$Type extends MessageType<ConsumeResetTokenResponse> {
+    constructor() {
+        super("user_service.ConsumeResetTokenResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_service.ConsumeResetTokenErrorCode", ConsumeResetTokenErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ConsumeResetTokenResponse>): ConsumeResetTokenResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ConsumeResetTokenResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ConsumeResetTokenResponse): ConsumeResetTokenResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_service.ConsumeResetTokenErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ConsumeResetTokenResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.ConsumeResetTokenErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ConsumeResetTokenResponse
+ */
+export const ConsumeResetTokenResponse = new ConsumeResetTokenResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_service.UserService
  */
@@ -615,5 +906,7 @@ export const UserService = new ServiceType("user_service.UserService", [
     { name: "Login", options: {}, I: LoginRequest, O: LoginResponse },
     { name: "Register", options: {}, I: RegisterRequest, O: RegisterResponse },
     { name: "Logout", options: {}, I: LogoutRequest, O: LogoutResponse },
-    { name: "GetUserProfile", options: {}, I: GetUserProfileRequest, O: GetUserProfileResponse }
+    { name: "GetUserProfile", options: {}, I: GetUserProfileRequest, O: GetUserProfileResponse },
+    { name: "ResetPassword", options: {}, I: ResetPasswordRequest, O: ResetPasswordResponse },
+    { name: "ConsumeResetToken", options: {}, I: ConsumeResetTokenRequest, O: ConsumeResetTokenResponse }
 ]);
