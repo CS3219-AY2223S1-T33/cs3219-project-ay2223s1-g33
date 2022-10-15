@@ -42,7 +42,7 @@ function ResetPassword() {
     // Send registration request to the server
     axios
       .post<ResetPasswordResponse>(
-        "/api/user/resetPassword",
+        "/api/reset",
         resetPasswordRequest
       )
       .then((res) => {

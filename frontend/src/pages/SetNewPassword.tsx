@@ -61,7 +61,7 @@ function SetNewPassword() {
     // Send registration request to the server
     axios
       .post<ConsumeResetTokenResponse>(
-        "/api/user/consumeResetToken",
+        "/api/reset/confirm",
         consumeResetTokenRequest
       )
       .then((res) => {
