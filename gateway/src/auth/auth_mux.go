@@ -12,7 +12,7 @@ const (
 	loginRoute             = "/api/user/login"
 	registerRoute          = "/api/user/register"
 	passwordResetRoute     = "/api/reset"
-	resetTokenConsumeRoute = "/api/reset/consume"
+	resetTokenConsumeRoute = "/api/reset/confirm"
 )
 
 func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Handler, util.Disposable, error) {
@@ -75,7 +75,6 @@ func isUnprotectedRoute(path string) bool {
 		path == resetTokenConsumeRoute ||
 		path == "/" ||
 		strings.HasPrefix(path, "/static")
-
 }
 
 func sanitizeRequest(req *http.Request) {
