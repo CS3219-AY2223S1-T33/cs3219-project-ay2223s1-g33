@@ -26,12 +26,22 @@ class DeleteQuestionHandler implements IApiHandler<DeleteQuestionRequest, Delete
 
     try {
       await this.questionStore.removeQuestion(request.questionId);
-      // Push delete-change to Stream
-      this.redisStream.pushStream(request.questionId.toString());
     } catch {
       return {
         response: {
           errorMessage: 'Database Error',
+        },
+        headers: {},
+      };
+    }
+
+    // Push delete-change to Stream
+    try {
+      this.redisStream.pushStream(request.questionId.toString());
+    } catch {
+      return {
+        response: {
+          errorMessage: 'Redis Error',
         },
         headers: {},
       };

@@ -27,9 +27,9 @@ class RedisConsumer implements IStreamConsumer {
       await this.redis.xGroupCreate(this.streams_key, this.consumer_group, '0', {
         MKSTREAM: true,
       });
-      Logger.info(`Created ${this.consumer_group} consumer group.`);
+      Logger.info(`Created ${this.consumer_group} group.`);
     } catch (err) {
-      Logger.info(`Consumer ${this.consumer_group} consumer group already exists, skipped creation.`);
+      Logger.info(`Consumer ${this.consumer_group} group already exists, skipped creation.`);
     }
 
     while (true) {

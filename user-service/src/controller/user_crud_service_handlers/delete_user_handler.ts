@@ -30,11 +30,18 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
 
     try {
       await this.userStore.removeUser(requestObject.userId);
-      // Push delete-change to Stream
-      this.redisStream.pushStream(requestObject.userId.toString());
     } catch {
       return getHeaderlessResponse({
         errorMessage: 'Database Error',
+      });
+    }
+
+    // Push delete-change to Stream
+    try {
+      this.redisStream.pushStream(requestObject.userId.toString());
+    } catch {
+      return getHeaderlessResponse({
+        errorMessage: 'Redis Error',
       });
     }
 
