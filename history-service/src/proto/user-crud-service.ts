@@ -13,6 +13,7 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { PasswordResetToken } from "./types";
 import { PasswordUser } from "./types";
 import { User } from "./types";
 /**
@@ -94,6 +95,72 @@ export interface DeleteUserRequest {
  * @generated from protobuf message user_crud_service.DeleteUserResponse
  */
 export interface DeleteUserResponse {
+    /**
+     * @generated from protobuf field: string error_message = 1;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message user_crud_service.GetResetTokensRequest
+ */
+export interface GetResetTokensRequest {
+    /**
+     * @generated from protobuf field: string token_string = 1;
+     */
+    tokenString: string;
+    /**
+     * @generated from protobuf field: string username = 2;
+     */
+    username: string;
+}
+/**
+ * @generated from protobuf message user_crud_service.GetResetTokensResponse
+ */
+export interface GetResetTokensResponse {
+    /**
+     * @generated from protobuf field: repeated common.PasswordResetToken tokens = 1;
+     */
+    tokens: PasswordResetToken[];
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message user_crud_service.CreateResetTokenRequest
+ */
+export interface CreateResetTokenRequest {
+    /**
+     * @generated from protobuf field: common.PasswordResetToken token = 1;
+     */
+    token?: PasswordResetToken;
+}
+/**
+ * @generated from protobuf message user_crud_service.CreateResetTokenResponse
+ */
+export interface CreateResetTokenResponse {
+    /**
+     * @generated from protobuf field: common.PasswordResetToken token = 1;
+     */
+    token?: PasswordResetToken;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message user_crud_service.DeleteResetTokenRequest
+ */
+export interface DeleteResetTokenRequest {
+    /**
+     * @generated from protobuf field: string token_string = 1;
+     */
+    tokenString: string;
+}
+/**
+ * @generated from protobuf message user_crud_service.DeleteResetTokenResponse
+ */
+export interface DeleteResetTokenResponse {
     /**
      * @generated from protobuf field: string error_message = 1;
      */
@@ -496,6 +563,309 @@ class DeleteUserResponse$Type extends MessageType<DeleteUserResponse> {
  * @generated MessageType for protobuf message user_crud_service.DeleteUserResponse
  */
 export const DeleteUserResponse = new DeleteUserResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetResetTokensRequest$Type extends MessageType<GetResetTokensRequest> {
+    constructor() {
+        super("user_crud_service.GetResetTokensRequest", [
+            { no: 1, name: "token_string", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetResetTokensRequest>): GetResetTokensRequest {
+        const message = { tokenString: "", username: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetResetTokensRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetResetTokensRequest): GetResetTokensRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string token_string */ 1:
+                    message.tokenString = reader.string();
+                    break;
+                case /* string username */ 2:
+                    message.username = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetResetTokensRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string token_string = 1; */
+        if (message.tokenString !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.tokenString);
+        /* string username = 2; */
+        if (message.username !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.username);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_crud_service.GetResetTokensRequest
+ */
+export const GetResetTokensRequest = new GetResetTokensRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetResetTokensResponse$Type extends MessageType<GetResetTokensResponse> {
+    constructor() {
+        super("user_crud_service.GetResetTokensResponse", [
+            { no: 1, name: "tokens", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PasswordResetToken },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetResetTokensResponse>): GetResetTokensResponse {
+        const message = { tokens: [], errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetResetTokensResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetResetTokensResponse): GetResetTokensResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated common.PasswordResetToken tokens */ 1:
+                    message.tokens.push(PasswordResetToken.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetResetTokensResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated common.PasswordResetToken tokens = 1; */
+        for (let i = 0; i < message.tokens.length; i++)
+            PasswordResetToken.internalBinaryWrite(message.tokens[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_crud_service.GetResetTokensResponse
+ */
+export const GetResetTokensResponse = new GetResetTokensResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class CreateResetTokenRequest$Type extends MessageType<CreateResetTokenRequest> {
+    constructor() {
+        super("user_crud_service.CreateResetTokenRequest", [
+            { no: 1, name: "token", kind: "message", T: () => PasswordResetToken }
+        ]);
+    }
+    create(value?: PartialMessage<CreateResetTokenRequest>): CreateResetTokenRequest {
+        const message = {};
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<CreateResetTokenRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CreateResetTokenRequest): CreateResetTokenRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.PasswordResetToken token */ 1:
+                    message.token = PasswordResetToken.internalBinaryRead(reader, reader.uint32(), options, message.token);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: CreateResetTokenRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.PasswordResetToken token = 1; */
+        if (message.token)
+            PasswordResetToken.internalBinaryWrite(message.token, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_crud_service.CreateResetTokenRequest
+ */
+export const CreateResetTokenRequest = new CreateResetTokenRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class CreateResetTokenResponse$Type extends MessageType<CreateResetTokenResponse> {
+    constructor() {
+        super("user_crud_service.CreateResetTokenResponse", [
+            { no: 1, name: "token", kind: "message", T: () => PasswordResetToken },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<CreateResetTokenResponse>): CreateResetTokenResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<CreateResetTokenResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CreateResetTokenResponse): CreateResetTokenResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.PasswordResetToken token */ 1:
+                    message.token = PasswordResetToken.internalBinaryRead(reader, reader.uint32(), options, message.token);
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: CreateResetTokenResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.PasswordResetToken token = 1; */
+        if (message.token)
+            PasswordResetToken.internalBinaryWrite(message.token, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_crud_service.CreateResetTokenResponse
+ */
+export const CreateResetTokenResponse = new CreateResetTokenResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteResetTokenRequest$Type extends MessageType<DeleteResetTokenRequest> {
+    constructor() {
+        super("user_crud_service.DeleteResetTokenRequest", [
+            { no: 1, name: "token_string", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteResetTokenRequest>): DeleteResetTokenRequest {
+        const message = { tokenString: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<DeleteResetTokenRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteResetTokenRequest): DeleteResetTokenRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string token_string */ 1:
+                    message.tokenString = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteResetTokenRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string token_string = 1; */
+        if (message.tokenString !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.tokenString);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_crud_service.DeleteResetTokenRequest
+ */
+export const DeleteResetTokenRequest = new DeleteResetTokenRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteResetTokenResponse$Type extends MessageType<DeleteResetTokenResponse> {
+    constructor() {
+        super("user_crud_service.DeleteResetTokenResponse", [
+            { no: 1, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteResetTokenResponse>): DeleteResetTokenResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<DeleteResetTokenResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteResetTokenResponse): DeleteResetTokenResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string error_message */ 1:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteResetTokenResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string error_message = 1; */
+        if (message.errorMessage !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_crud_service.DeleteResetTokenResponse
+ */
+export const DeleteResetTokenResponse = new DeleteResetTokenResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_crud_service.UserCrudService
  */
@@ -503,5 +873,8 @@ export const UserCrudService = new ServiceType("user_crud_service.UserCrudServic
     { name: "GetUser", options: {}, I: GetUserRequest, O: GetUserResponse },
     { name: "CreateUser", options: {}, I: CreateUserRequest, O: CreateUserResponse },
     { name: "EditUser", options: {}, I: EditUserRequest, O: EditUserResponse },
-    { name: "DeleteUser", options: {}, I: DeleteUserRequest, O: DeleteUserResponse }
+    { name: "DeleteUser", options: {}, I: DeleteUserRequest, O: DeleteUserResponse },
+    { name: "GetResetTokens", options: {}, I: GetResetTokensRequest, O: GetResetTokensResponse },
+    { name: "CreateResetToken", options: {}, I: CreateResetTokenRequest, O: CreateResetTokenResponse },
+    { name: "DeleteResetToken", options: {}, I: DeleteResetTokenRequest, O: DeleteResetTokenResponse }
 ]);

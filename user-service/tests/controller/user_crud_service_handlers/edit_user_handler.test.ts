@@ -32,6 +32,7 @@ describe('Edit User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     const userId = 10;
@@ -55,6 +56,7 @@ describe('Edit User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     const userId = 10;
@@ -98,6 +100,7 @@ describe('Edit User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     mockStore.replaceUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });

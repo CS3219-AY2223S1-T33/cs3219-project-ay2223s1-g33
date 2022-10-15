@@ -25,6 +25,7 @@ import { IUserCrudService } from '../proto/user-crud-service.grpc-server';
 import createHashAgent from '../auth/hash_agent';
 import ResetPasswordHandler from './user_service_handlers/reset_password_handler';
 import ConsumeResetTokenHandler from './user_service_handlers/consume_reset_token_handler';
+import { IEmailSender } from '../email/email_sender';
 
 class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
@@ -35,9 +36,11 @@ class UserServiceApi implements ApiService<IUserService> {
 
   constructor(
     authService: IAuthenticationAgent,
+    emailSender: IEmailSender,
     crudLoopback: ILoopbackServiceChannel<IUserCrudService>,
   ) {
     const hashAgent = createHashAgent();
+
     const handlerDefinitions: ServiceHandlerDefinition<IUserService> = {
       register: fromApiHandler(
         new RegisterHandler(crudLoopback, hashAgent),
@@ -60,12 +63,12 @@ class UserServiceApi implements ApiService<IUserService> {
         GetUserProfileResponse,
       ),
       resetPassword: fromApiHandler(
-        new ResetPasswordHandler(),
+        new ResetPasswordHandler(crudLoopback, emailSender),
         ResetPasswordRequest,
         ResetPasswordResponse,
       ),
       consumeResetToken: fromApiHandler(
-        new ConsumeResetTokenHandler(),
+        new ConsumeResetTokenHandler(crudLoopback, hashAgent),
         ConsumeResetTokenRequest,
         ConsumeResetTokenResponse,
       ),

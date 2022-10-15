@@ -12,9 +12,10 @@ env:
   ECS_CLUSTER: cs3219-cluster
 
 jobs:
-  build:
-    name: Build and Upload Images
+  deploy:
+    name: Deploy to AWS ECS
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Set up repository
@@ -109,14 +110,7 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
           echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
-  
-  deploy:
-    name: Deploy to AWS ECS
-    needs: build
-    runs-on: ubuntu-latest
-    environment: production
 
-    steps:
       - name: Update task definition for session-service
         id: task-def-session-service
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -165,6 +159,15 @@ jobs:
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
             SESSION_SERVICE_URL=session-service:4100
+            EMAIL_SERVICE=Outlook365
+            EMAIL_SERVER=smtp.office365.com
+            EMAIL_PORT=587
+            EMAIL_IS_SECURE=true
+
+            EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
+            EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+            RESET_PASSWORD_URL="http://ec2-13-229-235-156.ap-southeast-1.compute.amazonaws.com/resetToken?token=$TOKEN"
+
 
       - name: Update task definition for matching-service
         id: task-def-matching-service

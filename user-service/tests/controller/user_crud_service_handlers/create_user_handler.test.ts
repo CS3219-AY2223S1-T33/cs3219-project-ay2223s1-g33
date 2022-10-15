@@ -28,6 +28,7 @@ describe('Create User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     const storedUserResult = makeStoredUser(10, testUsername1, testNickname1, testPassword1);
@@ -48,6 +49,7 @@ describe('Create User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     const storedUserResult = makeStoredUser(10, testUsername1, testNickname1, testPassword1);
@@ -91,6 +93,7 @@ describe('Create User Handler', () => {
     const mockStore = makeMockUserStorage();
     const storage: IStorage = {
       getUserStore: jest.fn(() => mockStore),
+      getResetTokenStore: jest.fn(),
     };
 
     mockStore.addUser.mockImplementationOnce(() => { throw new Error(testErrorMessage); });
