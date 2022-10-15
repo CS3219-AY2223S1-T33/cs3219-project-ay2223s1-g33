@@ -149,14 +149,13 @@ class AttemptStore implements IAttemptStore {
 
   async removeHistoryOwner(userId: number): Promise<void> {
     // Delete HistoryOwner and retrieve attempts
-    const returnAttemptId = 'attempt_id';
     const resultAttemptId: { attempt_id: number; }[] = (await this.dbConn
       .getDataSource()
       .createQueryBuilder()
       .delete()
       .from(HistoryOwnerEntity)
       .where('user_id = :userId', { userId })
-      .returning(returnAttemptId)
+      .returning('attempt_id')
       .execute()
     ).raw;
     if (!resultAttemptId) {
@@ -166,7 +165,7 @@ class AttemptStore implements IAttemptStore {
       (res: { attempt_id: number; }) => res.attempt_id,
     );
 
-    // Retrieve attempts that has other users
+    // Retrieve deleted owner's attempts that has other owners
     const otherUserAttempts: HistoryAttemptEntity[] = await this.dbConn
       .getHistoryRepo()
       .createQueryBuilder('histories')
@@ -174,9 +173,11 @@ class AttemptStore implements IAttemptStore {
       .where('histories.attempt_id IN (:...listOfIds)', { listOfIds: deletedUserAttempts })
       .getMany();
     const attemptsWithOtherUser = new Set();
-    otherUserAttempts.map((res: HistoryAttemptEntity) => attemptsWithOtherUser.add(res.attemptId));
+    otherUserAttempts.map(
+      (res: HistoryAttemptEntity) => attemptsWithOtherUser.add(res.attemptId),
+    );
 
-    // Only delete attempts with no users
+    // Only delete attempts with no owners
     deletedUserAttempts.forEach((attemptId) => {
       if (!attemptsWithOtherUser.has(attemptId)) {
         this.removeAttempt(attemptId);
