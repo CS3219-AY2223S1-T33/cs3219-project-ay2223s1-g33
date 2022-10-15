@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	loginRoute    = "/api/user/login"
-	registerRoute = "/api/user/register"
+	loginRoute             = "/api/user/login"
+	registerRoute          = "/api/user/register"
+	passwordResetRoute     = "/api/reset"
+	resetTokenConsumeRoute = "/api/reset/consume"
 )
 
 func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Handler, util.Disposable, error) {
@@ -22,7 +24,7 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.EscapedPath()
-		if path == loginRoute || path == registerRoute || path == "/" || strings.HasPrefix(path, "/static") {
+		if isUnprotectedRoute(path) {
 			mux.ServeHTTP(w, r)
 			return
 		}
@@ -64,6 +66,16 @@ func AttachAuthMiddleware(sessionServiceUrl string, mux http.Handler) (http.Hand
 		mux.ServeHTTP(w, r)
 	})
 	return handler, authAgent, nil
+}
+
+func isUnprotectedRoute(path string) bool {
+	return path == loginRoute ||
+		path == registerRoute ||
+		path == passwordResetRoute ||
+		path == resetTokenConsumeRoute ||
+		path == "/" ||
+		strings.HasPrefix(path, "/static")
+
 }
 
 func sanitizeRequest(req *http.Request) {
