@@ -1,9 +1,6 @@
 name: cd-build
 
-on:
-  push:
-    branches:
-      - release
+on: [push]
 
 env:
   AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
@@ -64,50 +61,85 @@ jobs:
 
           # node services
 
-          # frontend
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile .
+          PID_LIST=()
+          # Build Images
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service &
+          PID_LIST+=($!)
+
+          RET_CODES=()
+          EXIT_CODE=0
+
+          for PID in ${PID_LIST[*]}; do
+              wait $PID
+              CODE=$?
+              if [ $CODE -ne 0 ]; then
+                  EXIT_CODE=$CODE
+              fi
+          done
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            exit $EXIT_CODE
+          fi
+
+          # Image Upload
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
           echo "::set-output name=frontend-image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
 
           # question-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
           echo "::set-output name=question-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG"
 
           # matching-service 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
           echo "::set-output name=matching-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG"
 
           # collab-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
           echo "::set-output name=collab-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG"
 
           # user-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
           echo "::set-output name=user-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG"
 
           # history-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
           echo "::set-output name=history-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG"
 
           # go services
 
           # matchmaker
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
           echo "::set-output name=matchmaker-image::$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG"
 
           # gateway
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
           echo "::set-output name=gateway-image::$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG"
 
           # session-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
           echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
 
