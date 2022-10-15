@@ -1,6 +1,6 @@
 import { Flex, Text } from "@chakra-ui/react";
 import React from "react";
-import { Chat } from "../../feature/chat/chatSlice";
+import { Chat } from "../../types";
 
 type Props = {
   message: Chat;

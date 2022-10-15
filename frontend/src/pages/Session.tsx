@@ -24,10 +24,10 @@ import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
-import { Language } from "../types";
+import { Chat, Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-import { addMessage, Chat, clearChat } from "../feature/chat/chatSlice";
+import { addMessage, clearChat } from "../feature/chat/chatSlice";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -138,7 +138,6 @@ function Session() {
       });
 
       ws.on("message_receive", (e: Chat) => {
-        console.log("Rvc text msg from websocket:", e);
         dispatch(addMessage(e));
       });
 

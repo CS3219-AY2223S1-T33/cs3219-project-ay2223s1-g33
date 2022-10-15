@@ -6,6 +6,7 @@ import ChatList from "./ChatList";
 type Props = {
   sendTextMessage: (content: string) => void;
 };
+
 function ChatSection({ sendTextMessage }: Props) {
   return (
     <Flex h="80vh" w="100%" flexDir="column">

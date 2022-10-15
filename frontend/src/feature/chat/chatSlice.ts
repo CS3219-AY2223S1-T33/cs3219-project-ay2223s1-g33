@@ -1,10 +1,6 @@
 /* eslint no-param-reassign: 0 */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface Chat {
-  from: string;
-  message: string;
-}
+import { Chat } from "../../types";
 
 interface ChatState {
   chat: Chat[];
