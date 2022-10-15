@@ -1,4 +1,4 @@
-import { RedisClientType } from 'redis';
+import { commandOptions, RedisClientType } from 'redis';
 import { DeleteUserRequest, DeleteUserResponse } from '../../proto/user-crud-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IStorage, IUserStore } from '../../storage/storage';
@@ -28,6 +28,14 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
         errorMessage: 'Malformed request',
       });
     }
+
+    // Push delete-change to PubSub
+    const STREAMS_KEY = 'stream-delete-user';
+    await this.redis.xAdd(
+      STREAMS_KEY,
+      '*',
+      { userId: requestObject.userId.toString() },
+    );
 
     try {
       await this.userStore.removeUser(requestObject.userId);
