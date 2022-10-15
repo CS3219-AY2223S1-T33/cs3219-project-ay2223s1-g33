@@ -25,7 +25,7 @@ class QuestionServiceApi implements ApiService<IQuestionService> {
 
   serviceImplementation: IQuestionService;
 
-  constructor(storage: IStorage) {
+  constructor(storage: IStorage, redisStream: IStreamProducer) {
     const handlerDefinitions: ServiceHandlerDefinition<IQuestionService> = {
       getQuestion: fromApiHandler(
         new GetQuestionHandler(storage),
@@ -43,7 +43,7 @@ class QuestionServiceApi implements ApiService<IQuestionService> {
         EditQuestionResponse,
       ),
       deleteQuestion: fromApiHandler(
-        new DeleteQuestionHandler(storage),
+        new DeleteQuestionHandler(storage, redisStream),
         DeleteQuestionRequest,
         DeleteQuestionResponse,
       ),

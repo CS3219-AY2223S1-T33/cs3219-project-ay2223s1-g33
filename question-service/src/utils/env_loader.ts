@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 
 type EnvironmentConfig = {
+  readonly REDIS_SERVER_URL: string,
   readonly HTTP_PORT: number,
   readonly GRPC_PORT: number,
 
@@ -60,6 +61,7 @@ export default function loadEnvironment(): EnvironmentConfig {
   config();
 
   return {
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
     DATABASE_DBHOST: requireString('DATABASE_DBHOST'),
     DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
     DATABASE_PASSWORD: requireString('DATABASE_PASSWORD'),

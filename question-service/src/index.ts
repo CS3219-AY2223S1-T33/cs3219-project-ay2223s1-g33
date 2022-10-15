@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { createClient, RedisClientType } from 'redis';
 import getApiServer from './api_server/api_server';
 import loadEnvironment from './utils/env_loader';
 import AppStorage from './storage/app_storage';
@@ -7,6 +8,7 @@ import QuestionServiceApi from './controller/question_service_controller';
 import Constants from './constants';
 import Logger from './utils/logger';
 import { connectDatabase } from './db';
+import createQuestionDeleteProducer from './redis_stream_adapter/question_delete_producer';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -20,6 +22,12 @@ async function run() {
   const dbConnection = await connectDatabase(envConfig);
   const dataStore: AppStorage = new AppStorage(dbConnection);
 
+  const redis: RedisClientType = createClient({
+    url: envConfig.REDIS_SERVER_URL,
+  });
+  await redis.connect();
+  const redisQuestionStream = createQuestionDeleteProducer(redis);
+
   const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
   const expressApp = apiServer.getHttpServer();
 
@@ -27,7 +35,7 @@ async function run() {
     resp.status(200).send('Welcome to Question Service');
   });
 
-  apiServer.registerServiceRoutes(new QuestionServiceApi(dataStore));
+  apiServer.registerServiceRoutes(new QuestionServiceApi(dataStore, redisQuestionStream));
   apiServer.bind();
 }
 
