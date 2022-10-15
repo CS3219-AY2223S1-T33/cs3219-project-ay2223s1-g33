@@ -31,6 +31,7 @@ export const QUESTION_REQ = 8;
 export const QUESTION_RCV = 9;
 export const SAVECODE_SEND = 10;
 export const SAVECODE_ACK = 11;
+export const TEXTMSG_SEND = 12;
 
 /**
  *                       encoder,          decoder,          provider,          emitSynced, messageType
@@ -97,6 +98,12 @@ messageHandlers[SAVECODE_SEND] = (_encoder, decoder, provider, _emitSynced, _mes
 messageHandlers[SAVECODE_ACK] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
 	const errorMsg = decoding.readVarString(decoder);
 	provider.emit("savecode_ack", [{ errorMsg }]);
+};
+
+messageHandlers[TEXTMSG_SEND] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
+	const from = decoding.readVarString(decoder);
+	const message = decoding.readVarString(decoder);
+	provider.emit("message_receive", [{ from, message }]);
 };
 
 // @todo - this should depend on awareness.outdatedTime
@@ -512,6 +519,14 @@ export class WebsocketProvider extends Observable {
 		const encoder = encoding.createEncoder();
 		encoding.writeUint8(encoder, SAVECODE_SEND);
 		encoding.writeVarString(encoder, language);
+		encoding.writeVarString(encoder, content);
+		broadcastMessage(this, encoding.toUint8Array(encoder));
+	}
+
+	sendTextMessage(/**@type {string} */ from, /** @type {string} */ content) {
+		const encoder = encoding.createEncoder();
+		encoding.writeUint8(encoder, TEXTMSG_SEND);
+		encoding.writeVarString(encoder, from);
 		encoding.writeVarString(encoder, content);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
