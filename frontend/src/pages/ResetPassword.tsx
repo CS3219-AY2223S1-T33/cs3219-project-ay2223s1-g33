@@ -39,17 +39,11 @@ function ResetPassword() {
 
     const resetPasswordRequest: ResetPasswordRequest = { username: email };
 
-    // Send registration request to the server
     axios
-      .post<ResetPasswordResponse>(
-        "/api/reset",
-        resetPasswordRequest
-      )
+      .post<ResetPasswordResponse>("/api/reset", resetPasswordRequest)
       .then((res) => {
         const { data: resData } = res;
 
-        // Since proto-buffers treat 0 and empty string as undefined, a successful registration
-        // will return an empty object
         if (resData.errorCode) {
           throw new Error(resData.errorMessage);
         }

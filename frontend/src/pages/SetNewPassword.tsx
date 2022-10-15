@@ -11,7 +11,7 @@ import {
   Button,
   useBoolean,
   Text,
-  FormErrorMessage
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import React from "react";
@@ -19,14 +19,14 @@ import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm
+  useForm,
 } from "react-hook-form";
 import { Navigate, useSearchParams } from "react-router-dom";
 import axios from "../axios";
 import Link from "../components/ui/Link";
 import {
   ConsumeResetTokenRequest,
-  ConsumeResetTokenResponse
+  ConsumeResetTokenResponse,
 } from "../proto/user-service";
 import useFixedToast from "../utils/hooks/useFixedToast";
 
@@ -34,7 +34,7 @@ function SetNewPassword() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
 
   const toast = useFixedToast();
@@ -52,7 +52,7 @@ function SetNewPassword() {
 
     const consumeResetTokenRequest: ConsumeResetTokenRequest = {
       token,
-      newPassword
+      newPassword,
     };
 
     axios
@@ -80,7 +80,7 @@ function SetNewPassword() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
@@ -104,8 +104,8 @@ function SetNewPassword() {
                       minLength: {
                         value: 8,
                         message:
-                          "Please make sure your password is at least 8 characters long."
-                      }
+                          "Please make sure your password is at least 8 characters long.",
+                      },
                     })}
                   />
                   <InputRightElement h="full">
@@ -126,7 +126,7 @@ function SetNewPassword() {
                   bg="blue.400"
                   color="white"
                   _hover={{
-                    bg: "blue.500"
+                    bg: "blue.500",
                   }}
                   type="submit"
                 >
