@@ -209,6 +209,13 @@ jobs:
           task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
           container-name: gateway
           image: ${{ steps.build-image.outputs.gateway-image }}      
+          environment-variables: |
+            USER_BFF_SERVER=user-service:4000
+            MATCHING_SERVER=matching-service:4001
+            COLLAB_SERVER=collab-service:4003
+            HISTORY_SERVER=history-service:4005
+            SESSION_SERVER=session-service:4100
+            STATIC_SERVER=frontend:80
 
       - name: Update task definition for history-service
         id: task-def-history-service
