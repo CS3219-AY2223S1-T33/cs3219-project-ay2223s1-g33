@@ -14,14 +14,14 @@ import {
   FormErrorMessage
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import React, { useEffect } from "react";
+import React from "react";
 import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
   useForm
 } from "react-hook-form";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import axios from "../axios";
 import Link from "../components/ui/Link";
 import {
@@ -38,17 +38,14 @@ function SetNewPassword() {
   } = useForm();
 
   const toast = useFixedToast();
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useBoolean();
   const [searchParams] = useSearchParams();
 
-  const token = searchParams.get("token")!;
+  const token = searchParams.get("token");
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/login", { replace: true });
-    }
-  }, []);
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
     const { password: newPassword } = data;
@@ -58,19 +55,16 @@ function SetNewPassword() {
       newPassword
     };
 
-    // Send registration request to the server
     axios
       .post<ConsumeResetTokenResponse>(
         "/api/reset/confirm",
         consumeResetTokenRequest
       )
       .then((res) => {
-        const { data: resData } = res;
+        const { errorCode, errorMessage } = res.data;
 
-        // Since proto-buffers treat 0 and empty string as undefined, a successful registration
-        // will return an empty object
-        if (resData.errorCode) {
-          throw new Error(resData.errorMessage);
+        if (errorCode) {
+          throw new Error(errorMessage);
         }
 
         toast.sendSuccessMessage(
