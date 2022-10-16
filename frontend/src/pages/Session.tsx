@@ -67,8 +67,9 @@ function Session() {
     /** Helper function to configure websocket with yDoc and custom events. */
     const buildWSProvider = (yd: Y.Doc, params: { [x: string]: string }) => {
       // First 2 params builds the room session: ws://localhost:5001/ + ws
+      const wsProtocol = (window.location.protocol === "https:") ? "wss" : "ws";
       const ws = new WebsocketProvider(
-        `ws://${window.location.host}/api/`,
+        `${wsProtocol}://${window.location.host}/api/`,
         "roomws",
         yd,
         { params, disableBc: true }
