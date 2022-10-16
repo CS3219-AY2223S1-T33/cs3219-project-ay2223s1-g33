@@ -52,8 +52,8 @@ class HistoryRedisConsumer {
   }
 
   addListeners() {
-    this.questionConsumer.addListener(this.createByQuestionRemover());
-    this.userConsumer.addListener(this.createByOwnerRemover());
+    this.questionConsumer.setListener(this.createByQuestionRemover());
+    this.userConsumer.setListener(this.createByOwnerRemover());
   }
 
   run() {

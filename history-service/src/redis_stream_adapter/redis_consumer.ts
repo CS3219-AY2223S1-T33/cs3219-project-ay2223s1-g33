@@ -24,7 +24,7 @@ class RedisConsumer implements IStreamConsumer {
     this.consumer_name = consumer_name;
   }
 
-  addListener(call: (response: { [property: string]: string }) => void) {
+  setListener(call: (response: { [property: string]: string }) => void) {
     this.listener = call;
   }
 
