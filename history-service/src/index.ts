@@ -30,7 +30,7 @@ async function run() {
   });
   await redis.connect();
   const consumer = createHistoryRedisConsumer(redis, dataStore.getAttemptStore());
-  consumer.addListeners();
+  consumer.setListeners();
   consumer.run();
 
   const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
