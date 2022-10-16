@@ -132,6 +132,7 @@ export class WebsocketProvider extends Observable<string> {
 	sendLanguageChange(language: string): void;
 	sendQuestionRequest(): void;
 	sendCodeSnapshot(content: string, language: string): void;
+	sendTextMessage(from: string, content: string);
 }
 import { Observable } from "lib0/observable";
 import * as Y from "yjs";
