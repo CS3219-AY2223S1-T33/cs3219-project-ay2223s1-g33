@@ -90,7 +90,7 @@ const testData = {
 
 function makeRedisStreamProducer() {
   return {
-    pushStream: jest.fn(),
+    pushMessage: jest.fn(),
   };
 }
 
