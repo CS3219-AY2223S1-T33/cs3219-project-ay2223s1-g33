@@ -5,8 +5,11 @@ import { IStorage, IQuestionStore } from '../../storage/storage';
 class DeleteQuestionHandler implements IApiHandler<DeleteQuestionRequest, DeleteQuestionResponse> {
   questionStore: IQuestionStore;
 
-  constructor(storage: IStorage) {
+  redisStream: IStreamProducer;
+
+  constructor(storage: IStorage, redisStream: IStreamProducer) {
     this.questionStore = storage.getQuestionStore();
+    this.redisStream = redisStream;
   }
 
   async handle(apiRequest: ApiRequest<DeleteQuestionRequest>):
@@ -21,8 +24,28 @@ class DeleteQuestionHandler implements IApiHandler<DeleteQuestionRequest, Delete
       };
     }
 
-    await this.questionStore.removeQuestion(request.questionId);
+    try {
+      await this.questionStore.removeQuestion(request.questionId);
+    } catch {
+      return {
+        response: {
+          errorMessage: 'Database Error',
+        },
+        headers: {},
+      };
+    }
 
+    // Push delete-change to Stream
+    try {
+      await this.redisStream.pushMessage(request.questionId.toString());
+    } catch {
+      return {
+        response: {
+          errorMessage: 'Redis Error',
+        },
+        headers: {},
+      };
+    }
     return {
       response: {
         errorMessage: '',

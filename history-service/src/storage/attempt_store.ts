@@ -3,6 +3,7 @@ import { IDatabase } from '../db';
 import HistoryAttemptEntity from '../db/history_entity';
 import { StoredAttempt } from '../model/attempt_store_model';
 import { IAttemptStore, AttemptStoreSearchResult } from './storage';
+import HistoryOwnerEntity from '../db/history_owner_entity';
 
 class AttemptStore implements IAttemptStore {
   private dbConn: IDatabase;
@@ -144,6 +145,58 @@ class AttemptStore implements IAttemptStore {
       attempts: selectResult,
       totalCount,
     };
+  }
+
+  async removeAllOfHistoryOwner(userId: number): Promise<void> {
+    // Delete HistoryOwner and retrieve attempts
+    const resultAttemptId: { attempt_id: number; }[] = (await this.dbConn
+      .getDataSource()
+      .createQueryBuilder()
+      .delete()
+      .from(HistoryOwnerEntity)
+      .where('user_id = :userId', { userId })
+      .returning('attempt_id')
+      .execute()
+    ).raw;
+    if (!resultAttemptId) {
+      return;
+    }
+    const deletedUserAttempts = resultAttemptId.map(
+      (res: { attempt_id: number; }) => res.attempt_id,
+    );
+    if (deletedUserAttempts.length === 0) {
+      return;
+    }
+
+    // Retrieve deleted owner's attempts that has other owners
+    const otherUserAttempts: HistoryAttemptEntity[] = await this.dbConn
+      .getHistoryRepo()
+      .createQueryBuilder('histories')
+      .innerJoinAndSelect('histories.users', 'history_owners')
+      .where('histories.attempt_id IN (:...listOfIds)', { listOfIds: deletedUserAttempts })
+      .getMany();
+    const attemptsWithOtherUser = new Set();
+    otherUserAttempts.map(
+      (res: HistoryAttemptEntity) => attemptsWithOtherUser.add(res.attemptId),
+    );
+
+    // Only delete attempts with no owners
+    deletedUserAttempts.forEach((attemptId) => {
+      if (!attemptsWithOtherUser.has(attemptId)) {
+        this.removeAttempt(attemptId);
+      }
+    });
+  }
+
+  async removeHistoryByQuestionId(questionId: number): Promise<void> {
+    // Remove attempts of question id, DB cascades deletes owners
+    await this.dbConn
+      .getDataSource()
+      .createQueryBuilder()
+      .delete()
+      .from(HistoryAttemptEntity)
+      .where('question_id = :questionId', { questionId })
+      .execute();
   }
 }
 

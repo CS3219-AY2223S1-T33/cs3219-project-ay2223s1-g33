@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { createClient, RedisClientType } from 'redis';
 import getApiServer from './api_server/api_server';
 import loadEnvironment from './utils/env_loader';
 import AppStorage from './storage/app_storage';
@@ -10,6 +11,7 @@ import { IHistoryCrudService } from './proto/history-crud-service.grpc-server';
 import Constants from './constants';
 import Logger from './utils/logger';
 import { connectDatabase } from './db';
+import createHistoryRedisConsumer from './redis_stream_adapter/history_redis_consumer';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -23,10 +25,20 @@ async function run() {
   const dbConnection = await connectDatabase(envConfig);
   const dataStore: AppStorage = new AppStorage(dbConnection);
 
+  const redis: RedisClientType = createClient({
+    url: envConfig.REDIS_SERVER_URL,
+  });
+  await redis.connect();
+  const consumer = createHistoryRedisConsumer(redis, dataStore.getAttemptStore());
+  consumer.setListeners();
+  consumer.run();
+
   const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
   const expressApp = apiServer.getHttpServer();
 
+  // @ts-ignore
   expressApp.get('/', (_: Request, resp: Response) => {
+    // @ts-ignore
     resp.status(200).send('Welcome to History Service');
   });
 

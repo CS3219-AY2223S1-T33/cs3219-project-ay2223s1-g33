@@ -31,12 +31,15 @@
     "@grpc/grpc-js": "^1.6.11",
     "@protobuf-ts/runtime": "^2.8.0",
     "@protobuf-ts/runtime-rpc": "^2.8.0",
+    "@types/uuid": "^8.3.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "pg": "^8.8.0",
+    "redis": "^4.3.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.3.9",
+    "uuid": "^9.0.0",
     "validator": "^13.7.0"
   }
 }
