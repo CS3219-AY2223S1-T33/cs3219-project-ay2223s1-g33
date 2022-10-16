@@ -1,8 +1,7 @@
 import { RedisClientType } from 'redis';
+import { v4 as uuidv4 } from 'uuid';
 import { IAttemptStore } from '../storage/storage';
 import createRedisConsumer from './redis_consumer';
-
-const uuid = require('uuid');
 
 const STREAMS_KEY_QUESTION = 'stream-delete-question';
 const STREAMS_KEY_USER = 'stream-delete-user';
@@ -10,7 +9,7 @@ const STREAMS_KEY_USER = 'stream-delete-user';
 const CONSUMER_GROUP_QUESTION = 'delete-question-history-service';
 const CONSUMER_GROUP_USER = 'delete-user-history-service';
 
-const CONSUMER_NAME = uuid.v4();
+const CONSUMER_NAME = uuidv4();
 
 class HistoryRedisConsumer {
   questionConsumer: IStreamConsumer;
@@ -48,13 +47,18 @@ class HistoryRedisConsumer {
   createByOwnerRemover() {
     return (response: { [property: string]: string }) => {
       const { userId } = response;
-      this.storage.removeHistoryOwner(Number(userId));
+      this.storage.removeAllOfHistoryOwner(Number(userId));
     };
   }
 
+  addListeners() {
+    this.questionConsumer.addListener(this.createByQuestionRemover());
+    this.userConsumer.addListener(this.createByOwnerRemover());
+  }
+
   run() {
-    this.questionConsumer.runConsumer(this.createByQuestionRemover());
-    this.userConsumer.runConsumer(this.createByOwnerRemover());
+    this.questionConsumer.run();
+    this.userConsumer.run();
   }
 }
 

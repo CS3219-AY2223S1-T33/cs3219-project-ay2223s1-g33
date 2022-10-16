@@ -147,7 +147,7 @@ class AttemptStore implements IAttemptStore {
     };
   }
 
-  async removeHistoryOwner(userId: number): Promise<void> {
+  async removeAllOfHistoryOwner(userId: number): Promise<void> {
     // Delete HistoryOwner and retrieve attempts
     const resultAttemptId: { attempt_id: number; }[] = (await this.dbConn
       .getDataSource()
@@ -164,7 +164,7 @@ class AttemptStore implements IAttemptStore {
     const deletedUserAttempts = resultAttemptId.map(
       (res: { attempt_id: number; }) => res.attempt_id,
     );
-    if (!deletedUserAttempts.length) {
+    if (deletedUserAttempts.length === 0) {
       return;
     }
 

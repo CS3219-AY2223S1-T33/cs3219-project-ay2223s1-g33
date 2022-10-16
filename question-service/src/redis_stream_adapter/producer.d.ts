@@ -1,3 +1,3 @@
 declare interface IStreamProducer {
-  pushStream(msg: string);
+  pushMessage(msg: string);
 }

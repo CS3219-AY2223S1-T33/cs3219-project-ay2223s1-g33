@@ -9,7 +9,7 @@ class QuestionDeleteProducer implements IStreamProducer {
     this.redis = redis;
   }
 
-  async pushStream(msg: string) {
+  async pushMessage(msg: string) {
     await this.redis.xAdd(
       STREAMS_KEY,
       '*',

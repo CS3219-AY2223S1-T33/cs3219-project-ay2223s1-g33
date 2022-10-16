@@ -10,6 +10,8 @@ class RedisConsumer implements IStreamConsumer {
 
   consumer_name: string;
 
+  listener: ((response: { [property: string]: string }) => void) | undefined;
+
   constructor(
     redis: RedisClientType,
     streams_key: string,
@@ -22,7 +24,15 @@ class RedisConsumer implements IStreamConsumer {
     this.consumer_name = consumer_name;
   }
 
-  async runConsumer(call: (response: { [property: string]: string }) => void) {
+  addListener(call: (response: { [property: string]: string }) => void) {
+    this.listener = call;
+  }
+
+  async run() {
+    if (this.listener === undefined) {
+      Logger.error('Consumer listener function not defined');
+      return;
+    }
     try {
       await this.redis.xGroupCreate(this.streams_key, this.consumer_group, '0', {
         MKSTREAM: true,
@@ -53,7 +63,7 @@ class RedisConsumer implements IStreamConsumer {
         );
         if (response) {
           // Execute on response data
-          call(response[0].messages[0].message);
+          this.listener(response[0].messages[0].message);
           // Acknowledge read data
           const entryId = response[0].messages[0].id;
           this.redis.xAck(this.streams_key, this.consumer_group, entryId);

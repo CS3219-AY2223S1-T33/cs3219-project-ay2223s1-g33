@@ -37,7 +37,7 @@ class DeleteQuestionHandler implements IApiHandler<DeleteQuestionRequest, Delete
 
     // Push delete-change to Stream
     try {
-      this.redisStream.pushStream(request.questionId.toString());
+      await this.redisStream.pushMessage(request.questionId.toString());
     } catch {
       return {
         response: {
