@@ -167,6 +167,7 @@ jobs:
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            REDIS_SERVER_URL=redis:6379
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
