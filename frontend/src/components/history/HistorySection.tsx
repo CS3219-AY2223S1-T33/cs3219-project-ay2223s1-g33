@@ -14,11 +14,11 @@ function HistorySection({ submission }: Props) {
       </Heading>
       <Divider />
       {submission ? (
-        <LoadingSection message="Loading Submission..." />
-      ) : (
         <Code width="100%" overflow="scroll">
           {submission}
         </Code>
+      ) : (
+        <LoadingSection message="Loading Submission..." />
       )}
     </VStack>
   );
