@@ -35,6 +35,6 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
-          run: |
+        run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:redis-$IMAGE_TAG -f ./images/redis.dockerfile ./images
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:redis-$IMAGE_TAG
