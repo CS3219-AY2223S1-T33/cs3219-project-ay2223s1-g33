@@ -90,17 +90,19 @@ func (conn *websocketConnection) Write(data []byte) (n int, err error) {
 }
 
 func (conn *websocketConnection) Close() error {
+	wasAlive := false
 	conn.stateMutex.Lock()
-	defer conn.stateMutex.Unlock()
+	wasAlive = conn.isAlive
+	conn.isAlive = false
+	conn.stateMutex.Unlock()
 
-	if !conn.isAlive {
+	if !wasAlive {
 		return nil
 	}
 
 	log.Println("Closing WS Connection")
 	close(conn.writeBuffer)
 	err := conn.socket.Close()
-	conn.isAlive = false
 
 	if conn.closeListener != nil {
 		conn.closeListener()
