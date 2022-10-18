@@ -1,9 +1,6 @@
 name: cd-deployment
 
-on:
-  push:
-    branches:
-      - release
+on: [push]
 
 env:
   AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
@@ -194,7 +191,7 @@ jobs:
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
             REDIS_SERVER_URL=redis:6379
-            
+
             SESSION_SERVICE_URL=session-service:4100
             EMAIL_SERVICE=Outlook365
             EMAIL_SERVER=smtp.office365.com
