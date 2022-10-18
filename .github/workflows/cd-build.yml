@@ -15,7 +15,9 @@ jobs:
   deploy:
     name: Deploy to AWS ECS
     runs-on: ubuntu-latest
-    environment: production
+    environment:
+      name: 'Production'
+      url: https://peerprep.launchsite.com.sg
 
     steps:
       - name: Set up repository
@@ -201,8 +203,7 @@ jobs:
 
             EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
             EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-            RESET_PASSWORD_URL="http://ec2-13-229-235-156.ap-southeast-1.compute.amazonaws.com/resetToken?token=$TOKEN"
-
+            RESET_PASSWORD_URL="https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN"
 
       - name: Update task definition for matching-service
         id: task-def-matching-service
