@@ -19,7 +19,13 @@ class DeleteAttemptHandler implements IApiHandler<DeleteAttemptRequest, DeleteAt
       });
     }
 
-    await this.attemptStore.removeAttempt(request.attemptId);
+    try {
+      await this.attemptStore.removeAttempt(request.attemptId);
+    } catch {
+      return DeleteAttemptHandler.buildHeaderlessResponse({
+        errorMessage: 'Database Error',
+      });
+    }
 
     return DeleteAttemptHandler.buildHeaderlessResponse({
       errorMessage: '',
