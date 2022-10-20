@@ -1,4 +1,4 @@
-import { StoredUser } from '../../src/model/user_store_model';
+import StoredUser from '../../src/model/user_store_model';
 import { PasswordUser, User } from '../../src/proto/types';
 
 function makeMockUserStorage() {
