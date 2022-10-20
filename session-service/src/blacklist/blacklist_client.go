@@ -6,12 +6,12 @@ import (
 	redis "github.com/go-redis/redis/v9"
 )
 
-//go:generate mockgen -destination=../mocks/mock_redis_client.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/session-service/conn RedisBlacklistClient
+//go:generate mockgen -destination=../mocks/mock_redis_client.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/session-service/blacklist RedisBlacklistClient
 type RedisBlacklistClient interface {
 	Connect() error
 	Close()
-	GetSessionBlacklist() RedisBlacklist
-	GetRefreshBlacklist() RedisBlacklist
+	GetSessionBlacklist() TokenBlacklist
+	GetRefreshBlacklist() TokenBlacklist
 }
 
 type blacklistClient struct {
@@ -20,14 +20,8 @@ type blacklistClient struct {
 	refreshExpiryDuration time.Duration
 
 	redisClient      *redis.Client
-	sessionBlacklist RedisBlacklist
-	refreshBlacklist RedisBlacklist
-}
-
-type RedisBlacklist interface {
-	AddToken(token string) error
-	RemoveToken(token string) error
-	IsTokenBlacklisted(token string) (bool, error)
+	sessionBlacklist TokenBlacklist
+	refreshBlacklist TokenBlacklist
 }
 
 func NewRedisBlacklistClient(
@@ -64,10 +58,10 @@ func (client *blacklistClient) Close() {
 	client.redisClient.Close()
 }
 
-func (client *blacklistClient) GetSessionBlacklist() RedisBlacklist {
+func (client *blacklistClient) GetSessionBlacklist() TokenBlacklist {
 	return client.sessionBlacklist
 }
 
-func (client *blacklistClient) GetRefreshBlacklist() RedisBlacklist {
+func (client *blacklistClient) GetRefreshBlacklist() TokenBlacklist {
 	return client.refreshBlacklist
 }
