@@ -14,6 +14,19 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 /**
+ * @generated from protobuf message session_service.UserTimestampPair
+ */
+export interface UserTimestampPair {
+    /**
+     * @generated from protobuf field: string username = 1;
+     */
+    username: string;
+    /**
+     * @generated from protobuf field: uint64 timestamp = 2;
+     */
+    timestamp: number;
+}
+/**
  * @generated from protobuf message session_service.CreateTokenRequest
  */
 export interface CreateTokenRequest {
@@ -89,6 +102,10 @@ export interface AddBlacklistRequest {
      * @generated from protobuf field: string refresh_token = 2;
      */
     refreshToken: string;
+    /**
+     * @generated from protobuf field: session_service.UserTimestampPair user_before = 3;
+     */
+    userBefore?: UserTimestampPair;
 }
 /**
  * @generated from protobuf message session_service.AddBlacklistResponse
@@ -146,6 +163,60 @@ export enum AddBlacklistErrorCode {
      */
     ADD_BLACKLIST_ERROR_INTERNAL = 100
 }
+// @generated message type with reflection information, may provide speed optimized methods
+class UserTimestampPair$Type extends MessageType<UserTimestampPair> {
+    constructor() {
+        super("session_service.UserTimestampPair", [
+            { no: 1, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "timestamp", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+        ]);
+    }
+    create(value?: PartialMessage<UserTimestampPair>): UserTimestampPair {
+        const message = { username: "", timestamp: 0 };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<UserTimestampPair>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: UserTimestampPair): UserTimestampPair {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string username */ 1:
+                    message.username = reader.string();
+                    break;
+                case /* uint64 timestamp */ 2:
+                    message.timestamp = reader.uint64().toNumber();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: UserTimestampPair, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string username = 1; */
+        if (message.username !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.username);
+        /* uint64 timestamp = 2; */
+        if (message.timestamp !== 0)
+            writer.tag(2, WireType.Varint).uint64(message.timestamp);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message session_service.UserTimestampPair
+ */
+export const UserTimestampPair = new UserTimestampPair$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class CreateTokenRequest$Type extends MessageType<CreateTokenRequest> {
     constructor() {
@@ -388,7 +459,8 @@ class AddBlacklistRequest$Type extends MessageType<AddBlacklistRequest> {
     constructor() {
         super("session_service.AddBlacklistRequest", [
             { no: 1, name: "session_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "refresh_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "refresh_token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "user_before", kind: "message", T: () => UserTimestampPair }
         ]);
     }
     create(value?: PartialMessage<AddBlacklistRequest>): AddBlacklistRequest {
@@ -409,6 +481,9 @@ class AddBlacklistRequest$Type extends MessageType<AddBlacklistRequest> {
                 case /* string refresh_token */ 2:
                     message.refreshToken = reader.string();
                     break;
+                case /* session_service.UserTimestampPair user_before */ 3:
+                    message.userBefore = UserTimestampPair.internalBinaryRead(reader, reader.uint32(), options, message.userBefore);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -427,6 +502,9 @@ class AddBlacklistRequest$Type extends MessageType<AddBlacklistRequest> {
         /* string refresh_token = 2; */
         if (message.refreshToken !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.refreshToken);
+        /* session_service.UserTimestampPair user_before = 3; */
+        if (message.userBefore)
+            UserTimestampPair.internalBinaryWrite(message.userBefore, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
