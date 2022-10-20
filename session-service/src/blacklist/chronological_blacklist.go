@@ -2,7 +2,10 @@ package blacklist
 
 import (
 	"context"
+	"cs3219-project-ay2223s1-g33/session-service/blacklist/pipeline"
+	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -14,62 +17,97 @@ const (
 	redisChronoBlacklistKeyFormat = "auth-chrono-blacklist-%s"
 )
 
-type ChronologicalBlacklist interface {
-	IsTokenBlacklisted(username string, timestamp uint64) (bool, error)
-	GetTimestampBlacklistFor(ctx context.Context, client RedisGetClient, username string) (string, error)
-	IsTimestampBlacklisted(redisValue string, timestamp uint64) (bool, error)
+type ChronoBlacklist interface {
+	TokenBlacklistWriter
+	redisBlacklistFilterProvider
 }
 
-type chronologicalBlacklist struct {
+type chronoBlacklist struct {
 	redisClient    *redis.Client
 	expiryDuration time.Duration
 }
 
-type RedisGetClient interface {
-	Get(ctx context.Context, key string) *redis.StringCmd
-}
-
-func newChronologicalBlacklist(redisClient *redis.Client, expiryDuration time.Duration) ChronologicalBlacklist {
-	return &chronologicalBlacklist{
+func newChronoBlacklist(redisClient *redis.Client, expiryDuration time.Duration) ChronoBlacklist {
+	return &chronoBlacklist{
 		redisClient:    redisClient,
 		expiryDuration: expiryDuration,
 	}
 }
 
-func (chronoBlacklist *chronologicalBlacklist) IsTokenBlacklisted(username string, timestamp uint64) (bool, error) {
+func (chronoBlacklist *chronoBlacklist) getFiltersFor(token *IssuedToken) []pipeline.RedisBlacklistFilter {
+	querierFunc := func(ctx context.Context, client redis.Cmdable) {
+		chronoBlacklist.queryChronoBlacklist(ctx, client, token.Username)
+	}
+
+	checkerFunc := func(result redis.Cmder) (bool, error) {
+		castedResult, ok := result.(*redis.StringCmd)
+		if !ok {
+			return false, errors.New("Unexpected Redis Reply")
+		}
+
+		chronoCommandResult, err := castedResult.Result()
+		if err == redis.Nil {
+			return false, nil
+		} else if err != nil {
+			return false, err
+		}
+
+		return chronoBlacklist.isTimestampBlacklisted(chronoCommandResult, token.Timestamp)
+	}
+
+	return []pipeline.RedisBlacklistFilter{
+		pipeline.BlacklistFilterFrom(querierFunc, checkerFunc),
+	}
+}
+
+func (chronoBlacklist *chronoBlacklist) AddToken(token *IssuedToken) error {
+	redisKey := chronoBlacklist.getTokenRepresentation(token.Username)
+	ctx := context.Background()
+	keyLifespan := chronoBlacklist.expiryDuration + chronoBlacklistTolerance
+	value := fmt.Sprintf("%d", token.Timestamp)
+
+	val, err := chronoBlacklist.redisClient.Get(ctx, redisKey).Result()
+	if err != nil && err != redis.Nil {
+		log.Println(err)
+		return err
+	}
+
+	timestamp := uint64(0)
+	if err != redis.Nil {
+		timestamp, err = strconv.ParseUint(val, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+
+	if timestamp > token.Timestamp {
+		return nil
+	}
+
+	return chronoBlacklist.redisClient.Set(ctx, redisKey, value, keyLifespan).Err()
+}
+
+func (chronoBlacklist *chronoBlacklist) RemoveToken(token *IssuedToken) error {
+	redisKey := chronoBlacklist.getTokenRepresentation(token.Username)
 	ctx := context.Background()
 
-	redisVal, err := chronoBlacklist.GetTimestampBlacklistFor(ctx, chronoBlacklist.redisClient, username)
-	if err != nil {
-		return false, err
-	}
-
-	isBlacklisted, err := chronoBlacklist.IsTimestampBlacklisted(redisVal, timestamp)
-	if err != nil {
-		return false, err
-	}
-
-	return isBlacklisted, nil
+	return chronoBlacklist.redisClient.Del(ctx, redisKey).Err()
 }
 
-func (chronoBlacklist *chronologicalBlacklist) GetTimestampBlacklistFor(ctx context.Context, client RedisGetClient, username string) (string, error) {
-	key := fmt.Sprintf(redisChronoBlacklistKeyFormat, username)
-	result := client.Get(ctx, key)
-	val, err := result.Result()
-
-	if err == redis.Nil {
-		return "", nil
-	} else if err != nil {
-		return "", err
-	}
-	return val, nil
+func (chronoBlacklist *chronoBlacklist) queryChronoBlacklist(ctx context.Context, client redis.Cmdable, username string) {
+	key := chronoBlacklist.getTokenRepresentation(username)
+	client.Get(ctx, key)
 }
 
-func (chronoBlacklist *chronologicalBlacklist) IsTimestampBlacklisted(redisValue string, timestamp uint64) (bool, error) {
+func (chronoBlacklist *chronoBlacklist) isTimestampBlacklisted(redisValue string, timestamp uint64) (bool, error) {
 	redisTimestamp, err := strconv.ParseUint(redisValue, 10, 64)
 	if err != nil {
 		return false, err
 	}
 
 	return timestamp <= redisTimestamp, nil
+}
+
+func (*chronoBlacklist) getTokenRepresentation(username string) string {
+	return fmt.Sprintf(redisChronoBlacklistKeyFormat, username)
 }

@@ -10,8 +10,12 @@ import (
 type RedisBlacklistClient interface {
 	Connect() error
 	Close()
-	GetSessionBlacklist() TokenBlacklist
-	GetRefreshBlacklist() TokenBlacklist
+	GetSessionBlacklist() TokenBlacklistWriter
+	GetRefreshBlacklist() TokenBlacklistWriter
+	GetChronoBlacklist() TokenBlacklistWriter
+
+	GetSessionBlacklistQuerier() TokenBlacklistQuerier
+	GetRefreshBlacklistQuerier() TokenBlacklistQuerier
 }
 
 type blacklistClient struct {
@@ -20,8 +24,12 @@ type blacklistClient struct {
 	refreshExpiryDuration time.Duration
 
 	redisClient      *redis.Client
-	sessionBlacklist TokenBlacklist
-	refreshBlacklist TokenBlacklist
+	sessionBlacklist SessionBlacklist
+	refreshBlacklist RefreshBlacklist
+	chronoBlacklist  ChronoBlacklist
+
+	sessionBlacklistQuerier SessionBlacklistQuerier
+	refreshBlacklistQuerier RefreshBlacklistQuerier
 }
 
 func NewRedisBlacklistClient(
@@ -50,6 +58,17 @@ func (client *blacklistClient) Connect() error {
 	client.redisClient = redis.NewClient(connOptions)
 	client.sessionBlacklist = newSessionBlacklist(client.redisClient, client.sessionExpiryDuration)
 	client.refreshBlacklist = newRefreshBlacklist(client.redisClient, client.refreshExpiryDuration)
+	client.chronoBlacklist = newChronoBlacklist(client.redisClient, client.refreshExpiryDuration)
+	client.sessionBlacklistQuerier = newSessionBlacklistQuerier(
+		client.redisClient,
+		client.chronoBlacklist,
+		client.sessionBlacklist,
+	)
+	client.refreshBlacklistQuerier = newRefreshBlacklistQuerier(
+		client.redisClient,
+		client.chronoBlacklist,
+		client.refreshBlacklist,
+	)
 
 	return nil
 }
@@ -58,10 +77,22 @@ func (client *blacklistClient) Close() {
 	client.redisClient.Close()
 }
 
-func (client *blacklistClient) GetSessionBlacklist() TokenBlacklist {
+func (client *blacklistClient) GetSessionBlacklist() TokenBlacklistWriter {
 	return client.sessionBlacklist
 }
 
-func (client *blacklistClient) GetRefreshBlacklist() TokenBlacklist {
+func (client *blacklistClient) GetRefreshBlacklist() TokenBlacklistWriter {
 	return client.refreshBlacklist
+}
+
+func (client *blacklistClient) GetChronoBlacklist() TokenBlacklistWriter {
+	return client.chronoBlacklist
+}
+
+func (client *blacklistClient) GetSessionBlacklistQuerier() TokenBlacklistQuerier {
+	return client.sessionBlacklistQuerier
+}
+
+func (client *blacklistClient) GetRefreshBlacklistQuerier() TokenBlacklistQuerier {
+	return client.refreshBlacklistQuerier
 }

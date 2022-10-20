@@ -13,14 +13,21 @@ type TokenAgent interface {
 }
 
 type tokenAgent struct {
-	blacklist blacklist.TokenBlacklist
-	jwtAgent  JwtAgent
+	blacklistWriter  blacklist.TokenBlacklistWriter
+	blacklistQuerier blacklist.TokenBlacklistQuerier
+	jwtAgent         JwtAgent
 }
 
-func CreateTokenAgent(secret string, tokenValidity time.Duration, blacklist blacklist.TokenBlacklist) TokenAgent {
+func CreateTokenAgent(
+	secret string,
+	tokenValidity time.Duration,
+	blacklistWriter blacklist.TokenBlacklistWriter,
+	blacklistQuerier blacklist.TokenBlacklistQuerier,
+) TokenAgent {
 	return &tokenAgent{
-		blacklist: blacklist,
-		jwtAgent:  CreateJwtAgent(secret, tokenValidity),
+		blacklistWriter:  blacklistWriter,
+		blacklistQuerier: blacklistQuerier,
+		jwtAgent:         CreateJwtAgent(secret, tokenValidity),
 	}
 }
 
@@ -34,7 +41,7 @@ func (agent *tokenAgent) ValidateToken(token string) (*TokenData, error) {
 		return nil, err
 	}
 
-	isBlacklisted, err := agent.blacklist.IsTokenBlacklisted(&blacklist.BlacklistToken{
+	isBlacklisted, err := agent.blacklistQuerier.IsTokenBlacklisted(&blacklist.IssuedToken{
 		Username:  tokenData.Email,
 		Timestamp: uint64(issuedAt),
 	})
@@ -55,7 +62,7 @@ func (agent *tokenAgent) BlacklistToken(token string) error {
 		return err
 	}
 
-	return agent.blacklist.AddToken(&blacklist.BlacklistToken{
+	return agent.blacklistWriter.AddToken(&blacklist.IssuedToken{
 		Username:  tokenData.Email,
 		Timestamp: uint64(issuedAt),
 	})
@@ -67,7 +74,7 @@ func (agent *tokenAgent) UnblacklistToken(token string) error {
 		return err
 	}
 
-	return agent.blacklist.RemoveToken(&blacklist.BlacklistToken{
+	return agent.blacklistWriter.RemoveToken(&blacklist.IssuedToken{
 		Username:  tokenData.Email,
 		Timestamp: uint64(issuedAt),
 	})

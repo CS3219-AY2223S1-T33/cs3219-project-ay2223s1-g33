@@ -60,11 +60,25 @@ func (mr *MockRedisBlacklistClientMockRecorder) Connect() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockRedisBlacklistClient)(nil).Connect))
 }
 
+// GetChronoBlacklist mocks base method.
+func (m *MockRedisBlacklistClient) GetChronoBlacklist() blacklist.TokenBlacklistWriter {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChronoBlacklist")
+	ret0, _ := ret[0].(blacklist.TokenBlacklistWriter)
+	return ret0
+}
+
+// GetChronoBlacklist indicates an expected call of GetChronoBlacklist.
+func (mr *MockRedisBlacklistClientMockRecorder) GetChronoBlacklist() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChronoBlacklist", reflect.TypeOf((*MockRedisBlacklistClient)(nil).GetChronoBlacklist))
+}
+
 // GetRefreshBlacklist mocks base method.
-func (m *MockRedisBlacklistClient) GetRefreshBlacklist() blacklist.TokenBlacklist {
+func (m *MockRedisBlacklistClient) GetRefreshBlacklist() blacklist.TokenBlacklistWriter {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRefreshBlacklist")
-	ret0, _ := ret[0].(blacklist.TokenBlacklist)
+	ret0, _ := ret[0].(blacklist.TokenBlacklistWriter)
 	return ret0
 }
 
@@ -74,11 +88,25 @@ func (mr *MockRedisBlacklistClientMockRecorder) GetRefreshBlacklist() *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRefreshBlacklist", reflect.TypeOf((*MockRedisBlacklistClient)(nil).GetRefreshBlacklist))
 }
 
+// GetRefreshBlacklistQuerier mocks base method.
+func (m *MockRedisBlacklistClient) GetRefreshBlacklistQuerier() blacklist.TokenBlacklistQuerier {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRefreshBlacklistQuerier")
+	ret0, _ := ret[0].(blacklist.TokenBlacklistQuerier)
+	return ret0
+}
+
+// GetRefreshBlacklistQuerier indicates an expected call of GetRefreshBlacklistQuerier.
+func (mr *MockRedisBlacklistClientMockRecorder) GetRefreshBlacklistQuerier() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRefreshBlacklistQuerier", reflect.TypeOf((*MockRedisBlacklistClient)(nil).GetRefreshBlacklistQuerier))
+}
+
 // GetSessionBlacklist mocks base method.
-func (m *MockRedisBlacklistClient) GetSessionBlacklist() blacklist.TokenBlacklist {
+func (m *MockRedisBlacklistClient) GetSessionBlacklist() blacklist.TokenBlacklistWriter {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSessionBlacklist")
-	ret0, _ := ret[0].(blacklist.TokenBlacklist)
+	ret0, _ := ret[0].(blacklist.TokenBlacklistWriter)
 	return ret0
 }
 
@@ -86,4 +114,18 @@ func (m *MockRedisBlacklistClient) GetSessionBlacklist() blacklist.TokenBlacklis
 func (mr *MockRedisBlacklistClientMockRecorder) GetSessionBlacklist() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionBlacklist", reflect.TypeOf((*MockRedisBlacklistClient)(nil).GetSessionBlacklist))
+}
+
+// GetSessionBlacklistQuerier mocks base method.
+func (m *MockRedisBlacklistClient) GetSessionBlacklistQuerier() blacklist.TokenBlacklistQuerier {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSessionBlacklistQuerier")
+	ret0, _ := ret[0].(blacklist.TokenBlacklistQuerier)
+	return ret0
+}
+
+// GetSessionBlacklistQuerier indicates an expected call of GetSessionBlacklistQuerier.
+func (mr *MockRedisBlacklistClientMockRecorder) GetSessionBlacklistQuerier() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionBlacklistQuerier", reflect.TypeOf((*MockRedisBlacklistClient)(nil).GetSessionBlacklistQuerier))
 }

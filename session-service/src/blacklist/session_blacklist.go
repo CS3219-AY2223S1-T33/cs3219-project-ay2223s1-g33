@@ -2,6 +2,8 @@ package blacklist
 
 import (
 	"context"
+	"cs3219-project-ay2223s1-g33/session-service/blacklist/pipeline"
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,57 +16,50 @@ const (
 )
 
 type sessionBlacklist struct {
-	ChronologicalBlacklist
 	redisClient    *redis.Client
 	expiryDuration time.Duration
 }
 
-func newSessionBlacklist(redisClient *redis.Client, expiryDuration time.Duration) TokenBlacklist {
+type SessionBlacklist interface {
+	TokenBlacklistWriter
+	redisBlacklistFilterProvider
+}
+
+func newSessionBlacklist(redisClient *redis.Client, expiryDuration time.Duration) SessionBlacklist {
 	return &sessionBlacklist{
-		ChronologicalBlacklist: newChronologicalBlacklist(redisClient, expiryDuration),
-		redisClient:            redisClient,
-		expiryDuration:         expiryDuration,
+		redisClient:    redisClient,
+		expiryDuration: expiryDuration,
 	}
 }
 
-func (blacklist *sessionBlacklist) IsTokenBlacklisted(token *BlacklistToken) (bool, error) {
+func (blacklist *sessionBlacklist) getFiltersFor(token *IssuedToken) []pipeline.RedisBlacklistFilter {
 	redisKey := blacklist.getTokenRepresentation(token)
-	ctx := context.Background()
-
-	redisResults, err := blacklist.redisClient.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-		pipe.Get(ctx, redisKey)
-		blacklist.GetTimestampBlacklistFor(ctx, pipe, token.Username)
-		return nil
-	})
-
-	if err != nil {
-		return false, err
+	querierFunc := func(ctx context.Context, client redis.Cmdable) {
+		client.Get(ctx, redisKey)
 	}
 
-	err = redisResults[0].(*redis.StringCmd).Err()
-	if err != nil && err != redis.Nil {
-		return false, err
-	} else if err == nil {
+	checkerFunc := func(result redis.Cmder) (bool, error) {
+		castedResult, ok := result.(*redis.StringCmd)
+		if !ok {
+			return false, errors.New("Unexpected Redis Reply")
+		}
+
+		err := castedResult.Err()
+		if err == redis.Nil {
+			return false, nil
+		} else if err != nil {
+			return false, err
+		}
+
 		return true, nil
 	}
 
-	// Token is not specifically blacklisted, check blanket blacklist
-	chronoCommandResult, err := redisResults[1].(*redis.StringCmd).Result()
-	if err == redis.Nil {
-		return false, nil
-	} else if err != nil {
-		return false, err
+	return []pipeline.RedisBlacklistFilter{
+		pipeline.BlacklistFilterFrom(querierFunc, checkerFunc),
 	}
-
-	isBlacklisted, err := blacklist.IsTimestampBlacklisted(chronoCommandResult, token.Timestamp)
-	if err != nil {
-		return false, err
-	}
-
-	return isBlacklisted, nil
 }
 
-func (blacklist *sessionBlacklist) AddToken(token *BlacklistToken) error {
+func (blacklist *sessionBlacklist) AddToken(token *IssuedToken) error {
 	redisKey := blacklist.getTokenRepresentation(token)
 	ctx := context.Background()
 	keyLifespan := blacklist.expiryDuration + sessionKeyLifespanTolerance
@@ -72,13 +67,13 @@ func (blacklist *sessionBlacklist) AddToken(token *BlacklistToken) error {
 	return blacklist.redisClient.Set(ctx, redisKey, "1", keyLifespan).Err()
 }
 
-func (blacklist *sessionBlacklist) RemoveToken(token *BlacklistToken) error {
+func (blacklist *sessionBlacklist) RemoveToken(token *IssuedToken) error {
 	redisKey := blacklist.getTokenRepresentation(token)
 	ctx := context.Background()
 
 	return blacklist.redisClient.Del(ctx, redisKey).Err()
 }
 
-func (*sessionBlacklist) getTokenRepresentation(token *BlacklistToken) string {
+func (*sessionBlacklist) getTokenRepresentation(token *IssuedToken) string {
 	return fmt.Sprintf(redisSessionBlacklistKeyFormat, token.Username, token.Timestamp)
 }
