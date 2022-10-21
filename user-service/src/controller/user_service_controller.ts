@@ -68,7 +68,7 @@ class UserServiceApi implements ApiService<IUserService> {
         ResetPasswordResponse,
       ),
       consumeResetToken: fromApiHandler(
-        new ConsumeResetTokenHandler(crudLoopback, hashAgent),
+        new ConsumeResetTokenHandler(crudLoopback, authService, hashAgent),
         ConsumeResetTokenRequest,
         ConsumeResetTokenResponse,
       ),
