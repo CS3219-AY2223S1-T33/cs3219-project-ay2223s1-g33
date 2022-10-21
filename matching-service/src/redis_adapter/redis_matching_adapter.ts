@@ -7,7 +7,7 @@ type MatchResult = {
 };
 
 interface IRedisMatchingAdapter {
-  pushStream(username: string, difficulties: number[]): Promise<boolean>;
+  pushStream(username: string, difficulties: number[]): Promise<string | undefined>;
   lockIfUnset(username: string): Promise<boolean>;
   getUserLock(username: string): Promise<MatchResult | null>;
   deleteUserLock(username: string): Promise<boolean>;
@@ -24,16 +24,16 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
     this.redisClient = redisClient;
   }
 
-  async pushStream(username: string, difficulties: number[]): Promise<boolean> {
+  async pushStream(username: string, difficulties: number[]): Promise<string | undefined> {
     const queueId = await this.redisClient.xAdd(
       MATCHMAKER_QUEUE_KEY,
       '*',
       RedisMatchingAdapter.createQueueItem(username, JSON.stringify(difficulties)),
     );
     if (queueId === '') {
-      return false;
+      return undefined;
     }
-    return true;
+    return queueId;
   }
 
   async getUserLock(username: string): Promise<MatchResult | null> {
@@ -43,7 +43,7 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
       return result;
     }
 
-    if (result === '') {
+    if (!result.includes(';;')) {
       return {
         matched: false,
         difficulty: 0,
@@ -51,7 +51,7 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
       };
     }
 
-    const tokenParts = result.split(';');
+    const tokenParts = result.split(';;');
     if (tokenParts.length < 2) {
       return null;
     }
