@@ -40,7 +40,8 @@
     "web-vitals": "^2.1.4",
     "y-codemirror.next": "^0.3.2",
     "y-websocket-peerprep": "file:y-websocket-peerprep-2.1.0.tgz",
-    "yjs": "13.5.41"
+    "yjs": "13.5.41",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",
