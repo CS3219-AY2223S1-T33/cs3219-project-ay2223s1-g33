@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type QueueServiceClient interface {
 	JoinQueue(ctx context.Context, in *JoinQueueRequest, opts ...grpc.CallOption) (*JoinQueueResponse, error)
 	CheckQueueStatus(ctx context.Context, in *CheckQueueStatusRequest, opts ...grpc.CallOption) (*CheckQueueStatusResponse, error)
+	LeaveQueue(ctx context.Context, in *LeaveQueueRequest, opts ...grpc.CallOption) (*LeaveQueueResponse, error)
 }
 
 type queueServiceClient struct {
@@ -52,12 +53,22 @@ func (c *queueServiceClient) CheckQueueStatus(ctx context.Context, in *CheckQueu
 	return out, nil
 }
 
+func (c *queueServiceClient) LeaveQueue(ctx context.Context, in *LeaveQueueRequest, opts ...grpc.CallOption) (*LeaveQueueResponse, error) {
+	out := new(LeaveQueueResponse)
+	err := c.cc.Invoke(ctx, "/matching_service.QueueService/LeaveQueue", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueueServiceServer is the server API for QueueService service.
 // All implementations must embed UnimplementedQueueServiceServer
 // for forward compatibility
 type QueueServiceServer interface {
 	JoinQueue(context.Context, *JoinQueueRequest) (*JoinQueueResponse, error)
 	CheckQueueStatus(context.Context, *CheckQueueStatusRequest) (*CheckQueueStatusResponse, error)
+	LeaveQueue(context.Context, *LeaveQueueRequest) (*LeaveQueueResponse, error)
 	mustEmbedUnimplementedQueueServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedQueueServiceServer) JoinQueue(context.Context, *JoinQueueRequ
 }
 func (UnimplementedQueueServiceServer) CheckQueueStatus(context.Context, *CheckQueueStatusRequest) (*CheckQueueStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckQueueStatus not implemented")
+}
+func (UnimplementedQueueServiceServer) LeaveQueue(context.Context, *LeaveQueueRequest) (*LeaveQueueResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveQueue not implemented")
 }
 func (UnimplementedQueueServiceServer) mustEmbedUnimplementedQueueServiceServer() {}
 
@@ -120,6 +134,24 @@ func _QueueService_CheckQueueStatus_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _QueueService_LeaveQueue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveQueueRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueueServiceServer).LeaveQueue(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/matching_service.QueueService/LeaveQueue",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueueServiceServer).LeaveQueue(ctx, req.(*LeaveQueueRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // QueueService_ServiceDesc is the grpc.ServiceDesc for QueueService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var QueueService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckQueueStatus",
 			Handler:    _QueueService_CheckQueueStatus_Handler,
+		},
+		{
+			MethodName: "LeaveQueue",
+			Handler:    _QueueService_LeaveQueue_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

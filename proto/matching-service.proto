@@ -12,6 +12,13 @@ enum JoinQueueErrorCode {
   JOIN_QUEUE_INTERNAL_ERROR = 101;
 }
 
+enum LeaveQueueErrorCode {
+  LEAVE_QUEUE_ERROR_NONE = 0;
+  LEAVE_QUEUE_NOT_IN_QUEUE = 1;
+  LEAVE_QUEUE_BAD_REQUEST = 100;
+  LEAVE_QUEUE_INTERNAL_ERROR = 101;
+}
+
 enum CheckQueueStatusErrorCode {
   CHECK_QUEUE_STATUS_ERROR_NONE = 0;
   CHECK_QUEUE_STATUS_ERROR_NOT_IN_QUEUE = 1;
@@ -45,7 +52,16 @@ message CheckQueueStatusResponse {
   CheckQueueStatusErrorCode error_code = 4;
 }
 
+message LeaveQueueRequest {
+}
+
+message LeaveQueueResponse {
+  string error_message = 1;
+  LeaveQueueErrorCode error_code = 2;
+}
+
 service QueueService {
   rpc JoinQueue(JoinQueueRequest) returns (JoinQueueResponse);
   rpc CheckQueueStatus(CheckQueueStatusRequest) returns (CheckQueueStatusResponse);
+  rpc LeaveQueue(LeaveQueueRequest) returns (LeaveQueueResponse);
 }
