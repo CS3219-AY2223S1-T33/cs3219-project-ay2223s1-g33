@@ -20,11 +20,34 @@ class LeaveQueueHandler implements IApiHandler<LeaveQueueRequest, LeaveQueueResp
     }
 
     const username = request.headers[gatewayHeaderUsername][0];
-    const isQueueable = await this.redisAdapter.lockIfUnset(username);
-    if (!isQueueable) {
+    const queueToken = await this.redisAdapter.getUserLock(username);
+    if (queueToken === null) {
       return LeaveQueueHandler.buildResponse(
-        LeaveQueueErrorCode.LEAVE_QUEUE_BAD_REQUEST,
-        'User already in queue',
+        LeaveQueueErrorCode.LEAVE_QUEUE_NOT_IN_QUEUE,
+        'User not currently in queue',
+      );
+    }
+
+    if (queueToken.matched) {
+      return LeaveQueueHandler.buildResponse(
+        LeaveQueueErrorCode.LEAVE_QUEUE_NOT_IN_QUEUE,
+        'User not currently in queue',
+      );
+    }
+
+    const isDeletedFromQueue = await this.redisAdapter.removeFromSteam(queueToken.queueId);
+    if (!isDeletedFromQueue) {
+      return LeaveQueueHandler.buildResponse(
+        LeaveQueueErrorCode.LEAVE_QUEUE_NOT_IN_QUEUE,
+        'User not currently in queue',
+      );
+    }
+
+    const isDeleteSuccessful = await this.redisAdapter.deleteUserLock(username);
+    if (!isDeleteSuccessful) {
+      return LeaveQueueHandler.buildResponse(
+        LeaveQueueErrorCode.LEAVE_QUEUE_NOT_IN_QUEUE,
+        'Failed leave queue',
       );
     }
 
