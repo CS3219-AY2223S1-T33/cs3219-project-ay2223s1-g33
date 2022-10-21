@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"cs3219-project-ay2223s1-g33/session-service/blacklist"
 	pb "cs3219-project-ay2223s1-g33/session-service/proto"
 	"cs3219-project-ay2223s1-g33/session-service/server"
 	"cs3219-project-ay2223s1-g33/session-service/service/handlers"
@@ -17,11 +18,15 @@ type SessionService struct {
 	addBlacklistHandler  server.ApiHandler[pb.AddBlacklistRequest, pb.AddBlacklistResponse]
 }
 
-func CreateSessionService(sessionAgent token.TokenAgent, refreshAgent token.TokenAgent) *SessionService {
+func CreateSessionService(
+	sessionAgent token.TokenAgent,
+	refreshAgent token.TokenAgent,
+	chronoBlacklist blacklist.TokenBlacklistWriter,
+) *SessionService {
 	return &SessionService{
 		createTokenHandler:   handlers.NewCreateTokenHandler(sessionAgent, refreshAgent),
 		validateTokenHandler: handlers.NewValidateTokenHandler(sessionAgent, refreshAgent),
-		addBlacklistHandler:  handlers.NewAddBlacklistHandler(sessionAgent, refreshAgent),
+		addBlacklistHandler:  handlers.NewAddBlacklistHandler(sessionAgent, refreshAgent, chronoBlacklist),
 	}
 }
 
