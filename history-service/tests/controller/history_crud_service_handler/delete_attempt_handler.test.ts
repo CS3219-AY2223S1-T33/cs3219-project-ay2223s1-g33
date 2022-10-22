@@ -18,16 +18,18 @@ describe('Delete Attempt Handler', () => {
   let mockStorage: IStorage = {
     getAttemptStore: jest.fn(() => mockAttemptStorage),
   };
+  let handler = new DeleteAttemptHandler(mockStorage);
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockAttemptStorage = makeMockAttemptStorage();
     mockStorage = {
       getAttemptStore: jest.fn(() => mockAttemptStorage),
     };
+    handler = new DeleteAttemptHandler(mockStorage);
   });
 
   test('Successful Attempt Deletion', async () => {
-    const handler = new DeleteAttemptHandler(mockStorage);
     const request = makeRequest(testAttempt.attemptId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBe('');
@@ -36,7 +38,6 @@ describe('Delete Attempt Handler', () => {
   });
 
   test('Bad Attempt Id Deletion Request', async () => {
-    const handler = new DeleteAttemptHandler(mockStorage);
     const request = makeRequest(-2);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).not.toBe('');
@@ -47,7 +48,6 @@ describe('Delete Attempt Handler', () => {
   test('DB Error Deletion Request', async () => {
     mockAttemptStorage.removeAttempt.mockImplementationOnce(() => { throw new Error(); });
 
-    const handler = new DeleteAttemptHandler(mockStorage);
     const request = makeRequest(testAttempt.attemptId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage).not.toBe('');
