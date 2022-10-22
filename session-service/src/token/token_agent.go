@@ -1,7 +1,7 @@
 package token
 
 import (
-	"fmt"
+	"cs3219-project-ay2223s1-g33/session-service/blacklist"
 	"time"
 )
 
@@ -13,16 +13,21 @@ type TokenAgent interface {
 }
 
 type tokenAgent struct {
-	blacklist TokenBlacklist
-	jwtAgent  JwtAgent
+	blacklistWriter  blacklist.TokenBlacklistWriter
+	blacklistQuerier blacklist.TokenBlacklistQuerier
+	jwtAgent         JwtAgent
 }
 
-const blacklistKeyFormat = "%s-%d"
-
-func CreateTokenAgent(secret string, tokenValidity time.Duration, blacklist TokenBlacklist) TokenAgent {
+func CreateTokenAgent(
+	secret string,
+	tokenValidity time.Duration,
+	blacklistWriter blacklist.TokenBlacklistWriter,
+	blacklistQuerier blacklist.TokenBlacklistQuerier,
+) TokenAgent {
 	return &tokenAgent{
-		blacklist: blacklist,
-		jwtAgent:  CreateJwtAgent(secret, tokenValidity),
+		blacklistWriter:  blacklistWriter,
+		blacklistQuerier: blacklistQuerier,
+		jwtAgent:         CreateJwtAgent(secret, tokenValidity),
 	}
 }
 
@@ -36,8 +41,10 @@ func (agent *tokenAgent) ValidateToken(token string) (*TokenData, error) {
 		return nil, err
 	}
 
-	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
-	isBlacklisted, err := agent.blacklist.IsTokenBlacklisted(blacklistKey)
+	isBlacklisted, err := agent.blacklistQuerier.IsTokenBlacklisted(&blacklist.IssuedToken{
+		Username:  tokenData.Email,
+		Timestamp: uint64(issuedAt),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +62,10 @@ func (agent *tokenAgent) BlacklistToken(token string) error {
 		return err
 	}
 
-	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
-	return agent.blacklist.AddToken(blacklistKey)
+	return agent.blacklistWriter.AddToken(&blacklist.IssuedToken{
+		Username:  tokenData.Email,
+		Timestamp: uint64(issuedAt),
+	})
 }
 
 func (agent *tokenAgent) UnblacklistToken(token string) error {
@@ -65,6 +74,8 @@ func (agent *tokenAgent) UnblacklistToken(token string) error {
 		return err
 	}
 
-	blacklistKey := fmt.Sprintf(blacklistKeyFormat, tokenData.Email, issuedAt)
-	return agent.blacklist.RemoveToken(blacklistKey)
+	return agent.blacklistWriter.RemoveToken(&blacklist.IssuedToken{
+		Username:  tokenData.Email,
+		Timestamp: uint64(issuedAt),
+	})
 }

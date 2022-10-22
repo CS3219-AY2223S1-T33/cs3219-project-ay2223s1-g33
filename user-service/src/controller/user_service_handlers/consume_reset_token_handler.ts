@@ -16,17 +16,25 @@ import {
   GetUserResponse,
 } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
-import { PasswordResetToken, User } from '../../proto/types';
+import { PasswordResetToken, PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
+import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 
 class ConsumeResetTokenHandler
 implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
-  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
+  crudClient: ILoopbackServiceChannel<IUserCrudService>;
+
+  authAgent: IAuthenticationAgent;
 
   hashAgent: IHashAgent;
 
-  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>, hashAgent: IHashAgent) {
-    this.rpcClient = rpcClient;
+  constructor(
+    crudClient: ILoopbackServiceChannel<IUserCrudService>,
+    authAgent: IAuthenticationAgent,
+    hashAgent: IHashAgent,
+  ) {
+    this.crudClient = crudClient;
+    this.authAgent = authAgent;
     this.hashAgent = hashAgent;
   }
 
@@ -59,11 +67,31 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
     }
 
     const hashedPassword = await this.hashAgent.hashPassword(newPassword);
-    const isSuccessful = await this.changeUserPassword(tokenObject.userId, hashedPassword);
+    const user = await this.getUser(tokenObject.userId);
+    if (!user || !user.userInfo) {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
+        'Could not find user',
+      );
+    }
+
+    const isSuccessful = await this.changeUserPassword(user, hashedPassword);
     if (!isSuccessful) {
       return ConsumeResetTokenHandler.buildErrorResponse(
         ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
         'Could not save new password',
+      );
+    }
+
+    try {
+      await this.authAgent.invalidateTokensBeforeTime(
+        user.userInfo.username,
+        Math.floor(new Date().getTime() / 1000),
+      );
+    } catch {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
+        'Could not invalidate old tokens',
       );
     }
 
@@ -79,7 +107,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       tokenString: token,
     };
 
-    const queryResponse = await this.rpcClient
+    const queryResponse = await this.crudClient
       .callRoute<GetResetTokensRequest, GetResetTokensResponse>(
       'getResetTokens',
       crudQueryRequest,
@@ -98,7 +126,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       tokenString: token,
     };
 
-    const queryResponse = await this.rpcClient
+    const queryResponse = await this.crudClient
       .callRoute<DeleteResetTokenRequest, DeleteResetTokenResponse>(
       'deleteResetToken',
       deleteRequest,
@@ -108,14 +136,14 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
     return queryResponse.errorMessage === '';
   }
 
-  async changeUserPassword(userId: number, newPassword: string): Promise<boolean> {
+  async getUser(userId: number): Promise<PasswordUser | undefined> {
     const crudQueryRequest: GetUserRequest = {
       user: User.create({
         userId,
       }),
     };
 
-    const queryResponse = await this.rpcClient
+    const queryResponse = await this.crudClient
       .callRoute<GetUserRequest, GetUserResponse>(
       'getUser',
       crudQueryRequest,
@@ -123,16 +151,20 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
     );
 
     if (queryResponse.errorMessage !== '' || !queryResponse.user) {
-      return false;
+      return undefined;
     }
 
-    const userModel = queryResponse.user;
-    userModel.password = newPassword;
+    return queryResponse.user;
+  }
+
+  async changeUserPassword(userModel: PasswordUser, newPassword: string): Promise<boolean> {
+    const newUserModel = userModel;
+    newUserModel.password = newPassword;
     const editUserRequest: EditUserRequest = {
-      user: userModel,
+      user: newUserModel,
     };
 
-    const updateResponse = await this.rpcClient
+    const updateResponse = await this.crudClient
       .callRoute<EditUserRequest, EditUserResponse>(
       'editUser',
       editUserRequest,

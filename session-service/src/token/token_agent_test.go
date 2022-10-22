@@ -20,8 +20,9 @@ func TestTokenAgent(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	blacklist := mocks.NewMockTokenBlacklist(ctrl)
-	tokenAgent := token.CreateTokenAgent(jwtTestSecret, time.Hour, blacklist)
+	blacklistWriter := mocks.NewMockTokenBlacklistWriter(ctrl)
+	blacklistQuerier := mocks.NewMockTokenBlacklistQuerier(ctrl)
+	tokenAgent := token.CreateTokenAgent(jwtTestSecret, time.Hour, blacklistWriter, blacklistQuerier)
 	testErr := errors.New("Test error")
 
 	createdToken, err := tokenAgent.CreateToken(&token.TokenData{
@@ -31,9 +32,9 @@ func TestTokenAgent(t *testing.T) {
 	assert.NotEmpty(t, createdToken)
 
 	gomock.InOrder(
-		blacklist.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(false, nil),
-		blacklist.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(true, nil),
-		blacklist.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(false, testErr),
+		blacklistQuerier.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(false, nil),
+		blacklistQuerier.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(true, nil),
+		blacklistQuerier.EXPECT().IsTokenBlacklisted(gomock.Any()).Return(false, testErr),
 	)
 
 	data, err := tokenAgent.ValidateToken(createdToken)
@@ -46,9 +47,9 @@ func TestTokenAgent(t *testing.T) {
 	_, err = tokenAgent.ValidateToken(createdToken)
 	assert.Equal(t, testErr, err)
 
-	blacklist.EXPECT().AddToken(gomock.Any())
+	blacklistWriter.EXPECT().AddToken(gomock.Any())
 	tokenAgent.BlacklistToken(createdToken)
 
-	blacklist.EXPECT().RemoveToken(gomock.Any())
+	blacklistWriter.EXPECT().RemoveToken(gomock.Any())
 	tokenAgent.UnblacklistToken(createdToken)
 }
