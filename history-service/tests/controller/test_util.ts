@@ -5,8 +5,12 @@ import {
   QuestionDifficulty,
   User,
 } from '../../src/proto/types';
+import HistoryAttemptEntity from '../../src/db/history_entity';
 
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
+
+const testDate = new Date('2022-10-10');
+const testDateSeconds = testDate.getTime() / 1000;
 
 const testUser: User = {
   userId: 1,
@@ -31,9 +35,19 @@ const testAttempt: HistoryAttempt = {
   attemptId: 1,
   question: testQuestion,
   language: 'Test language',
-  timestamp: 1,
-  users: ['Johnny', 'Thomas'],
+  timestamp: testDateSeconds,
+  users: [testUser.username],
   submission: 'Test submission',
+};
+
+const testHistoryAttemptEntity: HistoryAttemptEntity = {
+  attemptId: testAttempt.attemptId,
+  users: [testUser],
+  questionId: testQuestion.questionId,
+  submission: testAttempt.submission,
+  language: testAttempt.language,
+  createDateTime: testDate,
+  updateDateTime: testDate,
 };
 
 function makeMockAttemptStorage() {
@@ -57,8 +71,10 @@ function makeMockLoopbackChannel() {
 
 export {
   gatewayHeaderUsername,
+  testDateSeconds,
   testQuestion,
   testAttempt,
+  testHistoryAttemptEntity,
   testUser,
   testPasswordUser,
   makeMockAttemptStorage,
