@@ -29,8 +29,10 @@ describe('Get Attempt Submission Handler', () => {
     historyCrudClient.callRoute.mockImplementationOnce(
       (route: string, request: GetAttemptSubmissionRequest):
       GetAttemptSubmissionResponse => {
-        expect(route).toBe('getAttempt');
-        expect(request.attemptId).toBe(testAttempt.attemptId);
+        expect(route)
+          .toBe('getAttempt');
+        expect(request.attemptId)
+          .toBe(testAttempt.attemptId);
 
         return {
           attempt: testAttempt,
@@ -41,8 +43,10 @@ describe('Get Attempt Submission Handler', () => {
 
     const request = makeRequest(testAttempt.attemptId, testAttempt.users[0]);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).toBe('');
-    expect(response.response.attempt).toBe(testAttempt);
+    expect(response.response.errorMessage)
+      .toBe('');
+    expect(response.response.attempt)
+      .toBe(testAttempt);
   });
 
   test('Bad Request', async () => {
@@ -50,33 +54,45 @@ describe('Get Attempt Submission Handler', () => {
     historyCrudClient.callRoute.mockImplementationOnce(
       (route: string, request: GetAttemptSubmissionRequest):
       GetAttemptSubmissionResponse => {
-        expect(route).toBe('getAttempt');
-        expect(request.attemptId).toBe(badId);
+        expect(route)
+          .toBe('getAttempt');
+        expect(request.attemptId)
+          .toBe(badId);
         throw new Error();
       },
     );
 
     const request = makeRequest(badId, testAttempt.users[0]);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).not.toBe('');
-    expect(response.response.attempt).toBeUndefined();
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.attempt)
+      .toBeUndefined();
   });
 
   test('Bad Downstream Request', async () => {
     historyCrudClient.callRoute.mockImplementationOnce(() => ({
       attempt: undefined,
       errorMessage: '',
-    })).mockImplementationOnce(() => {
-      throw new Error('Cannot connect downstream');
-    });
+    }))
+      .mockImplementationOnce(() => {
+        throw new Error('Cannot connect downstream');
+      });
 
     const request = makeRequest(testAttempt.attemptId, testAttempt.users[0]);
     const response1 = await handler.handle(request);
-    expect(response1.response.errorMessage).not.toBe('');
-    expect(response1.response.attempt).toBeUndefined();
+    expect(response1.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response1.response.attempt)
+      .toBeUndefined();
 
     const response2 = await handler.handle(request);
-    expect(response2.response.errorMessage).not.toBe('');
-    expect(response2.response.attempt).toBeUndefined();
+    expect(response2.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response2.response.attempt)
+      .toBeUndefined();
   });
 });

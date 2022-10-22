@@ -17,7 +17,11 @@ describe('Get Attempt History Handler', () => {
   const makeRequest = (limit: number, offset: number, questionId: number, username: string):
   ApiRequest<GetAttemptHistoryRequest> => {
     const req: ApiRequest<GetAttemptHistoryRequest> = {
-      request: { limit, offset, questionId },
+      request: {
+        limit,
+        offset,
+        questionId,
+      },
       headers: {},
     };
     req.headers[gatewayHeaderUsername] = [username];
@@ -35,9 +39,12 @@ describe('Get Attempt History Handler', () => {
   test('Successful Get Attempt History', async () => {
     historyCrudClient.callRoute.mockImplementationOnce((route: string, request: GetAttemptsRequest):
     GetAttemptsResponse => {
-      expect(route).toBe('getAttempts');
-      expect(request.questionId).toBe(testQuestion.questionId);
-      expect(request.username).toBe(testAttempt.users[0]);
+      expect(route)
+        .toBe('getAttempts');
+      expect(request.questionId)
+        .toBe(testQuestion.questionId);
+      expect(request.username)
+        .toBe(testAttempt.users[0]);
 
       return {
         attempts: [testAttempt],
@@ -48,25 +55,35 @@ describe('Get Attempt History Handler', () => {
 
     const request = makeRequest(1, 1, testQuestion.questionId, testAttempt.users[0]);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).toBe('');
-    expect(response.response.attempts.length).toBe(1);
-    expect(response.response.attempts[0]).toStrictEqual(testAttempt);
+    expect(response.response.errorMessage)
+      .toBe('');
+    expect(response.response.attempts.length)
+      .toBe(1);
+    expect(response.response.attempts[0])
+      .toStrictEqual(testAttempt);
   });
 
   test('Bad Request', async () => {
     historyCrudClient.callRoute.mockImplementationOnce((route: string, request: GetAttemptsRequest):
     GetAttemptsResponse => {
-      expect(route).toBe('getAttempts');
-      expect(request.questionId).toBe(testQuestion.questionId);
-      expect(request.username).toBe('');
+      expect(route)
+        .toBe('getAttempts');
+      expect(request.questionId)
+        .toBe(testQuestion.questionId);
+      expect(request.username)
+        .toBe('');
       throw new Error();
     });
 
     const request = makeRequest(1, 1, testQuestion.questionId, '');
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).not.toBe('');
-    expect(response.response.totalCount).toBe(0);
-    expect(response.response.attempts).toStrictEqual([]);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.totalCount)
+      .toBe(0);
+    expect(response.response.attempts)
+      .toStrictEqual([]);
   });
 
   test('Bad Downstream Request', async () => {
@@ -76,8 +93,12 @@ describe('Get Attempt History Handler', () => {
 
     const request = makeRequest(1, 1, testQuestion.questionId, testAttempt.users[0]);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).not.toBe('');
-    expect(response.response.totalCount).toBe(0);
-    expect(response.response.attempts).toStrictEqual([]);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.totalCount)
+      .toBe(0);
+    expect(response.response.attempts)
+      .toStrictEqual([]);
   });
 });

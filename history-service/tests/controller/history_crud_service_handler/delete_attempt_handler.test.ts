@@ -32,26 +32,39 @@ describe('Delete Attempt Handler', () => {
   test('Successful Attempt Deletion', async () => {
     const request = makeRequest(testAttempt.attemptId);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).toBe('');
-    expect(mockAttemptStorage.removeAttempt.mock.calls.length).toBe(1);
-    expect(mockAttemptStorage.removeAttempt.mock.lastCall![0]).toBe(testAttempt.attemptId);
+    expect(response.response.errorMessage)
+      .toBe('');
+    expect(mockAttemptStorage.removeAttempt.mock.calls.length)
+      .toBe(1);
+    expect(mockAttemptStorage.removeAttempt.mock.lastCall![0])
+      .toBe(testAttempt.attemptId);
   });
 
   test('Bad Attempt Id Deletion Request', async () => {
     const request = makeRequest(-2);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).not.toBe('');
-    expect(mockAttemptStorage.removeAttempt.mock.calls.length).toBe(0); // Client not touched
-    expect(mockAttemptStorage.removeAttempt.mock.lastCall).toBe(undefined);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(mockAttemptStorage.removeAttempt.mock.calls.length)
+      .toBe(0); // Client not touched
+    expect(mockAttemptStorage.removeAttempt.mock.lastCall)
+      .toBe(undefined);
   });
 
   test('DB Error Deletion Request', async () => {
-    mockAttemptStorage.removeAttempt.mockImplementationOnce(() => { throw new Error(); });
+    mockAttemptStorage.removeAttempt.mockImplementationOnce(() => {
+      throw new Error();
+    });
 
     const request = makeRequest(testAttempt.attemptId);
     const response = await handler.handle(request);
-    expect(response.response.errorMessage).not.toBe('');
-    expect(mockAttemptStorage.removeAttempt.mock.calls.length).toBe(1);
-    expect(mockAttemptStorage.removeAttempt.mock.lastCall![0]).toBe(testAttempt.attemptId);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(mockAttemptStorage.removeAttempt.mock.calls.length)
+      .toBe(1);
+    expect(mockAttemptStorage.removeAttempt.mock.lastCall![0])
+      .toBe(testAttempt.attemptId);
   });
 });
