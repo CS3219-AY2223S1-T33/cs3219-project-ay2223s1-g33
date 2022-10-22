@@ -1,4 +1,9 @@
-import { makeMockLoopbackChannel, testAttempt, testQuestion } from '../test_util';
+import {
+  gatewayHeaderUsername,
+  makeMockLoopbackChannel,
+  testAttempt,
+  testQuestion,
+} from '../test_util';
 import { GetAttemptHistoryRequest } from '../../../src/proto/history-service';
 import { ApiRequest } from '../../../src/api_server/api_server_types';
 import GetAttemptHistoryHandler
@@ -15,7 +20,7 @@ describe('Get Attempt History Handler', () => {
       request: { limit, offset, questionId },
       headers: {},
     };
-    req.headers['grpc-x-bearer-username'] = [username];
+    req.headers[gatewayHeaderUsername] = [username];
     return req;
   };
 

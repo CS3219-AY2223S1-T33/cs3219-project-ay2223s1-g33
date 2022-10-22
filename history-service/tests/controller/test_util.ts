@@ -6,6 +6,8 @@ import {
   User,
 } from '../../src/proto/types';
 
+const gatewayHeaderUsername = 'grpc-x-bearer-username';
+
 const testUser: User = {
   userId: 1,
   username: 'johnny@mail.com',
@@ -54,6 +56,7 @@ function makeMockLoopbackChannel() {
 }
 
 export {
+  gatewayHeaderUsername,
   testQuestion,
   testAttempt,
   testUser,
