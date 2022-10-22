@@ -14,13 +14,15 @@ import {
   FieldValues,
   SubmitErrorHandler
 } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+import Link from "../ui/Link";
 import {
   ConsumeResetTokenRequest,
   ConsumeResetTokenResponse
 } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import PasswordInput from "../ui/form/PasswordInput";
+import { SET_PW_VALIDATOR } from "../../constants/validators";
 
 type Props = {
   token: string;
@@ -31,7 +33,7 @@ function SetNewPasswordForm({ token }: Props) {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm();
+  } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
 
   const toast = useFixedToast();
 

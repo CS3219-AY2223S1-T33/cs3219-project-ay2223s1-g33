@@ -20,4 +20,9 @@ const RESET_PW_VALIDATIOR = yup.object().shape({
 	email: AUTH_SCHEMA.email,
 });
 
-export { LOGIN_VALIDATOR, REGISTER_VALIDATOR, RESET_PW_VALIDATIOR };
+const SET_PW_VALIDATOR = yup.object().shape({
+	password: AUTH_SCHEMA.password,
+	confirmPassword: AUTH_SCHEMA.confirmPassword,
+});
+
+export { LOGIN_VALIDATOR, REGISTER_VALIDATOR, RESET_PW_VALIDATIOR, SET_PW_VALIDATOR };
