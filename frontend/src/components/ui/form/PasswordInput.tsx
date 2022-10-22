@@ -13,6 +13,7 @@ type Props = {
   register: UseFormRegister<FieldValues>;
   formKey: string;
 };
+
 function PasswordInput({ register, formKey }: Props) {
   const [showPassword, setShowPassword] = useBoolean();
   const inputType = showPassword ? "text" : "password";

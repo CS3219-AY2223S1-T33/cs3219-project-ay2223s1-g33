@@ -22,6 +22,7 @@ import {
 } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { LOGIN_VALIDATOR } from "../../constants/validators";
+import PasswordInput from "../ui/form/PasswordInput";
 
 function LoginForm() {
   const {
@@ -85,7 +86,7 @@ function LoginForm() {
 
         <FormControl id="password" isInvalid={!!errors.password}>
           <FormLabel>Password</FormLabel>
-          <Input type="password" {...register("password")} />
+          <PasswordInput register={register} formKey="password" />
           <FormErrorMessage>
             {errors.password?.message as string}
           </FormErrorMessage>

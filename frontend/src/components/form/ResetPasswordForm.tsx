@@ -17,43 +17,39 @@ import {
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "../ui/Link";
-import PasswordInput from "../ui/form/PasswordInput";
 import {
-  UserCredentials,
-  RegisterRequest,
-  RegisterResponse
+  ResetPasswordRequest,
+  ResetPasswordResponse
 } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
-import { REGISTER_VALIDATOR } from "../../constants/validators";
+import { RESET_PW_VALIDATIOR } from "../../constants/validators";
 
-function RegisterForm() {
+function ResetPasswordForm() {
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm({ resolver: yupResolver(REGISTER_VALIDATOR) });
+  } = useForm({ resolver: yupResolver(RESET_PW_VALIDATIOR) });
 
   const toast = useFixedToast();
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
-    const { email, password, nickname } = data;
+    const { email } = data;
 
-    const credentials: UserCredentials = { username: email, password };
-    const registerRequest: RegisterRequest = { credentials, nickname };
+    const resetPasswordRequest: ResetPasswordRequest = { username: email };
 
-    // Send registration request to the server
     axios
-      .post<RegisterResponse>("/api/user/register", registerRequest)
+      .post<ResetPasswordResponse>("/api/reset", resetPasswordRequest)
       .then((res) => {
         const { data: resData } = res;
 
-        // Since proto-buffers treat 0 and empty string as undefined, a successful registration
-        // will return an empty object
         if (resData.errorCode) {
           throw new Error(resData.errorMessage);
         }
 
-        toast.sendSuccessMessage("Yay! Click on the link below to login.");
+        toast.sendSuccessMessage(
+          "If an account exist, a reset password email will be sent."
+        );
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
@@ -72,34 +68,10 @@ function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(validFormHandler, invalidFormHandler)}>
       <Stack spacing={4}>
-        <FormControl id="nickname" isInvalid={!!errors.nickname}>
-          <FormLabel>Nickname</FormLabel>
-          <Input type="text" {...register("nickname")} />
-          <FormErrorMessage>
-            {errors.nickname?.message as string}
-          </FormErrorMessage>
-        </FormControl>
-
         <FormControl id="email" isInvalid={!!errors.email}>
           <FormLabel>Email address</FormLabel>
           <Input type="email" {...register("email")} />
           <FormErrorMessage>{errors.email?.message as string}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl id="password" isInvalid={!!errors.password}>
-          <FormLabel>Password</FormLabel>
-          <PasswordInput register={register} formKey="password" />
-          <FormErrorMessage>
-            {errors.password?.message as string}
-          </FormErrorMessage>
-        </FormControl>
-
-        <FormControl id="confirmPassword" isInvalid={!!errors.confirmPassword}>
-          <FormLabel>Confirm Password</FormLabel>
-          <PasswordInput register={register} formKey="confirmPassword" />
-          <FormErrorMessage>
-            {errors.password?.message as string}
-          </FormErrorMessage>
         </FormControl>
 
         <Stack spacing={10} pt={2}>
@@ -113,12 +85,12 @@ function RegisterForm() {
             }}
             type="submit"
           >
-            Sign up
+            Reset
           </Button>
         </Stack>
         <Stack pt={6}>
           <Text align="center">
-            Already a user? <Link to="/login">Login</Link>
+            Proceed to <Link to="/login">Login</Link>
           </Text>
         </Stack>
       </Stack>
@@ -126,4 +98,4 @@ function RegisterForm() {
   );
 }
 
-export default RegisterForm;
+export default ResetPasswordForm;
