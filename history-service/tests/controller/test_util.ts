@@ -46,10 +46,18 @@ function makeMockAttemptStorage() {
   };
 }
 
+function makeMockLoopbackChannel() {
+  return {
+    registerServiceRoutes: jest.fn(),
+    callRoute: jest.fn(),
+  };
+}
+
 export {
   testQuestion,
   testAttempt,
   testUser,
   testPasswordUser,
   makeMockAttemptStorage,
+  makeMockLoopbackChannel,
 };
