@@ -8,10 +8,7 @@ import { GetAttemptHistoryRequest } from '../../../src/proto/history-service';
 import { ApiRequest } from '../../../src/api_server/api_server_types';
 import GetAttemptHistoryHandler
   from '../../../src/controller/history_service_handlers/get_attempt_history_handler';
-import {
-  GetAttemptsRequest,
-  GetAttemptsResponse,
-} from '../../../src/proto/history-crud-service';
+import { GetAttemptsRequest, GetAttemptsResponse } from '../../../src/proto/history-crud-service';
 
 describe('Get Attempt History Handler', () => {
   const makeRequest = (limit: number, offset: number, questionId: number, username: string):
@@ -86,12 +83,18 @@ describe('Get Attempt History Handler', () => {
       .toStrictEqual([]);
   });
 
-  test('Bad Downstream Request', async () => {
-    historyCrudClient.callRoute.mockImplementationOnce(() => {
-      throw new Error('Cannot connect downstream');
+  test('Bad Request - W/O Header', async () => {
+    const makeNoHeaderRequest = (limit: number, offset: number, questionId: number):
+    ApiRequest<GetAttemptHistoryRequest> => ({
+      request: {
+        limit,
+        offset,
+        questionId,
+      },
+      headers: {},
     });
 
-    const request = makeRequest(1, 1, testQuestion.questionId, testAttempt.users[0]);
+    const request = makeNoHeaderRequest(1, 1, testQuestion.questionId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage)
       .not
@@ -99,6 +102,33 @@ describe('Get Attempt History Handler', () => {
     expect(response.response.totalCount)
       .toBe(0);
     expect(response.response.attempts)
+      .toStrictEqual([]);
+  });
+
+  test('Bad Downstream Request', async () => {
+    historyCrudClient.callRoute.mockImplementationOnce(() => (
+      { errorMessage: undefined }
+    )).mockImplementationOnce(() => {
+      throw new Error('Cannot connect downstream');
+    });
+
+    const request = makeRequest(1, 1, testQuestion.questionId, testAttempt.users[0]);
+    const response1 = await handler.handle(request);
+    expect(response1.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response1.response.totalCount)
+      .toBe(0);
+    expect(response1.response.attempts)
+      .toStrictEqual([]);
+
+    const response2 = await handler.handle(request);
+    expect(response2.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response2.response.totalCount)
+      .toBe(0);
+    expect(response2.response.attempts)
       .toStrictEqual([]);
   });
 });
