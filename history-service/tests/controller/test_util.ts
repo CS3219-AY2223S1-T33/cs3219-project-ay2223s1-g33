@@ -40,6 +40,15 @@ const testAttempt: HistoryAttempt = {
   submission: 'Test submission',
 };
 
+const testAttemptResponse: HistoryAttempt = {
+  attemptId: 1,
+  question: testQuestion,
+  language: 'Test language',
+  timestamp: testDateSeconds,
+  users: [testUser.nickname],
+  submission: 'Test submission',
+};
+
 const testHistoryAttemptEntity: HistoryAttemptEntity = {
   attemptId: testAttempt.attemptId,
   users: [testUser],
@@ -74,6 +83,7 @@ export {
   testDateSeconds,
   testQuestion,
   testAttempt,
+  testAttemptResponse,
   testHistoryAttemptEntity,
   testUser,
   testPasswordUser,
