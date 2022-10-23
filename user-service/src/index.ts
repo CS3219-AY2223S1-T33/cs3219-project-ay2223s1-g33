@@ -16,8 +16,8 @@ import { connectDatabase } from './db';
 import createSMTPAdapter from './adapter/smtp_adapter';
 import { createEmailSender } from './email/email_sender';
 import createUserDeleteProducer from './redis_stream_adapter/user_delete_producer';
-import makeHTTPServer from './api_server/http_server';
-import makeGRPCServer from './api_server/grpc_server';
+import HTTPServer from './api_server/http_server';
+import GRPCServer from './api_server/grpc_server';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -52,8 +52,8 @@ async function run() {
   });
   const emailSender = createEmailSender(emailAdapter, envConfig.RESET_PASSWORD_URL);
 
-  const httpServer = makeHTTPServer(envConfig.HTTP_PORT);
-  const grpcServer = makeGRPCServer(envConfig.GRPC_PORT);
+  const httpServer = HTTPServer.create(envConfig.HTTP_PORT);
+  const grpcServer = GRPCServer.create(envConfig.GRPC_PORT);
   const apiServer = createApiServer(httpServer, grpcServer);
   const expressApp = httpServer.getServer();
 

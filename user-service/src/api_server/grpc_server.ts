@@ -18,12 +18,12 @@ import { IGRPCServer } from './grpc_server_types';
 
 const HOST_ADDRESS = '0.0.0.0';
 
-class GRPCServer implements IGRPCServer {
+export default class GRPCServer implements IGRPCServer {
   grpcPort: number;
 
   grpcServer: BaseServer;
 
-  constructor(grpcPort: number) {
+  private constructor(grpcPort: number) {
     this.grpcPort = grpcPort;
     this.grpcServer = new BaseServer();
   }
@@ -113,8 +113,8 @@ class GRPCServer implements IGRPCServer {
 
     return responseHeaders;
   }
-}
 
-export default function makeGRPCServer(grpcPort: number): IGRPCServer {
-  return new GRPCServer(grpcPort);
+  static create(grpcPort: number): IGRPCServer {
+    return new GRPCServer(grpcPort);
+  }
 }

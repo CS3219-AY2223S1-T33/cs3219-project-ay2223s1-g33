@@ -18,14 +18,14 @@ import { HTTPResponse, IHTTPServer } from './http_server_types';
 
 const HOST_ADDRESS = '0.0.0.0';
 
-class HTTPServer implements IHTTPServer {
+export default class HTTPServer implements IHTTPServer {
   httpPort: number;
 
   httpServer: Express;
 
   httpRouter: Router;
 
-  constructor(httpPort: number) {
+  private constructor(httpPort: number) {
     this.httpPort = httpPort;
 
     this.httpServer = express();
@@ -44,15 +44,6 @@ class HTTPServer implements IHTTPServer {
       );
 
       this.httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
-        const normalizedHeaders: ApiHeaderMap = {};
-
-        Object.keys(req.headers).forEach((headerName: string) => {
-          const value = req.headers[headerName];
-          if (typeof value === 'string') {
-            normalizedHeaders[headerName] = [value];
-          }
-        });
-
         try {
           const response = await httpHandler(req);
           if (response.status) {
@@ -126,8 +117,8 @@ class HTTPServer implements IHTTPServer {
   getServer(): Express {
     return this.httpServer;
   }
-}
 
-export default function makeHTTPServer(httpPort: number): IHTTPServer {
-  return new HTTPServer(httpPort);
+  static create(httpPort: number): IHTTPServer {
+    return new HTTPServer(httpPort);
+  }
 }
