@@ -1,15 +1,17 @@
-import { ChannelCredentials } from '@grpc/grpc-js';
 import { ApiRequest } from '../../../src/api_server/api_server_types';
 import { GetAttemptRequest } from '../../../src/proto/history-crud-service';
 import {
-  makeMockAttemptStorage, testAttempt, testAttemptResponse,
+  makeMockAttemptStorage,
+  makeMockQuestionClient,
+  makeMockUserClient,
+  testAttempt,
+  testAttemptResponse,
   testHistoryAttemptEntity,
   testPasswordUser,
-  testQuestion, testUser,
+  testQuestion,
+  testUser,
 } from '../test_util';
 import { IStorage } from '../../../src/storage/storage';
-import { UserCrudServiceClient } from '../../../src/proto/user-crud-service.grpc-client';
-import { QuestionServiceClient } from '../../../src/proto/question-service.grpc-client';
 import BaseHandler from '../../../src/controller/history_crud_service_handlers/base_handler';
 import HistoryAttemptEntity from '../../../src/db/history_entity';
 import GetAttemptHandler
@@ -22,22 +24,13 @@ describe('Get Attempt Handler', () => {
     headers: {},
   });
 
+  const userClient = makeMockUserClient();
+  const questionClient = makeMockQuestionClient();
+
   let mockAttemptStorage = makeMockAttemptStorage();
   let mockStorage: IStorage = {
     getAttemptStore: jest.fn(() => mockAttemptStorage),
   };
-  const userClient = new UserCrudServiceClient(
-    'userServiceUrl',
-    ChannelCredentials.createInsecure(),
-    {},
-    {},
-  );
-  const questionClient = new QuestionServiceClient(
-    'questionServiceUrl',
-    ChannelCredentials.createInsecure(),
-    {},
-    {},
-  );
   let handler = new GetAttemptHandler(mockStorage, userClient, questionClient);
 
   beforeEach(() => {

@@ -1,3 +1,4 @@
+import { ChannelCredentials } from '@grpc/grpc-js';
 import {
   HistoryAttempt,
   PasswordUser,
@@ -6,6 +7,8 @@ import {
   User,
 } from '../../src/proto/types';
 import HistoryAttemptEntity from '../../src/db/history_entity';
+import { UserCrudServiceClient } from '../../src/proto/user-crud-service.grpc-client';
+import { QuestionServiceClient } from '../../src/proto/question-service.grpc-client';
 
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
@@ -78,6 +81,24 @@ function makeMockLoopbackChannel() {
   };
 }
 
+function makeMockUserClient() {
+  return new UserCrudServiceClient(
+    'fakeUserServiceUrl',
+    ChannelCredentials.createInsecure(),
+    {},
+    {},
+  );
+}
+
+function makeMockQuestionClient() {
+  return new QuestionServiceClient(
+    'fakeQuestionServiceUrl',
+    ChannelCredentials.createInsecure(),
+    {},
+    {},
+  );
+}
+
 export {
   gatewayHeaderUsername,
   testDateSeconds,
@@ -89,4 +110,6 @@ export {
   testPasswordUser,
   makeMockAttemptStorage,
   makeMockLoopbackChannel,
+  makeMockUserClient,
+  makeMockQuestionClient,
 };
