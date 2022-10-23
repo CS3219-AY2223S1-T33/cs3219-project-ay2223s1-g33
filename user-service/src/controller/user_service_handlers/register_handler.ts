@@ -4,12 +4,12 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { PasswordUser } from '../../proto/types';
 import { CreateUserRequest, CreateUserResponse } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import IHashAgent from '../../auth/hash_agent_types.d';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResponse> {
   return {

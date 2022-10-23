@@ -3,12 +3,12 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { PasswordUser, User } from '../../proto/types';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
 import GatewayConstants from '../../utils/gateway_constants';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUserProfileResponse> {
   return {

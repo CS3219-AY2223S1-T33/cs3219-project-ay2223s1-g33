@@ -3,7 +3,6 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import {
   DeleteResetTokenRequest,
@@ -19,6 +18,7 @@ import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordResetToken, PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 class ConsumeResetTokenHandler
 implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {

@@ -5,7 +5,6 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { IEmailSender } from '../../email/email_sender';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
@@ -21,6 +20,7 @@ import {
 } from '../../proto/user-crud-service';
 import { User } from '../../proto/types';
 import Logger from '../../utils/logger';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 const MAX_ACTIVE_TOKENS = 3;
 

@@ -1,6 +1,6 @@
 import { ServiceDefinition } from '@grpc/grpc-js';
 import { IUserService, userServiceDefinition } from '../proto/user-service.grpc-server';
-import { ServiceHandlerDefinition, ApiService, ILoopbackServiceChannel } from '../api_server/api_server_types';
+import { ServiceHandlerDefinition, ApiService } from '../api_server/api_server_types';
 import { fromApiHandler } from '../api_server/api_server_helpers';
 import RegisterHandler from './user_service_handlers/register_handler';
 import {
@@ -26,13 +26,12 @@ import createHashAgent from '../auth/hash_agent';
 import ResetPasswordHandler from './user_service_handlers/reset_password_handler';
 import ConsumeResetTokenHandler from './user_service_handlers/consume_reset_token_handler';
 import { IEmailSender } from '../email/email_sender';
+import { ILoopbackServiceChannel } from '../api_server/loopback_server_types';
 
 class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
 
   serviceDefinition: ServiceDefinition<IUserService>;
-
-  serviceImplementation: IUserService;
 
   constructor(
     authService: IAuthenticationAgent,
@@ -74,18 +73,8 @@ class UserServiceApi implements ApiService<IUserService> {
       ),
     };
 
-    const userService: IUserService = {
-      register: handlerDefinitions.register.grpcRouteHandler,
-      login: handlerDefinitions.login.grpcRouteHandler,
-      logout: handlerDefinitions.logout.grpcRouteHandler,
-      getUserProfile: handlerDefinitions.getUserProfile.grpcRouteHandler,
-      resetPassword: handlerDefinitions.resetPassword.grpcRouteHandler,
-      consumeResetToken: handlerDefinitions.consumeResetToken.grpcRouteHandler,
-    };
-
     this.serviceHandlerDefinition = handlerDefinitions;
     this.serviceDefinition = userServiceDefinition;
-    this.serviceImplementation = userService;
   }
 }
 
