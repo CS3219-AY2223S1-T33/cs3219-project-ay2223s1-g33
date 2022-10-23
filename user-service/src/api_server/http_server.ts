@@ -11,7 +11,6 @@ import Logger from '../utils/logger';
 import jsonParseMiddleware from '../utils/json_middleware';
 import {
   ApiHeaderMap,
-  ApiResponse,
   ApiService,
   IApiHandler,
 } from './api_server_types';
@@ -38,11 +37,12 @@ class HTTPServer implements IHTTPServer {
   registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void {
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
       const typedHandler = apiService.serviceHandlerDefinition[key];
-      const httpHandler = HTTPServer.adaptToHTTP(
+      const httpHandler = HTTPServer.adaptToHTTPhandler(
         typedHandler.handler,
         typedHandler.reqType,
         typedHandler.respType,
       );
+
       this.httpRouter.post(`/${key}`, jsonParseMiddleware, async (req: Request, resp: Response) => {
         const normalizedHeaders: ApiHeaderMap = {};
 
@@ -54,29 +54,48 @@ class HTTPServer implements IHTTPServer {
         });
 
         try {
-          const response = await httpHandler(req.body, normalizedHeaders);
-          Object.keys(response.headers).forEach((headerName: string) => {
-            resp.header(headerName, response.headers[headerName]);
-          });
+          const response = await httpHandler(req);
+          if (response.status) {
+            resp.status(response.status);
+          }
+          if (response.headers) {
+            const respHeaders: ApiHeaderMap = response.headers;
+            Object.keys(respHeaders).forEach((x) => {
+              if (x in respHeaders) {
+                resp.setHeader(key, respHeaders[x]);
+              }
+            });
+          }
           resp.json(response.jsonResponse);
         } catch {
-          resp.status(400).json({});
+          resp.status(500).json({});
         }
       });
     });
   }
 
-  static adaptToHTTP<RequestType extends object, ResponseType extends object>(
+  static adaptToHTTPhandler<RequestType extends object, ResponseType extends object>(
     handler: IApiHandler<RequestType, ResponseType>,
     reqType: IMessageType<RequestType>,
     respType: IMessageType<ResponseType>,
-  ): (json: any, headers: { [key: string]: string[] }) => Promise<HTTPResponse> {
-    return async (requestJson: any, headers: ApiHeaderMap): Promise<HTTPResponse> => {
-      const requestObject = reqType.fromJson(requestJson);
-      const responseObject: ApiResponse<ResponseType> = await handler.handle({
+  ): (req: Request) => Promise<HTTPResponse> {
+    return async (req: Request): Promise<HTTPResponse> => {
+      const headers = HTTPServer.parseIncomingHeaders(req);
+      let requestObject: RequestType;
+      try {
+        requestObject = reqType.fromJson(req.body);
+      } catch {
+        return {
+          status: 400,
+          jsonResponse: {},
+        };
+      }
+
+      const responseObject = await handler.handle({
         request: requestObject,
         headers,
       });
+
       return {
         jsonResponse: respType.toJson(responseObject.response, {
           enumAsInteger: true,
@@ -84,6 +103,18 @@ class HTTPServer implements IHTTPServer {
         headers: responseObject.headers,
       };
     };
+  }
+
+  static parseIncomingHeaders(req: Request): ApiHeaderMap {
+    const normalizedHeaders: ApiHeaderMap = {};
+    Object.keys(req.headers).forEach((headerName: string) => {
+      const value = req.headers[headerName];
+      if (typeof value === 'string') {
+        normalizedHeaders[headerName] = [value];
+      }
+    });
+
+    return normalizedHeaders;
   }
 
   bind() {
