@@ -84,7 +84,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
     }
 
     return ChangePasswordHandler.buildHeaderlessResponse({
-      errorCode: ChangePasswordErrorCode.CHANGE_PASSWORD_ERROR_INTERNAL_ERROR,
+      errorCode: ChangePasswordErrorCode.CHANGE_PASSWORD_ERROR_NONE,
       errorMessage: '',
     });
   }
