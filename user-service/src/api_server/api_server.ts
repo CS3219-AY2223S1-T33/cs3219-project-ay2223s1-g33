@@ -1,3 +1,7 @@
+/*
+  Revision 4 of the API server framework.
+*/
+
 import { UntypedServiceImplementation } from '@grpc/grpc-js';
 import { ApiService, IApiServer, IProtocolServer } from './api_server_types';
 
