@@ -9,6 +9,7 @@ import {
   MenuItem,
   MenuList,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
@@ -17,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { reset } from "../../../feature/matching/matchingSlice";
 import { logout, selectUser } from "../../../feature/user/userSlice";
 import { LogoutResponse } from "../../../proto/user-service";
+import AccountSettingsModal from "../../modal/AccountSettingsModal";
 
 function HomeNavbar() {
   const navigate = useNavigate();
@@ -41,37 +43,42 @@ function HomeNavbar() {
       });
   };
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const user = useSelector(selectUser);
   if (!user) {
     return null;
   }
 
   return (
-    <Box bg="gray.100" px={12} py={2}>
-      <Flex alignItems="center" justifyContent="space-between" h={16}>
-        {/* Future: Logo goes here */}
-        <Box>
-          <Heading>PeerPrep</Heading>
-        </Box>
+    <>
+      <Box bg="gray.100" px={12} py={2}>
+        <Flex alignItems="center" justifyContent="space-between" h={16}>
+          {/* Future: Logo goes here */}
+          <Box>
+            <Heading>PeerPrep</Heading>
+          </Box>
 
-        <Flex alignItems="center">
-          <HStack spacing={7}>
-            {/* TODO Placeholder icon for dark mode in future */}
-            {/* <MoonIcon /> */}
+          <Flex alignItems="center">
+            <HStack spacing={7}>
+              {/* TODO Placeholder icon for dark mode in future */}
+              {/* <MoonIcon /> */}
 
-            <Menu>
-              <MenuButton as={Button} variant="ghost" cursor="pointer">
-                <Text fontSize="lg">{`Hello, ${user.nickname}!`}</Text>
-              </MenuButton>
-              <MenuList alignItems="center">
-                <MenuItem>Account Settings</MenuItem>
-                <MenuItem onClick={logoutHandler}>Logout</MenuItem>
-              </MenuList>
-            </Menu>
-          </HStack>
+              <Menu>
+                <MenuButton as={Button} variant="ghost" cursor="pointer">
+                  <Text fontSize="lg">{`Hello, ${user.nickname}!`}</Text>
+                </MenuButton>
+                <MenuList alignItems="center">
+                  <MenuItem onClick={() => onOpen()}>Account Settings</MenuItem>
+                  <MenuItem onClick={logoutHandler}>Logout</MenuItem>
+                </MenuList>
+              </Menu>
+            </HStack>
+          </Flex>
         </Flex>
-      </Flex>
-    </Box>
+      </Box>
+      <AccountSettingsModal isOpen={isOpen} onClose={onClose} />
+    </>
   );
 }
 
