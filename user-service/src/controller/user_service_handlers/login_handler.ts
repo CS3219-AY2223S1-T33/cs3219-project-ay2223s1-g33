@@ -9,23 +9,23 @@ import { PasswordUser, User } from '../../proto/types';
 import { IAuthenticationAgent, TokenPair } from '../../auth/authentication_agent_types';
 import GatewayConstants from '../../utils/gateway_constants';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
-import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
+import { GetUserRequest } from '../../proto/user-crud-service';
 import IHashAgent from '../../auth/hash_agent_types.d';
 import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
-  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
+  rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
   authAgent: IAuthenticationAgent;
 
   hashAgent: IHashAgent;
 
   constructor(
-    rpcClient: ILoopbackServiceChannel<IUserCrudService>,
+    rpcLoopback: ILoopbackServiceChannel<IUserCrudService>,
     authAgent: IAuthenticationAgent,
     hashAgent: IHashAgent,
   ) {
-    this.rpcClient = rpcClient;
+    this.rpcLoopback = rpcLoopback;
     this.authAgent = authAgent;
     this.hashAgent = hashAgent;
   }
@@ -133,7 +133,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       user: searchUserObject,
     };
 
-    const result = await this.rpcClient.callRoute<GetUserRequest, GetUserResponse>('getUser', request, GetUserResponse);
+    const result = await this.rpcLoopback.client.getUser(request);
     if (!result) {
       return undefined;
     }

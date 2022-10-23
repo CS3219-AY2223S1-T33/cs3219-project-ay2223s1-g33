@@ -19,12 +19,12 @@ function getHeaderlessResponse(resp: RegisterResponse): ApiResponse<RegisterResp
 }
 
 class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> {
-  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
+  rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
   hashAgent: IHashAgent;
 
-  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>, hashAgent: IHashAgent) {
-    this.rpcClient = rpcClient;
+  constructor(rpcLoopback: ILoopbackServiceChannel<IUserCrudService>, hashAgent: IHashAgent) {
+    this.rpcLoopback = rpcLoopback;
     this.hashAgent = hashAgent;
   }
 
@@ -112,7 +112,7 @@ class RegisterHandler implements IApiHandler<RegisterRequest, RegisterResponse> 
     const request: CreateUserRequest = {
       user,
     };
-    const createResult = await this.rpcClient.callRoute<CreateUserRequest, CreateUserResponse>('createUser', request, CreateUserResponse);
+    const createResult = await this.rpcLoopback.client.createUser(request);
     return createResult;
   }
 

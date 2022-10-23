@@ -64,8 +64,7 @@ async function run() {
   const userCrudApi = new UserCrudServiceApi(dataStore, redisUserStream);
   apiServer.registerServiceRoutes(userCrudApi);
 
-  const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
-  loopbackCrudApi.registerServiceRoutes(userCrudApi);
+  const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>(userCrudApi);
   apiServer.registerServiceRoutes(new UserServiceApi(
     authService,
     emailSender,
