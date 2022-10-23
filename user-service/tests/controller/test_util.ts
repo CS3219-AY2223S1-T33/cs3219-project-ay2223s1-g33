@@ -16,6 +16,7 @@ function makeMockAuthAgent() {
   return {
     createToken: jest.fn(),
     invalidateToken: jest.fn(),
+    invalidateTokensBeforeTime: jest.fn(),
   };
 }
 
@@ -35,10 +36,17 @@ function makeMockUserCrudService() {
   };
 }
 
-function makeMockLoopbackChannel() {
+function makeMockUserCrudLoopbackChannel() {
   return {
-    registerServiceRoutes: jest.fn(),
-    callRoute: jest.fn(),
+    client: {
+      getUser: jest.fn(),
+      editUser: jest.fn(),
+      createUser: jest.fn(),
+      deleteUser: jest.fn(),
+      getResetTokens: jest.fn(),
+      deleteResetToken: jest.fn(),
+      createResetToken: jest.fn(),
+    },
   };
 }
 
@@ -99,7 +107,7 @@ export {
   makeMockAuthAgent,
   makeMockHashAgent,
   makeMockUserCrudService,
-  makeMockLoopbackChannel,
+  makeMockUserCrudLoopbackChannel,
   makeTestUser,
   makeTestPasswordUser,
   makeStoredUser,
