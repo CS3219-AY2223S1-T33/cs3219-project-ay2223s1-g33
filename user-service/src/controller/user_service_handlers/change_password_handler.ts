@@ -116,7 +116,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
     }
 
     return {
-      newPassword
+      newPassword,
     };
   }
 
@@ -156,7 +156,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
 
     return updateResponse.errorMessage === '';
   }
- 
+
   static buildHeaderlessResponse(response: ChangePasswordResponse):
   ApiResponse<ChangePasswordResponse> {
     return {

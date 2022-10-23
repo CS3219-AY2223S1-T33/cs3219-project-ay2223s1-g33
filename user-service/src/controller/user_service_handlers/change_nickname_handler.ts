@@ -28,7 +28,6 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
 
   async handle(request: ApiRequest<ChangeNicknameRequest>):
   Promise<ApiResponse<ChangeNicknameResponse>> {
-
     const requestObject = request.request;
 
     const validatedRequest = ChangeNicknameHandler.validateRequest(requestObject);
