@@ -1,3 +1,5 @@
+import { UserEntity } from '../../src/db';
+import StoredResetToken from '../../src/model/reset_token_model';
 import StoredUser from '../../src/model/user_store_model';
 import { PasswordUser, User } from '../../src/proto/types';
 
@@ -9,6 +11,15 @@ function makeMockUserStorage() {
     getUser: jest.fn(),
     getUserByUsername: jest.fn(),
     getAllUsers: jest.fn(),
+  };
+}
+
+function makeMockTokenStorage() {
+  return {
+    addResetToken: jest.fn(),
+    removeResetToken: jest.fn(),
+    getToken: jest.fn(),
+    getTokensByUsername: jest.fn(),
   };
 }
 
@@ -84,6 +95,23 @@ function makeStoredUser(
   };
 }
 
+function makeStoredToken(
+  token: string,
+  user: StoredUser,
+  expiresAt: Date,
+): StoredResetToken {
+  const userEntity: UserEntity = {
+    isActive: true,
+    ...user,
+  };
+
+  return {
+    token,
+    user: userEntity,
+    expiresAt,
+  };
+}
+
 const testData = {
   testUserId1: 10,
   testUsername1: 'User@email.com',
@@ -94,6 +122,9 @@ const testData = {
   testUsername2: 'User2@email.com',
   testNickname2: 'Thomas Ong',
   testPassword2: 'Password2',
+
+  testTokenString1: 'TOKENA',
+  testTokenString2: 'TOKENB',
 };
 
 function makeRedisStreamProducer() {
@@ -104,6 +135,7 @@ function makeRedisStreamProducer() {
 
 export {
   makeMockUserStorage,
+  makeMockTokenStorage,
   makeMockAuthAgent,
   makeMockHashAgent,
   makeMockUserCrudService,
@@ -113,4 +145,5 @@ export {
   makeStoredUser,
   makeRedisStreamProducer,
   testData,
+  makeStoredToken,
 };

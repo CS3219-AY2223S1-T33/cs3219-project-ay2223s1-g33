@@ -33,7 +33,7 @@ class GetResetTokensHandler implements IApiHandler<GetResetTokensRequest, GetRes
     const hasToken = requestObject.tokenString && requestObject.tokenString.length > 0;
     const hasUsername = requestObject.username && requestObject.username.length > 0;
 
-    if (!hasToken && !hasUsername) {
+    if ((!hasToken && !hasUsername) || (hasToken && hasUsername)) {
       return buildErrorResponse('Malformed request');
     }
 
