@@ -1,6 +1,7 @@
 import { UntypedServiceImplementation } from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
-import { LoopbackRouteHandler, ApiService, ILoopbackServiceChannel } from './api_server_types';
+import { ApiService, IApiHandler } from './api_server_types';
+import { LoopbackRouteHandler, ILoopbackServiceChannel } from './loopback_server_types';
 
 export default class LoopbackApiChannel<S extends UntypedServiceImplementation>
 implements ILoopbackServiceChannel<S> {
@@ -12,8 +13,26 @@ implements ILoopbackServiceChannel<S> {
 
   registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void {
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
-      this.routes[key] = apiService.serviceHandlerDefinition[key].loopbackRouteHandler;
+      const handler = apiService.serviceHandlerDefinition[key];
+      this.routes[key] = LoopbackApiChannel.getLoopbackRouteHandler(
+        handler.handler,
+        handler.reqType,
+      );
     });
+  }
+
+  static getLoopbackRouteHandler<RequestType extends object, ResponseType extends object>(
+    handler: IApiHandler<RequestType, ResponseType>,
+    reqType: IMessageType<RequestType>,
+  ): (request: object) => Promise<object> {
+    return async (request: object): Promise<object> => {
+      const requestObject = reqType.create(request);
+      const result = await handler.handle({
+        request: requestObject,
+        headers: {},
+      });
+      return result.response;
+    };
   }
 
   async callRoute<T extends object, U extends object>(
