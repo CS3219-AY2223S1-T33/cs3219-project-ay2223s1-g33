@@ -60,14 +60,12 @@ function ChangeNicknameForm() {
         if (errorCode) {
           throw new Error(errorMessage);
         }
-        
-        const newUser : User = { ...user }
-        newUser.nickname = newNickname
+
+        const newUser: User = { ...user };
+        newUser.nickname = newNickname;
         dispatch(changeNickname({ user: newUser }));
 
         toast.sendSuccessMessage("Your nickname is changed!");
-
-
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);

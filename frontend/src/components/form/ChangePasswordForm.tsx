@@ -18,14 +18,21 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import axios from "../../axios";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
 } from "../../proto/user-service";
+import { reset } from "../../feature/matching/matchingSlice";
+import { logout } from "../../feature/user/userSlice";
 
 function ChangePasswordForm() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
@@ -57,7 +64,13 @@ function ChangePasswordForm() {
           throw new Error(errorMessage);
         }
 
-        toast.sendSuccessMessage("Your password is changed!");
+        toast.sendSuccessMessage(
+          "Your password is changed! You will need to login again!"
+        );
+
+        dispatch(reset());
+        dispatch(logout());
+        navigate("/login", { replace: true });
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
