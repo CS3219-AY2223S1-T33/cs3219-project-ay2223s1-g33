@@ -1,3 +1,4 @@
+import Validator from 'validator';
 import { ChangePasswordRequest, ChangePasswordResponse, ChangePasswordErrorCode } from '../../proto/user-service';
 import {
   IApiHandler,
@@ -37,7 +38,17 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
 
   async handle(request: ApiRequest<ChangePasswordRequest>):
   Promise<ApiResponse<ChangePasswordResponse>> {
-    const { newPassword } = request.request;
+    const requestObject = request.request;
+
+    const validatedRequest = ChangePasswordHandler.validateRequest(requestObject);
+    if (validatedRequest instanceof Error) {
+      return ChangePasswordHandler.buildErrorResponse(
+        ChangePasswordErrorCode.CHANGE_PASSWORD_ERROR_BAD_REQUEST,
+        validatedRequest.message,
+      );
+    }
+
+    const { newPassword } = validatedRequest;
 
     if (!(GatewayConstants.GATEWAY_HEADER_USERNAME in request.headers)) {
       return ChangePasswordHandler.buildErrorResponse(
@@ -89,6 +100,26 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
     });
   }
 
+  static validateRequest(request: ChangePasswordRequest): (ValidatedRequest | Error) {
+    if (!request.newPassword) {
+      return new Error('New password not provided');
+    }
+
+    const newPassword = request.newPassword.trim();
+
+    if (Validator.isEmpty(newPassword)) {
+      return new Error('Empty field provided');
+    }
+
+    if (newPassword.length < 8) {
+      return new Error('Insufficient password length');
+    }
+
+    return {
+      newPassword
+    };
+  }
+
   async getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
     const searchUserObject: User = User.create();
     searchUserObject.username = username;
@@ -125,7 +156,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
 
     return updateResponse.errorMessage === '';
   }
-
+ 
   static buildHeaderlessResponse(response: ChangePasswordResponse):
   ApiResponse<ChangePasswordResponse> {
     return {
@@ -142,5 +173,9 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
     });
   }
 }
+
+type ValidatedRequest = {
+  newPassword: string,
+};
 
 export default ChangePasswordHandler;

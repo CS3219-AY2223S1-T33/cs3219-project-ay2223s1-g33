@@ -1,3 +1,4 @@
+import Validator from 'validator';
 import { ChangeNicknameErrorCode, ChangeNicknameRequest, ChangeNicknameResponse } from '../../proto/user-service';
 import {
   IApiHandler,
@@ -27,6 +28,19 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
 
   async handle(request: ApiRequest<ChangeNicknameRequest>):
   Promise<ApiResponse<ChangeNicknameResponse>> {
+
+    const requestObject = request.request;
+
+    const validatedRequest = ChangeNicknameHandler.validateRequest(requestObject);
+    if (validatedRequest instanceof Error) {
+      return ChangeNicknameHandler.buildErrorResponse(
+        ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_BAD_REQUEST,
+        validatedRequest.message,
+      );
+    }
+
+    const { newNickname } = validatedRequest;
+
     if (!(GatewayConstants.GATEWAY_HEADER_USERNAME in request.headers)) {
       return ChangeNicknameHandler.buildErrorResponse(
         ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_INTERNAL_ERROR,
@@ -41,8 +55,6 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
         'Bad request from gateway',
       );
     }
-
-    const { newNickname } = request.request;
 
     const user = await this.getUserByUsername(username);
     if (!user || !user.userInfo) {
@@ -64,6 +76,22 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
       errorCode: ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_NONE,
       errorMessage: '',
     });
+  }
+
+  static validateRequest(request: ChangeNicknameRequest): (ValidatedRequest | Error) {
+    if (!request.newNickname) {
+      return new Error('New nickname not provided');
+    }
+
+    const newNickname = request.newNickname.trim();
+
+    if (Validator.isEmpty(newNickname)) {
+      return new Error('Empty field provided');
+    }
+
+    return {
+      newNickname,
+    };
   }
 
   async getUserByUsername(username: string): Promise<(PasswordUser | undefined)> {
@@ -119,5 +147,9 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
     });
   }
 }
+
+type ValidatedRequest = {
+  newNickname: string,
+};
 
 export default ChangeNicknameHandler;
