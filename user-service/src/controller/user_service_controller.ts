@@ -4,6 +4,10 @@ import { ServiceHandlerDefinition, ApiService, ILoopbackServiceChannel } from '.
 import { fromApiHandler } from '../api_server/api_server_helpers';
 import RegisterHandler from './user_service_handlers/register_handler';
 import {
+  ChangeNicknameRequest,
+  ChangeNicknameResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   ConsumeResetTokenRequest,
   ConsumeResetTokenResponse,
   GetUserProfileRequest,
@@ -26,6 +30,8 @@ import createHashAgent from '../auth/hash_agent';
 import ResetPasswordHandler from './user_service_handlers/reset_password_handler';
 import ConsumeResetTokenHandler from './user_service_handlers/consume_reset_token_handler';
 import { IEmailSender } from '../email/email_sender';
+import ChangeNicknameHandler from './user_service_handlers/change_nickname_handler';
+import ChangePasswordHandler from './user_service_handlers/change_password_handler';
 
 class UserServiceApi implements ApiService<IUserService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IUserService>;
@@ -72,6 +78,16 @@ class UserServiceApi implements ApiService<IUserService> {
         ConsumeResetTokenRequest,
         ConsumeResetTokenResponse,
       ),
+      changeNickname: fromApiHandler(
+        new ChangeNicknameHandler(crudLoopback),
+        ChangeNicknameRequest,
+        ChangeNicknameResponse,
+      ),
+      changePassword: fromApiHandler(
+        new ChangePasswordHandler(crudLoopback, authService, hashAgent),
+        ChangePasswordRequest,
+        ChangePasswordResponse,
+      ),
     };
 
     const userService: IUserService = {
@@ -81,6 +97,8 @@ class UserServiceApi implements ApiService<IUserService> {
       getUserProfile: handlerDefinitions.getUserProfile.grpcRouteHandler,
       resetPassword: handlerDefinitions.resetPassword.grpcRouteHandler,
       consumeResetToken: handlerDefinitions.consumeResetToken.grpcRouteHandler,
+      changeNickname: handlerDefinitions.changeNickname.grpcRouteHandler,
+      changePassword: handlerDefinitions.changePassword.grpcRouteHandler,
     };
 
     this.serviceHandlerDefinition = handlerDefinitions;
