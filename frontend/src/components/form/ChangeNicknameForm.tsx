@@ -39,7 +39,7 @@ function ChangeNicknameForm() {
 
     axios
       .post<ChangeNicknameResponse>(
-        "/api/user/changenickname",
+        "/api/user/nickname",
         changeNicknameRequest,
         {
           withCredentials: true,

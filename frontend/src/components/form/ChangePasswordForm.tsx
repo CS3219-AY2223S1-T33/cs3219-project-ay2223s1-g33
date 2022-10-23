@@ -44,7 +44,7 @@ function ChangePasswordForm() {
 
     axios
       .post<ChangePasswordResponse>(
-        "/api/user/changepassword",
+        "/api/user/password",
         changePasswordRequest,
         {
           withCredentials: true,
