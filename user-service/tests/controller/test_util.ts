@@ -1,7 +1,7 @@
 import { UserEntity } from '../../src/db';
 import StoredResetToken from '../../src/model/reset_token_model';
 import StoredUser from '../../src/model/user_store_model';
-import { PasswordUser, User } from '../../src/proto/types';
+import { PasswordResetToken, PasswordUser, User } from '../../src/proto/types';
 
 function makeMockUserStorage() {
   return {
@@ -81,6 +81,14 @@ function makeTestPasswordUser(
   };
 }
 
+function makeTestResetToken(token: string, userId: number, expiresAt: number): PasswordResetToken {
+  return {
+    token,
+    userId,
+    expiresAt,
+  };
+}
+
 function makeStoredUser(
   userId: number,
   username: string,
@@ -112,6 +120,12 @@ function makeStoredToken(
   };
 }
 
+function makeMockEmailSender() {
+  return {
+    sendResetEmail: jest.fn(),
+  };
+}
+
 const testData = {
   testUserId1: 10,
   testUsername1: 'User@email.com',
@@ -125,6 +139,7 @@ const testData = {
 
   testTokenString1: 'TOKENA',
   testTokenString2: 'TOKENB',
+  testTokenString3: 'TOKENC',
 };
 
 function makeRedisStreamProducer() {
@@ -146,4 +161,6 @@ export {
   makeRedisStreamProducer,
   testData,
   makeStoredToken,
+  makeMockEmailSender,
+  makeTestResetToken,
 };

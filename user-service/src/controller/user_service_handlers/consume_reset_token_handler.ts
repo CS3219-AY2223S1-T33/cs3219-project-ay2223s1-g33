@@ -38,6 +38,13 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
   Promise<ApiResponse<ConsumeResetTokenResponse>> {
     const { token, newPassword } = request.request;
 
+    if (token.length === 0 || newPassword.length === 0) {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_BAD_REQUEST,
+        'Bad Request',
+      );
+    }
+
     const tokenObject = await this.getTokenData(token);
     if (!tokenObject) {
       return ConsumeResetTokenHandler.buildErrorResponse(

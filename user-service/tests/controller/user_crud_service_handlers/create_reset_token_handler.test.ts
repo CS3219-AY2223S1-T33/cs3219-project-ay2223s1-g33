@@ -7,6 +7,7 @@ import {
   makeMockTokenStorage,
   makeStoredToken,
   makeStoredUser,
+  makeTestResetToken,
   testData,
 } from '../test_util';
 import { convertStoredResetTokenToResetToken } from '../../../src/model/reset_token_helper';
@@ -25,13 +26,6 @@ describe('Create Reset Token Handler', () => {
       token,
     },
     headers: {},
-  });
-
-  const makeResetToken = (token: string, userId: number, expiresAt: number):
-  PasswordResetToken => ({
-    token,
-    userId,
-    expiresAt,
   });
 
   test('Successful Token Creation', async () => {
@@ -65,19 +59,19 @@ describe('Create Reset Token Handler', () => {
     };
 
     const handler = new CreateResetTokenHandler(storage);
-    let request = makeRequest(makeResetToken('', 1, 123));
+    let request = makeRequest(makeTestResetToken('', 1, 123));
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.token).toBeUndefined();
     expect(mockStore.addResetToken.mock.calls.length).toBe(0);
 
-    request = makeRequest(makeResetToken(testTokenString1, 0, 123));
+    request = makeRequest(makeTestResetToken(testTokenString1, 0, 123));
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.token).toBeUndefined();
     expect(mockStore.addResetToken.mock.calls.length).toBe(0);
 
-    request = makeRequest(makeResetToken(testTokenString1, 1, 0));
+    request = makeRequest(makeTestResetToken(testTokenString1, 1, 0));
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.token).toBeUndefined();
@@ -101,7 +95,7 @@ describe('Create Reset Token Handler', () => {
     mockStore.addResetToken.mockImplementationOnce(() => { throw new Error(testErrorMessage); });
     const handler = new CreateResetTokenHandler(storage);
 
-    const request = makeRequest(makeResetToken(testTokenString1, 1, 123));
+    const request = makeRequest(makeTestResetToken(testTokenString1, 1, 123));
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.token).toBeUndefined();
