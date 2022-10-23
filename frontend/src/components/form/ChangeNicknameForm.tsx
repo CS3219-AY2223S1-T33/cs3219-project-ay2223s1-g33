@@ -14,12 +14,15 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "../../axios";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import {
   ChangeNicknameRequest,
   ChangeNicknameResponse,
 } from "../../proto/user-service";
+import { changeNickname, selectUser } from "../../feature/user/userSlice";
+import { User } from "../../proto/types";
 
 function ChangeNicknameForm() {
   const {
@@ -29,6 +32,12 @@ function ChangeNicknameForm() {
   } = useForm();
 
   const toast = useFixedToast();
+  const dispatch = useDispatch();
+
+  const user = useSelector(selectUser);
+  if (!user) {
+    return null;
+  }
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
     const { nickname: newNickname } = data;
@@ -51,8 +60,14 @@ function ChangeNicknameForm() {
         if (errorCode) {
           throw new Error(errorMessage);
         }
+        
+        const newUser : User = { ...user }
+        newUser.nickname = newNickname
+        dispatch(changeNickname({ user: newUser }));
 
         toast.sendSuccessMessage("Your nickname is changed!");
+
+
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
