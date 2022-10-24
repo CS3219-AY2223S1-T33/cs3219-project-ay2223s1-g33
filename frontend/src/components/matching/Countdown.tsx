@@ -8,6 +8,7 @@ import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
 import {
   CheckQueueStatusResponse,
+  LeaveQueueResponse,
   QueueStatus,
 } from "../../proto/matching-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
@@ -22,12 +23,32 @@ function Countdown() {
 
   // Cleanup function for leaving the queue (may be extended for specific scenarios: timeout, matched)
   const leaveQueueHandler = () => {
-    // TODO API call to leave queue
-    // TODO Blocker - exposed API endpoint
-    console.log("Call API to leave the queue");
     setIsPlaying.off();
     dispatch(leaveQueue());
   };
+
+  const requestLeaveQueue = () => {
+    axios
+      .post<LeaveQueueResponse>(
+        "/api/queue/leave",
+        {},
+        {
+          withCredentials: true,
+        }
+      )
+      .then((res) => {
+        const { errorCode, errorMessage } = res.data;
+        if (errorCode) {
+          throw new Error(errorMessage);
+        }
+      })
+      .catch((err) => {
+        toast.sendErrorMessage(err.message);
+      })
+      .finally(() => {
+        leaveQueueHandler();
+      });
+  }
 
   const completeTimeHandler = () => {
     leaveQueueHandler();
@@ -89,7 +110,7 @@ function Countdown() {
       >
         {({ remainingTime }) => <CountdownText remainingTime={remainingTime} />}
       </CountdownCircleTimer>
-      <Button colorScheme="red" onClick={leaveQueueHandler}>
+      <Button colorScheme="red" onClick={requestLeaveQueue}>
         Leave Queue
       </Button>
     </Stack>
