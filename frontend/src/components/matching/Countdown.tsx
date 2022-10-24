@@ -48,7 +48,7 @@ function Countdown() {
       .finally(() => {
         leaveQueueHandler();
       });
-  }
+  };
 
   const completeTimeHandler = () => {
     leaveQueueHandler();

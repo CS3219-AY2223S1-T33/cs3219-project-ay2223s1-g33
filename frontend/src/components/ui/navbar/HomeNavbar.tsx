@@ -69,7 +69,7 @@ function HomeNavbar() {
                   <Text fontSize="lg">{`Hello, ${user.nickname}!`}</Text>
                 </MenuButton>
                 <MenuList alignItems="center">
-                  <MenuItem onClick={() => onOpen()}>Account Settings</MenuItem>
+                  <MenuItem onClick={onOpen}>Account Settings</MenuItem>
                   <MenuItem onClick={logoutHandler}>Logout</MenuItem>
                 </MenuList>
               </Menu>

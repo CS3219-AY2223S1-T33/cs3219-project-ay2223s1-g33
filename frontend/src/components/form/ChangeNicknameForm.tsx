@@ -15,6 +15,7 @@ import {
   useForm,
 } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "../../axios";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import {
@@ -23,13 +24,14 @@ import {
 } from "../../proto/user-service";
 import { changeNickname, selectUser } from "../../feature/user/userSlice";
 import { User } from "../../proto/types";
+import { CHANGE_NICKNAME_VALIDTOR } from "../../constants/validators";
 
 function ChangeNicknameForm() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({ resolver: yupResolver(CHANGE_NICKNAME_VALIDTOR) });
 
   const toast = useFixedToast();
   const dispatch = useDispatch();
@@ -90,12 +92,7 @@ function ChangeNicknameForm() {
         <FormControl id="nickname" isInvalid={!!errors.nickname}>
           <FormLabel>New Nickname</FormLabel>
 
-          <Input
-            type="text"
-            {...register("nickname", {
-              required: "Please enter your nickname.",
-            })}
-          />
+          <Input type="text" {...register("nickname")} />
           <FormErrorMessage>
             {errors.nickname?.message as string}
           </FormErrorMessage>

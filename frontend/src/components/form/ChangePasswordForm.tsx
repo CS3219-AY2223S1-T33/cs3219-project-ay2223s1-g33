@@ -5,13 +5,8 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
-  Input,
-  InputGroup,
-  InputRightElement,
-  useBoolean,
   VStack,
 } from "@chakra-ui/react";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import {
   FieldValues,
   SubmitErrorHandler,
@@ -20,6 +15,7 @@ import {
 } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "../../axios";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import {
@@ -28,6 +24,8 @@ import {
 } from "../../proto/user-service";
 import { reset } from "../../feature/matching/matchingSlice";
 import { logout } from "../../feature/user/userSlice";
+import PasswordInput from "../ui/form/PasswordInput";
+import { SET_PW_VALIDATOR } from "../../constants/validators";
 
 function ChangePasswordForm() {
   const navigate = useNavigate();
@@ -37,10 +35,9 @@ function ChangePasswordForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
 
   const toast = useFixedToast();
-  const [showPassword, setShowPassword] = useBoolean();
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
     const { password: newPassword } = data;
@@ -94,24 +91,7 @@ function ChangePasswordForm() {
       <form onSubmit={handleSubmit(validFormHandler, invalidFormHandler)}>
         <FormControl id="password" isInvalid={!!errors.password}>
           <FormLabel>New Password</FormLabel>
-          <InputGroup>
-            <Input
-              type={showPassword ? "text" : "password"}
-              {...register("password", {
-                required: "Please enter your password",
-                minLength: {
-                  value: 8,
-                  message:
-                    "Please make sure your password is at least 8 characters long.",
-                },
-              })}
-            />
-            <InputRightElement h="full">
-              <Button variant="ghost" onClick={setShowPassword.toggle}>
-                {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-              </Button>
-            </InputRightElement>
-          </InputGroup>
+          <PasswordInput register={register} formKey="password" />
           <FormErrorMessage>
             {errors.password?.message as string}
           </FormErrorMessage>
