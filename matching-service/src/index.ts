@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { createClient, RedisClientType } from 'redis';
 
-import getApiServer from './api_server/api_server';
+import createApiServer from './api_server/api_server';
 import loadEnvironment from './utils/env_loader';
 import MatchingServiceApi from './controller/matching_service_controller';
 import { createRedisMatchingAdapter } from './redis_adapter/redis_matching_adapter';
@@ -9,6 +9,8 @@ import { IRoomSessionAgent } from './room_auth/room_session_agent_types';
 import createRoomSessionService from './room_auth/room_session_agent';
 import Logger from './utils/logger';
 import Constants from './constants';
+import HTTPServer from './api_server/http_server';
+import GRPCServer from './api_server/grpc_server';
 
 const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
 Logger.info(`Starting Matching Service [V${version}]`);
@@ -21,9 +23,10 @@ const redisClient: RedisClientType = createClient({
 redisClient.connect();
 
 const redisMatchingAdapter = createRedisMatchingAdapter(redisClient);
-
-const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
-const expressApp = apiServer.getHttpServer();
+const httpServer = HTTPServer.create(envConfig.HTTP_PORT);
+const grpcServer = GRPCServer.create(envConfig.GRPC_PORT);
+const apiServer = createApiServer(httpServer, grpcServer);
+const expressApp = httpServer.getServer();
 
 const roomAuthService: IRoomSessionAgent = createRoomSessionService(
   envConfig.JWT_ROOM_SECRET,
