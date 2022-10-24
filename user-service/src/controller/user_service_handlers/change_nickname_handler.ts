@@ -4,26 +4,24 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import {
   EditUserRequest,
-  EditUserResponse,
   GetUserRequest,
-  GetUserResponse,
 } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordUser, User } from '../../proto/types';
 import GatewayConstants from '../../utils/gateway_constants';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 class ChangeNicknameHandler
 implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
-  crudClient: ILoopbackServiceChannel<IUserCrudService>;
+  rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
   constructor(
-    crudClient: ILoopbackServiceChannel<IUserCrudService>,
+    rpcLoopback: ILoopbackServiceChannel<IUserCrudService>,
   ) {
-    this.crudClient = crudClient;
+    this.rpcLoopback = rpcLoopback;
   }
 
   async handle(request: ApiRequest<ChangeNicknameRequest>):
@@ -101,7 +99,7 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
       user: searchUserObject,
     };
 
-    const result = await this.crudClient.callRoute<GetUserRequest, GetUserResponse>('getUser', request, GetUserResponse);
+    const result = await this.rpcLoopback.client.getUser(request);
     if (!result) {
       return undefined;
     }
@@ -120,13 +118,7 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
       user: newUserModel,
     };
 
-    const updateResponse = await this.crudClient
-      .callRoute<EditUserRequest, EditUserResponse>(
-      'editUser',
-      editUserRequest,
-      EditUserResponse,
-    );
-
+    const updateResponse = await this.rpcLoopback.client.editUser(editUserRequest);
     return updateResponse.errorMessage === '';
   }
 

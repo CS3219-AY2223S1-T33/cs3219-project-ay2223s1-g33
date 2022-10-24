@@ -4,34 +4,32 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import {
   EditUserRequest,
-  EditUserResponse,
   GetUserRequest,
-  GetUserResponse,
 } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import GatewayConstants from '../../utils/gateway_constants';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 class ChangePasswordHandler
 implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
-  crudClient: ILoopbackServiceChannel<IUserCrudService>;
+  rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
   authAgent: IAuthenticationAgent;
 
   hashAgent: IHashAgent;
 
   constructor(
-    crudClient: ILoopbackServiceChannel<IUserCrudService>,
+    rpcLoopback: ILoopbackServiceChannel<IUserCrudService>,
     authAgent: IAuthenticationAgent,
     hashAgent: IHashAgent,
   ) {
-    this.crudClient = crudClient;
+    this.rpcLoopback = rpcLoopback;
     this.authAgent = authAgent;
     this.hashAgent = hashAgent;
   }
@@ -128,7 +126,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
       user: searchUserObject,
     };
 
-    const result = await this.crudClient.callRoute<GetUserRequest, GetUserResponse>('getUser', request, GetUserResponse);
+    const result = await this.rpcLoopback.client.getUser(request);
     if (!result) {
       return undefined;
     }
@@ -147,13 +145,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
       user: newUserModel,
     };
 
-    const updateResponse = await this.crudClient
-      .callRoute<EditUserRequest, EditUserResponse>(
-      'editUser',
-      editUserRequest,
-      EditUserResponse,
-    );
-
+    const updateResponse = await this.rpcLoopback.client.editUser(editUserRequest);
     return updateResponse.errorMessage === '';
   }
 
