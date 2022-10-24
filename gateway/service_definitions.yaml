@@ -42,6 +42,10 @@ http:
     - selector: matching_service.QueueService.CheckQueueStatus
       post: /api/queue/status
       body: "*"
+
+    - selector: matching_service.QueueService.LeaveQueue
+      post: /api/queue/leave
+      body: "*"
     
     - selector: history_service.HistoryService.GetAttemptHistory
       post: /api/user/history
