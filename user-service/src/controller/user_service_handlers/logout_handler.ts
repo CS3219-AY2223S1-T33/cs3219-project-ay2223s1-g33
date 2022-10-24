@@ -2,6 +2,7 @@ import { LogoutErrorCode, LogoutRequest, LogoutResponse } from '../../proto/user
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import GatewayConstants from '../../utils/gateway_constants';
+import { safeReadFirstHeader } from '../controller_utils';
 
 class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   authService: IAuthenticationAgent;
@@ -11,15 +12,22 @@ class LogoutHandler implements IApiHandler<LogoutRequest, LogoutResponse> {
   }
 
   async handle(request: ApiRequest<LogoutRequest>): Promise<ApiResponse<LogoutResponse>> {
-    if (!(GatewayConstants.GATEWAY_HEADER_REFRESH_TOKEN in request.headers)
-      || !(GatewayConstants.GATEWAY_HEADER_SESSION_TOKEN in request.headers)) {
+    const refreshToken = safeReadFirstHeader(
+      request.headers,
+      GatewayConstants.GATEWAY_HEADER_REFRESH_TOKEN,
+    );
+
+    const sessionToken = safeReadFirstHeader(
+      request.headers,
+      GatewayConstants.GATEWAY_HEADER_SESSION_TOKEN,
+    );
+
+    if (!refreshToken || !sessionToken || refreshToken.length === 0 || sessionToken.length === 0) {
       return LogoutHandler.buildErrorResponse(
-        LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR,
+        LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST,
         'Bad request from gateway',
       );
     }
-    const sessionToken = request.headers[GatewayConstants.GATEWAY_HEADER_SESSION_TOKEN][0];
-    const refreshToken = request.headers[GatewayConstants.GATEWAY_HEADER_REFRESH_TOKEN][0];
 
     let success = false;
     try {

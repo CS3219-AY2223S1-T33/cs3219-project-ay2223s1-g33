@@ -50,17 +50,17 @@ describe('Logout Handler', () => {
     let request = makeRequest('', testRefreshToken);
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
-    expect(response.response.errorCode).toBe(LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR);
+    expect(response.response.errorCode).toBe(LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST);
 
     request = makeRequest(testSessionToken, '');
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
-    expect(response.response.errorCode).toBe(LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR);
+    expect(response.response.errorCode).toBe(LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST);
 
     request = makeRequest('', '');
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
-    expect(response.response.errorCode).toBe(LogoutErrorCode.LOGOUT_ERROR_INTERNAL_ERROR);
+    expect(response.response.errorCode).toBe(LogoutErrorCode.LOGOUT_ERROR_BAD_REQUEST);
   });
 
   test('Bad Downstream Request', async () => {
