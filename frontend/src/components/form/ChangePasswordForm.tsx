@@ -2,7 +2,6 @@ import React from "react";
 import {
   Button,
   FormControl,
-  FormErrorMessage,
   FormLabel,
   Heading,
   VStack,
@@ -89,12 +88,14 @@ function ChangePasswordForm() {
         Change Password
       </Heading>
       <form onSubmit={handleSubmit(validFormHandler, invalidFormHandler)}>
-        <FormControl id="password" isInvalid={!!errors.password}>
+        <FormControl id="password" isInvalid={!!errors.password} pb={4}>
           <FormLabel>New Password</FormLabel>
           <PasswordInput register={register} formKey="password" />
-          <FormErrorMessage>
-            {errors.password?.message as string}
-          </FormErrorMessage>
+        </FormControl>
+
+        <FormControl id="confirmPassword" isInvalid={!!errors.confirmPassword}>
+          <FormLabel>Confirm New Password</FormLabel>
+          <PasswordInput register={register} formKey="confirmPassword" />
         </FormControl>
         <Button
           loadingText="Submitting"

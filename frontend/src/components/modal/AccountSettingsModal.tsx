@@ -33,7 +33,7 @@ function AccountSettingsModal({ isOpen, onClose }: Props) {
         <ModalHeader bg="gray.50">Account Settings</ModalHeader>
         <ModalCloseButton />
         <ModalBody p={8}>
-          <HStack spacing={8} justifyContent="center">
+          <HStack spacing={8} justifyContent="center" alignItems="flex-start">
             <ChangePasswordForm />
             <Divider orientation="vertical" />
             <ChangeNicknameForm />
