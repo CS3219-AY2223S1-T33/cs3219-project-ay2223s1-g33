@@ -36,10 +36,10 @@ describe('Register Handler', () => {
 
   test('Successful Register', async () => {
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new RegisterHandler(userCrudClient, hashAgent);
-    userCrudClient.client.createUser.mockImplementationOnce((request: CreateUserRequest):
+    mockCrudLoopback.createUser.mockImplementationOnce((request: CreateUserRequest):
     CreateUserResponse => {
       expect(request.user!.userInfo!.username).toBe(testUsername1.toLowerCase());
       expect(request.user!.userInfo!.nickname).toBe(testNickname1);
@@ -60,7 +60,7 @@ describe('Register Handler', () => {
 
   test('Bad Request', async () => {
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new RegisterHandler(userCrudClient, hashAgent);
     hashAgent.hashPassword.mockImplementationOnce(() => Promise.resolve(testHash1));
@@ -69,33 +69,33 @@ describe('Register Handler', () => {
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.errorCode).toBe(RegisterErrorCode.REGISTER_ERROR_BAD_REQUEST);
-    expect(userCrudClient.client.createUser.mock.calls.length).toBe(0);
+    expect(mockCrudLoopback.createUser.mock.calls.length).toBe(0);
 
     request = makeRequest('notemail', testPassword1, testNickname1);
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.errorCode).toBe(RegisterErrorCode.REGISTER_ERROR_BAD_REQUEST);
-    expect(userCrudClient.client.createUser.mock.calls.length).toBe(0);
+    expect(mockCrudLoopback.createUser.mock.calls.length).toBe(0);
 
     request = makeRequest(testUsername1, '', testNickname1);
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.errorCode).toBe(RegisterErrorCode.REGISTER_ERROR_BAD_REQUEST);
-    expect(userCrudClient.client.createUser.mock.calls.length).toBe(0);
+    expect(mockCrudLoopback.createUser.mock.calls.length).toBe(0);
 
     request = makeRequest(testUsername1, testPassword1, '');
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.errorCode).toBe(RegisterErrorCode.REGISTER_ERROR_BAD_REQUEST);
-    expect(userCrudClient.client.createUser.mock.calls.length).toBe(0);
+    expect(mockCrudLoopback.createUser.mock.calls.length).toBe(0);
   });
 
   test('Username already Exists', async () => {
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new RegisterHandler(userCrudClient, hashAgent);
-    userCrudClient.client.createUser.mockImplementationOnce((request: CreateUserRequest):
+    mockCrudLoopback.createUser.mockImplementationOnce((request: CreateUserRequest):
     CreateUserResponse => {
       expect(request.user!.userInfo!.username).toBe(testUsername1.toLowerCase());
       expect(request.user!.userInfo!.nickname).toBe(testNickname1);
@@ -116,10 +116,10 @@ describe('Register Handler', () => {
 
   test('Bad Downstream Request', async () => {
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new RegisterHandler(userCrudClient, hashAgent);
-    userCrudClient.client.createUser.mockImplementationOnce(() => { throw new Error('Test Error'); });
+    mockCrudLoopback.createUser.mockImplementationOnce(() => { throw new Error('Test Error'); });
     hashAgent.hashPassword.mockImplementationOnce(() => Promise.resolve(testHash1));
 
     const request = makeRequest(testUsername1, testPassword1, testNickname1);

@@ -9,6 +9,8 @@ import { ApiRequest } from '../../../src/api_server/api_server_types';
 import GetAttemptHistoryHandler
   from '../../../src/controller/history_service_handlers/get_attempt_history_handler';
 import { GetAttemptsRequest, GetAttemptsResponse } from '../../../src/proto/history-crud-service';
+import { ILoopbackServiceChannel, LoopbackServiceClient } from '../../../src/api_server/loopback_server_types';
+import { IHistoryCrudService } from '../../../src/proto/history-crud-service.grpc-server';
 
 describe('Get Attempt History Handler', () => {
   const makeRequest = (limit: number, offset: number, questionId: number, username: string):
@@ -25,19 +27,20 @@ describe('Get Attempt History Handler', () => {
     return req;
   };
 
-  let historyCrudClient = makeMockLoopbackChannel();
-  let handler = new GetAttemptHistoryHandler(historyCrudClient);
+  let mockClient: any;
+  let historyCrudClient: ILoopbackServiceChannel<IHistoryCrudService>;
+  let handler: GetAttemptHistoryHandler;
 
   beforeEach(() => {
-    historyCrudClient = makeMockLoopbackChannel();
+    const { client, mock } = makeMockLoopbackChannel();
+    historyCrudClient = { client: client as LoopbackServiceClient<IHistoryCrudService> };
+    mockClient = mock;
     handler = new GetAttemptHistoryHandler(historyCrudClient);
   });
 
   test('Successful Get Attempt History', async () => {
-    historyCrudClient.callRoute.mockImplementationOnce((route: string, request: GetAttemptsRequest):
-    GetAttemptsResponse => {
-      expect(route)
-        .toBe('getAttempts');
+    mockClient.getAttempts.mockImplementationOnce(async (request: GetAttemptsRequest):
+    Promise<GetAttemptsResponse> => {
       expect(request.questionId)
         .toBe(testQuestion.questionId);
       expect(request.username)
@@ -61,10 +64,8 @@ describe('Get Attempt History Handler', () => {
   });
 
   test('Bad Request', async () => {
-    historyCrudClient.callRoute.mockImplementationOnce((route: string, request: GetAttemptsRequest):
-    GetAttemptsResponse => {
-      expect(route)
-        .toBe('getAttempts');
+    mockClient.getAttempts.mockImplementationOnce(async (request: GetAttemptsRequest):
+    Promise<GetAttemptsResponse> => {
       expect(request.questionId)
         .toBe(testQuestion.questionId);
       expect(request.username)
@@ -106,7 +107,7 @@ describe('Get Attempt History Handler', () => {
   });
 
   test('Bad Downstream Request', async () => {
-    historyCrudClient.callRoute.mockImplementationOnce(() => (
+    mockClient.getAttempts.mockImplementationOnce(() => (
       { errorMessage: undefined }
     )).mockImplementationOnce(() => {
       throw new Error('Cannot connect downstream');

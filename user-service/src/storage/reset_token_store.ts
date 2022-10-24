@@ -47,7 +47,7 @@ class ResetTokenStore implements IResetTokenStore {
     return true;
   }
 
-  async getToken(tokenString: string): Promise<StoredResetToken | null> {
+  async getToken(tokenString: string): Promise<StoredResetToken | undefined> {
     let token: PasswordResetTokenEntity | null = null;
 
     try {
@@ -60,11 +60,11 @@ class ResetTokenStore implements IResetTokenStore {
         });
     } catch (ex) {
       Logger.warn(`${ex}`);
-      return null;
+      return undefined;
     }
 
     if (token === null) {
-      return null;
+      return undefined;
     }
 
     return {

@@ -1,4 +1,4 @@
-import { ChannelCredentials } from '@grpc/grpc-js';
+import { ChannelCredentials, handleUnaryCall } from '@grpc/grpc-js';
 import {
   HistoryAttempt,
   PasswordUser,
@@ -9,6 +9,17 @@ import {
 import HistoryAttemptEntity from '../../src/db/history_entity';
 import { UserCrudServiceClient } from '../../src/proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../../src/proto/question-service.grpc-client';
+import {
+  CreateAttemptRequest,
+  CreateAttemptResponse,
+  DeleteAttemptRequest,
+  DeleteAttemptResponse,
+  GetAttemptRequest,
+  GetAttemptResponse,
+  GetAttemptsRequest,
+  GetAttemptsResponse,
+} from '../../src/proto/history-crud-service';
+import { LoopbackRouteHandler } from '../../src/api_server/loopback_server_types';
 
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
@@ -74,10 +85,26 @@ function makeMockAttemptStorage() {
   };
 }
 
+function forceCast<T extends object, U extends object>(object: any):
+LoopbackRouteHandler<handleUnaryCall<T, U>> {
+  return object as LoopbackRouteHandler<handleUnaryCall<T, U>>;
+}
+
 function makeMockLoopbackChannel() {
+  const mock = {
+    getAttempts: jest.fn(),
+    getAttempt: jest.fn(),
+    createAttempt: jest.fn(),
+    deleteAttempt: jest.fn(),
+  };
   return {
-    registerServiceRoutes: jest.fn(),
-    callRoute: jest.fn(),
+    client: {
+      getAttempts: forceCast<GetAttemptsRequest, GetAttemptsResponse>(mock.getAttempts),
+      getAttempt: forceCast<GetAttemptRequest, GetAttemptResponse>(mock.getAttempt),
+      createAttempt: forceCast<CreateAttemptRequest, CreateAttemptResponse>(mock.createAttempt),
+      deleteAttempt: forceCast<DeleteAttemptRequest, DeleteAttemptResponse>(mock.deleteAttempt),
+    },
+    mock,
   };
 }
 

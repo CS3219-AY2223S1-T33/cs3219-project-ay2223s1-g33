@@ -43,12 +43,12 @@ describe('Consume Password Token Handler', () => {
   };
 
   test('Successful Consume Token', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
 
     const handler = new ConsumeResetTokenHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getResetTokens.mockImplementationOnce((request: GetResetTokensRequest):
+    mockCrudLoopback.getResetTokens.mockImplementationOnce((request: GetResetTokensRequest):
     GetResetTokensResponse => {
       expect(request.tokenString).toBe(testTokenString1);
       expect(request.username).toBe('');
@@ -60,7 +60,7 @@ describe('Consume Password Token Handler', () => {
       };
     });
 
-    userCrudClient.client.getUser.mockImplementationOnce(
+    mockCrudLoopback.getUser.mockImplementationOnce(
       (request: GetUserRequest): GetUserResponse => {
         expect(request.user!.userId).toBe(testUserId1);
 
@@ -71,7 +71,7 @@ describe('Consume Password Token Handler', () => {
       },
     );
 
-    userCrudClient.client.deleteResetToken.mockImplementationOnce(
+    mockCrudLoopback.deleteResetToken.mockImplementationOnce(
       (request: DeleteResetTokenRequest): DeleteResetTokenResponse => {
         expect(request.tokenString).toBe(testTokenString1);
 
@@ -81,7 +81,7 @@ describe('Consume Password Token Handler', () => {
       },
     );
 
-    userCrudClient.client.editUser.mockImplementationOnce(
+    mockCrudLoopback.editUser.mockImplementationOnce(
       (request: EditUserRequest): EditUserResponse => {
         expect(request.user!.userInfo!.nickname).toBe(testNickname1);
         expect(request.user!.userInfo!.userId).toBe(testUserId1);
@@ -102,17 +102,17 @@ describe('Consume Password Token Handler', () => {
     expect(response.response.errorCode).toBe(
       ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_NONE,
     );
-    expect(userCrudClient.client.deleteResetToken.mock.calls.length).toBe(1);
-    expect(userCrudClient.client.editUser.mock.calls.length).toBe(1);
+    expect(mockCrudLoopback.deleteResetToken.mock.calls.length).toBe(1);
+    expect(mockCrudLoopback.editUser.mock.calls.length).toBe(1);
   });
 
   test('No Such Token', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
 
     const handler = new ConsumeResetTokenHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getResetTokens.mockImplementationOnce(
+    mockCrudLoopback.getResetTokens.mockImplementationOnce(
       (): GetResetTokensResponse => ({
         tokens: [],
         errorMessage: '',
@@ -128,12 +128,12 @@ describe('Consume Password Token Handler', () => {
   });
 
   test('Failed to delete token', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
 
     const handler = new ConsumeResetTokenHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getResetTokens.mockImplementationOnce((): GetResetTokensResponse => {
+    mockCrudLoopback.getResetTokens.mockImplementationOnce((): GetResetTokensResponse => {
       const afterNow = Math.floor(new Date().getTime() / 1000) + 3600;
 
       return {
@@ -142,7 +142,7 @@ describe('Consume Password Token Handler', () => {
       };
     });
 
-    userCrudClient.client.deleteResetToken.mockImplementationOnce(
+    mockCrudLoopback.deleteResetToken.mockImplementationOnce(
       (): DeleteResetTokenResponse => ({
         errorMessage: 'error',
       }),
@@ -157,12 +157,12 @@ describe('Consume Password Token Handler', () => {
   });
 
   test('No such user', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
 
     const handler = new ConsumeResetTokenHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getResetTokens.mockImplementationOnce(
+    mockCrudLoopback.getResetTokens.mockImplementationOnce(
       (): GetResetTokensResponse => {
         const afterNow = Math.floor(new Date().getTime() / 1000) + 3600;
 
@@ -173,14 +173,14 @@ describe('Consume Password Token Handler', () => {
       },
     );
 
-    userCrudClient.client.getUser.mockImplementationOnce(
+    mockCrudLoopback.getUser.mockImplementationOnce(
       (): GetUserResponse => ({
         user: undefined,
         errorMessage: '',
       }),
     );
 
-    userCrudClient.client.deleteResetToken.mockImplementationOnce(
+    mockCrudLoopback.deleteResetToken.mockImplementationOnce(
       (): DeleteResetTokenResponse => ({
         errorMessage: '',
       }),
@@ -195,12 +195,12 @@ describe('Consume Password Token Handler', () => {
   });
 
   test('Failed to change password', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
 
     const handler = new ConsumeResetTokenHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getResetTokens.mockImplementationOnce(
+    mockCrudLoopback.getResetTokens.mockImplementationOnce(
       (): GetResetTokensResponse => {
         const afterNow = Math.floor(new Date().getTime() / 1000) + 3600;
 
@@ -211,20 +211,20 @@ describe('Consume Password Token Handler', () => {
       },
     );
 
-    userCrudClient.client.getUser.mockImplementationOnce(
+    mockCrudLoopback.getUser.mockImplementationOnce(
       (): GetUserResponse => ({
         user: makeTestPasswordUser(testUserId1, testUsername1, testNickname1, testPassword1),
         errorMessage: '',
       }),
     );
 
-    userCrudClient.client.deleteResetToken.mockImplementationOnce(
+    mockCrudLoopback.deleteResetToken.mockImplementationOnce(
       (): DeleteResetTokenResponse => ({
         errorMessage: '',
       }),
     );
 
-    userCrudClient.client.editUser.mockImplementationOnce(
+    mockCrudLoopback.editUser.mockImplementationOnce(
       (): EditUserResponse => ({
         user: undefined,
         errorMessage: 'Test Error',
@@ -241,7 +241,7 @@ describe('Consume Password Token Handler', () => {
   });
 
   test('Bad Request', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient } = makeMockUserCrudLoopbackChannel();
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
 

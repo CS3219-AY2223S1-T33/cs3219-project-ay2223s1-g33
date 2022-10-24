@@ -29,10 +29,10 @@ describe('Get User Profile Handler', () => {
   };
 
   test('Successful Get User Profile', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new GetUserProfileHandler(userCrudClient);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1);
 
@@ -51,14 +51,14 @@ describe('Get User Profile Handler', () => {
   });
 
   test('Bad Request', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
     const handler = new GetUserProfileHandler(userCrudClient);
 
     let request = makeRequest('');
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
-    expect(userCrudClient.client.getUser.mock.calls.length).toBe(0);
+    expect(mockCrudLoopback.getUser.mock.calls.length).toBe(0);
 
     request = {
       request: {},
@@ -67,14 +67,14 @@ describe('Get User Profile Handler', () => {
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.user).toBeUndefined();
-    expect(userCrudClient.client.getUser.mock.calls.length).toBe(0);
+    expect(mockCrudLoopback.getUser.mock.calls.length).toBe(0);
   });
 
   test('Bad Downstream Request', async () => {
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new GetUserProfileHandler(userCrudClient);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1);
 

@@ -1,7 +1,26 @@
+import { handleUnaryCall } from '@grpc/grpc-js';
+import { LoopbackRouteHandler, LoopbackServiceClient } from '../../src/api_server/loopback_server_types';
 import { UserEntity } from '../../src/db';
 import StoredResetToken from '../../src/model/reset_token_model';
 import StoredUser from '../../src/model/user_store_model';
 import { PasswordResetToken, PasswordUser, User } from '../../src/proto/types';
+import {
+  CreateResetTokenRequest,
+  CreateResetTokenResponse,
+  CreateUserRequest,
+  CreateUserResponse,
+  DeleteResetTokenRequest,
+  DeleteResetTokenResponse,
+  DeleteUserRequest,
+  DeleteUserResponse,
+  EditUserRequest,
+  EditUserResponse,
+  GetResetTokensRequest,
+  GetResetTokensResponse,
+  GetUserRequest,
+  GetUserResponse,
+} from '../../src/proto/user-crud-service';
+import { IUserCrudService } from '../../src/proto/user-crud-service.grpc-server';
 
 function makeMockUserStorage() {
   return {
@@ -47,17 +66,41 @@ function makeMockUserCrudService() {
   };
 }
 
+function forceCast<T extends object, U extends object>(object: any):
+LoopbackRouteHandler<handleUnaryCall<T, U>> {
+  return object as LoopbackRouteHandler<handleUnaryCall<T, U>>;
+}
+
 function makeMockUserCrudLoopbackChannel() {
+  const mock = {
+    getUser: jest.fn(),
+    editUser: jest.fn(),
+    createUser: jest.fn(),
+    deleteUser: jest.fn(),
+    getResetTokens: jest.fn(),
+    deleteResetToken: jest.fn(),
+    createResetToken: jest.fn(),
+  };
+
   return {
-    client: {
-      getUser: jest.fn(),
-      editUser: jest.fn(),
-      createUser: jest.fn(),
-      deleteUser: jest.fn(),
-      getResetTokens: jest.fn(),
-      deleteResetToken: jest.fn(),
-      createResetToken: jest.fn(),
+    userCrudClient: {
+      client: {
+        getUser: forceCast<GetUserRequest, GetUserResponse>(mock.getUser),
+        editUser: forceCast<EditUserRequest, EditUserResponse>(mock.editUser),
+        createUser: forceCast<CreateUserRequest, CreateUserResponse>(mock.createUser),
+        deleteUser: forceCast<DeleteUserRequest, DeleteUserResponse>(mock.deleteUser),
+        getResetTokens: forceCast<GetResetTokensRequest, GetResetTokensResponse>(
+          mock.getResetTokens,
+        ),
+        deleteResetToken: forceCast<DeleteResetTokenRequest, DeleteResetTokenResponse>(
+          mock.deleteResetToken,
+        ),
+        createResetToken: forceCast<CreateResetTokenRequest, CreateResetTokenResponse>(
+          mock.createResetToken,
+        ),
+      } as LoopbackServiceClient<IUserCrudService>,
     },
+    mockCrudLoopback: mock,
   };
 }
 

@@ -22,8 +22,6 @@ class MatchingServiceApi implements ApiService<IQueueService> {
 
   serviceDefinition: ServiceDefinition<IQueueService>;
 
-  serviceImplementation: IQueueService;
-
   constructor(
     roomAuthService: IRoomSessionAgent,
     redisAdapter: IRedisMatchingAdapter,
@@ -46,15 +44,8 @@ class MatchingServiceApi implements ApiService<IQueueService> {
       ),
     };
 
-    const matchingQueueService: IQueueService = {
-      checkQueueStatus: handlerDefinitions.checkQueueStatus.grpcRouteHandler,
-      joinQueue: handlerDefinitions.joinQueue.grpcRouteHandler,
-      leaveQueue: handlerDefinitions.leaveQueue.grpcRouteHandler,
-    };
-
     this.serviceHandlerDefinition = handlerDefinitions;
     this.serviceDefinition = queueServiceDefinition;
-    this.serviceImplementation = matchingQueueService;
   }
 }
 

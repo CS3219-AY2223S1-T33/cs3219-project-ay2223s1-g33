@@ -10,7 +10,7 @@ declare type EmailBody = {
 };
 
 declare interface IEmailAdapter {
-  async sendEmail(metadata: EmailMetadata, body: EmailBody): Promise<boolean>;
+  sendEmail(metadata: EmailMetadata, body: EmailBody): Promise<boolean>;
 }
 
 export {

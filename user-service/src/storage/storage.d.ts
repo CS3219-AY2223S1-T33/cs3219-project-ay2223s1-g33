@@ -18,7 +18,7 @@ declare interface IUserStore {
 declare interface IResetTokenStore {
   addResetToken(token: StoredResetToken): Promise<boolean>;
   removeResetToken(tokenId: string): Promise<boolean>;
-  getToken(tokenId: string): Promise<StoredResetToken?>;
+  getToken(tokenId: string): Promise<StoredResetToken | undefined>;
   getTokensByUsername(username: string): Promise<StoredResetToken[]>;
 }
 

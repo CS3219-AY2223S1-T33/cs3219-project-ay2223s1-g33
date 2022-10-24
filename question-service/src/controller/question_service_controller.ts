@@ -23,8 +23,6 @@ class QuestionServiceApi implements ApiService<IQuestionService> {
 
   serviceDefinition: ServiceDefinition<IQuestionService>;
 
-  serviceImplementation: IQuestionService;
-
   constructor(storage: IStorage, redisStream: IStreamProducer) {
     const handlerDefinitions: ServiceHandlerDefinition<IQuestionService> = {
       getQuestion: fromApiHandler(
@@ -49,16 +47,8 @@ class QuestionServiceApi implements ApiService<IQuestionService> {
       ),
     };
 
-    const questionService: IQuestionService = {
-      getQuestion: handlerDefinitions.getQuestion.grpcRouteHandler,
-      createQuestion: handlerDefinitions.createQuestion.grpcRouteHandler,
-      editQuestion: handlerDefinitions.editQuestion.grpcRouteHandler,
-      deleteQuestion: handlerDefinitions.deleteQuestion.grpcRouteHandler,
-    };
-
     this.serviceHandlerDefinition = handlerDefinitions;
     this.serviceDefinition = questionServiceDefinition;
-    this.serviceImplementation = questionService;
   }
 }
 
