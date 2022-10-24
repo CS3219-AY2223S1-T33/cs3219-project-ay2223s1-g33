@@ -3,37 +3,33 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import {
   DeleteResetTokenRequest,
-  DeleteResetTokenResponse,
   EditUserRequest,
-  EditUserResponse,
   GetResetTokensRequest,
-  GetResetTokensResponse,
   GetUserRequest,
-  GetUserResponse,
 } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordResetToken, PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 class ConsumeResetTokenHandler
 implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
-  crudClient: ILoopbackServiceChannel<IUserCrudService>;
+  crudLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
   authAgent: IAuthenticationAgent;
 
   hashAgent: IHashAgent;
 
   constructor(
-    crudClient: ILoopbackServiceChannel<IUserCrudService>,
+    crudLoopback: ILoopbackServiceChannel<IUserCrudService>,
     authAgent: IAuthenticationAgent,
     hashAgent: IHashAgent,
   ) {
-    this.crudClient = crudClient;
+    this.crudLoopback = crudLoopback;
     this.authAgent = authAgent;
     this.hashAgent = hashAgent;
   }
@@ -41,6 +37,13 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
   async handle(request: ApiRequest<ConsumeResetTokenRequest>):
   Promise<ApiResponse<ConsumeResetTokenResponse>> {
     const { token, newPassword } = request.request;
+
+    if (token.length === 0 || newPassword.length === 0) {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_BAD_REQUEST,
+        'Bad Request',
+      );
+    }
 
     const tokenObject = await this.getTokenData(token);
     if (!tokenObject) {
@@ -107,12 +110,8 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       tokenString: token,
     };
 
-    const queryResponse = await this.crudClient
-      .callRoute<GetResetTokensRequest, GetResetTokensResponse>(
-      'getResetTokens',
-      crudQueryRequest,
-      GetResetTokensResponse,
-    );
+    const queryResponse = await this.crudLoopback.client
+      .getResetTokens(crudQueryRequest);
 
     if (queryResponse.errorMessage !== '' || queryResponse.tokens.length === 0) {
       return undefined;
@@ -126,13 +125,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       tokenString: token,
     };
 
-    const queryResponse = await this.crudClient
-      .callRoute<DeleteResetTokenRequest, DeleteResetTokenResponse>(
-      'deleteResetToken',
-      deleteRequest,
-      DeleteResetTokenResponse,
-    );
-
+    const queryResponse = await this.crudLoopback.client.deleteResetToken(deleteRequest);
     return queryResponse.errorMessage === '';
   }
 
@@ -143,13 +136,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       }),
     };
 
-    const queryResponse = await this.crudClient
-      .callRoute<GetUserRequest, GetUserResponse>(
-      'getUser',
-      crudQueryRequest,
-      GetUserResponse,
-    );
-
+    const queryResponse = await this.crudLoopback.client.getUser(crudQueryRequest);
     if (queryResponse.errorMessage !== '' || !queryResponse.user) {
       return undefined;
     }
@@ -164,13 +151,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       user: newUserModel,
     };
 
-    const updateResponse = await this.crudClient
-      .callRoute<EditUserRequest, EditUserResponse>(
-      'editUser',
-      editUserRequest,
-      EditUserResponse,
-    );
-
+    const updateResponse = await this.crudLoopback.client.editUser(editUserRequest);
     return updateResponse.errorMessage === '';
   }
 

@@ -1,5 +1,7 @@
+import { UserEntity } from '../../src/db';
+import StoredResetToken from '../../src/model/reset_token_model';
 import StoredUser from '../../src/model/user_store_model';
-import { PasswordUser, User } from '../../src/proto/types';
+import { PasswordResetToken, PasswordUser, User } from '../../src/proto/types';
 
 function makeMockUserStorage() {
   return {
@@ -12,10 +14,20 @@ function makeMockUserStorage() {
   };
 }
 
+function makeMockTokenStorage() {
+  return {
+    addResetToken: jest.fn(),
+    removeResetToken: jest.fn(),
+    getToken: jest.fn(),
+    getTokensByUsername: jest.fn(),
+  };
+}
+
 function makeMockAuthAgent() {
   return {
     createToken: jest.fn(),
     invalidateToken: jest.fn(),
+    invalidateTokensBeforeTime: jest.fn(),
   };
 }
 
@@ -35,10 +47,17 @@ function makeMockUserCrudService() {
   };
 }
 
-function makeMockLoopbackChannel() {
+function makeMockUserCrudLoopbackChannel() {
   return {
-    registerServiceRoutes: jest.fn(),
-    callRoute: jest.fn(),
+    client: {
+      getUser: jest.fn(),
+      editUser: jest.fn(),
+      createUser: jest.fn(),
+      deleteUser: jest.fn(),
+      getResetTokens: jest.fn(),
+      deleteResetToken: jest.fn(),
+      createResetToken: jest.fn(),
+    },
   };
 }
 
@@ -62,6 +81,14 @@ function makeTestPasswordUser(
   };
 }
 
+function makeTestResetToken(token: string, userId: number, expiresAt: number): PasswordResetToken {
+  return {
+    token,
+    userId,
+    expiresAt,
+  };
+}
+
 function makeStoredUser(
   userId: number,
   username: string,
@@ -76,6 +103,29 @@ function makeStoredUser(
   };
 }
 
+function makeStoredToken(
+  token: string,
+  user: StoredUser,
+  expiresAt: Date,
+): StoredResetToken {
+  const userEntity: UserEntity = {
+    isActive: true,
+    ...user,
+  };
+
+  return {
+    token,
+    user: userEntity,
+    expiresAt,
+  };
+}
+
+function makeMockEmailSender() {
+  return {
+    sendResetEmail: jest.fn(),
+  };
+}
+
 const testData = {
   testUserId1: 10,
   testUsername1: 'User@email.com',
@@ -86,6 +136,10 @@ const testData = {
   testUsername2: 'User2@email.com',
   testNickname2: 'Thomas Ong',
   testPassword2: 'Password2',
+
+  testTokenString1: 'TOKENA',
+  testTokenString2: 'TOKENB',
+  testTokenString3: 'TOKENC',
 };
 
 function makeRedisStreamProducer() {
@@ -96,13 +150,17 @@ function makeRedisStreamProducer() {
 
 export {
   makeMockUserStorage,
+  makeMockTokenStorage,
   makeMockAuthAgent,
   makeMockHashAgent,
   makeMockUserCrudService,
-  makeMockLoopbackChannel,
+  makeMockUserCrudLoopbackChannel,
   makeTestUser,
   makeTestPasswordUser,
   makeStoredUser,
   makeRedisStreamProducer,
   testData,
+  makeStoredToken,
+  makeMockEmailSender,
+  makeTestResetToken,
 };

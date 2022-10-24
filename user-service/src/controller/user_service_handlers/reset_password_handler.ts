@@ -5,33 +5,29 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { IEmailSender } from '../../email/email_sender';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import {
   CreateResetTokenRequest,
-  CreateResetTokenResponse,
   DeleteResetTokenRequest,
-  DeleteResetTokenResponse,
   GetResetTokensRequest,
-  GetResetTokensResponse,
   GetUserRequest,
-  GetUserResponse,
 } from '../../proto/user-crud-service';
 import { User } from '../../proto/types';
 import Logger from '../../utils/logger';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 const MAX_ACTIVE_TOKENS = 3;
 
 class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPasswordResponse> {
   emailClient: IEmailSender;
 
-  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
+  rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
-  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>, client: IEmailSender) {
+  constructor(rpcLoopback: ILoopbackServiceChannel<IUserCrudService>, client: IEmailSender) {
     this.emailClient = client;
-    this.rpcClient = rpcClient;
+    this.rpcLoopback = rpcLoopback;
   }
 
   async handle(request: ApiRequest<ResetPasswordRequest>):
@@ -48,12 +44,12 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
     const userObject = await this.getUserByUsername(username);
     if (!userObject) {
       return ResetPasswordHandler.buildErrorResponse(
-        ResetPasswordErrorCode.RESET_PASSWORD_ERROR_INTERNAL_ERROR,
+        ResetPasswordErrorCode.RESET_PASSWORD_ERROR_BAD_REQUEST,
         'No Such User',
       );
     }
 
-    const isUnderLimit = this.checkAndDeleteOldTokens(username);
+    const isUnderLimit = await this.checkAndDeleteOldTokens(username);
 
     if (!isUnderLimit) {
       return ResetPasswordHandler.buildErrorResponse(
@@ -66,7 +62,7 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
     const nowUnixSeconds = Math.floor(new Date().getTime() / 1000);
     const expiry = nowUnixSeconds + 60 * 60; // 1 hour
 
-    const isCreateSuccess = this.saveToken(token, userObject.userId, expiry);
+    const isCreateSuccess = await this.saveToken(token, userObject.userId, expiry);
     if (!isCreateSuccess) {
       return ResetPasswordHandler.buildErrorResponse(
         ResetPasswordErrorCode.RESET_PASSWORD_ERROR_INTERNAL_ERROR,
@@ -92,32 +88,30 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
       tokenString: '',
     };
 
-    const queryResponse = await this.rpcClient
-      .callRoute<GetResetTokensRequest, GetResetTokensResponse>(
-      'getResetTokens',
-      crudQueryRequest,
-      GetResetTokensResponse,
-    );
+    try {
+      const queryResponse = await this.rpcLoopback
+        .client
+        .getResetTokens(crudQueryRequest);
 
-    if (queryResponse.errorMessage !== '') {
+      if (queryResponse.errorMessage !== '') {
+        return false;
+      }
+
+      if (queryResponse.tokens.length >= MAX_ACTIVE_TOKENS) {
+        const crudDeleteRequest: DeleteResetTokenRequest = {
+          tokenString: queryResponse.tokens[0].token,
+        };
+        const isDelSuccess = await this.rpcLoopback.client
+          .deleteResetToken(crudDeleteRequest);
+
+        if (isDelSuccess.errorMessage !== '') {
+          return false;
+        }
+      }
+    } catch {
       return false;
     }
 
-    if (queryResponse.tokens.length >= MAX_ACTIVE_TOKENS) {
-      const crudDeleteRequest: DeleteResetTokenRequest = {
-        tokenString: queryResponse.tokens[0].token,
-      };
-      const isDelSuccess = await this.rpcClient
-        .callRoute<DeleteResetTokenRequest, DeleteResetTokenResponse>(
-        'deleteResetToken',
-        crudDeleteRequest,
-        DeleteResetTokenResponse,
-      );
-
-      if (isDelSuccess.errorMessage !== '') {
-        return false;
-      }
-    }
     return true;
   }
 
@@ -130,14 +124,14 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
       },
     };
 
-    const response = await this.rpcClient
-      .callRoute<CreateResetTokenRequest, CreateResetTokenResponse>(
-      'createResetToken',
-      crudInsertRequest,
-      CreateResetTokenResponse,
-    );
+    try {
+      const response = await this.rpcLoopback.client
+        .createResetToken(crudInsertRequest);
 
-    return response.errorMessage === '';
+      return response.errorMessage === '';
+    } catch {
+      return false;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -147,18 +141,18 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
       }),
     };
 
-    const queryResponse = await this.rpcClient
-      .callRoute<GetUserRequest, GetUserResponse>(
-      'getUser',
-      crudQueryRequest,
-      GetUserResponse,
-    );
+    try {
+      const queryResponse = await this.rpcLoopback.client
+        .getUser(crudQueryRequest);
 
-    if (queryResponse.errorMessage !== '' || !queryResponse.user) {
+      if (queryResponse.errorMessage !== '' || !queryResponse.user) {
+        return undefined;
+      }
+
+      return queryResponse.user.userInfo;
+    } catch {
       return undefined;
     }
-
-    return queryResponse.user.userInfo;
   }
 
   static validateRequest(username: string): (ValidatedRequest | Error) {
