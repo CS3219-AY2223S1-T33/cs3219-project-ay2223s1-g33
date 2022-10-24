@@ -10,8 +10,7 @@
     "sourceMap": true,
     "strict": true,
     "resolveJsonModule": true,
-    "isolatedModules": false,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "isolatedModules": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**/*"],

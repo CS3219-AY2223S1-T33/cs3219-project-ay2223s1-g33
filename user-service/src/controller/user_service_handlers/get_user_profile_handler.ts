@@ -3,12 +3,13 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import { PasswordUser, User } from '../../proto/types';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
-import { GetUserRequest, GetUserResponse } from '../../proto/user-crud-service';
+import { GetUserRequest } from '../../proto/user-crud-service';
 import GatewayConstants from '../../utils/gateway_constants';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
+import { safeReadFirstHeader } from '../controller_utils';
 
 function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUserProfileResponse> {
   return {
@@ -18,22 +19,22 @@ function getHeaderlessResponse(resp: GetUserProfileResponse): ApiResponse<GetUse
 }
 
 class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUserProfileResponse> {
-  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
+  rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
   constructor(
-    rpcClient: ILoopbackServiceChannel<IUserCrudService>,
+    rpcLoopback: ILoopbackServiceChannel<IUserCrudService>,
   ) {
-    this.rpcClient = rpcClient;
+    this.rpcLoopback = rpcLoopback;
   }
 
   async handle(request: ApiRequest<GetUserProfileRequest>)
     : Promise<ApiResponse<GetUserProfileResponse>> {
-    if (!(GatewayConstants.GATEWAY_HEADER_USERNAME in request.headers)) {
-      return GetUserProfileHandler.buildErrorResponse('Bad request from gateway');
-    }
+    const username = safeReadFirstHeader(
+      request.headers,
+      GatewayConstants.GATEWAY_HEADER_USERNAME,
+    );
 
-    const username = request.headers[GatewayConstants.GATEWAY_HEADER_USERNAME][0];
-    if (username.length === 0) {
+    if (!username || username.length === 0) {
       return GetUserProfileHandler.buildErrorResponse('Bad request from gateway');
     }
 
@@ -66,7 +67,7 @@ class GetUserProfileHandler implements IApiHandler<GetUserProfileRequest, GetUse
       user: searchUserObject,
     };
 
-    const result = await this.rpcClient.callRoute<GetUserRequest, GetUserResponse>('getUser', request, GetUserResponse);
+    const result = await this.rpcLoopback.client.getUser(request);
     if (!result) {
       return undefined;
     }

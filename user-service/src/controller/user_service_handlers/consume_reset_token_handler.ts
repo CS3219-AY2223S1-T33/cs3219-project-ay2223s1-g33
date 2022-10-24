@@ -3,36 +3,47 @@ import {
   IApiHandler,
   ApiRequest,
   ApiResponse,
-  ILoopbackServiceChannel,
 } from '../../api_server/api_server_types';
 import {
   DeleteResetTokenRequest,
-  DeleteResetTokenResponse,
   EditUserRequest,
-  EditUserResponse,
   GetResetTokensRequest,
-  GetResetTokensResponse,
   GetUserRequest,
-  GetUserResponse,
 } from '../../proto/user-crud-service';
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
-import { PasswordResetToken, User } from '../../proto/types';
+import { PasswordResetToken, PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
+import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 class ConsumeResetTokenHandler
 implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
-  rpcClient: ILoopbackServiceChannel<IUserCrudService>;
+  crudLoopback: ILoopbackServiceChannel<IUserCrudService>;
+
+  authAgent: IAuthenticationAgent;
 
   hashAgent: IHashAgent;
 
-  constructor(rpcClient: ILoopbackServiceChannel<IUserCrudService>, hashAgent: IHashAgent) {
-    this.rpcClient = rpcClient;
+  constructor(
+    crudLoopback: ILoopbackServiceChannel<IUserCrudService>,
+    authAgent: IAuthenticationAgent,
+    hashAgent: IHashAgent,
+  ) {
+    this.crudLoopback = crudLoopback;
+    this.authAgent = authAgent;
     this.hashAgent = hashAgent;
   }
 
   async handle(request: ApiRequest<ConsumeResetTokenRequest>):
   Promise<ApiResponse<ConsumeResetTokenResponse>> {
     const { token, newPassword } = request.request;
+
+    if (token.length === 0 || newPassword.length === 0) {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_BAD_REQUEST,
+        'Bad Request',
+      );
+    }
 
     const tokenObject = await this.getTokenData(token);
     if (!tokenObject) {
@@ -59,11 +70,31 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
     }
 
     const hashedPassword = await this.hashAgent.hashPassword(newPassword);
-    const isSuccessful = await this.changeUserPassword(tokenObject.userId, hashedPassword);
+    const user = await this.getUser(tokenObject.userId);
+    if (!user || !user.userInfo) {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
+        'Could not find user',
+      );
+    }
+
+    const isSuccessful = await this.changeUserPassword(user, hashedPassword);
     if (!isSuccessful) {
       return ConsumeResetTokenHandler.buildErrorResponse(
         ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
         'Could not save new password',
+      );
+    }
+
+    try {
+      await this.authAgent.invalidateTokensBeforeTime(
+        user.userInfo.username,
+        Math.floor(new Date().getTime() / 1000),
+      );
+    } catch {
+      return ConsumeResetTokenHandler.buildErrorResponse(
+        ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR,
+        'Could not invalidate old tokens',
       );
     }
 
@@ -79,12 +110,8 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       tokenString: token,
     };
 
-    const queryResponse = await this.rpcClient
-      .callRoute<GetResetTokensRequest, GetResetTokensResponse>(
-      'getResetTokens',
-      crudQueryRequest,
-      GetResetTokensResponse,
-    );
+    const queryResponse = await this.crudLoopback.client
+      .getResetTokens(crudQueryRequest);
 
     if (queryResponse.errorMessage !== '' || queryResponse.tokens.length === 0) {
       return undefined;
@@ -98,47 +125,33 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       tokenString: token,
     };
 
-    const queryResponse = await this.rpcClient
-      .callRoute<DeleteResetTokenRequest, DeleteResetTokenResponse>(
-      'deleteResetToken',
-      deleteRequest,
-      DeleteResetTokenResponse,
-    );
-
+    const queryResponse = await this.crudLoopback.client.deleteResetToken(deleteRequest);
     return queryResponse.errorMessage === '';
   }
 
-  async changeUserPassword(userId: number, newPassword: string): Promise<boolean> {
+  async getUser(userId: number): Promise<PasswordUser | undefined> {
     const crudQueryRequest: GetUserRequest = {
       user: User.create({
         userId,
       }),
     };
 
-    const queryResponse = await this.rpcClient
-      .callRoute<GetUserRequest, GetUserResponse>(
-      'getUser',
-      crudQueryRequest,
-      GetUserResponse,
-    );
-
+    const queryResponse = await this.crudLoopback.client.getUser(crudQueryRequest);
     if (queryResponse.errorMessage !== '' || !queryResponse.user) {
-      return false;
+      return undefined;
     }
 
-    const userModel = queryResponse.user;
-    userModel.password = newPassword;
+    return queryResponse.user;
+  }
+
+  async changeUserPassword(userModel: PasswordUser, newPassword: string): Promise<boolean> {
+    const newUserModel = userModel;
+    newUserModel.password = newPassword;
     const editUserRequest: EditUserRequest = {
-      user: userModel,
+      user: newUserModel,
     };
 
-    const updateResponse = await this.rpcClient
-      .callRoute<EditUserRequest, EditUserResponse>(
-      'editUser',
-      editUserRequest,
-      EditUserResponse,
-    );
-
+    const updateResponse = await this.crudLoopback.client.editUser(editUserRequest);
     return updateResponse.errorMessage === '';
   }
 

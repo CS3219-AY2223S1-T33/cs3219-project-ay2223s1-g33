@@ -1,4 +1,4 @@
-name: cd-build
+name: cd-deployment
 
 on:
   push:
@@ -15,7 +15,9 @@ jobs:
   deploy:
     name: Deploy to AWS ECS
     runs-on: ubuntu-latest
-    environment: production
+    environment:
+      name: 'Production'
+      url: https://peerprep.launchsite.com.sg
 
     steps:
       - name: Set up repository
@@ -64,50 +66,85 @@ jobs:
 
           # node services
 
-          # frontend
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile .
+          PID_LIST=()
+          # Build Images
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service &
+          PID_LIST+=($!)
+
+          RET_CODES=()
+          EXIT_CODE=0
+
+          for PID in ${PID_LIST[*]}; do
+              wait $PID
+              CODE=$?
+              if [ $CODE -ne 0 ]; then
+                  EXIT_CODE=$CODE
+              fi
+          done
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            exit $EXIT_CODE
+          fi
+
+          # Image Upload
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
           echo "::set-output name=frontend-image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
 
           # question-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
           echo "::set-output name=question-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG"
 
           # matching-service 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
           echo "::set-output name=matching-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG"
 
           # collab-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
           echo "::set-output name=collab-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG"
 
           # user-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
           echo "::set-output name=user-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG"
 
           # history-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
           echo "::set-output name=history-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG"
 
           # go services
 
           # matchmaker
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
           echo "::set-output name=matchmaker-image::$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG"
 
           # gateway
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
           echo "::set-output name=gateway-image::$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG"
 
           # session-service
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
           echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
 
@@ -135,6 +172,7 @@ jobs:
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            REDIS_SERVER_URL=redis:6379
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
@@ -158,6 +196,8 @@ jobs:
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            REDIS_SERVER_URL=redis:6379
+
             SESSION_SERVICE_URL=session-service:4100
             EMAIL_SERVICE=Outlook365
             EMAIL_SERVER=smtp.office365.com
@@ -166,8 +206,7 @@ jobs:
 
             EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
             EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-            RESET_PASSWORD_URL="http://ec2-13-229-235-156.ap-southeast-1.compute.amazonaws.com/resetToken?token=$TOKEN"
-
+            RESET_PASSWORD_URL="https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN"
 
       - name: Update task definition for matching-service
         id: task-def-matching-service
@@ -209,6 +248,13 @@ jobs:
           task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
           container-name: gateway
           image: ${{ steps.build-image.outputs.gateway-image }}      
+          environment-variables: |
+            USER_BFF_SERVER=user-service:4000
+            MATCHING_SERVER=matching-service:4001
+            COLLAB_SERVER=collab-service:4003
+            HISTORY_SERVER=history-service:4005
+            SESSION_SERVER=session-service:4100
+            STATIC_SERVER=frontend:80
 
       - name: Update task definition for history-service
         id: task-def-history-service
@@ -222,6 +268,7 @@ jobs:
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            REDIS_SERVER_URL=redis:6379
             USER_SERVICE_URL=user-service:4000
             QUESTION_SERVICE_URL=question-service:4004
 

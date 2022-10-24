@@ -20,6 +20,11 @@ enum AddBlacklistErrorCode {
   ADD_BLACKLIST_ERROR_INTERNAL = 100;
 }
 
+message UserTimestampPair {
+  string username = 1;
+  uint64 timestamp = 2;
+}
+
 message CreateTokenRequest {
   string email = 1;
   string nickname = 2;
@@ -46,6 +51,7 @@ message ValidateTokenResponse {
 message AddBlacklistRequest {
   string session_token = 1;
   string refresh_token = 2;
+  UserTimestampPair user_before = 3;
 }
 
 message AddBlacklistResponse {

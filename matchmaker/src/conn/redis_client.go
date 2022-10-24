@@ -30,7 +30,7 @@ const (
 	usernameKey        = "user"
 	difficultyKey      = "diff"
 	matchKeyTemplate   = "matchmaker-%s"
-	matchValueTemplate = "%d;%s"
+	matchValueTemplate = "%d;;%s"
 )
 
 func NewRedisMatchmakerClient(redisClient *redis.Client, queueLifespan time.Duration) RedisMatchmakerClient {

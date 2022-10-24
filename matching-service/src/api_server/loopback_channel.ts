@@ -1,31 +1,39 @@
-import { UntypedServiceImplementation } from '@grpc/grpc-js';
+import { handleUnaryCall, UntypedServiceImplementation } from '@grpc/grpc-js';
 import { IMessageType } from '@protobuf-ts/runtime';
-import { LoopbackRouteHandler, ApiService, ILoopbackServiceChannel } from './api_server_types';
+import { ApiService, IApiHandler } from './api_server_types';
+import { LoopbackRouteHandler, ILoopbackServiceChannel, LoopbackServiceClient } from './loopback_server_types';
 
 export default class LoopbackApiChannel<S extends UntypedServiceImplementation>
 implements ILoopbackServiceChannel<S> {
-  routes: { [route: string]: LoopbackRouteHandler };
+  client: LoopbackServiceClient<S>;
 
-  constructor() {
-    this.routes = {};
-  }
-
-  registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void {
+  constructor(apiService: ApiService<S>) {
+    const loopbackClient: { [k: string]: LoopbackRouteHandler<any> } = {};
     Object.keys(apiService.serviceHandlerDefinition).forEach((key) => {
-      this.routes[key] = apiService.serviceHandlerDefinition[key].loopbackRouteHandler;
+      const handler = apiService.serviceHandlerDefinition[key];
+      loopbackClient[key] = LoopbackApiChannel.getLoopbackRouteHandler(
+        handler.handler,
+        handler.reqType,
+        handler.respType,
+      );
     });
+
+    this.client = loopbackClient as LoopbackServiceClient<S>;
   }
 
-  async callRoute<T extends object, U extends object>(
-    route: string,
-    request: T,
-    responseContainer: IMessageType<U>,
-  ): Promise<U> {
-    if (!(route in this.routes)) {
-      throw new Error('No Such Route');
-    }
+  static getLoopbackRouteHandler<RequestType extends object, ResponseType extends object>(
+    handler: IApiHandler<RequestType, ResponseType>,
+    reqType: IMessageType<RequestType>,
+    respType: IMessageType<ResponseType>,
+  ): LoopbackRouteHandler<handleUnaryCall<RequestType, ResponseType>> {
+    return async (request: RequestType): Promise<ResponseType> => {
+      const requestObject = reqType.create(request);
+      const result = await handler.handle({
+        request: requestObject,
+        headers: {},
+      });
 
-    const response = await this.routes[route](request);
-    return responseContainer.create(response);
+      return respType.create(result.response);
+    };
   }
 }

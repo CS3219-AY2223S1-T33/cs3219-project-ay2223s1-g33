@@ -25,8 +25,6 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
 
   serviceDefinition: ServiceDefinition<IHistoryCrudService>;
 
-  serviceImplementation: IHistoryCrudService;
-
   constructor(storage: IStorage, userServiceUrl: string, questionServiceUrl: string) {
     const userGrpcClient = new UserCrudServiceClient(
       userServiceUrl,
@@ -65,16 +63,8 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
       ),
     };
 
-    const historyCrudService: IHistoryCrudService = {
-      getAttempt: handlerDefinitions.getAttempt.grpcRouteHandler,
-      getAttempts: handlerDefinitions.getAttempts.grpcRouteHandler,
-      createAttempt: handlerDefinitions.createAttempt.grpcRouteHandler,
-      deleteAttempt: handlerDefinitions.deleteAttempt.grpcRouteHandler,
-    };
-
     this.serviceHandlerDefinition = handlerDefinitions;
     this.serviceDefinition = historyCrudServiceDefinition;
-    this.serviceImplementation = historyCrudService;
   }
 }
 

@@ -24,13 +24,15 @@ import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
-import { Language } from "../types";
+import { Chat, Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
+import { addMessage, clearChat } from "../feature/chat/chatSlice";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
 type ErrorMessage = { errorMsg: string };
+type QuestionMessage = { question: string };
 
 let isInit = false;
 function Session() {
@@ -66,8 +68,9 @@ function Session() {
     /** Helper function to configure websocket with yDoc and custom events. */
     const buildWSProvider = (yd: Y.Doc, params: { [x: string]: string }) => {
       // First 2 params builds the room session: ws://localhost:5001/ + ws
+      const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
       const ws = new WebsocketProvider(
-        `ws://${window.location.host}/api/`,
+        `${wsProtocol}://${window.location.host}/api/`,
         "roomws",
         yd,
         { params, disableBc: true }
@@ -115,7 +118,7 @@ function Session() {
         setSelectedLang(language);
       });
 
-      ws.on("question_get", (q: { question: string }) => {
+      ws.on("question_get", (q: QuestionMessage) => {
         const questionObj: Question = Question.fromJsonString(q.question);
         toast.sendInfoMessage("Question loaded");
         setQuestion(questionObj);
@@ -134,6 +137,10 @@ function Session() {
           toast.sendErrorMessage(errorMsg);
         }
         setIsEditorLocked.off();
+      });
+
+      ws.on("message_receive", (e: Chat) => {
+        dispatch(addMessage(e));
       });
 
       return ws;
@@ -172,6 +179,8 @@ function Session() {
     yDoc?.destroy();
     // Clears the room session token
     dispatch(leaveRoom());
+    // Clears the session chat
+    dispatch(clearChat());
 
     // Just in case when use joins a brand new session
     isInit = false;
@@ -183,7 +192,7 @@ function Session() {
   };
 
   const downloadCodeHandler = () => {
-    toast.sendInfoMessage("Downloading file...", { duration: 3000 });
+    toast.sendInfoMessage("Downloading file...");
     saveFile(code, selectedLang);
   };
 
@@ -209,6 +218,14 @@ function Session() {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
 
+  const sendTextMessageHandler = (content: string) => {
+    if (!provider) {
+      return;
+    }
+
+    provider.sendTextMessage(nickname, content);
+  };
+
   // Ensures that the yDoc components are ready before passing to Editor
   const collabDefined = yText && provider && undoManager;
 
@@ -218,7 +235,11 @@ function Session() {
       <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
-        <EditorTabs question={question} getQuestion={getQuestionHandler} />
+        <EditorTabs
+          question={question}
+          getQuestion={getQuestionHandler}
+          sendTextMessage={sendTextMessageHandler}
+        />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
           {/* Code Editor Settings */}

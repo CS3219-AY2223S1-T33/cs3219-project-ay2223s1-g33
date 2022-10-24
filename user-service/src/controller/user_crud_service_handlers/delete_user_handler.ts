@@ -12,8 +12,11 @@ function getHeaderlessResponse(resp: DeleteUserResponse): ApiResponse<DeleteUser
 class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResponse> {
   userStore: IUserStore;
 
-  constructor(storage: IStorage) {
+  redisStream: IStreamProducer;
+
+  constructor(storage: IStorage, redisStream: IStreamProducer) {
     this.userStore = storage.getUserStore();
+    this.redisStream = redisStream;
   }
 
   async handle(request: ApiRequest<DeleteUserRequest>): Promise<ApiResponse<DeleteUserResponse>> {
@@ -30,6 +33,15 @@ class DeleteUserHandler implements IApiHandler<DeleteUserRequest, DeleteUserResp
     } catch {
       return getHeaderlessResponse({
         errorMessage: 'Database Error',
+      });
+    }
+
+    // Push delete-change to Stream
+    try {
+      await this.redisStream.pushMessage(requestObject.userId.toString());
+    } catch {
+      return getHeaderlessResponse({
+        errorMessage: 'Redis Error',
       });
     }
 
