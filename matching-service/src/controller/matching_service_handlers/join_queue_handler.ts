@@ -37,16 +37,17 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
       );
     }
 
-    const isQueueingSuccessful = await this.redisAdapter
+    const queueId = await this.redisAdapter
       .pushStream(username, validatedRequest.difficulties);
 
-    if (!isQueueingSuccessful) {
+    if (!queueId) {
       return JoinQueueHandler.buildResponse(
         JoinQueueErrorCode.JOIN_QUEUE_INTERNAL_ERROR,
         'Unable to queue',
       );
     }
 
+    await this.redisAdapter.setUserLock(username, queueId);
     return JoinQueueHandler.buildResponse(
       JoinQueueErrorCode.JOIN_QUEUE_ERROR_NONE,
       '',
