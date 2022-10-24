@@ -9,7 +9,10 @@ const AUTH_SCHEMA = {
     .oneOf([yup.ref("password"), "Please ensure your passwords match."]),
 };
 
-const LOGIN_VALIDATOR = yup.object().shape(AUTH_SCHEMA);
+const LOGIN_VALIDATOR = yup.object().shape({
+  email: AUTH_SCHEMA.email,
+  password: AUTH_SCHEMA.password,
+});
 
 const NICKNAME_SCHEMA = {
   nickname: yup.string().required("Please enter your nickname."),
