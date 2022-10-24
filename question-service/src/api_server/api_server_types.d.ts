@@ -20,7 +20,7 @@ declare interface IApiHandler<RequestType, ResponseType> {
   handle(request: ApiRequest<RequestType>): Promise<ApiResponse<ResponseType>>;
 }
 
-declare type TypedApiHandler<RequestType, ResponseType> = {
+declare type TypedApiHandler<RequestType extends object, ResponseType extends object> = {
   handler: IApiHandler<RequestType, ResponseType>;
   reqType: IMessageType<RequestType>;
   respType: IMessageType<ResponseType>;
