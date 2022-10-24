@@ -164,6 +164,50 @@ export interface ConsumeResetTokenResponse {
     errorMessage: string;
 }
 /**
+ * @generated from protobuf message user_service.ChangeNicknameRequest
+ */
+export interface ChangeNicknameRequest {
+    /**
+     * @generated from protobuf field: string new_nickname = 1;
+     */
+    newNickname: string;
+}
+/**
+ * @generated from protobuf message user_service.ChangeNicknameResponse
+ */
+export interface ChangeNicknameResponse {
+    /**
+     * @generated from protobuf field: user_service.ChangeNicknameErrorCode error_code = 1;
+     */
+    errorCode: ChangeNicknameErrorCode;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message user_service.ChangePasswordRequest
+ */
+export interface ChangePasswordRequest {
+    /**
+     * @generated from protobuf field: string new_password = 1;
+     */
+    newPassword: string;
+}
+/**
+ * @generated from protobuf message user_service.ChangePasswordResponse
+ */
+export interface ChangePasswordResponse {
+    /**
+     * @generated from protobuf field: user_service.ChangePasswordErrorCode error_code = 1;
+     */
+    errorCode: ChangePasswordErrorCode;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
  * @generated from protobuf enum user_service.LoginErrorCode
  */
 export enum LoginErrorCode {
@@ -259,6 +303,40 @@ export enum ConsumeResetTokenErrorCode {
      * @generated from protobuf enum value: CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR = 101;
      */
     CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR = 101
+}
+/**
+ * @generated from protobuf enum user_service.ChangeNicknameErrorCode
+ */
+export enum ChangeNicknameErrorCode {
+    /**
+     * @generated from protobuf enum value: CHANGE_NICKNAME_ERROR_NONE = 0;
+     */
+    CHANGE_NICKNAME_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: CHANGE_NICKNAME_ERROR_BAD_REQUEST = 100;
+     */
+    CHANGE_NICKNAME_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: CHANGE_NICKNAME_ERROR_INTERNAL_ERROR = 101;
+     */
+    CHANGE_NICKNAME_ERROR_INTERNAL_ERROR = 101
+}
+/**
+ * @generated from protobuf enum user_service.ChangePasswordErrorCode
+ */
+export enum ChangePasswordErrorCode {
+    /**
+     * @generated from protobuf enum value: CHANGE_PASSWORD_ERROR_NONE = 0;
+     */
+    CHANGE_PASSWORD_ERROR_NONE = 0,
+    /**
+     * @generated from protobuf enum value: CHANGE_PASSWORD_ERROR_BAD_REQUEST = 100;
+     */
+    CHANGE_PASSWORD_ERROR_BAD_REQUEST = 100,
+    /**
+     * @generated from protobuf enum value: CHANGE_PASSWORD_ERROR_INTERNAL_ERROR = 101;
+     */
+    CHANGE_PASSWORD_ERROR_INTERNAL_ERROR = 101
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class UserCredentials$Type extends MessageType<UserCredentials> {
@@ -899,6 +977,208 @@ class ConsumeResetTokenResponse$Type extends MessageType<ConsumeResetTokenRespon
  * @generated MessageType for protobuf message user_service.ConsumeResetTokenResponse
  */
 export const ConsumeResetTokenResponse = new ConsumeResetTokenResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ChangeNicknameRequest$Type extends MessageType<ChangeNicknameRequest> {
+    constructor() {
+        super("user_service.ChangeNicknameRequest", [
+            { no: 1, name: "new_nickname", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ChangeNicknameRequest>): ChangeNicknameRequest {
+        const message = { newNickname: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ChangeNicknameRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ChangeNicknameRequest): ChangeNicknameRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string new_nickname */ 1:
+                    message.newNickname = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ChangeNicknameRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string new_nickname = 1; */
+        if (message.newNickname !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.newNickname);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ChangeNicknameRequest
+ */
+export const ChangeNicknameRequest = new ChangeNicknameRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ChangeNicknameResponse$Type extends MessageType<ChangeNicknameResponse> {
+    constructor() {
+        super("user_service.ChangeNicknameResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_service.ChangeNicknameErrorCode", ChangeNicknameErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ChangeNicknameResponse>): ChangeNicknameResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ChangeNicknameResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ChangeNicknameResponse): ChangeNicknameResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_service.ChangeNicknameErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ChangeNicknameResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.ChangeNicknameErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ChangeNicknameResponse
+ */
+export const ChangeNicknameResponse = new ChangeNicknameResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ChangePasswordRequest$Type extends MessageType<ChangePasswordRequest> {
+    constructor() {
+        super("user_service.ChangePasswordRequest", [
+            { no: 1, name: "new_password", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ChangePasswordRequest>): ChangePasswordRequest {
+        const message = { newPassword: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ChangePasswordRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ChangePasswordRequest): ChangePasswordRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string new_password */ 1:
+                    message.newPassword = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ChangePasswordRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string new_password = 1; */
+        if (message.newPassword !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.newPassword);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ChangePasswordRequest
+ */
+export const ChangePasswordRequest = new ChangePasswordRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ChangePasswordResponse$Type extends MessageType<ChangePasswordResponse> {
+    constructor() {
+        super("user_service.ChangePasswordResponse", [
+            { no: 1, name: "error_code", kind: "enum", T: () => ["user_service.ChangePasswordErrorCode", ChangePasswordErrorCode] },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ChangePasswordResponse>): ChangePasswordResponse {
+        const message = { errorCode: 0, errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ChangePasswordResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ChangePasswordResponse): ChangePasswordResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* user_service.ChangePasswordErrorCode error_code */ 1:
+                    message.errorCode = reader.int32();
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ChangePasswordResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* user_service.ChangePasswordErrorCode error_code = 1; */
+        if (message.errorCode !== 0)
+            writer.tag(1, WireType.Varint).int32(message.errorCode);
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message user_service.ChangePasswordResponse
+ */
+export const ChangePasswordResponse = new ChangePasswordResponse$Type();
 /**
  * @generated ServiceType for protobuf service user_service.UserService
  */
@@ -908,5 +1188,7 @@ export const UserService = new ServiceType("user_service.UserService", [
     { name: "Logout", options: {}, I: LogoutRequest, O: LogoutResponse },
     { name: "GetUserProfile", options: {}, I: GetUserProfileRequest, O: GetUserProfileResponse },
     { name: "ResetPassword", options: {}, I: ResetPasswordRequest, O: ResetPasswordResponse },
-    { name: "ConsumeResetToken", options: {}, I: ConsumeResetTokenRequest, O: ConsumeResetTokenResponse }
+    { name: "ConsumeResetToken", options: {}, I: ConsumeResetTokenRequest, O: ConsumeResetTokenResponse },
+    { name: "ChangeNickname", options: {}, I: ChangeNicknameRequest, O: ChangeNicknameResponse },
+    { name: "ChangePassword", options: {}, I: ChangePasswordRequest, O: ChangePasswordResponse }
 ]);

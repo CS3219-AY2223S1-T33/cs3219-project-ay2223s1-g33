@@ -27,11 +27,16 @@ export const userSlice = createSlice({
       // state.sessionToken = initialState.sessionToken;
       state.user = initialState.user;
     },
+    changeNickname: (state, action: PayloadAction<Required<UserState>>) => {
+      const { user } = action.payload;
+      // state.sessionToken = sessionToken;
+      state.user = user;
+    },
   },
 });
 
 export const selectUser = (state: RootState) => state.user.user;
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, changeNickname } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -7,13 +7,20 @@ const AUTH_SCHEMA = {
     .string()
     .required("Please enter your confirmed password.")
     .oneOf([yup.ref("password"), "Please ensure your passwords match."]),
+  nickname: yup.string().required("Please enter your nickname."),
 };
 
-const LOGIN_VALIDATOR = yup.object().shape(AUTH_SCHEMA);
+const LOGIN_VALIDATOR = yup.object().shape({
+  email: AUTH_SCHEMA.email,
+  password: AUTH_SCHEMA.password,
+});
 
 const REGISTER_VALIDATOR = yup.object().shape({
   ...AUTH_SCHEMA,
-  nickname: yup.string().required("Please enter your nickname."),
+});
+
+const CHANGE_NICKNAME_VALIDTOR = yup.object().shape({
+  nickname: AUTH_SCHEMA.nickname,
 });
 
 const RESET_PW_VALIDATIOR = yup.object().shape({
@@ -30,4 +37,5 @@ export {
   REGISTER_VALIDATOR,
   RESET_PW_VALIDATIOR,
   SET_PW_VALIDATOR,
+  CHANGE_NICKNAME_VALIDTOR,
 };
