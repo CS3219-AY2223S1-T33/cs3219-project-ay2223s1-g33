@@ -44,8 +44,10 @@ function Countdown() {
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
+      })
+      .finally(() => {
+        leaveQueueHandler();
       });
-      leaveQueueHandler();
   }
 
   const completeTimeHandler = () => {
