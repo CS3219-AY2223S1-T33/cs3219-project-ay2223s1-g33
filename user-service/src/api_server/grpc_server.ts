@@ -85,14 +85,14 @@ export default class GRPCServer implements IGRPCServer {
   static parseIncomingMetadata(metadata: Metadata): ApiHeaderMap {
     const metadataMap = metadata.getMap();
     const headers: ApiHeaderMap = {};
-    Object.keys(metadata).forEach((key: string) => {
-      headers[key] = [metadataMap[key].toString()];
+    Object.keys(metadataMap).forEach((key: string) => {
+      const value = metadata.get(key);
+      if (value.length === 0) {
+        return;
+      }
+      headers[key] = value.map((x) => x.toString());
     });
 
-    const cookies = metadata.get('Cookie').map((val) => val.toString());
-    if (cookies.length > 0) {
-      headers.Cookie = cookies;
-    }
     return headers;
   }
 
@@ -104,7 +104,7 @@ export default class GRPCServer implements IGRPCServer {
         return;
       }
 
-      if (key === 'Set-Cookie') {
+      if (key.toLowerCase() === 'set-cookie') {
         values.forEach((value) => responseHeaders.add(key, value));
       } else {
         responseHeaders.add(key, headers[key][0]);
