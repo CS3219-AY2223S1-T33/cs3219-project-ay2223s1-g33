@@ -2,13 +2,16 @@ import { RedisClientType } from 'redis';
 
 type MatchResult = {
   matched: boolean;
+  queueId: string;
   difficulty: number;
   roomId: string;
 };
 
 interface IRedisMatchingAdapter {
-  pushStream(username: string, difficulties: number[]): Promise<boolean>;
+  pushStream(username: string, difficulties: number[]): Promise<string | undefined>;
+  removeFromSteam(queueId: string): Promise<boolean>;
   lockIfUnset(username: string): Promise<boolean>;
+  setUserLock(username: string, value: string): Promise<boolean>;
   getUserLock(username: string): Promise<MatchResult | null>;
   deleteUserLock(username: string): Promise<boolean>;
 }
@@ -16,6 +19,7 @@ interface IRedisMatchingAdapter {
 const MATCHMAKER_QUEUE_KEY = 'matchmaker-stream';
 const MATCHMAKER_LOCK_EXPIRY = 32; // Add 2 seconds as a buffer to prevent requeue
 const getMatchmakerUserKey = (username: string) => `matchmaker-${username}`;
+const MATCHMAKER_RESULT_DELIMITER = ';;';
 
 class RedisMatchingAdapter implements IRedisMatchingAdapter {
   redisClient: RedisClientType;
@@ -24,16 +28,21 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
     this.redisClient = redisClient;
   }
 
-  async pushStream(username: string, difficulties: number[]): Promise<boolean> {
+  async pushStream(username: string, difficulties: number[]): Promise<string | undefined> {
     const queueId = await this.redisClient.xAdd(
       MATCHMAKER_QUEUE_KEY,
       '*',
       RedisMatchingAdapter.createQueueItem(username, JSON.stringify(difficulties)),
     );
     if (queueId === '') {
-      return false;
+      return undefined;
     }
-    return true;
+    return queueId;
+  }
+
+  async removeFromSteam(queueId: string): Promise<boolean> {
+    const deleteCount = await this.redisClient.xDel(MATCHMAKER_QUEUE_KEY, queueId);
+    return deleteCount > 0;
   }
 
   async getUserLock(username: string): Promise<MatchResult | null> {
@@ -43,15 +52,16 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
       return result;
     }
 
-    if (result === '') {
+    if (!result.includes(MATCHMAKER_RESULT_DELIMITER)) {
       return {
         matched: false,
         difficulty: 0,
         roomId: '',
+        queueId: result,
       };
     }
 
-    const tokenParts = result.split(';');
+    const tokenParts = result.split(MATCHMAKER_RESULT_DELIMITER);
     if (tokenParts.length < 2) {
       return null;
     }
@@ -65,6 +75,7 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
       matched: true,
       difficulty,
       roomId: tokenParts[1],
+      queueId: '',
     };
   }
 
@@ -88,6 +99,22 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
     if (result !== null) {
       return false;
     }
+    return true;
+  }
+
+  async setUserLock(username: string, value: string): Promise<boolean> {
+    const key = getMatchmakerUserKey(username);
+    const oldValue = await this.redisClient.set(key, value, {
+      GET: true,
+      KEEPTTL: true,
+    });
+
+    if (oldValue && oldValue.includes(MATCHMAKER_RESULT_DELIMITER)) {
+      await this.redisClient.set(key, oldValue, {
+        KEEPTTL: true,
+      });
+    }
+
     return true;
   }
 
