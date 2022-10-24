@@ -5,7 +5,7 @@ import {
   Input,
   FormErrorMessage,
   Button,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
@@ -18,7 +18,7 @@ import { login } from "../../feature/user/userSlice";
 import {
   UserCredentials,
   LoginRequest,
-  LoginResponse
+  LoginResponse,
 } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { LOGIN_VALIDATOR } from "../../constants/validators";
@@ -28,7 +28,7 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(LOGIN_VALIDATOR) });
   const toast = useFixedToast();
   const dispatch = useDispatch();
@@ -41,7 +41,7 @@ function LoginForm() {
 
     axios
       .post<LoginResponse>("/api/user/login", loginReq, {
-        withCredentials: true
+        withCredentials: true,
       })
       .then((res) => {
         const { errorCode, errorMessage } = res.data;
@@ -70,7 +70,7 @@ function LoginForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
@@ -98,7 +98,7 @@ function LoginForm() {
           bg="blue.400"
           color="white"
           _hover={{
-            bg: "blue.500"
+            bg: "blue.500",
           }}
           type="submit"
         >

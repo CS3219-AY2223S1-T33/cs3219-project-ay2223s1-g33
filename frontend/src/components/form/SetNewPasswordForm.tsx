@@ -4,7 +4,7 @@ import {
   FormLabel,
   Button,
   FormErrorMessage,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
@@ -12,13 +12,13 @@ import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler
+  SubmitErrorHandler,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "../ui/Link";
 import {
   ConsumeResetTokenRequest,
-  ConsumeResetTokenResponse
+  ConsumeResetTokenResponse,
 } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import PasswordInput from "../ui/form/PasswordInput";
@@ -32,7 +32,7 @@ function SetNewPasswordForm({ token }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
 
   const toast = useFixedToast();
@@ -42,7 +42,7 @@ function SetNewPasswordForm({ token }: Props) {
 
     const consumeResetTokenRequest: ConsumeResetTokenRequest = {
       token,
-      newPassword
+      newPassword,
     };
 
     axios
@@ -70,7 +70,7 @@ function SetNewPasswordForm({ token }: Props) {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
@@ -101,7 +101,7 @@ function SetNewPasswordForm({ token }: Props) {
             bg="blue.400"
             color="white"
             _hover={{
-              bg: "blue.500"
+              bg: "blue.500",
             }}
             type="submit"
           >

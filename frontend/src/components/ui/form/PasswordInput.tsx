@@ -4,7 +4,7 @@ import {
   InputGroup,
   Input,
   InputRightElement,
-  Button
+  Button,
 } from "@chakra-ui/react";
 import React from "react";
 import { UseFormRegister, FieldValues } from "react-hook-form";

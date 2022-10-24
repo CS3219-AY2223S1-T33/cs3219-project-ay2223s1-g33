@@ -5,7 +5,7 @@ import {
   Input,
   FormErrorMessage,
   Button,
-  Text
+  Text,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
@@ -13,7 +13,7 @@ import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler
+  SubmitErrorHandler,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "../ui/Link";
@@ -21,7 +21,7 @@ import PasswordInput from "../ui/form/PasswordInput";
 import {
   UserCredentials,
   RegisterRequest,
-  RegisterResponse
+  RegisterResponse,
 } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { REGISTER_VALIDATOR } from "../../constants/validators";
@@ -30,7 +30,7 @@ function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(REGISTER_VALIDATOR) });
 
   const toast = useFixedToast();
@@ -64,7 +64,7 @@ function RegisterForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
@@ -109,7 +109,7 @@ function RegisterForm() {
             bg="blue.400"
             color="white"
             _hover={{
-              bg: "blue.500"
+              bg: "blue.500",
             }}
             type="submit"
           >
