@@ -3,7 +3,7 @@ import { ApiRequest } from '../../../src/api_server/api_server_types';
 import {
   makeMockAuthAgent,
   makeMockHashAgent,
-  makeMockLoopbackChannel,
+  makeMockUserCrudLoopbackChannel,
   makeTestPasswordUser,
   makeTestUser,
   testData,
@@ -37,12 +37,11 @@ describe('Login Handler', () => {
   test('Successful Login', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockLoopbackChannel();
+    const userCrudClient = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.callRoute.mockImplementationOnce((route: string, request: GetUserRequest):
+    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
-      expect(route).toBe('getUser');
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
       return {
@@ -70,21 +69,19 @@ describe('Login Handler', () => {
   test('Failed Login', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockLoopbackChannel();
+    const userCrudClient = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.callRoute.mockImplementationOnce((route: string, request: GetUserRequest):
+    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
-      expect(route).toBe('getUser');
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
       return {
         user: makeTestPasswordUser(testUserId1, testUsername1, testNickname1, testPassword1),
         errorMessage: '',
       };
-    }).mockImplementationOnce((route: string, request: GetUserRequest):
+    }).mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
-      expect(route).toBe('getUser');
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
       return {
@@ -112,7 +109,7 @@ describe('Login Handler', () => {
   test('Bad Request', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockLoopbackChannel();
+    const userCrudClient = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
 
@@ -138,12 +135,11 @@ describe('Login Handler', () => {
   test('Bad Downstream Request', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockLoopbackChannel();
+    const userCrudClient = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.callRoute.mockImplementationOnce((route: string, request: GetUserRequest):
+    userCrudClient.client.getUser.mockImplementationOnce((route: string, request: GetUserRequest):
     GetUserResponse => {
-      expect(route).toBe('getUser');
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
       return {
@@ -171,12 +167,11 @@ describe('Login Handler', () => {
   test('Bad downstream session', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockLoopbackChannel();
+    const userCrudClient = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.callRoute.mockImplementationOnce((route: string, request: GetUserRequest):
+    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
-      expect(route).toBe('getUser');
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
       return {

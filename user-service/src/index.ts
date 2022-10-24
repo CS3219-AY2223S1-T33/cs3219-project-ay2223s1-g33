@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { createClient, RedisClientType } from 'redis';
-import getApiServer from './api_server/api_server';
+import createApiServer from './api_server/api_server';
 import createAuthenticationService from './auth/authentication_agent';
 import { IAuthenticationAgent } from './auth/authentication_agent_types';
 import UserServiceApi from './controller/user_service_controller';
@@ -16,6 +16,8 @@ import { connectDatabase } from './db';
 import createSMTPAdapter from './adapter/smtp_adapter';
 import { createEmailSender } from './email/email_sender';
 import createUserDeleteProducer from './redis_stream_adapter/user_delete_producer';
+import HTTPServer from './api_server/http_server';
+import GRPCServer from './api_server/grpc_server';
 
 function printVersion() {
   const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constants.VERSION_REVISION}`;
@@ -50,8 +52,10 @@ async function run() {
   });
   const emailSender = createEmailSender(emailAdapter, envConfig.RESET_PASSWORD_URL);
 
-  const apiServer = getApiServer(envConfig.HTTP_PORT, envConfig.GRPC_PORT);
-  const expressApp = apiServer.getHttpServer();
+  const httpServer = HTTPServer.create(envConfig.HTTP_PORT);
+  const grpcServer = GRPCServer.create(envConfig.GRPC_PORT);
+  const apiServer = createApiServer(httpServer, grpcServer);
+  const expressApp = httpServer.getServer();
 
   expressApp.get('/', (_: Request, resp: Response) => {
     resp.status(200).send('Welcome to User Service');
@@ -60,8 +64,7 @@ async function run() {
   const userCrudApi = new UserCrudServiceApi(dataStore, redisUserStream);
   apiServer.registerServiceRoutes(userCrudApi);
 
-  const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>();
-  loopbackCrudApi.registerServiceRoutes(userCrudApi);
+  const loopbackCrudApi = new LoopbackApiChannel<IUserCrudService>(userCrudApi);
   apiServer.registerServiceRoutes(new UserServiceApi(
     authService,
     emailSender,

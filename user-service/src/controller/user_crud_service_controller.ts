@@ -32,8 +32,6 @@ class UserCrudServiceApi implements ApiService<IUserCrudService> {
 
   serviceDefinition: ServiceDefinition<IUserCrudService>;
 
-  serviceImplementation: IUserCrudService;
-
   constructor(storage: IStorage, redisStream: IStreamProducer) {
     const handlerDefinitions: ServiceHandlerDefinition<IUserCrudService> = {
       getUser: fromApiHandler(new GetUserHandler(storage), GetUserRequest, GetUserResponse),
@@ -66,20 +64,8 @@ class UserCrudServiceApi implements ApiService<IUserCrudService> {
       ),
     };
 
-    const userCrudService: IUserCrudService = {
-      getUser: handlerDefinitions.getUser.grpcRouteHandler,
-      createUser: handlerDefinitions.createUser.grpcRouteHandler,
-      editUser: handlerDefinitions.editUser.grpcRouteHandler,
-      deleteUser: handlerDefinitions.deleteUser.grpcRouteHandler,
-
-      getResetTokens: handlerDefinitions.getResetTokens.grpcRouteHandler,
-      createResetToken: handlerDefinitions.createResetToken.grpcRouteHandler,
-      deleteResetToken: handlerDefinitions.deleteResetToken.grpcRouteHandler,
-    };
-
     this.serviceHandlerDefinition = handlerDefinitions;
     this.serviceDefinition = userCrudServiceDefinition;
-    this.serviceImplementation = userCrudService;
   }
 }
 
