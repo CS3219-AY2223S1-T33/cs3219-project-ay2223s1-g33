@@ -1,12 +1,12 @@
 import {
   IApiHandler,
-  ILoopbackServiceChannel,
   ApiRequest,
   ApiResponse,
 } from '../../api_server/api_server_types';
 import { GetAttemptSubmissionRequest, GetAttemptSubmissionResponse } from '../../proto/history-service';
 import { IHistoryCrudService } from '../../proto/history-crud-service.grpc-server';
 import { GetAttemptRequest, GetAttemptResponse } from '../../proto/history-crud-service';
+import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
@@ -37,8 +37,7 @@ implements IApiHandler<GetAttemptSubmissionRequest, GetAttemptSubmissionResponse
 
     let crudResult: GetAttemptResponse;
     try {
-      crudResult = await this.crudLoopbackChannel
-        .callRoute<GetAttemptRequest, GetAttemptResponse>('getAttempt', crudRequest, GetAttemptResponse);
+      crudResult = await this.crudLoopbackChannel.client.getAttempt(crudRequest);
     } catch (ex) {
       return GetAttemptSubmissionHandler.buildErrorResponse(`${ex}`);
     }
