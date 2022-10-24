@@ -38,6 +38,18 @@ enum ConsumeResetTokenErrorCode {
   CONSUME_RESET_TOKEN_ERROR_INTERNAL_ERROR = 101;
 }
 
+enum ChangeNicknameErrorCode {
+  CHANGE_NICKNAME_ERROR_NONE = 0;
+  CHANGE_NICKNAME_ERROR_BAD_REQUEST = 100;
+  CHANGE_NICKNAME_ERROR_INTERNAL_ERROR = 101;
+}
+
+enum ChangePasswordErrorCode {
+  CHANGE_PASSWORD_ERROR_NONE = 0;
+  CHANGE_PASSWORD_ERROR_BAD_REQUEST = 100;
+  CHANGE_PASSWORD_ERROR_INTERNAL_ERROR = 101;
+}
+
 message UserCredentials {
   string username = 1;
   string password = 2;
@@ -98,6 +110,24 @@ message ConsumeResetTokenResponse {
   string error_message = 2;
 }
 
+message ChangeNicknameRequest {
+  string new_nickname = 1;
+}
+
+message ChangeNicknameResponse {
+  ChangeNicknameErrorCode error_code = 1;
+  string error_message = 2;
+}
+
+message ChangePasswordRequest {
+  string new_password = 1;
+}
+
+message ChangePasswordResponse {
+  ChangePasswordErrorCode error_code = 1;
+  string error_message = 2;
+}
+
 service UserService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Register(RegisterRequest) returns (RegisterResponse);
@@ -105,4 +135,6 @@ service UserService {
   rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
   rpc ConsumeResetToken(ConsumeResetTokenRequest) returns (ConsumeResetTokenResponse);
+  rpc ChangeNickname(ChangeNicknameRequest) returns (ChangeNicknameResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
 }

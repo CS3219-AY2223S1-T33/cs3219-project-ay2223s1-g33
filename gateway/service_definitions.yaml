@@ -27,6 +27,14 @@ http:
       post: /api/reset/confirm
       body: "*"
 
+    - selector: user_service.UserService.ChangeNickname
+      post: /api/user/nickname
+      body: "*"
+
+    - selector: user_service.UserService.ChangePassword
+      post: /api/user/password
+      body: "*"
+
     - selector: matching_service.QueueService.JoinQueue
       post: /api/queue/join
       body: "*"
