@@ -43,10 +43,10 @@ describe('Reset Password Handler', () => {
 
   test('Successful Reset Password', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
@@ -56,7 +56,7 @@ describe('Reset Password Handler', () => {
       };
     });
 
-    userCrudClient.client.getResetTokens.mockImplementationOnce((request: GetResetTokensRequest):
+    mockCrudLoopback.getResetTokens.mockImplementationOnce((request: GetResetTokensRequest):
     GetResetTokensResponse => {
       expect(request.username).toBe(testUsername1.toLowerCase());
 
@@ -66,7 +66,7 @@ describe('Reset Password Handler', () => {
       };
     });
 
-    userCrudClient.client.createResetToken.mockImplementationOnce(
+    mockCrudLoopback.createResetToken.mockImplementationOnce(
       (request: CreateResetTokenRequest): CreateResetTokenResponse => {
         expect(request.token!.userId).toBe(testUserId1);
         expect(request.token!.token.length).toBeGreaterThan(0);
@@ -91,16 +91,16 @@ describe('Reset Password Handler', () => {
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBe('');
     expect(response.response.errorCode).toBe(ResetPasswordErrorCode.RESET_PASSWORD_ERROR_NONE);
-    expect(userCrudClient.client.createResetToken.mock.calls.length).toBe(1);
+    expect(mockCrudLoopback.createResetToken.mock.calls.length).toBe(1);
     expect(emailSender.sendResetEmail.mock.calls.length).toBe(1);
   });
 
   test('Successful With Clear Old Tokens', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
@@ -113,7 +113,7 @@ describe('Reset Password Handler', () => {
     const token1 = makeTestResetToken(testTokenString1, testUserId1, 1);
     const token2 = makeTestResetToken(testTokenString2, testUserId1, 2);
     const token3 = makeTestResetToken(testTokenString3, testUserId1, 3);
-    userCrudClient.client.getResetTokens.mockImplementationOnce((request: GetResetTokensRequest):
+    mockCrudLoopback.getResetTokens.mockImplementationOnce((request: GetResetTokensRequest):
     GetResetTokensResponse => {
       expect(request.username).toBe(testUsername1.toLowerCase());
 
@@ -123,7 +123,7 @@ describe('Reset Password Handler', () => {
       };
     });
 
-    userCrudClient.client.deleteResetToken.mockImplementationOnce(
+    mockCrudLoopback.deleteResetToken.mockImplementationOnce(
       (request: DeleteResetTokenRequest): DeleteResetTokenResponse => {
         expect(request.tokenString).toBe(testTokenString1);
 
@@ -133,7 +133,7 @@ describe('Reset Password Handler', () => {
       },
     );
 
-    userCrudClient.client.createResetToken.mockImplementationOnce(
+    mockCrudLoopback.createResetToken.mockImplementationOnce(
       (request: CreateResetTokenRequest): CreateResetTokenResponse => {
         expect(request.token!.userId).toBe(testUserId1);
         expect(request.token!.token.length).toBeGreaterThan(0);
@@ -158,14 +158,14 @@ describe('Reset Password Handler', () => {
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBe('');
     expect(response.response.errorCode).toBe(ResetPasswordErrorCode.RESET_PASSWORD_ERROR_NONE);
-    expect(userCrudClient.client.deleteResetToken.mock.calls.length).toBe(1);
-    expect(userCrudClient.client.createResetToken.mock.calls.length).toBe(1);
+    expect(mockCrudLoopback.deleteResetToken.mock.calls.length).toBe(1);
+    expect(mockCrudLoopback.createResetToken.mock.calls.length).toBe(1);
     expect(emailSender.sendResetEmail.mock.calls.length).toBe(1);
   });
 
   test('Bad Request', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
     const request = makeRequest('');
@@ -178,10 +178,10 @@ describe('Reset Password Handler', () => {
 
   test('Bad Username', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
-    userCrudClient.client.getUser.mockImplementationOnce((): GetUserResponse => ({
+    mockCrudLoopback.getUser.mockImplementationOnce((): GetUserResponse => ({
       user: undefined,
       errorMessage: '',
     }));
@@ -196,15 +196,15 @@ describe('Reset Password Handler', () => {
 
   test('Cannot Get Current Tokens', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
-    userCrudClient.client.getUser.mockImplementationOnce((): GetUserResponse => ({
+    mockCrudLoopback.getUser.mockImplementationOnce((): GetUserResponse => ({
       user: makeTestPasswordUser(testUserId1, testUsername1, testNickname1, testPassword1),
       errorMessage: '',
     }));
 
-    userCrudClient.client.getResetTokens.mockImplementationOnce(
+    mockCrudLoopback.getResetTokens.mockImplementationOnce(
       (): GetResetTokensResponse => { throw new Error('Test Error'); },
     );
 
@@ -218,10 +218,10 @@ describe('Reset Password Handler', () => {
 
   test('Cannot Clear Old Tokens', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
-    userCrudClient.client.getUser.mockImplementationOnce((): GetUserResponse => ({
+    mockCrudLoopback.getUser.mockImplementationOnce((): GetUserResponse => ({
       user: makeTestPasswordUser(testUserId1, testUsername1, testNickname1, testPassword1),
       errorMessage: '',
     }));
@@ -229,12 +229,12 @@ describe('Reset Password Handler', () => {
     const token1 = makeTestResetToken(testTokenString1, testUserId1, 1);
     const token2 = makeTestResetToken(testTokenString2, testUserId1, 2);
     const token3 = makeTestResetToken(testTokenString3, testUserId1, 3);
-    userCrudClient.client.getResetTokens.mockImplementationOnce((): GetResetTokensResponse => ({
+    mockCrudLoopback.getResetTokens.mockImplementationOnce((): GetResetTokensResponse => ({
       tokens: [token1, token2, token3],
       errorMessage: '',
     }));
 
-    userCrudClient.client.deleteResetToken.mockImplementationOnce(
+    mockCrudLoopback.deleteResetToken.mockImplementationOnce(
       (): DeleteResetTokenResponse => {
         throw new Error('Test Error');
       },
@@ -250,22 +250,22 @@ describe('Reset Password Handler', () => {
 
   test('Cannot create token', async () => {
     const emailSender = makeMockEmailSender();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new ResetPasswordHandler(userCrudClient, emailSender);
-    userCrudClient.client.getUser.mockImplementationOnce((): GetUserResponse => ({
+    mockCrudLoopback.getUser.mockImplementationOnce((): GetUserResponse => ({
       user: makeTestPasswordUser(testUserId1, testUsername1, testNickname1, testPassword1),
       errorMessage: '',
     }));
 
-    userCrudClient.client.getResetTokens.mockImplementationOnce(
+    mockCrudLoopback.getResetTokens.mockImplementationOnce(
       (): GetResetTokensResponse => ({
         tokens: [],
         errorMessage: '',
       }),
     );
 
-    userCrudClient.client.createResetToken.mockImplementationOnce(
+    mockCrudLoopback.createResetToken.mockImplementationOnce(
       (): CreateResetTokenResponse => {
         throw new Error('Test Error');
       },

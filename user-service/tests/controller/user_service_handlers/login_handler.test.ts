@@ -37,10 +37,10 @@ describe('Login Handler', () => {
   test('Successful Login', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
@@ -69,10 +69,10 @@ describe('Login Handler', () => {
   test('Failed Login', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
@@ -109,7 +109,7 @@ describe('Login Handler', () => {
   test('Bad Request', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient } = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
 
@@ -135,10 +135,10 @@ describe('Login Handler', () => {
   test('Bad Downstream Request', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getUser.mockImplementationOnce((route: string, request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((route: string, request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
@@ -167,10 +167,10 @@ describe('Login Handler', () => {
   test('Bad downstream session', async () => {
     const authAgent = makeMockAuthAgent();
     const hashAgent = makeMockHashAgent();
-    const userCrudClient = makeMockUserCrudLoopbackChannel();
+    const { userCrudClient, mockCrudLoopback } = makeMockUserCrudLoopbackChannel();
 
     const handler = new LoginHandler(userCrudClient, authAgent, hashAgent);
-    userCrudClient.client.getUser.mockImplementationOnce((request: GetUserRequest):
+    mockCrudLoopback.getUser.mockImplementationOnce((request: GetUserRequest):
     GetUserResponse => {
       expect(request.user!.username).toBe(testUsername1.toLowerCase());
 
