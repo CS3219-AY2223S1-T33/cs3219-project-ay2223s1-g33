@@ -7,6 +7,7 @@ const AUTH_SCHEMA = {
     .string()
     .required("Please enter your confirmed password.")
     .oneOf([yup.ref("password"), "Please ensure your passwords match."]),
+  nickname: yup.string().required("Please enter your nickname."),
 };
 
 const LOGIN_VALIDATOR = yup.object().shape({
@@ -14,17 +15,12 @@ const LOGIN_VALIDATOR = yup.object().shape({
   password: AUTH_SCHEMA.password,
 });
 
-const NICKNAME_SCHEMA = {
-  nickname: yup.string().required("Please enter your nickname."),
-};
-
 const REGISTER_VALIDATOR = yup.object().shape({
   ...AUTH_SCHEMA,
-  ...NICKNAME_SCHEMA,
 });
 
 const CHANGE_NICKNAME_VALIDTOR = yup.object().shape({
-  nickname: NICKNAME_SCHEMA.nickname,
+  nickname: AUTH_SCHEMA.nickname,
 });
 
 const RESET_PW_VALIDATIOR = yup.object().shape({
