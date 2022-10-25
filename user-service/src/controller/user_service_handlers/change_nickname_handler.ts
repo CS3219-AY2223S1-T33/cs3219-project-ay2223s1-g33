@@ -79,6 +79,18 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
       );
     }
 
+    try {
+      await this.authAgent.invalidateTokensBeforeTime(
+        user.userInfo.username,
+        Math.floor(new Date().getTime() / 1000) - 1,
+      );
+    } catch {
+      return ChangeNicknameHandler.buildErrorResponse(
+        ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_INTERNAL_ERROR,
+        'Could not invalidate old tokens',
+      );
+    }
+
     user.userInfo.nickname = newNickname;
 
     let token: TokenPair;
