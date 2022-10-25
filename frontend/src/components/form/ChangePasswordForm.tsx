@@ -23,11 +23,11 @@ import PasswordInput from "../ui/form/PasswordInput";
 import { SET_PW_VALIDATOR } from "../../constants/validators";
 
 function ChangePasswordForm() {
-
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
 
   const toast = useFixedToast();
@@ -55,6 +55,7 @@ function ChangePasswordForm() {
         }
 
         toast.sendSuccessMessage("Your password is changed!");
+        reset();
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
