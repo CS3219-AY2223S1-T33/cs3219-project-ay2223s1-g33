@@ -31,14 +31,14 @@ implements IApiHandler<CreateCompletionRequest, CreateCompletionResponse> {
       return CreateCompletionHandler.buildErrorResponse('Missing completion information');
     }
 
-    let completed: StoredCompletion | undefined;
+    let completedEntity: StoredCompletion | undefined;
     try {
-      completed = await this.completedStore.addCompletion(convertedCompletion);
+      completedEntity = await this.completedStore.addCompletion(convertedCompletion);
     } catch (err) {
       return CreateCompletionHandler.buildErrorResponse(`${err}`);
     }
 
-    const resultCompletion = convertToProtoCompletion(completed);
+    const resultCompletion = convertToProtoCompletion(completedEntity);
     if (!resultCompletion) {
       return CreateCompletionHandler.buildErrorResponse('An internal error occurred');
     }

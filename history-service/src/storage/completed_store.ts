@@ -9,8 +9,8 @@ class CompletedStore implements ICompletedStore {
     this.dbConn = dbConn;
   }
 
-  async addCompletion(submission: StoredCompletion): Promise<StoredCompletion> {
-    const { userId, questionId } = submission;
+  async addCompletion(completionEntity: StoredCompletion): Promise<StoredCompletion> {
+    const { userId, questionId } = completionEntity;
 
     if (userId === undefined || userId <= 0) {
       throw new Error('No User Provided');
@@ -23,11 +23,11 @@ class CompletedStore implements ICompletedStore {
     const insertedItem = (
       await this.dbConn
         .getHistoryCompletionRepo()
-        .save([submission])
+        .save([completionEntity])
     )[0];
 
     const deepCopyOfItem: StoredCompletion = {
-      ...submission,
+      ...completionEntity,
     };
     deepCopyOfItem.userId = insertedItem.userId;
     deepCopyOfItem.questionId = insertedItem.questionId;

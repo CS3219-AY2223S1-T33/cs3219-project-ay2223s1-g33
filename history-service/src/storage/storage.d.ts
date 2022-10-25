@@ -33,7 +33,7 @@ declare interface IAttemptStore {
 }
 
 declare interface ICompletedStore {
-  addCompletion(submission: StoredCompletion): Promise<StoredCompletion>;
+  addCompletion(completionEntity: StoredCompletion): Promise<StoredCompletion>;
   getCompletion(
     userId: number,
     questionId: number,
