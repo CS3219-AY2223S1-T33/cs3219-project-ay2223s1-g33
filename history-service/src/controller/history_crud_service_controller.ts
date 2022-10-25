@@ -2,7 +2,7 @@ import { ServiceDefinition, ChannelCredentials } from '@grpc/grpc-js';
 import { IHistoryCrudService, historyCrudServiceDefinition } from '../proto/history-crud-service.grpc-server';
 import {
   CreateAttemptRequest,
-  CreateAttemptResponse,
+  CreateAttemptResponse, CreateCompletionRequest, CreateCompletionResponse,
   DeleteAttemptRequest,
   DeleteAttemptResponse,
   GetAttemptRequest,
@@ -19,6 +19,7 @@ import CreateAttemptHandler from './history_crud_service_handlers/create_attempt
 import DeleteAttemptHandler from './history_crud_service_handlers/delete_attempt_handler';
 import { UserCrudServiceClient } from '../proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../proto/question-service.grpc-client';
+import CreateCompletionHandler from './history_crud_service_handlers/create_completion_handler';
 
 class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IHistoryCrudService>;
@@ -60,6 +61,11 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
         new DeleteAttemptHandler(storage),
         DeleteAttemptRequest,
         DeleteAttemptResponse,
+      ),
+      createCompletion: fromApiHandler(
+        new CreateCompletionHandler(storage),
+        CreateCompletionRequest,
+        CreateCompletionResponse,
       ),
     };
 

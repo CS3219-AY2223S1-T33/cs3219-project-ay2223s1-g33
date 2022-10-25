@@ -114,6 +114,19 @@ export interface HistoryAttempt {
     submission: string;
 }
 /**
+ * @generated from protobuf message common.HistoryCompletion
+ */
+export interface HistoryCompletion {
+    /**
+     * @generated from protobuf field: uint64 user_id = 1;
+     */
+    userId: number;
+    /**
+     * @generated from protobuf field: uint64 question_id = 2;
+     */
+    questionId: number;
+}
+/**
  * @generated from protobuf enum common.QuestionDifficulty
  */
 export enum QuestionDifficulty {
@@ -467,3 +480,57 @@ class HistoryAttempt$Type extends MessageType<HistoryAttempt> {
  * @generated MessageType for protobuf message common.HistoryAttempt
  */
 export const HistoryAttempt = new HistoryAttempt$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class HistoryCompletion$Type extends MessageType<HistoryCompletion> {
+    constructor() {
+        super("common.HistoryCompletion", [
+            { no: 1, name: "user_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+        ]);
+    }
+    create(value?: PartialMessage<HistoryCompletion>): HistoryCompletion {
+        const message = { userId: 0, questionId: 0 };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<HistoryCompletion>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: HistoryCompletion): HistoryCompletion {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint64 user_id */ 1:
+                    message.userId = reader.uint64().toNumber();
+                    break;
+                case /* uint64 question_id */ 2:
+                    message.questionId = reader.uint64().toNumber();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: HistoryCompletion, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint64 user_id = 1; */
+        if (message.userId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.userId);
+        /* uint64 question_id = 2; */
+        if (message.questionId !== 0)
+            writer.tag(2, WireType.Varint).uint64(message.questionId);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message common.HistoryCompletion
+ */
+export const HistoryCompletion = new HistoryCompletion$Type();
