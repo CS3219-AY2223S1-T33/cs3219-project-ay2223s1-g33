@@ -149,6 +149,32 @@ export interface CreateCompletionResponse {
      */
     errorMessage: string;
 }
+/**
+ * @generated from protobuf message history_crud_service.GetCompletionRequest
+ */
+export interface GetCompletionRequest {
+    /**
+     * @generated from protobuf field: uint64 user_id = 1;
+     */
+    userId: number;
+    /**
+     * @generated from protobuf field: uint64 question_id = 2;
+     */
+    questionId: number;
+}
+/**
+ * @generated from protobuf message history_crud_service.GetCompletionResponse
+ */
+export interface GetCompletionResponse {
+    /**
+     * @generated from protobuf field: common.HistoryCompletion completed = 1;
+     */
+    completed?: HistoryCompletion;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class GetAttemptRequest$Type extends MessageType<GetAttemptRequest> {
     constructor() {
@@ -696,6 +722,114 @@ class CreateCompletionResponse$Type extends MessageType<CreateCompletionResponse
  * @generated MessageType for protobuf message history_crud_service.CreateCompletionResponse
  */
 export const CreateCompletionResponse = new CreateCompletionResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetCompletionRequest$Type extends MessageType<GetCompletionRequest> {
+    constructor() {
+        super("history_crud_service.GetCompletionRequest", [
+            { no: 1, name: "user_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetCompletionRequest>): GetCompletionRequest {
+        const message = { userId: 0, questionId: 0 };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetCompletionRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetCompletionRequest): GetCompletionRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint64 user_id */ 1:
+                    message.userId = reader.uint64().toNumber();
+                    break;
+                case /* uint64 question_id */ 2:
+                    message.questionId = reader.uint64().toNumber();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetCompletionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint64 user_id = 1; */
+        if (message.userId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.userId);
+        /* uint64 question_id = 2; */
+        if (message.questionId !== 0)
+            writer.tag(2, WireType.Varint).uint64(message.questionId);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_crud_service.GetCompletionRequest
+ */
+export const GetCompletionRequest = new GetCompletionRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetCompletionResponse$Type extends MessageType<GetCompletionResponse> {
+    constructor() {
+        super("history_crud_service.GetCompletionResponse", [
+            { no: 1, name: "completed", kind: "message", T: () => HistoryCompletion },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetCompletionResponse>): GetCompletionResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<GetCompletionResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetCompletionResponse): GetCompletionResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.HistoryCompletion completed */ 1:
+                    message.completed = HistoryCompletion.internalBinaryRead(reader, reader.uint32(), options, message.completed);
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetCompletionResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.HistoryCompletion completed = 1; */
+        if (message.completed)
+            HistoryCompletion.internalBinaryWrite(message.completed, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_crud_service.GetCompletionResponse
+ */
+export const GetCompletionResponse = new GetCompletionResponse$Type();
 /**
  * @generated ServiceType for protobuf service history_crud_service.HistoryCrudService
  */
@@ -704,5 +838,6 @@ export const HistoryCrudService = new ServiceType("history_crud_service.HistoryC
     { name: "GetAttempts", options: {}, I: GetAttemptsRequest, O: GetAttemptsResponse },
     { name: "CreateAttempt", options: {}, I: CreateAttemptRequest, O: CreateAttemptResponse },
     { name: "DeleteAttempt", options: {}, I: DeleteAttemptRequest, O: DeleteAttemptResponse },
-    { name: "CreateCompletion", options: {}, I: CreateCompletionRequest, O: CreateCompletionResponse }
+    { name: "CreateCompletion", options: {}, I: CreateCompletionRequest, O: CreateCompletionResponse },
+    { name: "GetCompletion", options: {}, I: GetCompletionRequest, O: GetCompletionResponse }
 ]);

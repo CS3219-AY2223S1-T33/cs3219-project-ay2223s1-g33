@@ -5,6 +5,8 @@
 import { HistoryCrudService } from "./history-crud-service";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
+import type { GetCompletionResponse } from "./history-crud-service";
+import type { GetCompletionRequest } from "./history-crud-service";
 import type { CreateCompletionResponse } from "./history-crud-service";
 import type { CreateCompletionRequest } from "./history-crud-service";
 import type { DeleteAttemptResponse } from "./history-crud-service";
@@ -55,6 +57,13 @@ export interface IHistoryCrudServiceClient {
     createCompletion(input: CreateCompletionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
     createCompletion(input: CreateCompletionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
     createCompletion(input: CreateCompletionRequest, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: GetCompletion(history_crud_service.GetCompletionRequest) returns (history_crud_service.GetCompletionResponse);
+     */
+    getCompletion(input: GetCompletionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    getCompletion(input: GetCompletionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    getCompletion(input: GetCompletionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    getCompletion(input: GetCompletionRequest, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service history_crud_service.HistoryCrudService
@@ -99,5 +108,12 @@ export class HistoryCrudServiceClient extends grpc.Client implements IHistoryCru
     createCompletion(input: CreateCompletionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void)): grpc.ClientUnaryCall {
         const method = HistoryCrudService.methods[4];
         return this.makeUnaryRequest<CreateCompletionRequest, CreateCompletionResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: CreateCompletionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): CreateCompletionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: GetCompletion(history_crud_service.GetCompletionRequest) returns (history_crud_service.GetCompletionResponse);
+     */
+    getCompletion(input: GetCompletionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetCompletionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetCompletionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: GetCompletionResponse) => void)): grpc.ClientUnaryCall {
+        const method = HistoryCrudService.methods[5];
+        return this.makeUnaryRequest<GetCompletionRequest, GetCompletionResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: GetCompletionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): GetCompletionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }

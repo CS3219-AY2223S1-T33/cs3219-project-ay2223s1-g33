@@ -57,10 +57,21 @@ message CreateCompletionResponse {
   string error_message = 2;
 }
 
+message GetCompletionRequest {
+  uint64 user_id = 1;
+  uint64 question_id = 2;
+}
+
+message GetCompletionResponse {
+  common.HistoryCompletion completed = 1;
+  string error_message = 2;
+}
+
 service HistoryCrudService {
   rpc GetAttempt(GetAttemptRequest) returns (GetAttemptResponse);
   rpc GetAttempts(GetAttemptsRequest) returns (GetAttemptsResponse);
   rpc CreateAttempt(CreateAttemptRequest) returns (CreateAttemptResponse);
   rpc DeleteAttempt(DeleteAttemptRequest) returns (DeleteAttemptResponse);
   rpc CreateCompletion(CreateCompletionRequest) returns (CreateCompletionResponse);
+  rpc GetCompletion(GetCompletionRequest) returns (GetCompletionResponse);
 }

@@ -19,8 +19,12 @@ function convertToStoredCompletion(
 }
 
 function convertToProtoCompletion(
-  completion: HistoryCompletionEntity,
+  completion: HistoryCompletionEntity | undefined,
 ): (HistoryCompletion | undefined) {
+  if (!completion) {
+    return undefined;
+  }
+
   if (!completion.userId) {
     return undefined;
   }

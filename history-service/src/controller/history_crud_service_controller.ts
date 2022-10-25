@@ -9,6 +9,8 @@ import {
   GetAttemptResponse,
   GetAttemptsRequest,
   GetAttemptsResponse,
+  GetCompletionRequest,
+  GetCompletionResponse,
 } from '../proto/history-crud-service';
 import { ServiceHandlerDefinition, ApiService } from '../api_server/api_server_types';
 import { fromApiHandler } from '../api_server/api_server_helpers';
@@ -20,6 +22,7 @@ import DeleteAttemptHandler from './history_crud_service_handlers/delete_attempt
 import { UserCrudServiceClient } from '../proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../proto/question-service.grpc-client';
 import CreateCompletionHandler from './history_crud_service_handlers/create_completion_handler';
+import GetCompletionHandler from './history_crud_service_handlers/get_completion_handler';
 
 class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IHistoryCrudService>;
@@ -66,6 +69,11 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
         new CreateCompletionHandler(storage),
         CreateCompletionRequest,
         CreateCompletionResponse,
+      ),
+      getCompletion: fromApiHandler(
+        new GetCompletionHandler(storage),
+        GetCompletionRequest,
+        GetCompletionResponse,
       ),
     };
 
