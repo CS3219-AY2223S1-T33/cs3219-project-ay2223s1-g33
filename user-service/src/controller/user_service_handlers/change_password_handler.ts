@@ -12,7 +12,7 @@ import {
 import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
-import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
+import { IAuthenticationAgent, TokenPair } from '../../auth/authentication_agent_types';
 import GatewayConstants from '../../utils/gateway_constants';
 import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
@@ -92,10 +92,31 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
       );
     }
 
-    return ChangePasswordHandler.buildHeaderlessResponse({
-      errorCode: ChangePasswordErrorCode.CHANGE_PASSWORD_ERROR_NONE,
-      errorMessage: '',
-    });
+    let token: TokenPair;
+    try {
+      token = await this.authAgent.createToken({
+        username: user.userInfo?.username,
+        nickname: user.userInfo?.nickname,
+      });
+    } catch {
+      return ChangePasswordHandler.buildErrorResponse(
+        ChangePasswordErrorCode.CHANGE_PASSWORD_ERROR_INTERNAL_ERROR,
+        'Internal Error',
+      );
+    }
+
+    return {
+      response: {
+        errorCode: ChangePasswordErrorCode.CHANGE_PASSWORD_ERROR_NONE,
+        errorMessage: '',
+      },
+      headers: {
+        'Set-Cookie': [
+          `${GatewayConstants.COOKIE_SESSION_TOKEN}=${token.sessionToken}; Path=/`,
+          `${GatewayConstants.COOKIE_REFRESH_TOKEN}=${token.refreshToken}; Path=/; HttpOnly`,
+        ],
+      },
+    };
   }
 
   static validateRequest(request: ChangePasswordRequest): (ValidatedRequest | Error) {
