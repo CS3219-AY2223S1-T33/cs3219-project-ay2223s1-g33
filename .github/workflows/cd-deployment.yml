@@ -206,6 +206,7 @@ jobs:
 
             EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
             EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+            EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
             RESET_PASSWORD_URL="https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN"
 
       - name: Update task definition for matching-service
