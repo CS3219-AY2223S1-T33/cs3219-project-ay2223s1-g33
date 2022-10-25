@@ -1,16 +1,16 @@
 import { IStorage, IAttemptStore, ICompletedStore } from './storage';
 import AttemptStore from './attempt_store';
 import { IDatabase } from '../db';
-import CompletedStore from './completed_store';
+import CompletionStore from './completion_store';
 
 class AppStorage implements IStorage {
   attemptStore: AttemptStore;
 
-  completionStore: CompletedStore;
+  completionStore: CompletionStore;
 
   constructor(dbConn: IDatabase) {
     this.attemptStore = new AttemptStore(dbConn);
-    this.completionStore = new CompletedStore(dbConn);
+    this.completionStore = new CompletionStore(dbConn);
   }
 
   getAttemptStore(): IAttemptStore {

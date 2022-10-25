@@ -2,7 +2,7 @@ import { ICompletedStore } from './storage';
 import { IDatabase } from '../db';
 import { StoredCompletion } from '../model/completion_store_model';
 
-class CompletedStore implements ICompletedStore {
+class CompletionStore implements ICompletedStore {
   private dbConn: IDatabase;
 
   constructor(dbConn: IDatabase) {
@@ -53,4 +53,4 @@ class CompletedStore implements ICompletedStore {
   }
 }
 
-export default CompletedStore;
+export default CompletionStore;
