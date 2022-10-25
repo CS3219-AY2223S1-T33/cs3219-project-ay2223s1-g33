@@ -83,7 +83,7 @@ implements IApiHandler<ChangePasswordRequest, ChangePasswordResponse> {
     try {
       await this.authAgent.invalidateTokensBeforeTime(
         user.userInfo.username,
-        Math.floor(new Date().getTime() / 1000),
+        Math.floor(new Date().getTime() / 1000) - 1,
       );
     } catch {
       return ChangePasswordHandler.buildErrorResponse(
