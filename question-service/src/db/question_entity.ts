@@ -27,6 +27,9 @@ export default class QuestionEntity implements Question {
   @Column({ nullable: false })
     solution!: string;
 
+  @Column({ name: 'execution_input', nullable: false, default: '' })
+    executionInput?: string;
+
   @CreateDateColumn({ name: 'create_timestamp' })
     createDateTime?: Date;
 
