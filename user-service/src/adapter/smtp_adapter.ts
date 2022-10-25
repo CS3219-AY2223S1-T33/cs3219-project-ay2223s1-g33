@@ -15,7 +15,6 @@ class SMTPAdapter implements IEmailAdapter {
     this.credentials = credentials;
 
     const transporterArgs = {
-      service: server.service,
       host: server.server,
       port: server.port,
       secure: server.isSecure,
@@ -23,16 +22,7 @@ class SMTPAdapter implements IEmailAdapter {
         user: credentials.username,
         pass: credentials.password,
       },
-      tls: {
-      },
     };
-
-    if (server.isSecure) {
-      transporterArgs.tls = {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false,
-      };
-    }
 
     this.transporter = createTransport(transporterArgs);
   }
@@ -40,7 +30,7 @@ class SMTPAdapter implements IEmailAdapter {
   async sendEmail(metadata: EmailMetadata, body: EmailBody): Promise<boolean> {
     try {
       await this.transporter.sendMail({
-        from: metadata.sender ? metadata.sender : this.credentials.username,
+        from: metadata.sender ? metadata.sender : this.credentials.sender,
         to: metadata.target,
         subject: metadata.subject,
         text: body.text,
