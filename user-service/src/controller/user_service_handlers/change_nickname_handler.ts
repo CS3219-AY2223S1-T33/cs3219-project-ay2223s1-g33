@@ -13,15 +13,25 @@ import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { PasswordUser, User } from '../../proto/types';
 import GatewayConstants from '../../utils/gateway_constants';
 import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
+import { IAuthenticationAgent, TokenPair } from '../../auth/authentication_agent_types';
+import IHashAgent from '../../auth/hash_agent_types';
 
 class ChangeNicknameHandler
 implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
   rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
 
+  authAgent: IAuthenticationAgent;
+
+  hashAgent: IHashAgent;
+
   constructor(
     rpcLoopback: ILoopbackServiceChannel<IUserCrudService>,
+    authAgent: IAuthenticationAgent,
+    hashAgent: IHashAgent,
   ) {
     this.rpcLoopback = rpcLoopback;
+    this.authAgent = authAgent;
+    this.hashAgent = hashAgent;
   }
 
   async handle(request: ApiRequest<ChangeNicknameRequest>):
@@ -69,10 +79,45 @@ implements IApiHandler<ChangeNicknameRequest, ChangeNicknameResponse> {
       );
     }
 
-    return ChangeNicknameHandler.buildHeaderlessResponse({
-      errorCode: ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_NONE,
-      errorMessage: '',
-    });
+    try {
+      await this.authAgent.invalidateTokensBeforeTime(
+        user.userInfo.username,
+        Math.floor(new Date().getTime() / 1000) - 1,
+      );
+    } catch {
+      return ChangeNicknameHandler.buildErrorResponse(
+        ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_INTERNAL_ERROR,
+        'Could not invalidate old tokens',
+      );
+    }
+
+    user.userInfo.nickname = newNickname;
+
+    let token: TokenPair;
+    try {
+      token = await this.authAgent.createToken({
+        username: user.userInfo?.username,
+        nickname: user.userInfo?.nickname,
+      });
+    } catch {
+      return ChangeNicknameHandler.buildErrorResponse(
+        ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_INTERNAL_ERROR,
+        'Internal Error',
+      );
+    }
+
+    return {
+      response: {
+        errorCode: ChangeNicknameErrorCode.CHANGE_NICKNAME_ERROR_NONE,
+        errorMessage: '',
+      },
+      headers: {
+        'Set-Cookie': [
+          `${GatewayConstants.COOKIE_SESSION_TOKEN}=${token.sessionToken}; Path=/`,
+          `${GatewayConstants.COOKIE_REFRESH_TOKEN}=${token.refreshToken}; Path=/; HttpOnly`,
+        ],
+      },
+    };
   }
 
   static validateRequest(request: ChangeNicknameRequest): (ValidatedRequest | Error) {

@@ -1,7 +1,7 @@
 declare interface IAuthenticationAgent {
   createToken(payload: Object): Promise<TokenPair>;
   invalidateToken(token: TokenPair): Promise<boolean>;
-  invalidateTokensBeforeTime(username: string, timestamp: number): void;
+  invalidateTokensBeforeTime(username: string, timestamp: number): Promise<void>;
 }
 
 declare type TokenUserData = {
