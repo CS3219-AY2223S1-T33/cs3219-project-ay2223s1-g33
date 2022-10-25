@@ -27,7 +27,17 @@ message GetAttemptSubmissionResponse {
   string error_message = 2;
 }
 
+message CreateCompletionSubmissionRequest {
+  common.HistoryCompletion completed = 1;
+}
+
+message CreateCompletionSubmissionResponse {
+  common.HistoryCompletion completed = 1;
+  string error_message = 2;
+}
+
 service HistoryService {
   rpc GetAttemptHistory(GetAttemptHistoryRequest) returns (GetAttemptHistoryResponse);
   rpc GetAttemptSubmission(GetAttemptSubmissionRequest) returns (GetAttemptSubmissionResponse);
+  rpc CreateCompletionSubmission(CreateCompletionSubmissionRequest) returns (CreateCompletionSubmissionResponse);
 }

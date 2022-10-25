@@ -5,6 +5,8 @@ import { fromApiHandler } from '../api_server/api_server_helpers';
 import GetAttemptHistoryHandler from './history_service_handlers/get_attempt_history_handler';
 import { IHistoryCrudService } from '../proto/history-crud-service.grpc-server';
 import {
+  CreateCompletionSubmissionRequest,
+  CreateCompletionSubmissionResponse,
   GetAttemptHistoryRequest,
   GetAttemptHistoryResponse,
   GetAttemptSubmissionRequest,
@@ -12,6 +14,8 @@ import {
 } from '../proto/history-service';
 import GetAttemptSubmissionHandler from './history_service_handlers/get_attempt_submission_handler';
 import { ILoopbackServiceChannel } from '../api_server/loopback_server_types';
+import CreateCompletionSubmissionHandler
+  from './history_service_handlers/create_completion_handler';
 
 class HistoryServiceApi implements ApiService<IHistoryService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IHistoryService>;
@@ -29,6 +33,11 @@ class HistoryServiceApi implements ApiService<IHistoryService> {
         new GetAttemptSubmissionHandler(crudLoopback),
         GetAttemptSubmissionRequest,
         GetAttemptSubmissionResponse,
+      ),
+      createCompletionSubmission: fromApiHandler(
+        new CreateCompletionSubmissionHandler(crudLoopback),
+        CreateCompletionSubmissionRequest,
+        CreateCompletionSubmissionResponse,
       ),
     };
 
