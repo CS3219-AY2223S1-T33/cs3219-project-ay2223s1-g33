@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import HistoryEntity from './history_entity';
 import HistoryOwnerEntity from './history_owner_entity';
 import Logger from '../utils/logger';
+import HistoryCompletionEntity from './history_completion_entity';
 
 type DataSourceConfig = {
   readonly DATABASE_DBHOST: string,
@@ -16,6 +17,7 @@ interface IDatabase {
   getDataSource(): DataSource;
   getHistoryRepo(): Repository<HistoryEntity>;
   getHistoryOwnerRepo(): Repository<HistoryOwnerEntity>;
+  getHistoryCompletionRepo(): Repository<HistoryCompletionEntity>;
 }
 
 class Database implements IDatabase {
@@ -40,6 +42,10 @@ class Database implements IDatabase {
 
   getHistoryOwnerRepo(): Repository<HistoryOwnerEntity> {
     return this.dataSource.getRepository(HistoryOwnerEntity);
+  }
+
+  getHistoryCompletionRepo(): Repository<HistoryCompletionEntity> {
+    return this.dataSource.getRepository(HistoryCompletionEntity);
   }
 
   private createDataSource(): DataSource {

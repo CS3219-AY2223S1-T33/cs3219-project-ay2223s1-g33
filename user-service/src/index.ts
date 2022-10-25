@@ -49,6 +49,7 @@ async function run() {
   }, {
     username: envConfig.EMAIL_USERNAME,
     password: envConfig.EMAIL_PASSWORD,
+    sender: envConfig.EMAIL_SENDER,
   });
   const emailSender = createEmailSender(emailAdapter, envConfig.RESET_PASSWORD_URL);
 

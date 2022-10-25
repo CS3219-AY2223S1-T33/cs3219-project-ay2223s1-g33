@@ -78,7 +78,7 @@ class UserServiceApi implements ApiService<IUserService> {
         ConsumeResetTokenResponse,
       ),
       changeNickname: fromApiHandler(
-        new ChangeNicknameHandler(crudLoopback),
+        new ChangeNicknameHandler(crudLoopback, authService, hashAgent),
         ChangeNicknameRequest,
         ChangeNicknameResponse,
       ),
