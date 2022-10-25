@@ -202,7 +202,7 @@ jobs:
             EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
             EMAIL_SERVER=${{ secrets.EMAIL_SERVER }}
             EMAIL_PORT=${{ secrets.EMAIL_PORT }}
-            EMAIL_IS_SECURE=true
+            EMAIL_IS_SECURE=${{ secrets.EMAIL_IS_SECURE }}
 
             EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
             EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
