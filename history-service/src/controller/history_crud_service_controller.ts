@@ -66,7 +66,7 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
         DeleteAttemptResponse,
       ),
       createCompletion: fromApiHandler(
-        new CreateCompletionHandler(storage),
+        new CreateCompletionHandler(storage, userGrpcClient, questionGrpcClient),
         CreateCompletionRequest,
         CreateCompletionResponse,
       ),
