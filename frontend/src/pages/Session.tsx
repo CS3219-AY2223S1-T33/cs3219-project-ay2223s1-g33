@@ -46,16 +46,8 @@ function Session() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const {
-    isOpen: isLeaveModalOpen,
-    onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal,
-  } = useDisclosure();
-  const {
-    isOpen: isDisconnectModalOpen,
-    onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal,
-  } = useDisclosure();
+  const leaveModalDisclosure = useDisclosure();
+  const disconnectModalDisclosure = useDisclosure();
   const toast = useFixedToast();
 
   // YJS Settings
@@ -92,7 +84,7 @@ function Session() {
             break;
           default:
             dispatch(changeWSStatus({ status: "Disconnected" }));
-            onOpenDisconnectModal();
+            disconnectModalDisclosure.onOpen();
             break;
         }
       });
@@ -100,7 +92,7 @@ function Session() {
       // eslint-disable-next-line
       ws.on("terminate_with_error", (error: ErrorMessage) => {
         dispatch(changeWSStatus({ status: "Disconnected" }));
-        onOpenDisconnectModal();
+        disconnectModalDisclosure.onOpen();
       });
 
       ws.on("user_join", (joinedNickname: Nickname) => {
@@ -237,7 +229,7 @@ function Session() {
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
+      <SessionNavbar onOpen={leaveModalDisclosure.onOpen} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs
@@ -292,13 +284,13 @@ function Session() {
 
       {/* Modals */}
       <LeaveModal
-        isOpen={isLeaveModalOpen}
-        onClose={onCloseLeaveModal}
+        isOpen={leaveModalDisclosure.isOpen}
+        onClose={leaveModalDisclosure.onClose}
         leaveSessionHandler={leaveSessionHandler}
       />
       <DisconnectModal
-        isOpen={isDisconnectModalOpen}
-        onClose={onCloseDisconnectModal}
+        isOpen={disconnectModalDisclosure.isOpen}
+        onClose={disconnectModalDisclosure.onClose}
         leaveSessionHandler={leaveSessionHandler}
       />
     </>
