@@ -1,4 +1,4 @@
-import { Box, Divider, Heading, Text, VStack } from "@chakra-ui/react";
+import { Badge, Box, Divider, Heading, Text, VStack } from "@chakra-ui/react";
 import React from "react";
 import ConstraintsList from "./ConstraintsList";
 import { QuestionDifficulty, Question } from "../../proto/types";
@@ -7,9 +7,10 @@ import ExampleList from "./ExampleList";
 
 type Props = {
   question: Question;
+  isCompleted?: boolean;
 };
 
-function QuestionSection({ question }: Props) {
+function QuestionSection({ question, isCompleted }: Props) {
   const { questionId, name, difficulty, content } = question;
 
   const contentDecode = JSON.parse(content.replace(/\n/g, "\\".concat("n")));
@@ -23,6 +24,7 @@ function QuestionSection({ question }: Props) {
         <Heading as="h5" size="sm" color={difficultyColor(difficulty)}>
           {QuestionDifficulty[difficulty].toString()}
         </Heading>
+        {isCompleted && <Badge colorScheme="green">COMPLETED</Badge>}
       </Box>
       <Divider py={4} />
       <VStack spacing={4} id="question-content" alignItems="flex-start">

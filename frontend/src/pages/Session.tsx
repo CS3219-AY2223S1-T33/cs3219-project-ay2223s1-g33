@@ -5,7 +5,7 @@ import {
   useDisclosure,
   Box,
   Grid,
-  useBoolean,
+  useBoolean
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +32,7 @@ import { addMessage, clearChat } from "../feature/chat/chatSlice";
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
 type ErrorMessage = { errorMsg: string };
-type QuestionMessage = { question: string };
+type QuestionMessage = { question: string; isCompleted: boolean };
 
 let isInit = false;
 function Session() {
@@ -43,12 +43,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal,
+    onClose: onCloseLeaveModal
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal,
+    onClose: onCloseDisconnectModal
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -63,6 +63,8 @@ function Session() {
   const [question, setQuestion] = useState<Question | undefined>();
   const [isEditorLocked, setIsEditorLocked] = useBoolean(false);
   const [code, setCode] = useState("");
+  // eslint-disable-next-line
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -103,13 +105,13 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`,
+          title: `${joinedNickname.nickname} has joined the room!`
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`,
+          title: `${leftNickname.nickname} has left the room.`
         });
       });
 
@@ -119,9 +121,11 @@ function Session() {
       });
 
       ws.on("question_get", (q: QuestionMessage) => {
-        const questionObj: Question = Question.fromJsonString(q.question);
-        toast.sendInfoMessage("Question loaded");
+        const { question: qStr, isCompleted: ic } = q;
+        const questionObj: Question = Question.fromJsonString(qStr);
         setQuestion(questionObj);
+        setIsCompleted(ic);
+        toast.sendInfoMessage("Question loaded");
       });
 
       ws.on("savecode_send", () => {
@@ -150,7 +154,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -236,6 +240,7 @@ function Session() {
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs
+          isCompleted={isCompleted}
           question={question}
           getQuestion={getQuestionHandler}
           sendTextMessage={sendTextMessageHandler}

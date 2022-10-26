@@ -6,7 +6,7 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";
@@ -15,6 +15,7 @@ import HistoryTable from "../history/HistoryTable";
 import ChatSection from "../chat/ChatSection";
 
 type Props = {
+  isCompleted: boolean;
   question: Question | undefined;
   getQuestion: () => void;
   sendTextMessage: (content: string) => void;
@@ -22,7 +23,12 @@ type Props = {
 
 const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
-function EditorTabs({ question, getQuestion, sendTextMessage }: Props) {
+function EditorTabs({
+  question,
+  getQuestion,
+  sendTextMessage,
+  isCompleted
+}: Props) {
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
       <TabList>
@@ -33,9 +39,8 @@ function EditorTabs({ question, getQuestion, sendTextMessage }: Props) {
 
       <TabPanels>
         <TabPanel key="question_section" h="85vh" overflowY="scroll">
-          {/* TODO Maybe have a refresh button? (Collab svc) */}
           {question ? (
-            <QuestionSection question={question} />
+            <QuestionSection question={question} isCompleted={isCompleted} />
           ) : (
             <VStack align="center" spacing={6}>
               <Text>Error: No question received.</Text>
