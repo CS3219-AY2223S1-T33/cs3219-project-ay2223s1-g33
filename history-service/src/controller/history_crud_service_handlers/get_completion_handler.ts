@@ -56,9 +56,7 @@ class GetCompletionHandler extends BaseHandler
       user.userInfo.username,
       completedEntity,
     );
-    if (!resultCompletion) {
-      return GetCompletionHandler.buildErrorResponse('An internal error occurred');
-    }
+    // Don't catch, undefined == completion not found
 
     return {
       response: {

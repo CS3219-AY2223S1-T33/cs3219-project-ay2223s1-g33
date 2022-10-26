@@ -41,7 +41,7 @@ class HistoryAgent implements IHistoryAgent {
   }
 
   getHasBeenCompleted(username: string, questionId: number): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>((resolve) => {
       this.historyClient.getCompletion(
         {
           username,
@@ -50,13 +50,11 @@ class HistoryAgent implements IHistoryAgent {
         {
           deadline: getGrpcDeadline(),
         },
-        (err, value) => {
-          if (value) {
+        (_err, value) => {
+          if (value && value.completed) {
             resolve(true);
-          } else if (err) {
-            resolve(false);
           } else {
-            reject();
+            resolve(false);
           }
         },
       );

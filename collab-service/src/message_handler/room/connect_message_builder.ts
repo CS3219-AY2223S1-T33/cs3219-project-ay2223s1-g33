@@ -35,7 +35,7 @@ Uint8Array {
   const encoder = encoding.createEncoder();
   encoding.writeUint8(encoder, opcode);
   encoding.writeVarString(encoder, qns);
-  encoding.write(encoder, completed);
+  encoding.writeUint8(encoder, completed);
   return encoding.toUint8Array(encoder);
 }
 
