@@ -12,7 +12,6 @@ import {
 import BaseHandler from './base_handler';
 import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
-import { PasswordUser, Question, User } from '../../proto/types';
 
 class CreateCompletionHandler extends BaseHandler
   implements IApiHandler<CreateCompletionRequest, CreateCompletionResponse> {
@@ -39,11 +38,11 @@ class CreateCompletionHandler extends BaseHandler
       return CreateCompletionHandler.buildErrorResponse('Missing completion information');
     }
 
-    const user = await this.getUserByUsername(request.completed.username);
+    const user = await super.getUserByUsername(request.completed.username);
     if (!user?.userInfo) {
       return CreateCompletionHandler.buildErrorResponse('User does not exist');
     }
-    if (!(await this.checkQuestionExist(request.completed.questionId))) {
+    if (!(await super.checkQuestionExist(request.completed.questionId))) {
       return CreateCompletionHandler.buildErrorResponse('Question does not exist');
     }
 
@@ -73,40 +72,6 @@ class CreateCompletionHandler extends BaseHandler
       },
       headers: {},
     };
-  }
-
-  async getUserByUsername(username: string): Promise<PasswordUser | undefined> {
-    const searchUserObject: User = User.create();
-    searchUserObject.username = username;
-    try {
-      return await super.getUser(searchUserObject);
-    } catch (err) {
-      return undefined;
-    }
-  }
-
-  async getUserById(userId: number | undefined): Promise<PasswordUser | undefined> {
-    if (!userId) {
-      return undefined;
-    }
-    const searchUserObject: User = User.create();
-    searchUserObject.userId = userId;
-    try {
-      return await super.getUser(searchUserObject);
-    } catch (err) {
-      return undefined;
-    }
-  }
-
-  async checkQuestionExist(questionId: number): Promise<boolean> {
-    const searchQuestionObject: Question = Question.create();
-    searchQuestionObject.questionId = questionId;
-    try {
-      const question = await super.getQuestion(searchQuestionObject);
-      return question !== undefined;
-    } catch (err) {
-      return false;
-    }
   }
 
   static buildErrorResponse(errorMessage: string):

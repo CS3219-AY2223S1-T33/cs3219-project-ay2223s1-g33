@@ -20,6 +20,7 @@ import {
   GetAttemptsResponse, GetCompletionRequest, GetCompletionResponse,
 } from '../../src/proto/history-crud-service';
 import { LoopbackRouteHandler } from '../../src/api_server/loopback_server_types';
+import HistoryCompletionEntity from '../../src/db/history_completion_entity';
 
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
@@ -78,6 +79,11 @@ const testCompletion: HistoryCompletion = {
   questionId: testQuestion.questionId,
 };
 
+const testCompletionEntity: HistoryCompletionEntity = {
+  userId: testUser.userId,
+  questionId: testQuestion.questionId,
+};
+
 function makeMockAttemptStorage() {
   return {
     addAttempt: jest.fn(),
@@ -87,6 +93,13 @@ function makeMockAttemptStorage() {
     getAttemptsByUserIdAndQuestionId: jest.fn(),
     removeAllOfHistoryOwner: jest.fn(),
     removeHistoryByQuestionId: jest.fn(),
+  };
+}
+
+function makeMockCompletionStorage() {
+  return {
+    addCompletion: jest.fn(),
+    getCompletion: jest.fn(),
   };
 }
 
@@ -146,7 +159,9 @@ export {
   testUser,
   testPasswordUser,
   testCompletion,
+  testCompletionEntity,
   makeMockAttemptStorage,
+  makeMockCompletionStorage,
   makeMockLoopbackChannel,
   makeMockUserClient,
   makeMockQuestionClient,

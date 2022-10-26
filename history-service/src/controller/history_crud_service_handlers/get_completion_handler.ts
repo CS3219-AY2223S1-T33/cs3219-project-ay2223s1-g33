@@ -8,7 +8,6 @@ import { GetCompletionRequest, GetCompletionResponse } from '../../proto/history
 import BaseHandler from './base_handler';
 import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
-import { PasswordUser, Question, User } from '../../proto/types';
 
 class GetCompletionHandler extends BaseHandler
   implements IApiHandler<GetCompletionRequest, GetCompletionResponse> {
@@ -35,11 +34,11 @@ class GetCompletionHandler extends BaseHandler
       return GetCompletionHandler.buildErrorResponse('No question ID supplied');
     }
 
-    const user = await this.getUserExist(request.username);
+    const user = await super.getUserByUsername(request.username);
     if (!user?.userInfo) {
       return GetCompletionHandler.buildErrorResponse('User does not exist');
     }
-    if (!(await this.checkQuestionExist(request.questionId))) {
+    if (!(await super.checkQuestionExist(request.questionId))) {
       return GetCompletionHandler.buildErrorResponse('Question does not exist');
     }
 
@@ -57,6 +56,9 @@ class GetCompletionHandler extends BaseHandler
       user.userInfo.username,
       completedEntity,
     );
+    if (!resultCompletion) {
+      return GetCompletionHandler.buildErrorResponse('An internal error occurred');
+    }
 
     return {
       response: {
@@ -65,27 +67,6 @@ class GetCompletionHandler extends BaseHandler
       },
       headers: {},
     };
-  }
-
-  async getUserExist(username: string): Promise<PasswordUser | undefined> {
-    const searchUserObject: User = User.create();
-    searchUserObject.username = username;
-    try {
-      return await super.getUser(searchUserObject);
-    } catch (err) {
-      return undefined;
-    }
-  }
-
-  async checkQuestionExist(questionId: number): Promise<boolean> {
-    const searchQuestionObject: Question = Question.create();
-    searchQuestionObject.questionId = questionId;
-    try {
-      const question = await super.getQuestion(searchQuestionObject);
-      return question !== undefined;
-    } catch (err) {
-      return false;
-    }
   }
 
   static buildErrorResponse(errorMessage: string):

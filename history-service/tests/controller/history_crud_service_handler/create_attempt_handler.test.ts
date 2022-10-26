@@ -12,9 +12,8 @@ import CreateAttemptHandler
   from '../../../src/controller/history_crud_service_handlers/create_attempt_handler';
 import { HistoryAttempt, PasswordUser, Question } from '../../../src/proto/types';
 import BaseHandler from '../../../src/controller/history_crud_service_handlers/base_handler';
-import HistoryAttemptEntity from '../../../src/db/history_entity';
 
-describe('Get Attempt Handler', () => {
+describe('Create Attempt Handler', () => {
   const makeRequest = (attempt: HistoryAttempt | undefined):
   ApiRequest<CreateAttemptRequest> => ({
     request: { attempt },
@@ -49,7 +48,7 @@ describe('Get Attempt Handler', () => {
         () => new Promise<PasswordUser | undefined>((resolve) => { resolve(testPasswordUser); }),
       );
     mockAttemptStorage.addAttempt.mockImplementation(
-      (): HistoryAttemptEntity => testHistoryAttemptEntity,
+      () => testHistoryAttemptEntity,
     );
   });
 
