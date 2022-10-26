@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type HistoryServiceClient interface {
 	GetAttemptHistory(ctx context.Context, in *GetAttemptHistoryRequest, opts ...grpc.CallOption) (*GetAttemptHistoryResponse, error)
 	GetAttemptSubmission(ctx context.Context, in *GetAttemptSubmissionRequest, opts ...grpc.CallOption) (*GetAttemptSubmissionResponse, error)
+	CreateCompletionSubmission(ctx context.Context, in *CreateCompletionSubmissionRequest, opts ...grpc.CallOption) (*CreateCompletionSubmissionResponse, error)
 }
 
 type historyServiceClient struct {
@@ -52,12 +53,22 @@ func (c *historyServiceClient) GetAttemptSubmission(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *historyServiceClient) CreateCompletionSubmission(ctx context.Context, in *CreateCompletionSubmissionRequest, opts ...grpc.CallOption) (*CreateCompletionSubmissionResponse, error) {
+	out := new(CreateCompletionSubmissionResponse)
+	err := c.cc.Invoke(ctx, "/history_service.HistoryService/CreateCompletionSubmission", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HistoryServiceServer is the server API for HistoryService service.
 // All implementations must embed UnimplementedHistoryServiceServer
 // for forward compatibility
 type HistoryServiceServer interface {
 	GetAttemptHistory(context.Context, *GetAttemptHistoryRequest) (*GetAttemptHistoryResponse, error)
 	GetAttemptSubmission(context.Context, *GetAttemptSubmissionRequest) (*GetAttemptSubmissionResponse, error)
+	CreateCompletionSubmission(context.Context, *CreateCompletionSubmissionRequest) (*CreateCompletionSubmissionResponse, error)
 	mustEmbedUnimplementedHistoryServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedHistoryServiceServer) GetAttemptHistory(context.Context, *Get
 }
 func (UnimplementedHistoryServiceServer) GetAttemptSubmission(context.Context, *GetAttemptSubmissionRequest) (*GetAttemptSubmissionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttemptSubmission not implemented")
+}
+func (UnimplementedHistoryServiceServer) CreateCompletionSubmission(context.Context, *CreateCompletionSubmissionRequest) (*CreateCompletionSubmissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCompletionSubmission not implemented")
 }
 func (UnimplementedHistoryServiceServer) mustEmbedUnimplementedHistoryServiceServer() {}
 
@@ -120,6 +134,24 @@ func _HistoryService_GetAttemptSubmission_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HistoryService_CreateCompletionSubmission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCompletionSubmissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HistoryServiceServer).CreateCompletionSubmission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/history_service.HistoryService/CreateCompletionSubmission",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HistoryServiceServer).CreateCompletionSubmission(ctx, req.(*CreateCompletionSubmissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HistoryService_ServiceDesc is the grpc.ServiceDesc for HistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var HistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAttemptSubmission",
 			Handler:    _HistoryService_GetAttemptSubmission_Handler,
+		},
+		{
+			MethodName: "CreateCompletionSubmission",
+			Handler:    _HistoryService_CreateCompletionSubmission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

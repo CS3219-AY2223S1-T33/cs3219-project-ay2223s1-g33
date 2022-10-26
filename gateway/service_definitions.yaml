@@ -54,3 +54,7 @@ http:
     - selector: history_service.HistoryService.GetAttemptSubmission
       post: /api/user/history/submission
       body: "*"
+
+    - selector: history_service.HistoryService.CreateCompletionSubmission
+      post: /api/user/history/completion
+      body: "*"
