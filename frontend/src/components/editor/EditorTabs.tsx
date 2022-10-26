@@ -19,6 +19,7 @@ type Props = {
   question: Question | undefined;
   getQuestion: () => void;
   sendTextMessage: (content: string) => void;
+  onToggle: () => void;
 };
 
 const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
@@ -27,7 +28,8 @@ function EditorTabs({
   question,
   getQuestion,
   sendTextMessage,
-  isCompleted
+  isCompleted,
+  onToggle
 }: Props) {
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
@@ -40,7 +42,11 @@ function EditorTabs({
       <TabPanels>
         <TabPanel key="question_section" h="85vh" overflowY="scroll">
           {question ? (
-            <QuestionSection question={question} isCompleted={isCompleted} />
+            <QuestionSection
+              question={question}
+              isCompleted={isCompleted}
+              onToggle={onToggle}
+            />
           ) : (
             <VStack align="center" spacing={6}>
               <Text>Error: No question received.</Text>
