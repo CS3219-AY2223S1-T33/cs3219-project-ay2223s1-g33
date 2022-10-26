@@ -5,12 +5,21 @@ import {
   StoredCompletion,
 } from '../../model/completion_store_model';
 import { GetCompletionRequest, GetCompletionResponse } from '../../proto/history-crud-service';
+import BaseHandler from './base_handler';
+import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
+import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
+import { PasswordUser, Question, User } from '../../proto/types';
 
-class GetCompletionHandler
-implements IApiHandler<GetCompletionRequest, GetCompletionResponse> {
+class GetCompletionHandler extends BaseHandler
+  implements IApiHandler<GetCompletionRequest, GetCompletionResponse> {
   completedStore: ICompletedStore;
 
-  constructor(storage: IStorage) {
+  constructor(
+    storage: IStorage,
+    userGrpcClient: UserCrudServiceClient,
+    questionGrpcClient: QuestionServiceClient,
+  ) {
+    super(userGrpcClient, questionGrpcClient);
     this.completedStore = storage.getCompletionStore();
   }
 
@@ -18,26 +27,36 @@ implements IApiHandler<GetCompletionRequest, GetCompletionResponse> {
   Promise<ApiResponse<GetCompletionResponse>> {
     const { request } = apiRequest;
 
-    if (!request.userId) {
-      return GetCompletionHandler.buildErrorResponse('No user ID supplied');
+    if (!request.username) {
+      return GetCompletionHandler.buildErrorResponse('No username supplied');
     }
 
     if (!request.questionId) {
       return GetCompletionHandler.buildErrorResponse('No question ID supplied');
     }
 
+    const user = await this.getUserExist(request.username);
+    if (!user?.userInfo) {
+      return GetCompletionHandler.buildErrorResponse('User does not exist');
+    }
+    if (!(await this.checkQuestionExist(request.questionId))) {
+      return GetCompletionHandler.buildErrorResponse('Question does not exist');
+    }
+
     let completedEntity: StoredCompletion | undefined;
     try {
-      completedEntity = await this.completedStore.getCompletion(request.userId, request.questionId);
+      completedEntity = await this.completedStore.getCompletion(
+        user.userInfo.userId,
+        request.questionId,
+      );
     } catch (err) {
       return GetCompletionHandler.buildErrorResponse(`${err}`);
     }
 
-    const resultCompletion = convertToProtoCompletion(completedEntity);
-    if (!resultCompletion) {
-      // No entries found, send errorless
-      return GetCompletionHandler.buildErrorResponse('');
-    }
+    const resultCompletion = convertToProtoCompletion(
+      user.userInfo.username,
+      completedEntity,
+    );
 
     return {
       response: {
@@ -46,6 +65,27 @@ implements IApiHandler<GetCompletionRequest, GetCompletionResponse> {
       },
       headers: {},
     };
+  }
+
+  async getUserExist(username: string): Promise<PasswordUser | undefined> {
+    const searchUserObject: User = User.create();
+    searchUserObject.username = username;
+    try {
+      return await super.getUser(searchUserObject);
+    } catch (err) {
+      return undefined;
+    }
+  }
+
+  async checkQuestionExist(questionId: number): Promise<boolean> {
+    const searchQuestionObject: Question = Question.create();
+    searchQuestionObject.questionId = questionId;
+    try {
+      const question = await super.getQuestion(searchQuestionObject);
+      return question !== undefined;
+    } catch (err) {
+      return false;
+    }
   }
 
   static buildErrorResponse(errorMessage: string):

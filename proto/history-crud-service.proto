@@ -58,7 +58,7 @@ message CreateCompletionResponse {
 }
 
 message GetCompletionRequest {
-  uint64 user_id = 1;
+  string username = 1;
   uint64 question_id = 2;
 }
 

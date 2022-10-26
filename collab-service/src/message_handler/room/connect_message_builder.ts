@@ -7,6 +7,9 @@ export const OPCODE_QUESTION_REQ = 8;
 export const OPCODE_QUESTION_RCV = 9;
 export const OPCODE_SAVE_CODE_REQ = 10;
 export const OPCODE_SAVE_CODE_ACK = 11;
+export const OPCODE_EXECUTE_REQ = 13
+export const OPCODE_EXECUTE_PENDING = 14
+export const OPCODE_EXECUTE_COMPLETE = 15
 
 function encodeContentOpcode(content: string, opcode: number): Uint8Array {
   const encoder = encoding.createEncoder();

@@ -39,6 +39,12 @@ class HistoryAgent implements IHistoryAgent {
       );
     });
   }
+
+  getHasBeenCompletion(username: string, questionId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.historyClient.getCompletion()
+    });
+  }
 }
 
 function createHistoryAgent(

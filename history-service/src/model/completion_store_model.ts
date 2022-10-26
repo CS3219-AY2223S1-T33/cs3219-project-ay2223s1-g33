@@ -4,35 +4,27 @@ import { HistoryCompletion } from '../proto/types';
 declare type StoredCompletion = HistoryCompletionEntity;
 
 function convertToStoredCompletion(
-  completion: HistoryCompletion,
-): (HistoryCompletionEntity | undefined) {
-  if (!completion.userId) {
-    return undefined;
-  }
-  if (!completion.questionId) {
-    return undefined;
-  }
+  userId: number,
+  questionId: number,
+): HistoryCompletionEntity {
   return {
-    userId: completion.userId,
-    questionId: completion.questionId,
+    userId,
+    questionId,
   };
 }
 
 function convertToProtoCompletion(
+  username: string,
   completion: HistoryCompletionEntity | undefined,
 ): (HistoryCompletion | undefined) {
   if (!completion) {
     return undefined;
   }
-
-  if (!completion.userId) {
-    return undefined;
-  }
   if (!completion.questionId) {
     return undefined;
   }
   return {
-    userId: completion.userId,
+    username,
     questionId: completion.questionId,
   };
 }

@@ -74,7 +74,7 @@ const testHistoryAttemptEntity: HistoryAttemptEntity = {
 };
 
 const testCompletion: HistoryCompletion = {
-  userId: testUser.userId,
+  username: testUser.username,
   questionId: testQuestion.questionId,
 };
 

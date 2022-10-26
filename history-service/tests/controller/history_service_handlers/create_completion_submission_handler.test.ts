@@ -18,11 +18,11 @@ import {
 } from '../test_util';
 
 describe('Create Completion Submission Handler', () => {
-  const makeRequest = (userId: number, questionId: number):
+  const makeRequest = (username: string, questionId: number):
   ApiRequest<CreateCompletionSubmissionRequest> => ({
     request: {
       completed: {
-        userId,
+        username,
         questionId,
       },
     },
@@ -54,7 +54,7 @@ describe('Create Completion Submission Handler', () => {
       },
     );
 
-    const request = makeRequest(testUser.userId, testQuestion.questionId);
+    const request = makeRequest(testUser.username, testQuestion.questionId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage)
       .toBe('');
@@ -69,7 +69,7 @@ describe('Create Completion Submission Handler', () => {
       },
     );
 
-    const request = makeRequest(testUser.userId, testQuestion.questionId);
+    const request = makeRequest(testUser.username, testQuestion.questionId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage)
       .not
@@ -103,7 +103,7 @@ describe('Create Completion Submission Handler', () => {
       }),
     );
 
-    const request = makeRequest(testUser.userId, testQuestion.questionId);
+    const request = makeRequest(testUser.username, testQuestion.questionId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage)
       .not

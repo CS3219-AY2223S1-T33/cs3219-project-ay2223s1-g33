@@ -154,9 +154,9 @@ export interface CreateCompletionResponse {
  */
 export interface GetCompletionRequest {
     /**
-     * @generated from protobuf field: uint64 user_id = 1;
+     * @generated from protobuf field: string username = 1;
      */
-    userId: number;
+    username: string;
     /**
      * @generated from protobuf field: uint64 question_id = 2;
      */
@@ -726,12 +726,12 @@ export const CreateCompletionResponse = new CreateCompletionResponse$Type();
 class GetCompletionRequest$Type extends MessageType<GetCompletionRequest> {
     constructor() {
         super("history_crud_service.GetCompletionRequest", [
-            { no: 1, name: "user_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 1, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
         ]);
     }
     create(value?: PartialMessage<GetCompletionRequest>): GetCompletionRequest {
-        const message = { userId: 0, questionId: 0 };
+        const message = { username: "", questionId: 0 };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<GetCompletionRequest>(this, message, value);
@@ -742,8 +742,8 @@ class GetCompletionRequest$Type extends MessageType<GetCompletionRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* uint64 user_id */ 1:
-                    message.userId = reader.uint64().toNumber();
+                case /* string username */ 1:
+                    message.username = reader.string();
                     break;
                 case /* uint64 question_id */ 2:
                     message.questionId = reader.uint64().toNumber();
@@ -760,9 +760,9 @@ class GetCompletionRequest$Type extends MessageType<GetCompletionRequest> {
         return message;
     }
     internalBinaryWrite(message: GetCompletionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint64 user_id = 1; */
-        if (message.userId !== 0)
-            writer.tag(1, WireType.Varint).uint64(message.userId);
+        /* string username = 1; */
+        if (message.username !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.username);
         /* uint64 question_id = 2; */
         if (message.questionId !== 0)
             writer.tag(2, WireType.Varint).uint64(message.questionId);

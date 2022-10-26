@@ -12,7 +12,7 @@ import {
 import BaseHandler from './base_handler';
 import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
-import { Question, User } from '../../proto/types';
+import { PasswordUser, Question, User } from '../../proto/types';
 
 class CreateCompletionHandler extends BaseHandler
   implements IApiHandler<CreateCompletionRequest, CreateCompletionResponse> {
@@ -35,18 +35,22 @@ class CreateCompletionHandler extends BaseHandler
       return CreateCompletionHandler.buildErrorResponse('Invalid completion information');
     }
 
-    const convertedCompletion = convertToStoredCompletion(request.completed);
-    if (!convertedCompletion) {
+    if ((!request.completed.username || !request.completed.questionId)) {
       return CreateCompletionHandler.buildErrorResponse('Missing completion information');
     }
 
-    if (!(await this.checkUserExist(request.completed.userId))) {
+    const user = await this.getUserByUsername(request.completed.username);
+    if (!user?.userInfo) {
       return CreateCompletionHandler.buildErrorResponse('User does not exist');
     }
     if (!(await this.checkQuestionExist(request.completed.questionId))) {
       return CreateCompletionHandler.buildErrorResponse('Question does not exist');
     }
 
+    const convertedCompletion = convertToStoredCompletion(
+      user.userInfo.userId,
+      request.completed.questionId,
+    );
     let completedEntity: StoredCompletion | undefined;
     try {
       completedEntity = await this.completedStore.addCompletion(convertedCompletion);
@@ -54,7 +58,10 @@ class CreateCompletionHandler extends BaseHandler
       return CreateCompletionHandler.buildErrorResponse(`${err}`);
     }
 
-    const resultCompletion = convertToProtoCompletion(completedEntity);
+    const resultCompletion = convertToProtoCompletion(
+      user.userInfo.username,
+      completedEntity,
+    );
     if (!resultCompletion) {
       return CreateCompletionHandler.buildErrorResponse('An internal error occurred');
     }
@@ -68,14 +75,26 @@ class CreateCompletionHandler extends BaseHandler
     };
   }
 
-  async checkUserExist(userId: number): Promise<boolean> {
+  async getUserByUsername(username: string): Promise<PasswordUser | undefined> {
+    const searchUserObject: User = User.create();
+    searchUserObject.username = username;
+    try {
+      return await super.getUser(searchUserObject);
+    } catch (err) {
+      return undefined;
+    }
+  }
+
+  async getUserById(userId: number | undefined): Promise<PasswordUser | undefined> {
+    if (!userId) {
+      return undefined;
+    }
     const searchUserObject: User = User.create();
     searchUserObject.userId = userId;
     try {
-      const user = await super.getUser(searchUserObject);
-      return user !== undefined;
+      return await super.getUser(searchUserObject);
     } catch (err) {
-      return false;
+      return undefined;
     }
   }
 
