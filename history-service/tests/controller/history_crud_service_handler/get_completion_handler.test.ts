@@ -1,30 +1,22 @@
 import { ApiRequest } from '../../../src/api_server/api_server_types';
-import {
-  CreateCompletionRequest,
-} from '../../../src/proto/history-crud-service';
+import { GetCompletionRequest } from '../../../src/proto/history-crud-service';
 import {
   makeMockCompletionStorage,
   makeMockQuestionClient,
-  makeMockUserClient,
-  testCompletion,
-  testCompletionEntity,
-  testPasswordUser,
-  testQuestion,
+  makeMockUserClient, testCompletion, testCompletionEntity, testPasswordUser, testQuestion,
 } from '../test_util';
 import { IStorage } from '../../../src/storage/storage';
-import CreateCompletionHandler
-  from '../../../src/controller/history_crud_service_handlers/create_completion_handler';
+import GetCompletionHandler
+  from '../../../src/controller/history_crud_service_handlers/get_completion_handler';
 import BaseHandler from '../../../src/controller/history_crud_service_handlers/base_handler';
 import { PasswordUser, Question } from '../../../src/proto/types';
 
-describe('Create Completion Handler', () => {
+describe('Get Completion Handler', () => {
   const makeRequest = (username: string, questionId: number):
-  ApiRequest<CreateCompletionRequest> => ({
+  ApiRequest<GetCompletionRequest> => ({
     request: {
-      completed: {
-        username,
-        questionId,
-      },
+      username,
+      questionId,
     },
     headers: {},
   });
@@ -37,7 +29,7 @@ describe('Create Completion Handler', () => {
     getAttemptStore: jest.fn(),
     getCompletionStore: jest.fn(() => mockCompletionStorage),
   };
-  let handler = new CreateCompletionHandler(mockStorage, userClient, questionClient);
+  let handler = new GetCompletionHandler(mockStorage, userClient, questionClient);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,7 +38,7 @@ describe('Create Completion Handler', () => {
       getAttemptStore: jest.fn(),
       getCompletionStore: jest.fn(() => mockCompletionStorage),
     };
-    handler = new CreateCompletionHandler(mockStorage, userClient, questionClient);
+    handler = new GetCompletionHandler(mockStorage, userClient, questionClient);
 
     jest.spyOn(BaseHandler.prototype, 'getQuestion')
       .mockImplementation(
@@ -56,36 +48,18 @@ describe('Create Completion Handler', () => {
       .mockImplementation(
         () => new Promise<PasswordUser | undefined>((resolve) => { resolve(testPasswordUser); }),
       );
-    mockCompletionStorage.addCompletion.mockImplementation(
+    mockCompletionStorage.getCompletion.mockImplementation(
       () => testCompletionEntity,
     );
   });
 
-  test('Successful Completion Creation', async () => {
+  test('Successful Completion Retrieval', async () => {
     const request = makeRequest(testCompletion.username, testCompletion.questionId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage)
       .toBe('');
     expect(response.response.completed)
       .toStrictEqual(testCompletion);
-  });
-
-  test('Bad Request', async () => {
-    const makeUndefinedCompleteRequest = ():
-    ApiRequest<CreateCompletionRequest> => ({
-      request: {
-        completed: undefined,
-      },
-      headers: {},
-    });
-
-    const request = makeUndefinedCompleteRequest();
-    const response = await handler.handle(request);
-    expect(response.response.errorMessage)
-      .not
-      .toBe('');
-    expect(response.response.completed)
-      .toBeUndefined();
   });
 
   test('Bad Request - Missing username', async () => {
@@ -168,8 +142,8 @@ describe('Create Completion Handler', () => {
       .toBeUndefined();
   });
 
-  test('Bad Downstream Add Completion Request', async () => {
-    mockCompletionStorage.addCompletion.mockImplementationOnce(
+  test('Bad Downstream Get Completion Request', async () => {
+    mockCompletionStorage.getCompletion.mockImplementationOnce(
       () => { throw new Error(); },
     );
 
@@ -182,15 +156,14 @@ describe('Create Completion Handler', () => {
       .toBeUndefined();
   });
 
-  test('Internal Error', async () => {
-    mockCompletionStorage.addCompletion.mockImplementationOnce(
+  test('User does not exit', async () => {
+    mockCompletionStorage.getCompletion.mockImplementationOnce(
       () => undefined,
     );
 
     const request = makeRequest(testCompletion.username, testCompletion.questionId);
     const response = await handler.handle(request);
     expect(response.response.errorMessage)
-      .not
       .toBe('');
     expect(response.response.completed)
       .toBeUndefined();
