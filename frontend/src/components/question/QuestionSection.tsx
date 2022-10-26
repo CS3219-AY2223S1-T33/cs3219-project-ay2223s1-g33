@@ -8,7 +8,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import ConstraintsList from "./ConstraintsList";
 import {
@@ -25,11 +25,11 @@ import {
   CreateCompletionSubmissionResponse
 } from "../../proto/history-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
+import { changeIsCompleted } from "../../feature/session/sessionSlice";
 
 type Props = {
   question: Question;
   showCompletion?: boolean;
-  // onToggle?: () => void;
 };
 
 function QuestionSection({ question, showCompletion }: Props) {
@@ -38,6 +38,7 @@ function QuestionSection({ question, showCompletion }: Props) {
   );
   const username = useSelector(selectUser)?.username;
   const toast = useFixedToast();
+  const dispatch = useDispatch();
 
   const { questionId, name, difficulty, content } = question;
 
@@ -62,6 +63,7 @@ function QuestionSection({ question, showCompletion }: Props) {
         }
 
         // setIsCompleted((prev) => !prev);
+        dispatch(changeIsCompleted({ isComplete: !isCompleted }));
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
