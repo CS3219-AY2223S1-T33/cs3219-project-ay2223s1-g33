@@ -71,7 +71,7 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
         CreateCompletionResponse,
       ),
       getCompletion: fromApiHandler(
-        new GetCompletionHandler(storage),
+        new GetCompletionHandler(storage, userGrpcClient, questionGrpcClient),
         GetCompletionRequest,
         GetCompletionResponse,
       ),
