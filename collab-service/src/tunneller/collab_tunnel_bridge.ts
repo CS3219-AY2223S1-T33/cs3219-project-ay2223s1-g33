@@ -43,6 +43,8 @@ class CollabTunnelBridge {
 
   roomId: string;
 
+  questionId: number | undefined;
+
   constructor(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
@@ -181,7 +183,12 @@ class CollabTunnelBridge {
    */
   private async writeQuestionToClient() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
-    this.call.write(makeDataResponse(createQuestionRcvPackage(finalQuestion)));
+    this.questionId = JSON.parse(finalQuestion).questionId;
+    let isCompleted = false;
+    if (this.questionId) {
+      isCompleted = await this.historyAgent.getHasBeenCompleted(this.username, this.questionId);
+    }
+    this.call.write(makeDataResponse(createQuestionRcvPackage(finalQuestion, isCompleted)));
   }
 
   /**

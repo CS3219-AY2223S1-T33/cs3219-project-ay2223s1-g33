@@ -30,8 +30,21 @@ function createDisconnectedPackage(username: string): Uint8Array {
   return encodeContentOpcode(username, OPCODE_USER_LEAVE);
 }
 
-function createQuestionRcvPackage(question: string): Uint8Array {
-  return encodeContentOpcode(question, OPCODE_QUESTION_RCV);
+function encodeQuestionCompletion(qns: string, completed: number, opcode: number):
+Uint8Array {
+  const encoder = encoding.createEncoder();
+  encoding.writeUint8(encoder, opcode);
+  encoding.writeVarString(encoder, qns);
+  encoding.write(encoder, completed);
+  return encoding.toUint8Array(encoder);
+}
+
+function createQuestionRcvPackage(question: string, isCompleted: boolean): Uint8Array {
+  let completed = 0;
+  if (isCompleted) {
+    completed = 1;
+  }
+  return encodeQuestionCompletion(question, completed, OPCODE_QUESTION_RCV);
 }
 
 function createSaveCodeReqPackage(): Uint8Array {
