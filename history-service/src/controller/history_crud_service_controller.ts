@@ -2,7 +2,9 @@ import { ServiceDefinition, ChannelCredentials } from '@grpc/grpc-js';
 import { IHistoryCrudService, historyCrudServiceDefinition } from '../proto/history-crud-service.grpc-server';
 import {
   CreateAttemptRequest,
-  CreateAttemptResponse, CreateCompletionRequest, CreateCompletionResponse,
+  CreateAttemptResponse,
+  CreateCompletionRequest,
+  CreateCompletionResponse,
   DeleteAttemptRequest,
   DeleteAttemptResponse,
   GetAttemptRequest,

@@ -1,6 +1,7 @@
 import { ChannelCredentials, handleUnaryCall } from '@grpc/grpc-js';
 import {
-  HistoryAttempt, HistoryCompletion,
+  HistoryAttempt,
+  HistoryCompletion,
   PasswordUser,
   Question,
   QuestionDifficulty,
