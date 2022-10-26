@@ -1,0 +1,277 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-service
+  labels:
+    app: session-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: session-service
+  template:
+    metadata:
+      labels:
+        app: session-service
+    spec:
+      containers:
+        - name: session-service
+          image: gcr.io/cs3219-peerprep-366617/session-service
+          ports:
+            - name: grpc
+              containerPort: 4100
+          envFrom:
+          - secretRef:
+                name: secrets
+          - configMapRef:
+                name: service-names
+          env:
+          - name: SESSION_LIFESPAN_MINS
+            value: "1"
+          resources:
+            limits:
+              cpu: 30m
+              memory: 32Mi
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: gcr.io/cs3219-peerprep-366617/user-service
+          ports:
+            - name: grpc
+              containerPort: 4000
+            - name: http
+              containerPort: 8081
+          envFrom:
+          - secretRef:
+                name: secrets
+          - configMapRef:
+                name: service-names
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    app: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: gcr.io/cs3219-peerprep-366617/gateway
+          ports:
+            - name: http
+              containerPort: 5000
+          env:
+            - name: USER_BFF_SERVER
+              value: "user-service:4000"
+            - name: SESSION_SERVER
+              value: "session-service:4100"
+            - name: MATCHING_SERVER
+              value: "matching-service:4001"
+            - name: COLLAB_SERVER
+              value: "collab-service:4003"
+            - name: HISTORY_SERVER
+              value: "history-service:4005"
+          resources:
+            limits:
+              cpu: 60m
+              memory: 44Mi
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-service
+  labels:
+    app: question-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: question-service
+  template:
+    metadata:
+      labels:
+        app: question-service
+    spec:
+      containers:
+        - name: question-service
+          image: gcr.io/cs3219-peerprep-366617/question-service:latest
+          ports:
+            - name: grpc
+              containerPort: 4004
+            - name: http
+              containerPort: 8084
+          envFrom:
+          - secretRef:
+                name: secrets
+          - configMapRef:
+                name: service-names
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: history-service
+  labels:
+    app: history-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: history-service
+  template:
+    metadata:
+      labels:
+        app: history-service
+    spec:
+      containers:
+        - name: history-service
+          image: gcr.io/cs3219-peerprep-366617/history-service:latest
+          ports:
+            - name: grpc
+              containerPort: 4005
+            - name: http
+              containerPort: 8085
+          envFrom:
+          - secretRef:
+                name: secrets
+          - configMapRef:
+                name: service-names
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matching-service
+  labels:
+    app: matching-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matching-service
+  template:
+    metadata:
+      labels:
+        app: matching-service
+    spec:
+      containers:
+        - name: matching-service
+          image: gcr.io/cs3219-peerprep-366617/matching-service:latest
+          ports:
+            - name: grpc
+              containerPort: 4001
+            - name: http
+              containerPort: 8085
+          envFrom:
+          - secretRef:
+                name: secrets
+          - configMapRef:
+                name: service-names
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matchmaker
+  labels:
+    app: matchmaker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matchmaker
+  template:
+    metadata:
+      labels:
+        app: matchmaker
+    spec:
+      containers:
+        - name: matchmaker
+          image: gcr.io/cs3219-peerprep-366617/matchmaker:latest
+          envFrom:
+          - configMapRef:
+                name: service-names
+          resources:
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collab-service
+  labels:
+    app: collab-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collab-service
+  template:
+    metadata:
+      labels:
+        app: collab-service
+    spec:
+      containers:
+        - name: collab-service
+          image: gcr.io/cs3219-peerprep-366617/collab-service:latest
+          ports:
+            - name: grpc
+              containerPort: 4003
+            - name: http
+              containerPort: 8083
+          envFrom:
+          - secretRef:
+                name: secrets
+          - configMapRef:
+                name: service-names
+          resources:
+            limits:
+              cpu: 70m
+              memory: 150Mi
+          imagePullPolicy: Always
