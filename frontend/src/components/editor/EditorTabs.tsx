@@ -6,7 +6,7 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
@@ -16,7 +16,6 @@ import ChatSection from "../chat/ChatSection";
 import { RootState } from "../../app/store";
 
 type Props = {
-  // isCompleted: boolean;
   getQuestion: () => void;
   sendTextMessage: (content: string) => void;
 };

@@ -24,7 +24,7 @@ function Editor({
   provider,
   undoManager,
   nickname,
-  onCodeUpdate
+  onCodeUpdate,
 }: Props) {
   const selectedLang = useSelector(selectSelectedLanguage);
   const isEditable = !useSelector(
@@ -36,7 +36,7 @@ function Editor({
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333"
+        colorLight: "#6eeb8333",
       });
       providerSet = true;
     }

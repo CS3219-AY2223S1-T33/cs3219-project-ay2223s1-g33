@@ -5,7 +5,7 @@ import {
   Heading,
   HStack,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,7 @@ import ConstraintsList from "./ConstraintsList";
 import {
   QuestionDifficulty,
   Question,
-  HistoryCompletion
+  HistoryCompletion,
 } from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
@@ -22,7 +22,7 @@ import { RootState } from "../../app/store";
 import { selectUser } from "../../feature/user/userSlice";
 import {
   CreateCompletionSubmissionRequest,
-  CreateCompletionSubmissionResponse
+  CreateCompletionSubmissionResponse,
 } from "../../proto/history-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { changeIsCompleted } from "../../feature/session/sessionSlice";
