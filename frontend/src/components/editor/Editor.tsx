@@ -5,7 +5,9 @@ import * as Y from "yjs";
 import React, { useEffect } from "react";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { yCollab } from "y-codemirror.next";
-import { Language } from "../../types";
+import { useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import { selectSelectedLanguage } from "../../feature/session/sessionSlice";
 
 let providerSet = false;
 
@@ -14,9 +16,7 @@ type Props = {
   provider: WebsocketProvider;
   undoManager: Y.UndoManager;
   nickname: string;
-  selectedLang: Language;
   onCodeUpdate: (c: string, update: ViewUpdate) => void;
-  isEditable: boolean;
 };
 
 function Editor({
@@ -24,16 +24,19 @@ function Editor({
   provider,
   undoManager,
   nickname,
-  selectedLang,
-  onCodeUpdate,
-  isEditable,
+  onCodeUpdate
 }: Props) {
+  const selectedLang = useSelector(selectSelectedLanguage);
+  const isEditable = !useSelector(
+    (state: RootState) => state.session.isEditorLocked
+  );
+
   useEffect(() => {
     if (!providerSet) {
       provider.awareness.setLocalStateField("user", {
         name: nickname,
         color: "#6eeb83",
-        colorLight: "#6eeb8333",
+        colorLight: "#6eeb8333"
       });
       providerSet = true;
     }

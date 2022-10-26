@@ -6,31 +6,26 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import React from "react";
-import { Question } from "../../proto/types";
+import { useSelector } from "react-redux";
 import QuestionSection from "../question/QuestionSection";
 import HistoryTable from "../history/HistoryTable";
 import ChatSection from "../chat/ChatSection";
+import { RootState } from "../../app/store";
 
 type Props = {
-  isCompleted: boolean;
-  question: Question | undefined;
+  // isCompleted: boolean;
   getQuestion: () => void;
   sendTextMessage: (content: string) => void;
-  onToggle: () => void;
 };
 
 const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
-function EditorTabs({
-  question,
-  getQuestion,
-  sendTextMessage,
-  isCompleted,
-  onToggle,
-}: Props) {
+function EditorTabs({ getQuestion, sendTextMessage }: Props) {
+  const question = useSelector((state: RootState) => state.session.question);
+
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
       <TabList>
@@ -42,11 +37,7 @@ function EditorTabs({
       <TabPanels>
         <TabPanel key="question_section" h="85vh" overflowY="scroll">
           {question ? (
-            <QuestionSection
-              question={question}
-              isCompleted={isCompleted}
-              onToggle={onToggle}
-            />
+            <QuestionSection question={question} showCompletion />
           ) : (
             <VStack align="center" spacing={6}>
               <Text>Error: No question received.</Text>

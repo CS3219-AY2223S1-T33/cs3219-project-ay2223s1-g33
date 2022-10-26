@@ -5,22 +5,68 @@ import {
   Heading,
   HStack,
   Text,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import React from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
 import ConstraintsList from "./ConstraintsList";
-import { QuestionDifficulty, Question } from "../../proto/types";
+import {
+  QuestionDifficulty,
+  Question,
+  HistoryCompletion
+} from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
+import { RootState } from "../../app/store";
+import { selectUser } from "../../feature/user/userSlice";
+import {
+  CreateCompletionSubmissionRequest,
+  CreateCompletionSubmissionResponse
+} from "../../proto/history-service";
+import useFixedToast from "../../utils/hooks/useFixedToast";
 
 type Props = {
   question: Question;
-  isCompleted?: boolean;
-  onToggle?: () => void;
+  showCompletion?: boolean;
+  // onToggle?: () => void;
 };
 
-function QuestionSection({ question, isCompleted, onToggle }: Props) {
+function QuestionSection({ question, showCompletion }: Props) {
+  const isCompleted = useSelector(
+    (state: RootState) => state.session.isCompleted
+  );
+  const username = useSelector(selectUser)?.username;
+  const toast = useFixedToast();
+
   const { questionId, name, difficulty, content } = question;
+
+  const toggleCompletionHandler = () => {
+    if (!username) {
+      return;
+    }
+
+    const completed: HistoryCompletion = { questionId, username };
+    const request: CreateCompletionSubmissionRequest = { completed };
+    axios
+      .post<CreateCompletionSubmissionResponse>(
+        "/api/user/history/completion",
+        request,
+        { withCredentials: true }
+      )
+      .then((res) => {
+        const { errorMessage } = res.data;
+
+        if (errorMessage !== "") {
+          throw new Error(errorMessage);
+        }
+
+        // setIsCompleted((prev) => !prev);
+      })
+      .catch((err) => {
+        toast.sendErrorMessage(err.message);
+      });
+  };
 
   const contentDecode = JSON.parse(content.replace(/\n/g, "\\".concat("n")));
 
@@ -34,12 +80,12 @@ function QuestionSection({ question, isCompleted, onToggle }: Props) {
           <Heading as="h5" size="sm" color={difficultyColor(difficulty)}>
             {QuestionDifficulty[difficulty].toString()}
           </Heading>
-          {isCompleted !== undefined && (
+          {showCompletion && (
             <Badge
               colorScheme={isCompleted ? "green" : "gray"}
               size="lg"
               fontWeight="bold"
-              onClick={onToggle}
+              onClick={toggleCompletionHandler}
             >
               {isCompleted ? "COMPLETED" : "NOT COMPLETED"}
             </Badge>
