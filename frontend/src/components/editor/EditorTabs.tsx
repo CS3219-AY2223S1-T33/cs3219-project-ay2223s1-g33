@@ -6,7 +6,7 @@ import {
   TabPanel,
   Text,
   Button,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { Question } from "../../proto/types";
@@ -29,7 +29,7 @@ function EditorTabs({
   getQuestion,
   sendTextMessage,
   isCompleted,
-  onToggle
+  onToggle,
 }: Props) {
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">

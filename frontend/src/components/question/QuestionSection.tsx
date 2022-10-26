@@ -5,7 +5,7 @@ import {
   Heading,
   HStack,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import ConstraintsList from "./ConstraintsList";
