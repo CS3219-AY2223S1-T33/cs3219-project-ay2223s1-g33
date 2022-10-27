@@ -6,8 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import UnprotectedRoute from "./components/auth/UnprotectedRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import axios from "./axios";
-import { GetUserProfileResponse } from "./proto/user-service";
+import UserAPI from "./api/user";
 import { login, selectUser } from "./feature/user/userSlice";
 import useFixedToast from "./utils/hooks/useFixedToast";
 
@@ -15,44 +14,35 @@ import useFixedToast from "./utils/hooks/useFixedToast";
 let firstMount = true;
 
 function App() {
-  const toast = useFixedToast();
-  const dispatch = useDispatch();
-  const user = useSelector(selectUser);
+	const toast = useFixedToast();
+	const dispatch = useDispatch();
+	const user = useSelector(selectUser);
 
-  // eslint-disable-next-line
-  const [cookies, setCookies, removeCookies] = useCookies(["AUTH-SESSION"]);
+	// eslint-disable-next-line
+	const [cookies, setCookies, removeCookies] = useCookies(["AUTH-SESSION"]);
 
-  useEffect(() => {
-    if (cookies["AUTH-SESSION"] && firstMount) {
-      console.log("Auth session exists");
-      firstMount = false;
-      axios
-        .post<GetUserProfileResponse>(
-          "/api/user/profile",
-          {},
-          { withCredentials: true }
-        )
-        .then((res) => {
-          const { errorMessage, user: fetchedUser } = res.data;
+	useEffect(() => {
+		if (cookies["AUTH-SESSION"] && firstMount) {
+			console.log("Auth session exists");
+			firstMount = false;
+			UserAPI.getUserProfile()
+				.then((res) => {
+					const { user: fetchedUser } = res;
 
-          if (!fetchedUser) {
-            throw new Error(errorMessage);
-          }
+					if (!fetchedUser) {
+						throw new Error("No user fetched");
+					}
 
-          dispatch(login({ user: fetchedUser }));
-        })
-        .catch((err) => {
-          toast.sendErrorMessage("Please log in again");
-          console.error(err.message);
-        });
-    }
-  }, []);
+					dispatch(login({ user: fetchedUser }));
+				})
+				.catch((err) => {
+					toast.sendErrorMessage("Please log in again");
+					console.error(err.message);
+				});
+		}
+	}, []);
 
-  return (
-    <BrowserRouter>
-      {user ? <ProtectedRoute /> : <UnprotectedRoute />}
-    </BrowserRouter>
-  );
+	return <BrowserRouter>{user ? <ProtectedRoute /> : <UnprotectedRoute />}</BrowserRouter>;
 }
 
 export default App;

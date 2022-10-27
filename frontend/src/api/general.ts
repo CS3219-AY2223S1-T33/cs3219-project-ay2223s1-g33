@@ -1,16 +1,22 @@
 import axios, { AxiosResponse } from "axios";
 
 type ErrorResponse = {
-	errorCode: number;
+	errorCode?: number;
 	errorMessage: string;
 };
 
 const throwIfError = <T extends ErrorResponse>(res: AxiosResponse<T, any>) => {
 	const { errorCode, errorMessage } = res.data;
 
-	if (errorCode) {
-		throw new Error(errorMessage);
+	if (errorCode !== undefined && !errorCode) {
+		return;
 	}
+
+	if (errorMessage === "") {
+		return;
+	}
+
+	throw new Error(errorMessage);
 };
 
 const sendRequest = <Req, Res extends ErrorResponse>(url: string, req: Req, withCredentials?: boolean) =>
@@ -20,5 +26,4 @@ const sendRequest = <Req, Res extends ErrorResponse>(url: string, req: Req, with
 		return res.data;
 	});
 
-// eslint-disable-next-line
-export { sendRequest };
+export { sendRequest, throwIfError };
