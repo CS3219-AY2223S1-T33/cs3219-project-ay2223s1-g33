@@ -48,3 +48,8 @@ message HistoryCompletion {
   string username = 1;
   uint64 question_id = 2;
 }
+
+message ExecuteCode {
+  string language = 1;
+  string code = 2;
+}

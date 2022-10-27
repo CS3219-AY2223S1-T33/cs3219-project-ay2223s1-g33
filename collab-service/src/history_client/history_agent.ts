@@ -4,7 +4,7 @@ import {
   HistoryCrudServiceClient,
 } from '../proto/history-crud-service.grpc-client';
 import { HistoryAttempt } from '../proto/types';
-import getGrpcDeadline from '../utils/grpc_deadline';
+import { getGrpcDeadline } from '../utils/call_deadline';
 
 class HistoryAgent implements IHistoryAgent {
   historyClient: IHistoryCrudServiceClient;

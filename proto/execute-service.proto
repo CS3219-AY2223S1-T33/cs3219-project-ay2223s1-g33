@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package execute_service;
+option go_package = "cs3219-project-ay2223s1-g33/proto";
+
+import "types.proto";
+
+message CreateExecuteRequest {
+  common.ExecuteCode execute_code = 1;
+}
+
+message CreateExecuteResponse {
+  string output = 1;
+  string error_message = 2;
+}

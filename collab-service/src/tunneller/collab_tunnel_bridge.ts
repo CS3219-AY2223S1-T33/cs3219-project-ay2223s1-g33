@@ -15,8 +15,12 @@ import {
 } from '../message_handler/internal/internal_message_builder';
 import { isHeartbeat, makeDataResponse } from '../message_handler/room/response_message_builder';
 import {
-  createQuestionRcvPackage, createSaveCodeAckPackage, createSaveCodeFailedPackage,
-  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ,
+  createQuestionRcvPackage,
+  createSaveCodeAckPackage,
+  createSaveCodeFailedPackage,
+  OPCODE_EXECUTE_REQ,
+  OPCODE_QUESTION_REQ,
+  OPCODE_SAVE_CODE_REQ,
   readConnectionOpCode,
 } from '../message_handler/room/connect_message_builder';
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
@@ -130,6 +134,10 @@ class CollabTunnelBridge {
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${this.username} requested for saving code`);
         await this.handleIncomingSaveRequest(request);
+        break;
+
+      case OPCODE_EXECUTE_REQ: // Execute code
+        Logger.info(`${this.username} requested for executing code`);
         break;
 
       default: // Normal data, push to publisher
