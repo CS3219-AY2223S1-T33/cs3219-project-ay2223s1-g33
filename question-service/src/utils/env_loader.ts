@@ -61,7 +61,7 @@ export default function loadEnvironment(): EnvironmentConfig {
   config();
 
   return {
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
     DATABASE_DBHOST: requireString('DATABASE_DBHOST'),
     DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
     DATABASE_PASSWORD: requireString('DATABASE_PASSWORD'),
