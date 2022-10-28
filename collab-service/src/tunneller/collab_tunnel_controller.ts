@@ -19,6 +19,7 @@ import { IQuestionAgent } from '../question_client/question_agent_types';
 import createHistoryAgent from '../history_client/history_agent';
 import { TunnelMessage } from '../message_handler/internal/internal_message_types';
 import createCollabTunnelBridge from './collab_tunnel_bridge';
+import createExecuteAgent from '../executor_client/executor_agent';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -36,7 +37,15 @@ class CollabTunnelController {
 
   historyAgent: IHistoryAgent;
 
-  constructor(redisUrl: string, questionUrl: string, historyUrl: string, roomSecret: string) {
+  executeAgent: IExecuteAgent;
+
+  constructor(
+    redisUrl: string,
+    questionUrl: string,
+    historyUrl: string,
+    judge0URL: string,
+    roomSecret: string,
+  ) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
     this.pub = createClient({
       url: redisUrl,
@@ -54,6 +63,8 @@ class CollabTunnelController {
     this.questionAgent = createQuestionService(questionUrl);
 
     this.historyAgent = createHistoryAgent(historyUrl);
+
+    this.executeAgent = createExecuteAgent(judge0URL);
   }
 
   /**
@@ -96,6 +107,7 @@ class CollabTunnelController {
       this.pub,
       this.questionAgent,
       this.historyAgent,
+      this.executeAgent,
       username,
       nickname,
       roomId,
@@ -157,9 +169,16 @@ function createCollabTunnelController(
   redisUrl: string,
   questionUrl: string,
   historyUrl: string,
+  judge0URL: string,
   roomSecret: string,
 ): CollabTunnelController {
-  return new CollabTunnelController(redisUrl, questionUrl, historyUrl, roomSecret);
+  return new CollabTunnelController(
+    redisUrl,
+    questionUrl,
+    historyUrl,
+    judge0URL,
+    roomSecret,
+  );
 }
 
 export {

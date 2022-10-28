@@ -15,6 +15,7 @@ const collabController = createCollabTunnelController(
   envConfig.REDIS_SERVER_URL,
   envConfig.QUESTION_SERVER_URL,
   envConfig.HISTORY_SERVER_URL,
+  envConfig.JUDGE0_SERVER_URL,
   envConfig.JWT_ROOM_SECRET,
 );
 

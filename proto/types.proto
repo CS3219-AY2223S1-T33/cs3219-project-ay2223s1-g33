@@ -50,6 +50,7 @@ message HistoryCompletion {
 }
 
 message ExecuteCode {
-  string language = 1;
-  string code = 2;
+  uint64 language_id = 1;
+  string stdin = 2;
+  string code = 3;
 }

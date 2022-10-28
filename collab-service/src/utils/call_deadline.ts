@@ -1,5 +1,3 @@
-import { AbortController } from 'node-abort-controller';
-
 const defaultTimeoutMS = 5000;
 
 function getGrpcDeadline(timeout: number = defaultTimeoutMS) {

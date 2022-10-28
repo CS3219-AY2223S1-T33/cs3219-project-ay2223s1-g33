@@ -131,11 +131,15 @@ export interface HistoryCompletion {
  */
 export interface ExecuteCode {
     /**
-     * @generated from protobuf field: string language = 1;
+     * @generated from protobuf field: uint64 language_id = 1;
      */
-    language: string;
+    languageId: number;
     /**
-     * @generated from protobuf field: string code = 2;
+     * @generated from protobuf field: string stdin = 2;
+     */
+    stdin: string;
+    /**
+     * @generated from protobuf field: string code = 3;
      */
     code: string;
 }
@@ -551,12 +555,13 @@ export const HistoryCompletion = new HistoryCompletion$Type();
 class ExecuteCode$Type extends MessageType<ExecuteCode> {
     constructor() {
         super("common.ExecuteCode", [
-            { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "code", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "language_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "stdin", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "code", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<ExecuteCode>): ExecuteCode {
-        const message = { language: "", code: "" };
+        const message = { languageId: 0, stdin: "", code: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<ExecuteCode>(this, message, value);
@@ -567,10 +572,13 @@ class ExecuteCode$Type extends MessageType<ExecuteCode> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string language */ 1:
-                    message.language = reader.string();
+                case /* uint64 language_id */ 1:
+                    message.languageId = reader.uint64().toNumber();
                     break;
-                case /* string code */ 2:
+                case /* string stdin */ 2:
+                    message.stdin = reader.string();
+                    break;
+                case /* string code */ 3:
                     message.code = reader.string();
                     break;
                 default:
@@ -585,12 +593,15 @@ class ExecuteCode$Type extends MessageType<ExecuteCode> {
         return message;
     }
     internalBinaryWrite(message: ExecuteCode, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string language = 1; */
-        if (message.language !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.language);
-        /* string code = 2; */
+        /* uint64 language_id = 1; */
+        if (message.languageId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.languageId);
+        /* string stdin = 2; */
+        if (message.stdin !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.stdin);
+        /* string code = 3; */
         if (message.code !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.code);
+            writer.tag(3, WireType.LengthDelimited).string(message.code);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

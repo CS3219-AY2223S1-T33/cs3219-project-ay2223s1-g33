@@ -15,6 +15,7 @@ import {
 } from '../message_handler/internal/internal_message_builder';
 import { isHeartbeat, makeDataResponse } from '../message_handler/room/response_message_builder';
 import {
+  createExecutePendingPackage,
   createQuestionRcvPackage,
   createSaveCodeAckPackage,
   createSaveCodeFailedPackage,
@@ -41,6 +42,8 @@ class CollabTunnelBridge {
 
   historyAgent: IHistoryAgent;
 
+  executeAgent: IExecuteAgent;
+
   username: string;
 
   nickname: string;
@@ -55,6 +58,7 @@ class CollabTunnelBridge {
     redis: RedisClientType,
     questionAgent: IQuestionAgent,
     historyAgent: IHistoryAgent,
+    executeAgent: IExecuteAgent,
     username: string,
     nickname: string,
     roomId: string,
@@ -65,6 +69,7 @@ class CollabTunnelBridge {
     this.attemptCache = createAttemptCache();
     this.questionAgent = questionAgent;
     this.historyAgent = historyAgent;
+    this.executeAgent = executeAgent;
     this.username = username;
     this.nickname = nickname;
     this.roomId = roomId;
@@ -128,16 +133,17 @@ class CollabTunnelBridge {
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send question back to user
         Logger.info(`${this.username} requested for question`);
-        await this.writeQuestionToClient();
+        await this.handleRetrieveQuestionRequest();
         break;
 
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${this.username} requested for saving code`);
-        await this.handleIncomingSaveRequest(request);
+        await this.handleSaveHistoryRequest(request);
         break;
 
       case OPCODE_EXECUTE_REQ: // Execute code
         Logger.info(`${this.username} requested for executing code`);
+        await this.handleExecuteCodeRequest(request);
         break;
 
       default: // Normal data, push to publisher
@@ -150,7 +156,7 @@ class CollabTunnelBridge {
    * @param request
    * @private
    */
-  private async handleIncomingSaveRequest(request: CollabTunnelRequest) {
+  private async handleSaveHistoryRequest(request: CollabTunnelRequest) {
     // Prepare saving snapshot
     const questionResponse = await getQuestionRedis(this.roomId, this.redis);
     this.attemptCache.setQuestion(questionResponse);
@@ -182,14 +188,14 @@ class CollabTunnelBridge {
       return;
     }
     await setQuestionRedis(this.roomId, question, this.redis);
-    await this.writeQuestionToClient();
+    await this.handleRetrieveQuestionRequest();
   }
 
   /**
    * Retrieves stored question and writes to client
    * @private
    */
-  private async writeQuestionToClient() {
+  private async handleRetrieveQuestionRequest() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
     this.questionId = JSON.parse(finalQuestion).questionId;
     let isCompleted = false;
@@ -216,6 +222,20 @@ class CollabTunnelBridge {
     }
     return createSaveCodeAckPackage(message);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async handleExecuteCodeRequest(request: CollabTunnelRequest) {
+    if (!this.questionId) {
+      return;
+    }
+    // Notify self & other user
+    await this.pubsub.pushMessage(createDataMessage(this.username, createExecutePendingPackage()));
+    this.call.write(makeDataResponse(createExecutePendingPackage()));
+
+    // const protoExecuteCode = request.data;
+    // this.executeAgent.uploadCode()
+    console.log('running');
+  }
 }
 
 export default function createCollabTunnelBridge(
@@ -224,6 +244,7 @@ export default function createCollabTunnelBridge(
   redis: RedisClientType,
   questionAgent: IQuestionAgent,
   historyAgent: IHistoryAgent,
+  executeAgent: IExecuteAgent,
   username: string,
   nickname: string,
   roomId: string,
@@ -234,6 +255,7 @@ export default function createCollabTunnelBridge(
     redis,
     questionAgent,
     historyAgent,
+    executeAgent,
     username,
     nickname,
     roomId,

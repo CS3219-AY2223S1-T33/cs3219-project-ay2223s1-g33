@@ -10,6 +10,15 @@ message CreateExecuteRequest {
 }
 
 message CreateExecuteResponse {
+  string token = 1;
+  string error_message = 2;
+}
+
+message GetExecuteRequest {
+  string token = 1;
+}
+
+message GetExecuteResponse {
   string output = 1;
   string error_message = 2;
 }

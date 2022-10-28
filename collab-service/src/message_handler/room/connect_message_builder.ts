@@ -56,6 +56,14 @@ function createSaveCodeFailedPackage(): Uint8Array {
   return encodeContentOpcode('Save failed', OPCODE_SAVE_CODE_ACK);
 }
 
+function createExecutePendingPackage(): Uint8Array {
+  return encodeOpcodeOnly(OPCODE_EXECUTE_PENDING);
+}
+
+function createExecuteCompletePackage(): Uint8Array {
+  return encodeOpcodeOnly(OPCODE_EXECUTE_COMPLETE);
+}
+
 /**
  * Extracts opcode of given data package
  * @param data
@@ -71,5 +79,7 @@ export {
   createSaveCodeReqPackage,
   createSaveCodeAckPackage,
   createSaveCodeFailedPackage,
+  createExecutePendingPackage,
+  createExecuteCompletePackage,
   readConnectionOpCode,
 };

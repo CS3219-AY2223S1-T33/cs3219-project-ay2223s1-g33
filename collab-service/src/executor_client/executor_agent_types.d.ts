@@ -1,4 +1,4 @@
-declare interface IExecutorAgent {
-  uploadCode(language: string, code: string): Promise<string>
-  retrieveCode(token: string): Promise<string>
+declare interface IExecuteAgent {
+  uploadCode(executeCode: ExecuteCode): Promise<string>
+  retrieveResult(token: string): Promise<string>
 }
