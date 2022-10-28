@@ -1,9 +1,9 @@
 import {
   Badge,
   Box,
+  Button,
   Divider,
   Heading,
-  HStack,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -30,26 +30,28 @@ function QuestionSection({ question, isCompleted, onToggle }: Props) {
         <Heading as="h4" size="md" pb={2}>
           {questionId}. {name}
         </Heading>
-        <HStack spacing={4}>
-          <Heading as="h5" size="sm" color={difficultyColor(difficulty)}>
-            {QuestionDifficulty[difficulty].toString()}
-          </Heading>
-          {isCompleted !== undefined && (
+        <Heading as="h5" size="sm" color={difficultyColor(difficulty)}>
+          {QuestionDifficulty[difficulty].toString()}
+        </Heading>
+        {isCompleted !== undefined && (
+          <>
             <Badge
               colorScheme={isCompleted ? "green" : "gray"}
               size="lg"
               fontWeight="bold"
-              onClick={onToggle}
             >
               {isCompleted ? "COMPLETED" : "NOT COMPLETED"}
             </Badge>
-          )}
-        </HStack>
+            <Button size="sm" onClick={onToggle}>
+              Mark as {isCompleted ? "Not Complete" : "Complete"}
+            </Button>
+          </>
+        )}
       </Box>
       <Divider py={4} />
       <VStack spacing={4} id="question-content" alignItems="flex-start">
         {contentDecode.question.split("\n").map((ln: string) => (
-          <Text>{ln}</Text>
+          <Text key={ln.substring(0, 5)}>{ln}</Text>
         ))}
       </VStack>
       <ExampleList examples={contentDecode.example} />
