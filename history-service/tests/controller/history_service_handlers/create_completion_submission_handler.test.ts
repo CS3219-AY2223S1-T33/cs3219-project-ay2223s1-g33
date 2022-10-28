@@ -1,14 +1,14 @@
 import { ApiRequest } from '../../../src/api_server/api_server_types';
 import {
-  CreateCompletionSubmissionRequest,
-  CreateCompletionSubmissionResponse,
+  SetHistoryCompletionRequest,
+  SetHistoryCompletionResponse,
 } from '../../../src/proto/history-service';
 import {
   ILoopbackServiceChannel,
   LoopbackServiceClient,
 } from '../../../src/api_server/loopback_server_types';
 import { IHistoryCrudService } from '../../../src/proto/history-crud-service.grpc-server';
-import CreateCompletionSubmissionHandler
+import SetHistoryCompletionHandler
   from '../../../src/controller/history_service_handlers/create_completion_submission_handler';
 import {
   makeMockLoopbackChannel,
@@ -19,7 +19,7 @@ import {
 
 describe('Create Completion Submission Handler', () => {
   const makeRequest = (username: string, questionId: number):
-  ApiRequest<CreateCompletionSubmissionRequest> => ({
+  ApiRequest<SetHistoryCompletionRequest> => ({
     request: {
       completed: {
         username,
@@ -31,19 +31,19 @@ describe('Create Completion Submission Handler', () => {
 
   let mockClient: any;
   let historyCrudClient: ILoopbackServiceChannel<IHistoryCrudService>;
-  let handler: CreateCompletionSubmissionHandler;
+  let handler: SetHistoryCompletionHandler;
 
   beforeEach(() => {
     const { client, mock } = makeMockLoopbackChannel();
     historyCrudClient = { client: client as LoopbackServiceClient<IHistoryCrudService> };
     mockClient = mock;
-    handler = new CreateCompletionSubmissionHandler(historyCrudClient);
+    handler = new SetHistoryCompletionHandler(historyCrudClient);
   });
 
   test('Successful Get Attempt History', async () => {
     mockClient.createCompletion.mockImplementationOnce(
-      async (request: CreateCompletionSubmissionRequest):
-      Promise<CreateCompletionSubmissionResponse> => {
+      async (request: SetHistoryCompletionRequest):
+      Promise<SetHistoryCompletionResponse> => {
         expect(request.completed)
           .toStrictEqual(testCompletion);
 
@@ -80,7 +80,7 @@ describe('Create Completion Submission Handler', () => {
 
   test('Bad Request', async () => {
     const makeUndefinedRequest = ():
-    ApiRequest<CreateCompletionSubmissionRequest> => ({
+    ApiRequest<SetHistoryCompletionRequest> => ({
       request: {
         completed: undefined,
       },

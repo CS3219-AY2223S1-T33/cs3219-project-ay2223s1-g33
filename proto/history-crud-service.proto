@@ -67,6 +67,14 @@ message GetCompletionResponse {
   string error_message = 2;
 }
 
+message DeleteCompletionRequest {
+  common.HistoryCompletion completed = 1;
+}
+
+message DeleteCompletionResponse {
+  string error_message = 2;
+}
+
 service HistoryCrudService {
   rpc GetAttempt(GetAttemptRequest) returns (GetAttemptResponse);
   rpc GetAttempts(GetAttemptsRequest) returns (GetAttemptsResponse);
@@ -74,4 +82,5 @@ service HistoryCrudService {
   rpc DeleteAttempt(DeleteAttemptRequest) returns (DeleteAttemptResponse);
   rpc CreateCompletion(CreateCompletionRequest) returns (CreateCompletionResponse);
   rpc GetCompletion(GetCompletionRequest) returns (GetCompletionResponse);
+  rpc DeleteCompletion(DeleteCompletionRequest) returns (DeleteCompletionResponse);
 }

@@ -4,27 +4,27 @@ import {
   ApiResponse,
 } from '../../api_server/api_server_types';
 import {
-  CreateCompletionSubmissionRequest,
-  CreateCompletionSubmissionResponse,
+  SetHistoryCompletionRequest,
+  SetHistoryCompletionResponse,
 } from '../../proto/history-service';
 import { IHistoryCrudService } from '../../proto/history-crud-service.grpc-server';
 import { CreateCompletionRequest, CreateCompletionResponse } from '../../proto/history-crud-service';
 import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
 
-class CreateCompletionSubmissionHandler
-implements IApiHandler<CreateCompletionSubmissionRequest, CreateCompletionSubmissionResponse> {
+class SetHistoryCompletionHandler
+implements IApiHandler<SetHistoryCompletionRequest, SetHistoryCompletionResponse> {
   crudLoopbackChannel: ILoopbackServiceChannel<IHistoryCrudService>;
 
   constructor(crudLoopbackChannel: ILoopbackServiceChannel<IHistoryCrudService>) {
     this.crudLoopbackChannel = crudLoopbackChannel;
   }
 
-  async handle(apiRequest: ApiRequest<CreateCompletionSubmissionRequest>):
-  Promise<ApiResponse<CreateCompletionSubmissionResponse>> {
+  async handle(apiRequest: ApiRequest<SetHistoryCompletionRequest>):
+  Promise<ApiResponse<SetHistoryCompletionResponse>> {
     const { request } = apiRequest;
 
     if (!request.completed) {
-      return CreateCompletionSubmissionHandler.buildErrorResponse('Invalid completion information');
+      return SetHistoryCompletionHandler.buildErrorResponse('Invalid completion information');
     }
 
     const crudRequest: CreateCompletionRequest = {
@@ -35,11 +35,11 @@ implements IApiHandler<CreateCompletionSubmissionRequest, CreateCompletionSubmis
     try {
       crudResult = await this.crudLoopbackChannel.client.createCompletion(crudRequest);
     } catch (err) {
-      return CreateCompletionSubmissionHandler.buildErrorResponse(`${err}`);
+      return SetHistoryCompletionHandler.buildErrorResponse(`${err}`);
     }
 
     if (crudResult.errorMessage !== '') {
-      return CreateCompletionSubmissionHandler.buildErrorResponse(crudResult.errorMessage);
+      return SetHistoryCompletionHandler.buildErrorResponse(crudResult.errorMessage);
     }
 
     return {
@@ -63,4 +63,4 @@ implements IApiHandler<CreateCompletionSubmissionRequest, CreateCompletionSubmis
   }
 }
 
-export default CreateCompletionSubmissionHandler;
+export default SetHistoryCompletionHandler;

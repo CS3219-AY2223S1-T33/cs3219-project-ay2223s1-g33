@@ -72,18 +72,18 @@ export interface GetAttemptSubmissionResponse {
     errorMessage: string;
 }
 /**
- * @generated from protobuf message history_service.CreateCompletionSubmissionRequest
+ * @generated from protobuf message history_service.SetHistoryCompletionRequest
  */
-export interface CreateCompletionSubmissionRequest {
+export interface SetHistoryCompletionRequest {
     /**
      * @generated from protobuf field: common.HistoryCompletion completed = 1;
      */
     completed?: HistoryCompletion;
 }
 /**
- * @generated from protobuf message history_service.CreateCompletionSubmissionResponse
+ * @generated from protobuf message history_service.SetHistoryCompletionResponse
  */
-export interface CreateCompletionSubmissionResponse {
+export interface SetHistoryCompletionResponse {
     /**
      * @generated from protobuf field: common.HistoryCompletion completed = 1;
      */
@@ -317,20 +317,20 @@ class GetAttemptSubmissionResponse$Type extends MessageType<GetAttemptSubmission
  */
 export const GetAttemptSubmissionResponse = new GetAttemptSubmissionResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class CreateCompletionSubmissionRequest$Type extends MessageType<CreateCompletionSubmissionRequest> {
+class SetHistoryCompletionRequest$Type extends MessageType<SetHistoryCompletionRequest> {
     constructor() {
-        super("history_service.CreateCompletionSubmissionRequest", [
+        super("history_service.SetHistoryCompletionRequest", [
             { no: 1, name: "completed", kind: "message", T: () => HistoryCompletion }
         ]);
     }
-    create(value?: PartialMessage<CreateCompletionSubmissionRequest>): CreateCompletionSubmissionRequest {
+    create(value?: PartialMessage<SetHistoryCompletionRequest>): SetHistoryCompletionRequest {
         const message = {};
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<CreateCompletionSubmissionRequest>(this, message, value);
+            reflectionMergePartial<SetHistoryCompletionRequest>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CreateCompletionSubmissionRequest): CreateCompletionSubmissionRequest {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetHistoryCompletionRequest): SetHistoryCompletionRequest {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -349,7 +349,7 @@ class CreateCompletionSubmissionRequest$Type extends MessageType<CreateCompletio
         }
         return message;
     }
-    internalBinaryWrite(message: CreateCompletionSubmissionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: SetHistoryCompletionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* common.HistoryCompletion completed = 1; */
         if (message.completed)
             HistoryCompletion.internalBinaryWrite(message.completed, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
@@ -360,25 +360,25 @@ class CreateCompletionSubmissionRequest$Type extends MessageType<CreateCompletio
     }
 }
 /**
- * @generated MessageType for protobuf message history_service.CreateCompletionSubmissionRequest
+ * @generated MessageType for protobuf message history_service.SetHistoryCompletionRequest
  */
-export const CreateCompletionSubmissionRequest = new CreateCompletionSubmissionRequest$Type();
+export const SetHistoryCompletionRequest = new SetHistoryCompletionRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class CreateCompletionSubmissionResponse$Type extends MessageType<CreateCompletionSubmissionResponse> {
+class SetHistoryCompletionResponse$Type extends MessageType<SetHistoryCompletionResponse> {
     constructor() {
-        super("history_service.CreateCompletionSubmissionResponse", [
+        super("history_service.SetHistoryCompletionResponse", [
             { no: 1, name: "completed", kind: "message", T: () => HistoryCompletion },
             { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<CreateCompletionSubmissionResponse>): CreateCompletionSubmissionResponse {
+    create(value?: PartialMessage<SetHistoryCompletionResponse>): SetHistoryCompletionResponse {
         const message = { errorMessage: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
-            reflectionMergePartial<CreateCompletionSubmissionResponse>(this, message, value);
+            reflectionMergePartial<SetHistoryCompletionResponse>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CreateCompletionSubmissionResponse): CreateCompletionSubmissionResponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetHistoryCompletionResponse): SetHistoryCompletionResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -400,7 +400,7 @@ class CreateCompletionSubmissionResponse$Type extends MessageType<CreateCompleti
         }
         return message;
     }
-    internalBinaryWrite(message: CreateCompletionSubmissionResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: SetHistoryCompletionResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* common.HistoryCompletion completed = 1; */
         if (message.completed)
             HistoryCompletion.internalBinaryWrite(message.completed, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
@@ -414,14 +414,14 @@ class CreateCompletionSubmissionResponse$Type extends MessageType<CreateCompleti
     }
 }
 /**
- * @generated MessageType for protobuf message history_service.CreateCompletionSubmissionResponse
+ * @generated MessageType for protobuf message history_service.SetHistoryCompletionResponse
  */
-export const CreateCompletionSubmissionResponse = new CreateCompletionSubmissionResponse$Type();
+export const SetHistoryCompletionResponse = new SetHistoryCompletionResponse$Type();
 /**
  * @generated ServiceType for protobuf service history_service.HistoryService
  */
 export const HistoryService = new ServiceType("history_service.HistoryService", [
     { name: "GetAttemptHistory", options: {}, I: GetAttemptHistoryRequest, O: GetAttemptHistoryResponse },
     { name: "GetAttemptSubmission", options: {}, I: GetAttemptSubmissionRequest, O: GetAttemptSubmissionResponse },
-    { name: "CreateCompletionSubmission", options: {}, I: CreateCompletionSubmissionRequest, O: CreateCompletionSubmissionResponse }
+    { name: "SetHistoryCompletion", options: {}, I: SetHistoryCompletionRequest, O: SetHistoryCompletionResponse }
 ]);
