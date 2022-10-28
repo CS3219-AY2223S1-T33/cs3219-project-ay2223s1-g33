@@ -38,6 +38,10 @@ declare interface ICompletedStore {
     userId: number,
     questionId: number,
   ): Promise<StoredCompletion | undefined>;
+  removeCompletion(
+    userId: number,
+    questionId: number,
+  ): Promise<void>;
 }
 
 export {

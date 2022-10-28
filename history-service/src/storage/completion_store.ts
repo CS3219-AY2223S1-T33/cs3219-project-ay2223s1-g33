@@ -1,6 +1,7 @@
 import { ICompletedStore } from './storage';
 import { IDatabase } from '../db';
 import { StoredCompletion } from '../model/completion_store_model';
+import HistoryCompletionEntity from '../db/history_completion_entity';
 
 class CompletionStore implements ICompletedStore {
   private dbConn: IDatabase;
@@ -50,6 +51,17 @@ class CompletionStore implements ICompletedStore {
     return {
       ...selectResult,
     };
+  }
+
+  async removeCompletion(userId: number, questionId: number): Promise<void> {
+    await this.dbConn
+      .getDataSource()
+      .createQueryBuilder()
+      .delete()
+      .from(HistoryCompletionEntity)
+      .where('userId = :userId', { userId })
+      .andWhere('questionId = :questionId', { questionId })
+      .execute();
   }
 }
 
