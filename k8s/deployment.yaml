@@ -32,7 +32,7 @@ spec:
             limits:
               cpu: 30m
               memory: 32Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -67,7 +67,7 @@ spec:
             limits:
               cpu: 50m
               memory: 128Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -106,7 +106,7 @@ spec:
             limits:
               cpu: 60m
               memory: 44Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -141,7 +141,7 @@ spec:
             limits:
               cpu: 50m
               memory: 128Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -239,7 +239,7 @@ spec:
             limits:
               cpu: 50m
               memory: 32Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 ---
 apiVersion: apps/v1
 kind: Deployment
