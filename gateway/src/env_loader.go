@@ -6,12 +6,12 @@ import (
 )
 
 type GatewayConfiguration struct {
-	UserBFFServer  string
-	MatchingServer string
-	CollabServer   string
-	SessionServer  string
-	HistoryServer  string
-	StaticServer   string
+	UserServiceUrl     string
+	MatchingServiceUrl string
+	CollabServiceUrl   string
+	SessionServiceUrl  string
+	HistoryServiceUrl  string
+	StaticServerUrl    string
 
 	Port int
 }
@@ -27,7 +27,7 @@ const (
 )
 
 func loadConfig() *GatewayConfiguration {
-	userBFFServer := loadEnvVariableOrDefaultString(envUserService, "localhost:4000")
+	userServer := loadEnvVariableOrDefaultString(envUserService, "localhost:4000")
 	matchingServer := loadEnvVariableOrDefaultString(envMatchingService, "localhost:4001")
 	collabServer := loadEnvVariableOrDefaultString(envCollabService, "localhost:4003")
 	sessionServer := loadEnvVariableOrDefaultString(envSessionService, "localhost:4100")
@@ -36,13 +36,13 @@ func loadConfig() *GatewayConfiguration {
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
 
 	return &GatewayConfiguration{
-		UserBFFServer:  userBFFServer,
-		MatchingServer: matchingServer,
-		CollabServer:   collabServer,
-		SessionServer:  sessionServer,
-		HistoryServer:  historyServer,
-		StaticServer:   staticServer,
-		Port:           port,
+		UserServiceUrl:     userServer,
+		MatchingServiceUrl: matchingServer,
+		CollabServiceUrl:   collabServer,
+		SessionServiceUrl:  sessionServer,
+		HistoryServiceUrl:  historyServer,
+		StaticServerUrl:    staticServer,
+		Port:               port,
 	}
 }
 

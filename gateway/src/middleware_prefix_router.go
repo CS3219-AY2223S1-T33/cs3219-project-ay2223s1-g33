@@ -1,17 +1,32 @@
 package main
 
 import (
-	"net/http"
+	"cs3219-project-ay2223s1-g33/gateway/util"
 	"strings"
 )
 
-func AttachPrefixRouter(prefix string, matchedMux http.Handler, otherwiseMux http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.EscapedPath()
-		if strings.HasPrefix(path, prefix) {
-			matchedMux.ServeHTTP(w, r)
-			return
-		}
-		otherwiseMux.ServeHTTP(w, r)
-	})
+type prefixRouter struct {
+	prefix        string
+	matchedPipe   util.PipeInput[*util.HTTPContext]
+	otherwisePipe util.PipeInput[*util.HTTPContext]
+}
+
+func NewPrefixRouter(
+	prefix string,
+	matchedPipe util.PipeInput[*util.HTTPContext],
+	otherwisePipe util.PipeInput[*util.HTTPContext],
+) util.PipeInput[*util.HTTPContext] {
+	return &prefixRouter{
+		prefix:        prefix,
+		matchedPipe:   matchedPipe,
+		otherwisePipe: otherwisePipe,
+	}
+}
+
+func (router *prefixRouter) Receive(httpCtx *util.HTTPContext) error {
+	path := httpCtx.Request.URL.EscapedPath()
+	if strings.HasPrefix(path, router.prefix) {
+		return router.matchedPipe.Receive(httpCtx)
+	}
+	return router.otherwisePipe.Receive(httpCtx)
 }
