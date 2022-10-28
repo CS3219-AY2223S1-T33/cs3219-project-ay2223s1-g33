@@ -5,7 +5,7 @@ import {
   Divider,
   Heading,
   Text,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import React from "react";
 import ConstraintsList from "./ConstraintsList";
@@ -42,6 +42,7 @@ function QuestionSection({ question, isCompleted, onToggle }: Props) {
             >
               {isCompleted ? "COMPLETED" : "NOT COMPLETED"}
             </Badge>
+            <br />
             <Button size="sm" onClick={onToggle}>
               Mark as {isCompleted ? "Not Complete" : "Complete"}
             </Button>
