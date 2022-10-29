@@ -12,6 +12,7 @@ const question: Question = {
   difficulty: 1,
   content: '1',
   solution: '1',
+  executionInput: '',
 };
 
 const key = 'key';
