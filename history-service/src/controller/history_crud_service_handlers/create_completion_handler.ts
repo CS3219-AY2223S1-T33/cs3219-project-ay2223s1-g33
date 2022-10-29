@@ -3,7 +3,7 @@ import {
   CreateCompletionRequest,
   CreateCompletionResponse,
 } from '../../proto/history-crud-service';
-import { ICompletedStore, IStorage } from '../../storage/storage';
+import { ICompletionStore, IStorage } from '../../storage/storage';
 import {
   convertToProtoCompletion,
   convertToStoredCompletion,
@@ -15,7 +15,7 @@ import { QuestionServiceClient } from '../../proto/question-service.grpc-client'
 
 class CreateCompletionHandler extends BaseHandler
   implements IApiHandler<CreateCompletionRequest, CreateCompletionResponse> {
-  completedStore: ICompletedStore;
+  completedStore: ICompletionStore;
 
   constructor(
     storage: IStorage,
