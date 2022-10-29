@@ -34,7 +34,7 @@ class CreateCompletionHandler extends BaseHandler
       return CreateCompletionHandler.buildErrorResponse('Invalid completion information');
     }
 
-    if ((!request.completed.username || !request.completed.questionId)) {
+    if (!request.completed.username || !request.completed.questionId) {
       return CreateCompletionHandler.buildErrorResponse('Missing completion information');
     }
 

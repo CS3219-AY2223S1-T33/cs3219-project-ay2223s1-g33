@@ -28,7 +28,7 @@ class DeleteCompletionHandler extends BaseHandler
       return DeleteCompletionHandler.buildErrorResponse('Invalid completion information');
     }
 
-    if ((!request.completed.username || !request.completed.questionId)) {
+    if (!request.completed.username || !request.completed.questionId) {
       return DeleteCompletionHandler.buildErrorResponse('Missing completion information');
     }
 
