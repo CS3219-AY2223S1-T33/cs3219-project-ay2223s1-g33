@@ -1,76 +1,60 @@
 import {
-  Badge,
+  // Badge,
   Box,
-  Button,
+  // Button,
   Divider,
   Heading,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import { useSelector } from "react-redux";
+import CompletionStatus from "./CompletionStatus";
+// import axios from "axios";
 import ConstraintsList from "./ConstraintsList";
 import {
   QuestionDifficulty,
   Question,
-  HistoryCompletion,
+  // HistoryCompletion,
 } from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
 import { RootState } from "../../app/store";
-import { selectUser } from "../../feature/user/userSlice";
-import {
-  SetHistoryCompletionRequest,
-  SetHistoryCompletionResponse,
-} from "../../proto/history-service";
-import useFixedToast from "../../utils/hooks/useFixedToast";
-import { changeIsCompleted } from "../../feature/session/sessionSlice";
+// import { selectUser } from "../../feature/user/userSlice";
+// import {
+//   SetHistoryCompletionRequest,
+//   SetHistoryCompletionResponse,
+// } from "../../proto/history-service";
+// import useFixedToast from "../../utils/hooks/useFixedToast";
+// import { changeIsCompleted } from "../../feature/session/sessionSlice";
+import { CompletionConfig } from "../../types";
 
 type Props = {
   question: Question;
-  // showCompletion?: boolean;
+};
+
+const COMPLETED: CompletionConfig = {
+  colorScheme: "green",
+  badgeText: "COMPLETED",
+  btnText: "Not Complete",
+};
+
+const NOT_COMPLETED: CompletionConfig = {
+  colorScheme: "gray",
+  badgeText: "NOT COMPLETED",
+  btnText: "Complete",
 };
 
 function QuestionSection({ question }: Props) {
   const isCompleted = useSelector(
     (state: RootState) => state.session.isCompleted
   );
-  const username = useSelector(selectUser)?.username;
-  const toast = useFixedToast();
-  const dispatch = useDispatch();
 
   const { questionId, name, difficulty, content } = question;
 
-  const toggleCompletionHandler = () => {
-    if (!username) {
-      return;
-    }
-
-    const completed: HistoryCompletion = { questionId, username };
-    const request: SetHistoryCompletionRequest = { completed };
-    axios
-      .post<SetHistoryCompletionResponse>(
-        "/api/user/history/completion",
-        request,
-        { withCredentials: true }
-      )
-      .then((res) => {
-        const { errorMessage } = res.data;
-
-        if (errorMessage !== "") {
-          throw new Error(errorMessage);
-        }
-
-        // setIsCompleted((prev) => !prev);
-        dispatch(changeIsCompleted({ isComplete: !isCompleted }));
-      })
-      .catch((err) => {
-        toast.sendErrorMessage(err.message);
-      });
-  };
-
   const contentDecode = JSON.parse(content.replace(/\n/g, "\\".concat("n")));
+
+  const completeConf = isCompleted ? COMPLETED : NOT_COMPLETED;
 
   return (
     <Box>
@@ -82,19 +66,11 @@ function QuestionSection({ question }: Props) {
           {QuestionDifficulty[difficulty].toString()}
         </Heading>
         {isCompleted !== undefined && (
-          <>
-            <Badge
-              colorScheme={isCompleted ? "green" : "gray"}
-              size="lg"
-              fontWeight="bold"
-            >
-              {isCompleted ? "COMPLETED" : "NOT COMPLETED"}
-            </Badge>
-            <br />
-            <Button size="sm" onClick={toggleCompletionHandler}>
-              Mark as {isCompleted ? "Not Complete" : "Complete"}
-            </Button>
-          </>
+          <CompletionStatus
+            config={completeConf}
+            question={question}
+            isCompleted={isCompleted}
+          />
         )}
       </Box>
       <Divider py={4} />
