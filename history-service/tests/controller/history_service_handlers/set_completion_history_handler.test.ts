@@ -17,7 +17,8 @@ import {
   testUser,
 } from '../test_util';
 import {
-  CreateCompletionRequest, CreateCompletionResponse,
+  CreateCompletionRequest,
+  CreateCompletionResponse,
   DeleteCompletionRequest,
   DeleteCompletionResponse,
   GetCompletionRequest,
