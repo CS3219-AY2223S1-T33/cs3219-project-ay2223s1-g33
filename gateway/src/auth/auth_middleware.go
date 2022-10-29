@@ -62,6 +62,10 @@ func (middleware *authMiddleware) Receive(httpCtx *util.HTTPContext) error {
 	}
 	refreshToken := refreshTokenCookie.Value
 
+	if sessionToken == "" || refreshToken == "" {
+		return writeUnauthorizedResponse(resp)
+	}
+
 	log.Println("Authenticating with server")
 	username, nickname, newSessionToken, err := middleware.authAgent.ValidateToken(sessionToken, refreshToken)
 	if err != nil {
