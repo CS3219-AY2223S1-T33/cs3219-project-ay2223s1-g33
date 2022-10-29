@@ -17,21 +17,21 @@ type GatewayConfiguration struct {
 }
 
 const (
-	envUserBFFServer  = "USER_BFF_SERVER"
-	envMatchingServer = "MATCHING_SERVER"
-	envCollabServer   = "COLLAB_SERVER"
-	envSessionServer  = "SESSION_SERVER"
-	envHistoryServer  = "HISTORY_SERVER"
-	envStaticServer   = "STATIC_SERVER"
-	envPort           = "GATEWAY_PORT"
+	envUserService     = "USER_SERVICE_URL"
+	envMatchingService = "MATCHING_SERVICE_URL"
+	envCollabService   = "COLLAB_SERVICE_URL"
+	envSessionService  = "SESSION_SERVICE_URL"
+	envHistoryService  = "HISTORY_SERVICE_URL"
+	envStaticServer    = "STATIC_SERVER"
+	envPort            = "GATEWAY_PORT"
 )
 
 func loadConfig() *GatewayConfiguration {
-	userBFFServer := loadEnvVariableOrDefaultString(envUserBFFServer, "localhost:4000")
-	matchingServer := loadEnvVariableOrDefaultString(envMatchingServer, "localhost:4001")
-	collabServer := loadEnvVariableOrDefaultString(envCollabServer, "localhost:4003")
-	sessionServer := loadEnvVariableOrDefaultString(envSessionServer, "localhost:4100")
-	historyServer := loadEnvVariableOrDefaultString(envHistoryServer, "localhost:4005")
+	userBFFServer := loadEnvVariableOrDefaultString(envUserService, "localhost:4000")
+	matchingServer := loadEnvVariableOrDefaultString(envMatchingService, "localhost:4001")
+	collabServer := loadEnvVariableOrDefaultString(envCollabService, "localhost:4003")
+	sessionServer := loadEnvVariableOrDefaultString(envSessionService, "localhost:4100")
+	historyServer := loadEnvVariableOrDefaultString(envHistoryService, "localhost:4005")
 	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "localhost:8000")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
 

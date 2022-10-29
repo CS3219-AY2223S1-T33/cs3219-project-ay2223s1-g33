@@ -1,10 +1,10 @@
 import { config } from 'dotenv';
 
 type EnvironmentConfig = {
-  readonly JWT_ROOM_SECRET: string;
+  readonly ROOM_SIGNING_SECRET: string;
   readonly REDIS_SERVER_URL: string;
-  readonly QUESTION_SERVER_URL: string;
-  readonly HISTORY_SERVER_URL: string;
+  readonly QUESTION_SERVICE_URL: string;
+  readonly HISTORY_SERVICE_URL: string;
   readonly JUDGE0_SERVER_URL: string;
   readonly GRPC_PORT: number;
 };
@@ -58,10 +58,10 @@ export default function loadEnvironment(): EnvironmentConfig {
   config();
 
   return {
-    JWT_ROOM_SECRET: requireString('JWT_ROOM_SECRET'),
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
-    QUESTION_SERVER_URL: requireString('QUESTION_SERVER_URL'),
-    HISTORY_SERVER_URL: requireString('HISTORY_SERVER_URL'),
+    ROOM_SIGNING_SECRET: requireString('ROOM_SIGNING_SECRET'),
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
+    QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL'),
+    HISTORY_SERVICE_URL: requireString('HISTORY_SERVICE_URL'),
     JUDGE0_SERVER_URL: requireString('JUDGE0_SERVER_URL'),
     GRPC_PORT: requireInt('GRPC_PORT', 4003),
   };

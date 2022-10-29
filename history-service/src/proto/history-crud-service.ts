@@ -175,6 +175,24 @@ export interface GetCompletionResponse {
      */
     errorMessage: string;
 }
+/**
+ * @generated from protobuf message history_crud_service.DeleteCompletionRequest
+ */
+export interface DeleteCompletionRequest {
+    /**
+     * @generated from protobuf field: common.HistoryCompletion completed = 1;
+     */
+    completed?: HistoryCompletion;
+}
+/**
+ * @generated from protobuf message history_crud_service.DeleteCompletionResponse
+ */
+export interface DeleteCompletionResponse {
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class GetAttemptRequest$Type extends MessageType<GetAttemptRequest> {
     constructor() {
@@ -830,6 +848,100 @@ class GetCompletionResponse$Type extends MessageType<GetCompletionResponse> {
  * @generated MessageType for protobuf message history_crud_service.GetCompletionResponse
  */
 export const GetCompletionResponse = new GetCompletionResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteCompletionRequest$Type extends MessageType<DeleteCompletionRequest> {
+    constructor() {
+        super("history_crud_service.DeleteCompletionRequest", [
+            { no: 1, name: "completed", kind: "message", T: () => HistoryCompletion }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteCompletionRequest>): DeleteCompletionRequest {
+        const message = {};
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<DeleteCompletionRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteCompletionRequest): DeleteCompletionRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.HistoryCompletion completed */ 1:
+                    message.completed = HistoryCompletion.internalBinaryRead(reader, reader.uint32(), options, message.completed);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteCompletionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.HistoryCompletion completed = 1; */
+        if (message.completed)
+            HistoryCompletion.internalBinaryWrite(message.completed, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_crud_service.DeleteCompletionRequest
+ */
+export const DeleteCompletionRequest = new DeleteCompletionRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteCompletionResponse$Type extends MessageType<DeleteCompletionResponse> {
+    constructor() {
+        super("history_crud_service.DeleteCompletionResponse", [
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteCompletionResponse>): DeleteCompletionResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<DeleteCompletionResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteCompletionResponse): DeleteCompletionResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteCompletionResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_crud_service.DeleteCompletionResponse
+ */
+export const DeleteCompletionResponse = new DeleteCompletionResponse$Type();
 /**
  * @generated ServiceType for protobuf service history_crud_service.HistoryCrudService
  */
@@ -839,5 +951,6 @@ export const HistoryCrudService = new ServiceType("history_crud_service.HistoryC
     { name: "CreateAttempt", options: {}, I: CreateAttemptRequest, O: CreateAttemptResponse },
     { name: "DeleteAttempt", options: {}, I: DeleteAttemptRequest, O: DeleteAttemptResponse },
     { name: "CreateCompletion", options: {}, I: CreateCompletionRequest, O: CreateCompletionResponse },
-    { name: "GetCompletion", options: {}, I: GetCompletionRequest, O: GetCompletionResponse }
+    { name: "GetCompletion", options: {}, I: GetCompletionRequest, O: GetCompletionResponse },
+    { name: "DeleteCompletion", options: {}, I: DeleteCompletionRequest, O: DeleteCompletionResponse }
 ]);

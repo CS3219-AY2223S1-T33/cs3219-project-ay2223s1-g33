@@ -11,6 +11,45 @@ env:
   ECS_SERVICE: cs3219-service
   ECS_CLUSTER: cs3219-cluster
 
+  CONFIG_ROUTE_MAP_INTERNAL: |
+    USER_SERVICE_URL=user-service:4000
+    MATCHING_SERVICE_URL=matching-service:4001
+    COLLAB_SERVICE_URL=collab-service:4003
+    QUESTION_SERVICE_URL=question-service:4004
+    HISTORY_SERVICE_URL=history-service:4005
+    SESSION_SERVICE_URL=session-service:4100
+    REDIS_SERVER=redis:6379
+
+  CONFIG_ROUTE_MAP_GATEWAY: |
+    USER_SERVICE_URL=user-service:4000
+    MATCHING_SERVICE_URL=matching-service:4001
+    COLLAB_SERVICE_URL=collab-service:4003
+    HISTORY_SERVICE_URL=history-service:4005
+    SESSION_SERVICE_URL=session-service:4100
+    STATIC_SERVER=frontend:80
+
+  CONFIG_SECRETS_SIGNING: |
+    REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
+    SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
+    ROOM_SIGNING_SECRET=${{ secrets.ROOM_SIGNING_SECRET }}
+  
+  CONFIG_SECRETS_EMAIL: |
+    EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
+    EMAIL_SERVER=${{ secrets.EMAIL_SERVER }}
+    EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+    EMAIL_IS_SECURE=${{ secrets.EMAIL_IS_SECURE }}
+
+    EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
+    EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+    EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
+    RESET_PASSWORD_URL=https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN
+  
+  CONFIG_SECRETS_DB: |
+    DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+    DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+    DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+    DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+
 jobs:
   deploy:
     name: Deploy to AWS ECS
@@ -65,7 +104,6 @@ jobs:
           # be deployed to ECS.
 
           # node services
-
           PID_LIST=()
           # Build Images
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile . &
@@ -112,41 +150,28 @@ jobs:
 
           # Image Upload
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG
-          echo "::set-output name=frontend-image::$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG"
-
-          # question-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG
-          echo "::set-output name=question-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG"
-
-          # matching-service 
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG
-          echo "::set-output name=matching-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG"
-
-          # collab-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG
-          echo "::set-output name=collab-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG"
-
-          # user-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG
-          echo "::set-output name=user-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG"
-
-          # history-service
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG
-          echo "::set-output name=history-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG"
+
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
+
+          # Output the image variables
+          echo "frontend-image=$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "question-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "matching-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "collab-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "user-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "history-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
 
           # go services
-
-          # matchmaker
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG
-          echo "::set-output name=matchmaker-image::$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG"
-
-          # gateway
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG
-          echo "::set-output name=gateway-image::$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG"
-
-          # session-service
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG
-          echo "::set-output name=session-service-image::$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG"
+          echo "matchmaker-image=$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "gateway-image=$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "session-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Update task definition for session-service
         id: task-def-session-service
@@ -156,9 +181,8 @@ jobs:
           container-name: session-service
           image: ${{ steps.build-image.outputs.session-service-image }}
           environment-variables: |
-            REDIS_SERVER=redis:6379
-            REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
-            SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_SIGNING }}
 
       - name: Update task definition for question-service
         id: task-def-question-service
@@ -168,11 +192,8 @@ jobs:
           container-name: question-service
           image: ${{ steps.build-image.outputs.question-service-image }}
           environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            REDIS_SERVER_URL=redis:6379
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_DB }}
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
@@ -182,7 +203,7 @@ jobs:
           container-name: matchmaker
           image: ${{ steps.build-image.outputs.matchmaker-image }}
           environment-variables: |
-            REDIS_SERVER=redis:6379
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
 
       - name: Update task definition for user-service
         id: task-def-user-service
@@ -192,22 +213,9 @@ jobs:
           container-name: user-service
           image: ${{ steps.build-image.outputs.user-service-image }}
           environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            REDIS_SERVER_URL=redis:6379
-
-            SESSION_SERVICE_URL=session-service:4100
-            EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
-            EMAIL_SERVER=${{ secrets.EMAIL_SERVER }}
-            EMAIL_PORT=${{ secrets.EMAIL_PORT }}
-            EMAIL_IS_SECURE=${{ secrets.EMAIL_IS_SECURE }}
-
-            EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
-            EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-            EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
-            RESET_PASSWORD_URL="https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN"
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_DB }}
+            ${{ env.CONFIG_SECRETS_EMAIL }}
 
       - name: Update task definition for matching-service
         id: task-def-matching-service
@@ -217,9 +225,8 @@ jobs:
           container-name: matching-service
           image: ${{ steps.build-image.outputs.matching-service-image }}
           environment-variables: |
-            REDIS_SERVER_URL=redis:6379
-            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
-            JWT_SIGNING_SECRET=${{ secrets.JWT_SIGNING_SECRET }}
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_SIGNING }}
 
       - name: Update task definition for collab-service
         id: task-def-collab-service
@@ -229,10 +236,8 @@ jobs:
           container-name: collab-service
           image: ${{ steps.build-image.outputs.collab-service-image }}
           environment-variables: |
-            REDIS_SERVER_URL=redis:6379
-            QUESTION_SERVER_URL=question-service:4004
-            JWT_ROOM_SECRET=${{ secrets.JWT_ROOM_SECRET }}
-            HISTORY_SERVER_URL=history-service:4005
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_SIGNING }}
 
       - name: Update task definition for frontend
         id: task-def-frontend
@@ -250,12 +255,7 @@ jobs:
           container-name: gateway
           image: ${{ steps.build-image.outputs.gateway-image }}      
           environment-variables: |
-            USER_BFF_SERVER=user-service:4000
-            MATCHING_SERVER=matching-service:4001
-            COLLAB_SERVER=collab-service:4003
-            HISTORY_SERVER=history-service:4005
-            SESSION_SERVER=session-service:4100
-            STATIC_SERVER=frontend:80
+            ${{ env.CONFIG_ROUTE_MAP_GATEWAY }}
 
       - name: Update task definition for history-service
         id: task-def-history-service
@@ -265,13 +265,8 @@ jobs:
           container-name: history-service
           image: ${{ steps.build-image.outputs.history-service-image }}  
           environment-variables: |
-            DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            REDIS_SERVER_URL=redis:6379
-            USER_SERVICE_URL=user-service:4000
-            QUESTION_SERVICE_URL=question-service:4004
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_DB }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1

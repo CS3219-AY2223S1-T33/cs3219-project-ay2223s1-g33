@@ -13,10 +13,10 @@ const streamServer = createStreamServer(envConfig.GRPC_PORT);
 
 const collabController = createCollabTunnelController(
   envConfig.REDIS_SERVER_URL,
-  envConfig.QUESTION_SERVER_URL,
-  envConfig.HISTORY_SERVER_URL,
+  envConfig.QUESTION_SERVICE_URL,
+  envConfig.HISTORY_SERVICE_URL,
   envConfig.JUDGE0_SERVER_URL,
-  envConfig.JWT_ROOM_SECRET,
+  envConfig.ROOM_SIGNING_SECRET,
 );
 
 const router = new CollabTunnelRouter(collabController);
