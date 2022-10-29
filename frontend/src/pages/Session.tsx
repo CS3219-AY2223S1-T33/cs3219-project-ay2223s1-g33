@@ -5,7 +5,7 @@ import {
   useDisclosure,
   Box,
   Grid,
-  useBoolean
+  useBoolean,
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +31,7 @@ import saveFile from "../utils/fileDownloadUtil";
 import { addMessage, clearChat } from "../feature/chat/chatSlice";
 import {
   SetHistoryCompletionRequest,
-  SetHistoryCompletionResponse
+  SetHistoryCompletionResponse,
 } from "../proto/history-service";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
@@ -49,12 +49,12 @@ function Session() {
   const {
     isOpen: isLeaveModalOpen,
     onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal
+    onClose: onCloseLeaveModal,
   } = useDisclosure();
   const {
     isOpen: isDisconnectModalOpen,
     onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal
+    onClose: onCloseDisconnectModal,
   } = useDisclosure();
   const toast = useFixedToast();
 
@@ -83,7 +83,7 @@ function Session() {
         yd,
         {
           params,
-          disableBc: true
+          disableBc: true,
         }
       );
 
@@ -114,13 +114,13 @@ function Session() {
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`
+          title: `${joinedNickname.nickname} has joined the room!`,
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`
+          title: `${leftNickname.nickname} has left the room.`,
         });
       });
 
@@ -163,7 +163,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken
+        room: roomToken === undefined ? "" : roomToken,
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
