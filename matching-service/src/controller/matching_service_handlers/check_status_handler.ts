@@ -7,8 +7,8 @@ import {
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
 import { IRoomSessionAgent } from '../../room_auth/room_session_agent_types';
-
-const gatewayHeaderUsername = 'grpc-x-bearer-username';
+import { safeReadFirstHeader } from '../controller_utils';
+import GatewayConstants from '../../utils/gateway_constants';
 
 class CheckQueueStatusHandler
 implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
@@ -26,14 +26,17 @@ implements IApiHandler<CheckQueueStatusRequest, CheckQueueStatusResponse> {
 
   async handle(request: ApiRequest<CheckQueueStatusRequest>) :
   Promise<ApiResponse<CheckQueueStatusResponse>> {
-    if (!(gatewayHeaderUsername in request.headers)) {
+    const username = safeReadFirstHeader(
+      request.headers,
+      GatewayConstants.GATEWAY_HEADER_USERNAME,
+    );
+
+    if (!username || username.length === 0) {
       return CheckQueueStatusHandler.buildErrorResponse(
         CheckQueueStatusErrorCode.CHECK_QUEUE_STATUS_INTERNAL_ERROR,
         'Bad request from gateway',
       );
     }
-
-    const username = request.headers[gatewayHeaderUsername][0];
 
     // Get Queue Status
     let queueStatus = QueueStatus.PENDING;
