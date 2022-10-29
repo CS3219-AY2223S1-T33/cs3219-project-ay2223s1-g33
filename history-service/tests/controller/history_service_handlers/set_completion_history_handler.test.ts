@@ -198,6 +198,46 @@ describe('Set Completion Submission Handler', () => {
       .toBeUndefined();
   });
 
+  test('Bad Request - Missing username', async () => {
+    const makeUndefinedRequest = ():
+    ApiRequest<SetHistoryCompletionRequest> => ({
+      request: {
+        completed: {
+          username: '',
+          questionId: testCompletion.questionId,
+        },
+      },
+      headers: {},
+    });
+    const request = makeUndefinedRequest();
+    const response = await handler.handle(request);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.completed)
+      .toBeUndefined();
+  });
+
+  test('Bad Request - Missing questionId', async () => {
+    const makeUndefinedRequest = ():
+    ApiRequest<SetHistoryCompletionRequest> => ({
+      request: {
+        completed: {
+          username: testCompletion.username,
+          questionId: 0,
+        },
+      },
+      headers: {},
+    });
+    const request = makeUndefinedRequest();
+    const response = await handler.handle(request);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.completed)
+      .toBeUndefined();
+  });
+
   test('Get: Internal Error Occurred', async () => {
     mockClient.getCompletion.mockImplementationOnce(
       () => ({
