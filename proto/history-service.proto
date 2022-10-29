@@ -27,11 +27,11 @@ message GetAttemptSubmissionResponse {
   string error_message = 2;
 }
 
-message CreateCompletionSubmissionRequest {
+message SetHistoryCompletionRequest {
   common.HistoryCompletion completed = 1;
 }
 
-message CreateCompletionSubmissionResponse {
+message SetHistoryCompletionResponse {
   common.HistoryCompletion completed = 1;
   string error_message = 2;
 }
@@ -39,5 +39,5 @@ message CreateCompletionSubmissionResponse {
 service HistoryService {
   rpc GetAttemptHistory(GetAttemptHistoryRequest) returns (GetAttemptHistoryResponse);
   rpc GetAttemptSubmission(GetAttemptSubmissionRequest) returns (GetAttemptSubmissionResponse);
-  rpc CreateCompletionSubmission(CreateCompletionSubmissionRequest) returns (CreateCompletionSubmissionResponse);
+  rpc SetHistoryCompletion(SetHistoryCompletionRequest) returns (SetHistoryCompletionResponse);
 }

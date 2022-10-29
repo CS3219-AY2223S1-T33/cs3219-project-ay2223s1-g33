@@ -55,6 +55,6 @@ http:
       post: /api/user/history/submission
       body: "*"
 
-    - selector: history_service.HistoryService.CreateCompletionSubmission
+    - selector: history_service.HistoryService.SetHistoryCompletion
       post: /api/user/history/completion
       body: "*"

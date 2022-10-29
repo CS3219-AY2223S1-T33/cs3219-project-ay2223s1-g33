@@ -1,4 +1,4 @@
-import { IStorage, IAttemptStore, ICompletedStore } from './storage';
+import { IStorage, IAttemptStore, ICompletionStore } from './storage';
 import AttemptStore from './attempt_store';
 import { IDatabase } from '../db';
 import CompletionStore from './completion_store';
@@ -17,7 +17,7 @@ class AppStorage implements IStorage {
     return this.attemptStore;
   }
 
-  getCompletionStore(): ICompletedStore {
+  getCompletionStore(): ICompletionStore {
     return this.completionStore;
   }
 }

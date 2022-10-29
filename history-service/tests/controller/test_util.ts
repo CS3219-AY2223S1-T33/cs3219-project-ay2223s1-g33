@@ -14,7 +14,7 @@ import {
   CreateAttemptRequest,
   CreateAttemptResponse, CreateCompletionRequest, CreateCompletionResponse,
   DeleteAttemptRequest,
-  DeleteAttemptResponse,
+  DeleteAttemptResponse, DeleteCompletionRequest, DeleteCompletionResponse,
   GetAttemptRequest,
   GetAttemptResponse,
   GetAttemptsRequest,
@@ -101,6 +101,7 @@ function makeMockCompletionStorage() {
   return {
     addCompletion: jest.fn(),
     getCompletion: jest.fn(),
+    removeCompletion: jest.fn(),
   };
 }
 
@@ -117,6 +118,7 @@ function makeMockLoopbackChannel() {
     deleteAttempt: jest.fn(),
     createCompletion: jest.fn(),
     getCompletion: jest.fn(),
+    deleteCompletion: jest.fn(),
   };
   return {
     client: {
@@ -127,6 +129,8 @@ function makeMockLoopbackChannel() {
       createCompletion:
         forceCast<CreateCompletionRequest, CreateCompletionResponse>(mock.createCompletion),
       getCompletion: forceCast<GetCompletionRequest, GetCompletionResponse>(mock.getCompletion),
+      deleteCompletion:
+        forceCast<DeleteCompletionRequest, DeleteCompletionResponse>(mock.deleteCompletion),
     },
     mock,
   };

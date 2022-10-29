@@ -29,7 +29,7 @@ const apiServer = createApiServer(httpServer, grpcServer);
 const expressApp = httpServer.getServer();
 
 const roomAuthService: IRoomSessionAgent = createRoomSessionService(
-  envConfig.JWT_ROOM_SECRET,
+  envConfig.ROOM_SIGNING_SECRET,
 );
 
 expressApp.get('/', (_: Request, resp: Response) => {

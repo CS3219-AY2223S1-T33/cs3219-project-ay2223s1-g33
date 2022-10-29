@@ -5,6 +5,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { DownloadIcon } from "@chakra-ui/icons";
+// import axios from "axios";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -67,7 +68,10 @@ function Session() {
         `${wsProtocol}://${window.location.host}/api/`,
         "roomws",
         yd,
-        { params, disableBc: true }
+        {
+          params,
+          disableBc: true,
+        }
       );
 
       ws.on("status", (joinStatus: Status) => {
