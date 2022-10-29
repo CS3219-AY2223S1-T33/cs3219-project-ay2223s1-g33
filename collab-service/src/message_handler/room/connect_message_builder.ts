@@ -60,8 +60,8 @@ function createExecutePendingPackage(): Uint8Array {
   return encodeOpcodeOnly(OPCODE_EXECUTE_PENDING);
 }
 
-function createExecuteCompletePackage(): Uint8Array {
-  return encodeOpcodeOnly(OPCODE_EXECUTE_COMPLETE);
+function createExecuteCompletePackage(output: string): Uint8Array {
+  return encodeContentOpcode(output, OPCODE_EXECUTE_COMPLETE);
 }
 
 /**

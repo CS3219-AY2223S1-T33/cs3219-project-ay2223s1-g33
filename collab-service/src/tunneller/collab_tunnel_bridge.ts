@@ -15,6 +15,7 @@ import {
 } from '../message_handler/internal/internal_message_builder';
 import { isHeartbeat, makeDataResponse } from '../message_handler/room/response_message_builder';
 import {
+  createExecuteCompletePackage,
   createExecutePendingPackage,
   createQuestionRcvPackage,
   createSaveCodeAckPackage,
@@ -239,8 +240,9 @@ class CollabTunnelBridge {
       return;
     }
     // Notify self & other user
-    await this.pubsub.pushMessage(createDataMessage(this.username, createExecutePendingPackage()));
-    this.call.write(makeDataResponse(createExecutePendingPackage()));
+    const pendingData = createExecutePendingPackage();
+    await this.pubsub.pushMessage(createDataMessage(this.username, pendingData));
+    this.call.write(makeDataResponse(pendingData));
 
     const question = await getQuestionRedis(this.roomId, this.redis);
     const qns = deserializeQuestion(question);
@@ -249,8 +251,15 @@ class CollabTunnelBridge {
     }
     const stdin = qns.executionInput;
     const runner = new ExecuteBridge(stdin, request.data, this.executeAgent);
-    await runner.run((value: string) => {
+    await runner.run(async (value: string) => {
       console.log(value);
+      // Write to self & other user
+      const completeData = createExecuteCompletePackage(value);
+      await this.pubsub.pushMessage(createDataMessage(
+        this.username,
+        completeData,
+      ));
+      this.call.write(makeDataResponse(completeData));
     });
   }
 }
