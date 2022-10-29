@@ -32,7 +32,6 @@ class ExecuteServiceClient implements IExecuteServiceClient {
       }),
     });
     const content = await rawResponse.json();
-
     const protoResponse = CreateExecuteResponse.create({
       token: content.token,
       errorMessage: '',
@@ -54,8 +53,6 @@ class ExecuteServiceClient implements IExecuteServiceClient {
       signal: getFetchDeadline(metadata.deadline),
     });
     const content = await rawResponse.json();
-    console.log(content);
-
     const protoResponse = GetExecuteResponse.create({
       output: content.stdout,
       errorMessage: content.status.description,
