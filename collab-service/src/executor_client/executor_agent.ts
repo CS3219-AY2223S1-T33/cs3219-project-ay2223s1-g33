@@ -42,10 +42,9 @@ class ExecuteAgent implements IExecuteAgent {
           deadline: timeout,
         },
         (value) => {
-          if (value.errorMessage === 'Accepted') {
+          if (value.errorMessage === 'Accepted'
+            || value.errorMessage === 'Runtime Error (NZEC)') {
             resolve(value.output);
-          } else if (value.errorMessage === 'Runtime Error') {
-            resolve(value.errorMessage);
           } else {
             resolve('');
           }

@@ -29,12 +29,6 @@ class ExecuteServiceClient implements IExecuteServiceClient {
         source_code: input.executeCode?.code,
         language_id: input.executeCode?.languageId,
         stdin: input.executeCode?.stdin,
-        number_of_runs: 1,
-        cpu_time_limit: 2,
-        cpu_extra_time: 0,
-        wall_time_limit: 3,
-        memory_limit: 64000,
-        stack_limit: 64000,
       }),
     });
     const content = await rawResponse.json();
@@ -51,7 +45,7 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     metadata: { deadline: number },
     callback: (value: GetExecuteResponse) => void,
   ) {
-    const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}`, {
+    const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}?fields=stdout,status`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
