@@ -5,6 +5,7 @@ option go_package = "cs3219-project-ay2223s1-g33/proto";
 
 enum CreateTokenErrorCode {
   CREATE_TOKEN_NO_ERROR = 0;
+  CREATE_TOKEN_BAD_REQUEST = 1;
   CREATE_TOKEN_ERROR_INTERNAL = 100;
 }
 

@@ -125,6 +125,10 @@ export enum CreateTokenErrorCode {
      */
     CREATE_TOKEN_NO_ERROR = 0,
     /**
+     * @generated from protobuf enum value: CREATE_TOKEN_BAD_REQUEST = 1;
+     */
+    CREATE_TOKEN_BAD_REQUEST = 1,
+    /**
      * @generated from protobuf enum value: CREATE_TOKEN_ERROR_INTERNAL = 100;
      */
     CREATE_TOKEN_ERROR_INTERNAL = 100

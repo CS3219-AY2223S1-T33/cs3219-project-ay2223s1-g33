@@ -20,6 +20,12 @@ func NewCreateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.Tok
 }
 
 func (handler *createTokenHandler) Handle(req *pb.CreateTokenRequest) (*pb.CreateTokenResponse, error) {
+	if req.GetEmail() == "" || req.GetNickname() == "" {
+		return &pb.CreateTokenResponse{
+			ErrorCode: pb.CreateTokenErrorCode_CREATE_TOKEN_BAD_REQUEST,
+		}, nil
+	}
+
 	tokenData := &token.TokenData{
 		Email:    req.GetEmail(),
 		Nickname: req.GetNickname(),
