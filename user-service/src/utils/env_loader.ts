@@ -73,7 +73,7 @@ export default function loadEnvironment(): EnvironmentConfig {
 
   return {
     SESSION_SERVICE_URL: requireString('SESSION_SERVICE_URL'),
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8081),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),
 
