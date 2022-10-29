@@ -27,8 +27,8 @@ class HistoryAgent implements IHistoryAgent {
         {
           deadline: getGrpcDeadline(),
         },
-        (err, value) => {
-          if (value) {
+        (err, response) => {
+          if (response) {
             resolve('');
           } else if (err) {
             resolve('Saved failed');
@@ -50,8 +50,8 @@ class HistoryAgent implements IHistoryAgent {
         {
           deadline: getGrpcDeadline(),
         },
-        (_err, value) => {
-          if (value && value.completed) {
+        (_err, response) => {
+          if (response && response.completed) {
             resolve(true);
           } else {
             resolve(false);
