@@ -61,6 +61,7 @@ class Database implements IDatabase {
       entities: [
         HistoryEntity,
         HistoryOwnerEntity,
+        HistoryCompletionEntity,
       ],
       subscribers: [],
       migrations: [],
