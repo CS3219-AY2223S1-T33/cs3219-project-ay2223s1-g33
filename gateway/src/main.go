@@ -12,7 +12,7 @@ import (
 )
 
 type pipelineHandler struct {
-	pipe util.PipeInput[*util.HTTPContext]
+	pipe util.PipeInput
 }
 
 func main() {
@@ -60,7 +60,7 @@ func run(config *GatewayConfiguration) error {
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.Port), handler)
 }
 
-func buildPipelineHandler(input util.PipeInput[*util.HTTPContext]) http.Handler {
+func buildPipelineHandler(input util.PipeInput) http.Handler {
 	return &pipelineHandler{
 		pipe: input,
 	}

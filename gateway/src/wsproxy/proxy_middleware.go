@@ -8,12 +8,12 @@ import (
 )
 
 type wsProxyMiddleware struct {
-	util.BasePipeOutput[*util.HTTPContext]
+	util.BasePipeOutput
 	collabServiceUrl string
 	proxyManager     WebsocketProxyManager
 }
 
-func NewWSProxyMiddleware(downstreamUrl string) util.ThroughPipe[*util.HTTPContext, *util.HTTPContext] {
+func NewWSProxyMiddleware(downstreamUrl string) util.ThroughPipe {
 	log.Printf("WS Proxy on Downstream %s\n", downstreamUrl)
 	return &wsProxyMiddleware{
 		collabServiceUrl: downstreamUrl,

@@ -7,15 +7,15 @@ import (
 
 type prefixRouter struct {
 	prefix        string
-	matchedPipe   util.PipeInput[*util.HTTPContext]
-	otherwisePipe util.PipeInput[*util.HTTPContext]
+	matchedPipe   util.PipeInput
+	otherwisePipe util.PipeInput
 }
 
 func NewPrefixRouter(
 	prefix string,
-	matchedPipe util.PipeInput[*util.HTTPContext],
-	otherwisePipe util.PipeInput[*util.HTTPContext],
-) util.PipeInput[*util.HTTPContext] {
+	matchedPipe util.PipeInput,
+	otherwisePipe util.PipeInput,
+) util.PipeInput {
 	return &prefixRouter{
 		prefix:        prefix,
 		matchedPipe:   matchedPipe,

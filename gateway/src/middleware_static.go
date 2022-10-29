@@ -12,7 +12,7 @@ type staticContentServer struct {
 	downstreamServer string
 }
 
-func NewStaticContentServer(server string) util.PipeInput[*util.HTTPContext] {
+func NewStaticContentServer(server string) util.PipeInput {
 	return &staticContentServer{
 		downstreamServer: server,
 	}

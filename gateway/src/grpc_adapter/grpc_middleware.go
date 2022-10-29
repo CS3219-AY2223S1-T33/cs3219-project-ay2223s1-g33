@@ -27,7 +27,7 @@ func NewGRPCMiddleware(
 	userServiceUrl string,
 	matchingServiceUrl string,
 	historyServiceUrl string,
-) util.DisposablePipeInput[*util.HTTPContext] {
+) util.DisposablePipeInput {
 	ctx, cancel := context.WithCancel(context.Background())
 	middleware := &grpcMiddleware{
 		userServiceUrl:     userServiceUrl,

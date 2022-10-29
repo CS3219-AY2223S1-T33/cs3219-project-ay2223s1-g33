@@ -5,42 +5,44 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -destination=../mocks/types_mock.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/gateway/util Disposable,PipeOutput,PipeInput,ThroughPipe,DisposablePipeInput,DisposableThroughPipe
+
 type Disposable interface {
 	Dispose()
 }
 
-type PipeOutput[T any] interface {
-	PipeTo(to PipeInput[T])
+type PipeOutput interface {
+	PipeTo(to PipeInput)
 }
 
-type PipeInput[T any] interface {
-	Receive(item T) error
+type PipeInput interface {
+	Receive(item *HTTPContext) error
 }
 
-type ThroughPipe[T any, U any] interface {
-	PipeInput[T]
-	PipeOutput[U]
+type ThroughPipe interface {
+	PipeInput
+	PipeOutput
 }
 
-type DisposablePipeInput[T any] interface {
-	PipeInput[T]
+type DisposablePipeInput interface {
+	PipeInput
 	Disposable
 }
 
-type DispoableThroughPipe[T any, U any] interface {
-	ThroughPipe[T, U]
+type DisposableThroughPipe interface {
+	ThroughPipe
 	Disposable
 }
 
-type BasePipeOutput[T any] struct {
-	output PipeInput[T]
+type BasePipeOutput struct {
+	output PipeInput
 }
 
-func (stage *BasePipeOutput[T]) PipeTo(to PipeInput[T]) {
+func (stage *BasePipeOutput) PipeTo(to PipeInput) {
 	stage.output = to
 }
 
-func (stage *BasePipeOutput[T]) WriteToDownstream(item T) error {
+func (stage *BasePipeOutput) WriteToDownstream(item *HTTPContext) error {
 	if stage.output == nil {
 		return errors.New("No Pipe Downstream")
 	}

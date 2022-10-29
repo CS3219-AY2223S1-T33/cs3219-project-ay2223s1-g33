@@ -16,12 +16,12 @@ const (
 )
 
 type authMiddleware struct {
-	util.BasePipeOutput[*util.HTTPContext]
+	util.BasePipeOutput
 	sessionServiceUrl string
 	authAgent         AuthAgent
 }
 
-func NewAuthMiddleware(sessionServiceUrl string) util.DispoableThroughPipe[*util.HTTPContext, *util.HTTPContext] {
+func NewAuthMiddleware(sessionServiceUrl string) util.DisposableThroughPipe {
 	log.Printf("Auth Middleware using Session Service on %s\n", sessionServiceUrl)
 	authAgent, err := CreateAuthAgent(sessionServiceUrl)
 	if err != nil {
