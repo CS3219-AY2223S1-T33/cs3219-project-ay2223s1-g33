@@ -21,6 +21,7 @@ import {
 } from '../message_handler/room/connect_message_builder';
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
 import { createAttemptCache } from '../history_handler/attempt_cache';
+import { deserializeQuestion } from '../question_client/question_serializer';
 
 const SUBMISSION_WAIT = 4 * 1000;
 
@@ -183,7 +184,11 @@ class CollabTunnelBridge {
    */
   private async writeQuestionToClient() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
-    this.questionId = JSON.parse(finalQuestion).questionId;
+    const qns = deserializeQuestion(finalQuestion);
+    if (!qns) {
+      return;
+    }
+    this.questionId = qns.questionId;
     let isCompleted = false;
     if (this.questionId) {
       isCompleted = await this.historyAgent.getHasBeenCompleted(this.username, this.questionId);
