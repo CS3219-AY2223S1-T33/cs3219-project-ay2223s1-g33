@@ -26,6 +26,8 @@ import {
 } from '../message_handler/room/connect_message_builder';
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
 import { createAttemptCache } from '../history_handler/attempt_cache';
+import { deserializeQuestion } from '../question_client/question_serializer';
+import ExecuteBridge from '../executor_handler/execute_controller';
 
 const SUBMISSION_WAIT = 4 * 1000;
 
@@ -138,7 +140,8 @@ class CollabTunnelBridge {
 
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${this.username} requested for saving code`);
-        await this.handleSaveHistoryRequest(request);
+        // await this.handleSaveHistoryRequest(request);
+        await this.handleExecuteCodeRequest(request);
         break;
 
       case OPCODE_EXECUTE_REQ: // Execute code
@@ -197,7 +200,7 @@ class CollabTunnelBridge {
    */
   private async handleRetrieveQuestionRequest() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
-    this.questionId = JSON.parse(finalQuestion).questionId;
+    this.questionId = deserializeQuestion(finalQuestion).questionId;
     let isCompleted = false;
     if (this.questionId) {
       isCompleted = await this.historyAgent.getHasBeenCompleted(this.username, this.questionId);
@@ -223,7 +226,10 @@ class CollabTunnelBridge {
     return createSaveCodeAckPackage(message);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  /**
+   * Executes code.
+   * @private
+   */
   private async handleExecuteCodeRequest(request: CollabTunnelRequest) {
     if (!this.questionId) {
       return;
@@ -232,9 +238,11 @@ class CollabTunnelBridge {
     await this.pubsub.pushMessage(createDataMessage(this.username, createExecutePendingPackage()));
     this.call.write(makeDataResponse(createExecutePendingPackage()));
 
-    // const protoExecuteCode = request.data;
-    // this.executeAgent.uploadCode()
-    console.log('running');
+    const question = await getQuestionRedis(this.roomId, this.redis);
+    const stdin = deserializeQuestion(question).executionInput;
+    const runner = new ExecuteBridge(stdin, request.data, this.executeAgent);
+    const response = await runner.run();
+    console.log(response);
   }
 }
 

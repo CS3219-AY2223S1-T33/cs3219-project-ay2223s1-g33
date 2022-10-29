@@ -26,6 +26,7 @@ class QuestionAgent implements IQuestionAgent {
       name: '',
       solution: '',
       content: '',
+      executionInput: '',
     };
 
     return new Promise<Question | undefined>((resolve, reject) => {

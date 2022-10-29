@@ -1,6 +1,7 @@
 import { RedisClientType } from 'redis';
 import { Question } from '../proto/types';
 import Logger from '../utils/logger';
+import { serializeQuestion } from '../question_client/question_serializer';
 
 const REDIS_PREFIX = 'collab-qns';
 const REFRESH_INTERVAL = 3 * 20;
@@ -16,7 +17,7 @@ async function setQuestionRedis(
   question: Question,
   publisher: RedisClientType,
 ) {
-  await publisher.set(`${REDIS_PREFIX}-${key}`, JSON.stringify(question), {
+  await publisher.set(`${REDIS_PREFIX}-${key}`, serializeQuestion(question), {
     EX: REFRESH_INTERVAL,
     NX: true,
   });

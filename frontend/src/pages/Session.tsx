@@ -30,8 +30,8 @@ import { HistoryCompletion, Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
 import { addMessage, clearChat } from "../feature/chat/chatSlice";
 import {
-  CreateCompletionSubmissionRequest,
-  CreateCompletionSubmissionResponse,
+  SetHistoryCompletionRequest,
+  SetHistoryCompletionResponse,
 } from "../proto/history-service";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
@@ -231,9 +231,9 @@ function Session() {
 
     const { questionId } = question;
     const completed: HistoryCompletion = { questionId, username };
-    const request: CreateCompletionSubmissionRequest = { completed };
+    const request: SetHistoryCompletionRequest = { completed };
     axios
-      .post<CreateCompletionSubmissionResponse>(
+      .post<SetHistoryCompletionResponse>(
         "/api/user/history/completion",
         request,
         { withCredentials: true }

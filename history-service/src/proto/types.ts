@@ -83,6 +83,10 @@ export interface Question {
      * @generated from protobuf field: string solution = 5;
      */
     solution: string;
+    /**
+     * @generated from protobuf field: string execution_input = 6;
+     */
+    executionInput: string;
 }
 /**
  * @generated from protobuf message common.HistoryAttempt
@@ -348,11 +352,12 @@ class Question$Type extends MessageType<Question> {
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] },
             { no: 4, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "execution_input", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<Question>): Question {
-        const message = { questionId: 0, name: "", difficulty: 0, content: "", solution: "" };
+        const message = { questionId: 0, name: "", difficulty: 0, content: "", solution: "", executionInput: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<Question>(this, message, value);
@@ -377,6 +382,9 @@ class Question$Type extends MessageType<Question> {
                     break;
                 case /* string solution */ 5:
                     message.solution = reader.string();
+                    break;
+                case /* string execution_input */ 6:
+                    message.executionInput = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -405,6 +413,9 @@ class Question$Type extends MessageType<Question> {
         /* string solution = 5; */
         if (message.solution !== "")
             writer.tag(5, WireType.LengthDelimited).string(message.solution);
+        /* string execution_input = 6; */
+        if (message.executionInput !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.executionInput);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

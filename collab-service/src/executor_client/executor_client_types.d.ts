@@ -8,11 +8,11 @@ declare interface IExecuteServiceClient {
   createExecution(
     input: CreateExecuteRequest,
     metadata: { deadline: number },
-    callback: (value: CreateExecuteResponse, err: string | null) => void,
+    callback: (value: CreateExecuteResponse) => void,
   )
   retrieveExecution(
     input: GetExecuteRequest,
     metadata: { deadline: number },
-    callback: (value: GetExecuteResponse, err: string | null) => void,
+    callback: (value: GetExecuteResponse) => void,
   )
 }

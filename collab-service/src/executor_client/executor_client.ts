@@ -16,9 +16,9 @@ class ExecuteServiceClient implements IExecuteServiceClient {
   async createExecution(
     input: CreateExecuteRequest,
     metadata: { deadline: number },
-    callback: (value: CreateExecuteResponse, err: (string | null)) => void,
+    callback: (value: CreateExecuteResponse) => void,
   ) {
-    const rawResponse = await fetch(this.apiURL, {
+    const rawResponse = await fetch(`http://${this.apiURL}/submissions`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -38,21 +38,20 @@ class ExecuteServiceClient implements IExecuteServiceClient {
       }),
     });
     const content = await rawResponse.json();
-    console.log(content);
 
-    const protoResponse = CreateExecuteResponse.create();
-    protoResponse.token = 'token';
-    protoResponse.errorMessage = '';
-
-    callback(protoResponse, null);
+    const protoResponse = CreateExecuteResponse.create({
+      token: content.token,
+      errorMessage: '',
+    });
+    callback(protoResponse);
   }
 
   async retrieveExecution(
     input: GetExecuteRequest,
     metadata: { deadline: number },
-    callback: (value: GetExecuteResponse, err: (string | null)) => void,
+    callback: (value: GetExecuteResponse) => void,
   ) {
-    const rawResponse = await fetch(`${this.apiURL}/submission/${input.token}?fields=stdout,status`, {
+    const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -63,11 +62,11 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     const content = await rawResponse.json();
     console.log(content);
 
-    const protoResponse = GetExecuteResponse.create();
-    protoResponse.output = 'output';
-    protoResponse.errorMessage = '';
-
-    callback(protoResponse, null);
+    const protoResponse = GetExecuteResponse.create({
+      output: content.stdout,
+      errorMessage: content.status.description,
+    });
+    callback(protoResponse);
   }
 }
 
