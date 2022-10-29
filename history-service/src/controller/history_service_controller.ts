@@ -15,7 +15,7 @@ import {
 import GetAttemptSubmissionHandler from './history_service_handlers/get_attempt_submission_handler';
 import { ILoopbackServiceChannel } from '../api_server/loopback_server_types';
 import SetHistoryCompletionHandler
-  from './history_service_handlers/create_completion_submission_handler';
+  from './history_service_handlers/set_completion_history_handler';
 
 class HistoryServiceApi implements ApiService<IHistoryService> {
   serviceHandlerDefinition: ServiceHandlerDefinition<IHistoryService>;
