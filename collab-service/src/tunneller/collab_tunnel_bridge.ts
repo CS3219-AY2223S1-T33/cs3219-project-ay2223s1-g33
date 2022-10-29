@@ -243,10 +243,15 @@ class CollabTunnelBridge {
     this.call.write(makeDataResponse(createExecutePendingPackage()));
 
     const question = await getQuestionRedis(this.roomId, this.redis);
-    const stdin = deserializeQuestion(question).executionInput;
+    const qns = deserializeQuestion(question);
+    if (!qns) {
+      return;
+    }
+    const stdin = qns.executionInput;
     const runner = new ExecuteBridge(stdin, request.data, this.executeAgent);
-    const response = await runner.run();
-    console.log(response);
+    await runner.run((value: string) => {
+      console.log(value);
+    });
   }
 }
 
