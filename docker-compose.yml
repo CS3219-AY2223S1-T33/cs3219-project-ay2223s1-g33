@@ -18,7 +18,10 @@ services:
 
   user-service:
     platform: linux/amd64
-    env_file: config_env/user-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-email.env
 
     build:
       context: .
@@ -39,7 +42,9 @@ services:
       - "host.docker.internal:host-gateway"
 
   matching-service:
-    env_file: config_env/matching-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
 
     build:
       context: .
@@ -59,7 +64,9 @@ services:
       - "host.docker.internal:host-gateway"
 
   collab-service:
-    env_file: config_env/collab-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
 
     build:
       context: .
@@ -76,7 +83,9 @@ services:
       - /app/collab-service/node_modules
 
   question-service:
-    env_file: config_env/question-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
 
     build:
       context: .
@@ -98,7 +107,8 @@ services:
 
   matchmaker:
     platform: linux/amd64
-    env_file: config_env/matchmaker.env
+    env_file:
+      - config_env/route-map-internal.env
 
     build:
       context: ./matchmaker
@@ -108,7 +118,10 @@ services:
 
   session-service:
     platform: linux/amd64
-    env_file: config_env/session-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/session-service.env
 
     build:
       context: ./session-service
@@ -121,7 +134,9 @@ services:
 
   history-service:
     platform: linux/amd64
-    env_file: config_env/history-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
 
     build:
       context: .
@@ -135,7 +150,8 @@ services:
 
   gateway:
     platform: linux/amd64
-    env_file: config_env/gateway.env
+    env_file:
+      - config_env/route-map-gateway.env
 
     build:
       context: ./gateway
