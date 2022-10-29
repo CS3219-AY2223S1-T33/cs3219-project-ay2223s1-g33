@@ -1,4 +1,4 @@
-package main
+package prefix_router
 
 import (
 	"cs3219-project-ay2223s1-g33/gateway/util"

@@ -1,31 +1,30 @@
-package main
+package static
 
 import (
 	"cs3219-project-ay2223s1-g33/gateway/util"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
-type staticContentServer struct {
+type staticContentProxy struct {
 	downstreamServer string
 }
 
-func NewStaticContentServer(server string) util.PipeInput {
-	return &staticContentServer{
+func NewStaticContentProxy(server string) util.PipeInput {
+	return &staticContentProxy{
 		downstreamServer: server,
 	}
 }
 
-func (server *staticContentServer) Receive(httpCtx *util.HTTPContext) error {
+func (server *staticContentProxy) Receive(httpCtx *util.HTTPContext) error {
 	path := httpCtx.Request.URL.EscapedPath()
 
-	if server.shouldRewritePath(path) {
+	if shouldRewritePath(path) {
 		path = "/"
 	}
 
-	resp, err := http.Get(fmt.Sprintf("http://%s%s", server, path))
+	resp, err := http.Get(fmt.Sprintf("http://%s%s", server.downstreamServer, path))
 	if err != nil {
 		httpCtx.Response.WriteHeader(404)
 		return nil
@@ -41,10 +40,4 @@ func (server *staticContentServer) Receive(httpCtx *util.HTTPContext) error {
 	httpCtx.Response.WriteHeader(resp.StatusCode)
 	httpCtx.Response.Write(data)
 	return nil
-}
-
-func (server *staticContentServer) shouldRewritePath(path string) bool {
-	return !(strings.HasPrefix(path, "/static") ||
-		path == "/manifest.json" ||
-		path == "/favicon.ico")
 }

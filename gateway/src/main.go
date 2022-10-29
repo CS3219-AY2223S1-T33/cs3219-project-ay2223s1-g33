@@ -3,6 +3,8 @@ package main
 import (
 	"cs3219-project-ay2223s1-g33/gateway/auth"
 	"cs3219-project-ay2223s1-g33/gateway/grpc_adapter"
+	"cs3219-project-ay2223s1-g33/gateway/prefix_router"
+	"cs3219-project-ay2223s1-g33/gateway/static"
 	"cs3219-project-ay2223s1-g33/gateway/util"
 	"cs3219-project-ay2223s1-g33/gateway/wsproxy"
 	"errors"
@@ -32,7 +34,7 @@ func main() {
 }
 
 func run(config *GatewayConfiguration) error {
-	staticServeHandler := NewStaticContentServer(config.StaticServerUrl)
+	staticServeHandler := resolveStaticHandler(config)
 	proxyMiddleware := wsproxy.NewWSProxyMiddleware(config.CollabServiceUrl)
 
 	grpcMiddleware := grpc_adapter.NewGRPCMiddleware(
@@ -51,13 +53,23 @@ func run(config *GatewayConfiguration) error {
 	}
 	defer authMiddleware.Dispose()
 
-	prefixRouter := NewPrefixRouter("/api", authMiddleware, staticServeHandler)
+	prefixRouter := prefix_router.NewPrefixRouter("/api", authMiddleware, staticServeHandler)
 	authMiddleware.PipeTo(proxyMiddleware)
 	proxyMiddleware.PipeTo(grpcMiddleware)
 
 	handler := buildPipelineHandler(prefixRouter)
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.Port), handler)
+}
+
+func resolveStaticHandler(config *GatewayConfiguration) util.PipeInput {
+	if config.StaticServerUrl != "" {
+		return static.NewStaticContentProxy(config.StaticServerUrl)
+	} else if config.StaticFolderPath != "" {
+		return static.NewStaticContentServer(config.StaticFolderPath)
+	} else {
+		return static.NewStaticContentMissingEndpoint()
+	}
 }
 
 func buildPipelineHandler(input util.PipeInput) http.Handler {

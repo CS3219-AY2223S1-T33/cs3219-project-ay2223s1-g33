@@ -12,6 +12,7 @@ type GatewayConfiguration struct {
 	SessionServiceUrl  string
 	HistoryServiceUrl  string
 	StaticServerUrl    string
+	StaticFolderPath   string
 
 	Port int
 }
@@ -23,6 +24,7 @@ const (
 	envSessionService  = "SESSION_SERVICE_URL"
 	envHistoryService  = "HISTORY_SERVICE_URL"
 	envStaticServer    = "STATIC_SERVER"
+	envStaticFolder    = "STATIC_FOLDER"
 	envPort            = "GATEWAY_PORT"
 )
 
@@ -32,7 +34,8 @@ func loadConfig() *GatewayConfiguration {
 	collabServer := loadEnvVariableOrDefaultString(envCollabService, "localhost:4003")
 	sessionServer := loadEnvVariableOrDefaultString(envSessionService, "localhost:4100")
 	historyServer := loadEnvVariableOrDefaultString(envHistoryService, "localhost:4005")
-	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "localhost:8000")
+	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "")
+	staticFolder := loadEnvVariableOrDefaultString(envStaticFolder, "")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
 
 	return &GatewayConfiguration{
@@ -42,6 +45,7 @@ func loadConfig() *GatewayConfiguration {
 		SessionServiceUrl:  sessionServer,
 		HistoryServiceUrl:  historyServer,
 		StaticServerUrl:    staticServer,
+		StaticFolderPath:   staticFolder,
 		Port:               port,
 	}
 }
