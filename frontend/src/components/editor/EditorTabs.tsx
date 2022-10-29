@@ -36,7 +36,7 @@ function EditorTabs({ getQuestion, sendTextMessage }: Props) {
       <TabPanels>
         <TabPanel key="question_section" h="85vh" overflowY="scroll">
           {question ? (
-            <QuestionSection question={question} showCompletion />
+            <QuestionSection question={question} />
           ) : (
             <VStack align="center" spacing={6}>
               <Text>Error: No question received.</Text>
