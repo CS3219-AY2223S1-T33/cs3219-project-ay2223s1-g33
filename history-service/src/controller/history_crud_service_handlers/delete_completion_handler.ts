@@ -3,13 +3,13 @@ import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_serve
 import {
   DeleteCompletionRequest, DeleteCompletionResponse,
 } from '../../proto/history-crud-service';
-import { ICompletedStore, IStorage } from '../../storage/storage';
+import { ICompletionStore, IStorage } from '../../storage/storage';
 import { UserCrudServiceClient } from '../../proto/user-crud-service.grpc-client';
 import { QuestionServiceClient } from '../../proto/question-service.grpc-client';
 
 class DeleteCompletionHandler extends BaseHandler
   implements IApiHandler<DeleteCompletionRequest, DeleteCompletionResponse> {
-  completedStore: ICompletedStore;
+  completedStore: ICompletionStore;
 
   constructor(
     storage: IStorage,
@@ -28,7 +28,7 @@ class DeleteCompletionHandler extends BaseHandler
       return DeleteCompletionHandler.buildErrorResponse('Invalid completion information');
     }
 
-    if ((!request.completed.username || !request.completed.questionId)) {
+    if (!request.completed.username || !request.completed.questionId) {
       return DeleteCompletionHandler.buildErrorResponse('Missing completion information');
     }
 

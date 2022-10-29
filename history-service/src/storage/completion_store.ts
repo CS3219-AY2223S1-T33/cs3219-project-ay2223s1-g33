@@ -1,9 +1,9 @@
-import { ICompletedStore } from './storage';
+import { ICompletionStore } from './storage';
 import { IDatabase } from '../db';
 import { StoredCompletion } from '../model/completion_store_model';
 import HistoryCompletionEntity from '../db/history_completion_entity';
 
-class CompletionStore implements ICompletedStore {
+class CompletionStore implements ICompletionStore {
   private dbConn: IDatabase;
 
   constructor(dbConn: IDatabase) {

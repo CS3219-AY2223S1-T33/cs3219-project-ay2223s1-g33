@@ -3,7 +3,7 @@ import { StoredCompletion } from '../model/completion_store_model';
 
 declare interface IStorage {
   getAttemptStore(): IAttemptStore;
-  getCompletionStore(): ICompletedStore;
+  getCompletionStore(): ICompletionStore;
 }
 
 declare type AttemptStoreSearchResult = {
@@ -32,7 +32,7 @@ declare interface IAttemptStore {
   removeHistoryByQuestionId(questionId: number): Promise<void>;
 }
 
-declare interface ICompletedStore {
+declare interface ICompletionStore {
   addCompletion(completionEntity: StoredCompletion): Promise<StoredCompletion>;
   getCompletion(
     userId: number,
@@ -48,5 +48,5 @@ export {
   IStorage,
   IAttemptStore,
   AttemptStoreSearchResult,
-  ICompletedStore,
+  ICompletionStore,
 };

@@ -17,7 +17,8 @@ import {
   testUser,
 } from '../test_util';
 import {
-  CreateCompletionRequest, CreateCompletionResponse,
+  CreateCompletionRequest,
+  CreateCompletionResponse,
   DeleteCompletionRequest,
   DeleteCompletionResponse,
   GetCompletionRequest,
@@ -185,6 +186,46 @@ describe('Set Completion Submission Handler', () => {
     ApiRequest<SetHistoryCompletionRequest> => ({
       request: {
         completed: undefined,
+      },
+      headers: {},
+    });
+    const request = makeUndefinedRequest();
+    const response = await handler.handle(request);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.completed)
+      .toBeUndefined();
+  });
+
+  test('Bad Request - Missing username', async () => {
+    const makeUndefinedRequest = ():
+    ApiRequest<SetHistoryCompletionRequest> => ({
+      request: {
+        completed: {
+          username: '',
+          questionId: testCompletion.questionId,
+        },
+      },
+      headers: {},
+    });
+    const request = makeUndefinedRequest();
+    const response = await handler.handle(request);
+    expect(response.response.errorMessage)
+      .not
+      .toBe('');
+    expect(response.response.completed)
+      .toBeUndefined();
+  });
+
+  test('Bad Request - Missing questionId', async () => {
+    const makeUndefinedRequest = ():
+    ApiRequest<SetHistoryCompletionRequest> => ({
+      request: {
+        completed: {
+          username: testCompletion.username,
+          questionId: 0,
+        },
       },
       headers: {},
     });

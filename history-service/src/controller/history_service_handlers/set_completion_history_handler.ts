@@ -34,6 +34,10 @@ implements IApiHandler<SetHistoryCompletionRequest, SetHistoryCompletionResponse
       return SetHistoryCompletionHandler.buildErrorResponse('Invalid completion information');
     }
 
+    if (!request.completed.username || !request.completed.questionId) {
+      return SetHistoryCompletionHandler.buildErrorResponse('Missing completion information');
+    }
+
     // Check if completion exist
     const crudGetRequest: GetCompletionRequest = {
       username: request.completed.username,

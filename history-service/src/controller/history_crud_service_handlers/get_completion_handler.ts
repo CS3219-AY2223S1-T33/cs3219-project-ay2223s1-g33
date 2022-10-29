@@ -1,5 +1,5 @@
 import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
-import { ICompletedStore, IStorage } from '../../storage/storage';
+import { ICompletionStore, IStorage } from '../../storage/storage';
 import {
   convertToProtoCompletion,
   StoredCompletion,
@@ -11,7 +11,7 @@ import { QuestionServiceClient } from '../../proto/question-service.grpc-client'
 
 class GetCompletionHandler extends BaseHandler
   implements IApiHandler<GetCompletionRequest, GetCompletionResponse> {
-  completedStore: ICompletedStore;
+  completedStore: ICompletionStore;
 
   constructor(
     storage: IStorage,

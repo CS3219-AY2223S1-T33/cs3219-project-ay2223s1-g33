@@ -81,7 +81,10 @@ function Session() {
         `${wsProtocol}://${window.location.host}/api/`,
         "roomws",
         yd,
-        { params, disableBc: true }
+        {
+          params,
+          disableBc: true,
+        }
       );
 
       ws.on("status", (joinStatus: Status) => {
@@ -229,6 +232,7 @@ function Session() {
       return;
     }
 
+    // console.log("Temp suppress");
     const { questionId } = question;
     const completed: HistoryCompletion = { questionId, username };
     const request: SetHistoryCompletionRequest = { completed };

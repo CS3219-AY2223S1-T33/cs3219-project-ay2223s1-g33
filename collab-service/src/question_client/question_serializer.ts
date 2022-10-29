@@ -4,8 +4,13 @@ function serializeQuestion(question: Question): string {
   return JSON.stringify(question);
 }
 
-function deserializeQuestion(question: string): Question {
-  return JSON.parse(question);
+function deserializeQuestion(question: string): Question | undefined {
+  try {
+    const qns: Question = JSON.parse(question);
+    return qns;
+  } catch (err) {
+    return undefined;
+  }
 }
 
 export {

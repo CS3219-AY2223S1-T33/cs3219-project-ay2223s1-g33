@@ -200,7 +200,11 @@ class CollabTunnelBridge {
    */
   private async handleRetrieveQuestionRequest() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
-    this.questionId = deserializeQuestion(finalQuestion).questionId;
+    const qns = deserializeQuestion(finalQuestion);
+    if (!qns) {
+      return;
+    }
+    this.questionId = qns.questionId;
     let isCompleted = false;
     if (this.questionId) {
       isCompleted = await this.historyAgent.getHasBeenCompleted(this.username, this.questionId);
