@@ -11,23 +11,28 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(apiRequest: ApiRequest<GetQuestionRequest>):
-  Promise<ApiResponse<GetQuestionResponse>> {
+  async handle(
+    apiRequest: ApiRequest<GetQuestionRequest>
+  ): Promise<ApiResponse<GetQuestionResponse>> {
     const { request } = apiRequest;
 
     if (!request.question) {
       return GetQuestionHandler.buildErrorResponse('Malformed request');
     }
 
-    let questionResult : StoredQuestion | undefined;
-
-    if (request.question.difficulty) {
-      questionResult = await this.questionStore
-        .getRandomQuestionByDifficulty(request.question.difficulty);
-    } else if (request.question.name !== '') {
-      questionResult = await this.questionStore.getQuestionByName(request.question.name);
-    } else if (request.question.questionId > 0) {
-      questionResult = await this.questionStore.getQuestion(request.question.questionId);
+    let questionResult: StoredQuestion | undefined;
+    try {
+      if (request.question.questionId > 0) {
+        questionResult = await this.questionStore.getQuestion(request.question.questionId);
+      } else if (request.question.name !== '') {
+        questionResult = await this.questionStore.getQuestionByName(request.question.name);
+      } else if (request.question.difficulty) {
+        questionResult = await this.questionStore.getRandomQuestionByDifficulty(
+          request.question.difficulty
+        );
+      }
+    } catch {
+      return GetQuestionHandler.buildErrorResponse('Database Error');
     }
 
     if (!questionResult) {
