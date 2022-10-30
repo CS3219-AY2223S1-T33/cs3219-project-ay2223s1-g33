@@ -26,6 +26,7 @@ class QuestionAgent implements IQuestionAgent {
       name: '',
       solution: '',
       content: '',
+      executionInput: '',
     };
 
     return new Promise<Question | undefined>((resolve, reject) => {
@@ -50,9 +51,7 @@ class QuestionAgent implements IQuestionAgent {
   }
 }
 
-function createQuestionService(
-  questionURL: string,
-): IQuestionAgent {
+function createQuestionService(questionURL: string): IQuestionAgent {
   return new QuestionAgent(questionURL);
 }
 

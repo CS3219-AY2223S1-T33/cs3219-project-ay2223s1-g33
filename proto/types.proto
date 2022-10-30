@@ -33,6 +33,7 @@ message Question {
   QuestionDifficulty difficulty = 3;
   string content = 4;
   string solution = 5;
+  string executionInput = 6;
 }
 
 message HistoryAttempt {

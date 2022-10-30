@@ -1,6 +1,6 @@
 import { Question } from '../proto/types';
 
-declare type StoredQuestion = Omit<Question, 'questionId'> & { questionId?: number };
+declare type StoredQuestion = Question;
 
 export {
   // eslint-disable-next-line import/prefer-default-export
