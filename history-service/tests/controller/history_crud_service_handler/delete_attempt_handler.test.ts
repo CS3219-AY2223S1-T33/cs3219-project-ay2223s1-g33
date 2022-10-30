@@ -17,6 +17,7 @@ describe('Delete Attempt Handler', () => {
   let mockAttemptStorage = makeMockAttemptStorage();
   let mockStorage: IStorage = {
     getAttemptStore: jest.fn(() => mockAttemptStorage),
+    getCompletionStore: jest.fn(),
   };
   let handler = new DeleteAttemptHandler(mockStorage);
 
@@ -25,6 +26,7 @@ describe('Delete Attempt Handler', () => {
     mockAttemptStorage = makeMockAttemptStorage();
     mockStorage = {
       getAttemptStore: jest.fn(() => mockAttemptStorage),
+      getCompletionStore: jest.fn(),
     };
     handler = new DeleteAttemptHandler(mockStorage);
   });

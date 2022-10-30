@@ -44,3 +44,8 @@ message HistoryAttempt {
   repeated string users = 5;
   string submission = 6;
 }
+
+message HistoryCompletion {
+  string username = 1;
+  uint64 question_id = 2;
+}

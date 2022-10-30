@@ -1,8 +1,8 @@
 import { JoinQueueErrorCode, JoinQueueRequest, JoinQueueResponse } from '../../proto/matching-service';
 import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_server_types';
 import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
-
-const gatewayHeaderUsername = 'grpc-x-bearer-username';
+import GatewayConstants from '../../utils/gateway_constants';
+import { safeReadFirstHeader } from '../controller_utils';
 
 class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueResponse> {
   redisAdapter: IRedisMatchingAdapter;
@@ -20,14 +20,17 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
       );
     }
 
-    if (!(gatewayHeaderUsername in request.headers)) {
+    const username = safeReadFirstHeader(
+      request.headers,
+      GatewayConstants.GATEWAY_HEADER_USERNAME,
+    );
+
+    if (!username || username.length === 0) {
       return JoinQueueHandler.buildResponse(
         JoinQueueErrorCode.JOIN_QUEUE_INTERNAL_ERROR,
         'Bad request from gateway',
       );
     }
-
-    const username = request.headers[gatewayHeaderUsername][0];
 
     const isQueueable = await this.redisAdapter.lockIfUnset(username);
     if (!isQueueable) {

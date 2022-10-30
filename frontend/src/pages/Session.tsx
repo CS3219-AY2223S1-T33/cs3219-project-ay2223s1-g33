@@ -13,6 +13,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { DownloadIcon } from "@chakra-ui/icons";
+import axios from "axios";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -25,19 +26,24 @@ import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
 import { Chat, Language } from "../types";
-import { Question } from "../proto/types";
+import { HistoryCompletion, Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
 import { addMessage, clearChat } from "../feature/chat/chatSlice";
+import {
+  SetHistoryCompletionRequest,
+  SetHistoryCompletionResponse,
+} from "../proto/history-service";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
 type ErrorMessage = { errorMsg: string };
-type QuestionMessage = { question: string };
+type QuestionMessage = { question: string; isCompleted: boolean };
 
 let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const nickname = useSelector(selectUser)?.nickname;
+  const username = useSelector(selectUser)?.username;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
@@ -63,6 +69,8 @@ function Session() {
   const [question, setQuestion] = useState<Question | undefined>();
   const [isEditorLocked, setIsEditorLocked] = useBoolean(false);
   const [code, setCode] = useState("");
+  // eslint-disable-next-line
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -73,7 +81,10 @@ function Session() {
         `${wsProtocol}://${window.location.host}/api/`,
         "roomws",
         yd,
-        { params, disableBc: true }
+        {
+          params,
+          disableBc: true,
+        }
       );
 
       ws.on("status", (joinStatus: Status) => {
@@ -119,9 +130,11 @@ function Session() {
       });
 
       ws.on("question_get", (q: QuestionMessage) => {
-        const questionObj: Question = Question.fromJsonString(q.question);
-        toast.sendInfoMessage("Question loaded");
+        const { question: qStr, isCompleted: ic } = q;
+        const questionObj: Question = Question.fromJsonString(qStr);
         setQuestion(questionObj);
+        setIsCompleted(ic);
+        toast.sendInfoMessage("Question loaded");
       });
 
       ws.on("savecode_send", () => {
@@ -214,6 +227,35 @@ function Session() {
     provider.sendCodeSnapshot(code, selectedLang);
   };
 
+  const toggleCompletionHandler = () => {
+    if (!question || !username) {
+      return;
+    }
+
+    // console.log("Temp suppress");
+    const { questionId } = question;
+    const completed: HistoryCompletion = { questionId, username };
+    const request: SetHistoryCompletionRequest = { completed };
+    axios
+      .post<SetHistoryCompletionResponse>(
+        "/api/user/history/completion",
+        request,
+        { withCredentials: true }
+      )
+      .then((res) => {
+        const { errorMessage } = res.data;
+
+        if (errorMessage !== "") {
+          throw new Error(errorMessage);
+        }
+
+        setIsCompleted((prev) => !prev);
+      })
+      .catch((err) => {
+        toast.sendErrorMessage(err.message);
+      });
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -236,9 +278,11 @@ function Session() {
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs
+          isCompleted={isCompleted}
           question={question}
           getQuestion={getQuestionHandler}
           sendTextMessage={sendTextMessageHandler}
+          onToggle={toggleCompletionHandler}
         />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
@@ -278,6 +322,9 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
+              {/* <Button>
+                Mark A
+              </Button> */}
               <Button
                 onClick={sendCodeSnapshotHandler}
                 isDisabled={isEditorLocked}
