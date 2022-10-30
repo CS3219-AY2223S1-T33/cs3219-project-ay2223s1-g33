@@ -38,7 +38,7 @@ describe('Create Attempt Handler', () => {
       testDifficulty1,
       testContent1,
       testSolution1,
-      testExecutionInput1
+      testExecutionInput1,
     );
     mockStore.addQuestion.mockReturnValue(Promise.resolve(storedQuestionResult));
     const handler = new CreateQuestionHandler(storage);
@@ -50,8 +50,8 @@ describe('Create Attempt Handler', () => {
         testDifficulty1,
         testContent1,
         testSolution1,
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
     const response = await handler.handle(request);
 
@@ -78,7 +78,7 @@ describe('Create Attempt Handler', () => {
       testDifficulty1,
       testContent1,
       testSolution1,
-      testExecutionInput1
+      testExecutionInput1,
     );
     mockStore.addQuestion.mockReturnValue(Promise.resolve(storedQuestionResult));
     const handler = new CreateQuestionHandler(storage);
@@ -90,8 +90,8 @@ describe('Create Attempt Handler', () => {
         testDifficulty1,
         testContent1,
         testSolution1,
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -105,8 +105,8 @@ describe('Create Attempt Handler', () => {
         0,
         testContent1,
         testSolution1,
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -120,8 +120,8 @@ describe('Create Attempt Handler', () => {
         -1,
         testContent1,
         testSolution1,
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -135,8 +135,8 @@ describe('Create Attempt Handler', () => {
         testDifficulty1,
         '',
         testSolution1,
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -150,8 +150,8 @@ describe('Create Attempt Handler', () => {
         testDifficulty1,
         testContent1,
         '',
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -159,7 +159,7 @@ describe('Create Attempt Handler', () => {
     expect(mockStore.addQuestion.mock.calls.length).toBe(0);
 
     request = makeRequest(
-      makeTestQuestion(testQuestionId1, testName1, testDifficulty1, testContent1, testSolution1, '')
+      makeTestQuestion(testQuestionId1, testName1, testDifficulty1, testContent1, testSolution1, ''),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -185,8 +185,8 @@ describe('Create Attempt Handler', () => {
         testDifficulty1,
         testContent1,
         testSolution1,
-        testExecutionInput1
-      )
+        testExecutionInput1,
+      ),
     );
 
     const response = await handler.handle(request);

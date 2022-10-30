@@ -38,7 +38,7 @@ describe('Get Question Handler', () => {
       testDifficulty1,
       testContent1,
       testSolution1,
-      testExecutionInput1
+      testExecutionInput1,
     );
     mockStore.getQuestion.mockReturnValue(storedQuestionResult);
     mockStore.getQuestionByName.mockReturnValue(storedQuestionResult);
@@ -79,8 +79,8 @@ describe('Get Question Handler', () => {
 
     const handler = new GetQuestionHandler(storage);
 
-    let request = makeRequest(makeTestQuestion(-1, '', -1, '', '', ''));
-    let response = await handler.handle(request);
+    const request = makeRequest(makeTestQuestion(-1, '', -1, '', '', ''));
+    const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
     expect(response.response.question).toBeUndefined();
   });

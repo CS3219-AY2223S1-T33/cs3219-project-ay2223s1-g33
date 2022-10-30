@@ -40,7 +40,7 @@ describe('Edit User Handler', () => {
       testDifficulty2,
       testContent2,
       testSolution2,
-      testExecutionInput2
+      testExecutionInput2,
     );
     mockStore.replaceQuestion.mockReturnValue(Promise.resolve(storedQuestionResult));
     const handler = new EditQuestionHandler(storage);
@@ -52,8 +52,8 @@ describe('Edit User Handler', () => {
         testDifficulty2,
         testContent2,
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     const response = await handler.handle(request);
 
@@ -82,7 +82,7 @@ describe('Edit User Handler', () => {
       testDifficulty2,
       testContent2,
       testSolution2,
-      testExecutionInput2
+      testExecutionInput2,
     );
     mockStore.replaceQuestion.mockReturnValue(Promise.resolve(storedQuestionResult));
     const handler = new EditQuestionHandler(storage);
@@ -94,8 +94,8 @@ describe('Edit User Handler', () => {
         testDifficulty2,
         testContent2,
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     let response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -109,8 +109,8 @@ describe('Edit User Handler', () => {
         testDifficulty2,
         testContent2,
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -124,8 +124,8 @@ describe('Edit User Handler', () => {
         0,
         testContent2,
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -139,8 +139,8 @@ describe('Edit User Handler', () => {
         -1,
         testContent2,
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -154,8 +154,8 @@ describe('Edit User Handler', () => {
         testDifficulty2,
         '',
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -174,8 +174,8 @@ describe('Edit User Handler', () => {
         testDifficulty2,
         testContent2,
         '',
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -188,7 +188,7 @@ describe('Edit User Handler', () => {
     expect(mockStore.replaceQuestion.mock.calls.length).toBe(0);
 
     request = makeRequest(
-      makeTestQuestion(testQuestionId2, testName2, testDifficulty2, testContent2, testSolution2, '')
+      makeTestQuestion(testQuestionId2, testName2, testDifficulty2, testContent2, testSolution2, ''),
     );
     response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();
@@ -215,8 +215,8 @@ describe('Edit User Handler', () => {
         testDifficulty2,
         testContent2,
         testSolution2,
-        testExecutionInput2
-      )
+        testExecutionInput2,
+      ),
     );
     const response = await handler.handle(request);
     expect(response.response.errorMessage).toBeTruthy();

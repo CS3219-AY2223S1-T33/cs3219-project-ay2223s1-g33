@@ -12,7 +12,7 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
   }
 
   async handle(
-    apiRequest: ApiRequest<GetQuestionRequest>
+    apiRequest: ApiRequest<GetQuestionRequest>,
   ): Promise<ApiResponse<GetQuestionResponse>> {
     const { request } = apiRequest;
 
@@ -28,7 +28,7 @@ class GetQuestionHandler implements IApiHandler<GetQuestionRequest, GetQuestionR
         questionResult = await this.questionStore.getQuestionByName(request.question.name);
       } else if (request.question.difficulty) {
         questionResult = await this.questionStore.getRandomQuestionByDifficulty(
-          request.question.difficulty
+          request.question.difficulty,
         );
       }
     } catch {
