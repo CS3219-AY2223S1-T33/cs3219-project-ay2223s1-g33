@@ -1,4 +1,12 @@
-import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
+import {
+  Flex,
+  Button,
+  Text,
+  useDisclosure,
+  Grid,
+  // Box,
+  Code
+} from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
@@ -58,9 +66,9 @@ function Session() {
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
   const [code, setCode] = useState("");
-  // eslint-disable-next-line
-  const [isCompleted, setIsCompleted] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
+  // eslint-disable-next-line
+  const [executionOutput, setExecutionOutput] = useState("");
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -146,15 +154,15 @@ function Session() {
         dispatch(addMessage(e));
       });
 
-      // ws.on("execute_reply", (m: {state: string}) => {
-      //   const {state} = m;
-      //   // Change state for loading button
-      //   if (state === "pending") {
-      //     return;
-      //   } else if (state === "complete") {
-      //     setIsExecuting(false)
-      //   }
-      // })
+      ws.on("execute_pending", () => {
+        setIsExecuting(true);
+      });
+
+      ws.on("execute_complete", (o: { output: string }) => {
+        const { output } = o;
+        console.log(output);
+        // Change the error box here
+      });
 
       return ws;
     };
@@ -231,7 +239,7 @@ function Session() {
       return;
     }
 
-    // provider.sendExecutionRequest()
+    provider.sendExecutionRequest(code, selectedLang);
     setIsExecuting(true);
   };
 
@@ -292,8 +300,9 @@ function Session() {
           )}
           {/* Test case window */}
           <Grid templateRows="1fr 3fr 1fr">
-            <Text fontSize="lg">Testcases</Text>
-            <Box>Content</Box>
+            <Text fontSize="lg">Output</Text>
+            {/* <Box>Content</Box> */}
+            <Code>{executionOutput}</Code>
             <Flex direction="row-reverse" px={12} pb={4}>
               <Button onClick={executeCodeHandler} isLoading={isExecuting}>
                 Execute Code

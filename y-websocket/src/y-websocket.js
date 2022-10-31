@@ -111,11 +111,12 @@ messageHandlers[TEXTMSG_SEND] = (_encoder, decoder, provider, _emitSynced, _mess
 };
 
 messageHandlers[EXECUTE_PENDING] = (_encoding, decoder, provider, _emitSynced, _messageType) => {
-	provider.emit("execute_reply", [{state: "pending"}])
+	provider.emit("execute_pending", [])
 }
 
 messageHandlers[EXECUTE_COMPLETE] = (_encoding, decoder, provider, _emitSynced, _messageType) => {
-	provider.emit("execute_reply", [{state: "complete"}])
+	const output = decoding.readVarString(decoder);
+	provider.emit("execute_complete", [{ output }])
 }
 
 // @todo - this should depend on awareness.outdatedTime
