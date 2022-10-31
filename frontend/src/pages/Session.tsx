@@ -1,19 +1,10 @@
-import {
-  Flex,
-  Button,
-  Text,
-  useDisclosure,
-  Box,
-  Grid,
-  useBoolean,
-} from "@chakra-ui/react";
+import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { DownloadIcon } from "@chakra-ui/icons";
-import axios from "axios";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -26,13 +17,20 @@ import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
 import { Chat, Language } from "../types";
-import { HistoryCompletion, Question } from "../proto/types";
+import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-import { addMessage, clearChat } from "../feature/chat/chatSlice";
+// import { addMessage, clearChat } from "../feature/chat/chatSlice";
 import {
-  SetHistoryCompletionRequest,
-  SetHistoryCompletionResponse,
-} from "../proto/history-service";
+  addMessage,
+  changeEditorLocked,
+  changeIsCompleted,
+  changeLanguage,
+  changeWSStatus,
+  reset,
+  selectIsEditorLocked,
+  selectSelectedLanguage,
+  setQuestion
+} from "../feature/session/sessionSlice";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -43,19 +41,14 @@ let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const nickname = useSelector(selectUser)?.nickname;
-  const username = useSelector(selectUser)?.username;
+  const wsStatus = useSelector((state: RootState) => state.session.wsStatus);
+  const isEditorLocked = useSelector(selectIsEditorLocked);
+  const selectedLang = useSelector(selectSelectedLanguage);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const {
-    isOpen: isLeaveModalOpen,
-    onOpen: onOpenLeaveModal,
-    onClose: onCloseLeaveModal,
-  } = useDisclosure();
-  const {
-    isOpen: isDisconnectModalOpen,
-    onOpen: onOpenDisconnectModal,
-    onClose: onCloseDisconnectModal,
-  } = useDisclosure();
+  const leaveModalDisclosure = useDisclosure();
+  const disconnectModalDisclosure = useDisclosure();
   const toast = useFixedToast();
 
   // YJS Settings
@@ -64,13 +57,7 @@ function Session() {
   const [yText, setYText] = useState<Y.Text>();
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
-  const [wsStatus, setWsStatus] = useState("Not Connected");
-  const [selectedLang, setSelectedLang] = useState<Language>("javascript");
-  const [question, setQuestion] = useState<Question | undefined>();
-  const [isEditorLocked, setIsEditorLocked] = useBoolean(false);
   const [code, setCode] = useState("");
-  // eslint-disable-next-line
-  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -83,7 +70,7 @@ function Session() {
         yd,
         {
           params,
-          disableBc: true,
+          disableBc: true
         }
       );
 
@@ -91,55 +78,55 @@ function Session() {
         const { status } = joinStatus;
         switch (status) {
           case "connected":
-            setWsStatus("Connected");
+            dispatch(changeWSStatus({ status: "Connected" }));
             break;
           case "connecting":
             if (wsStatus !== "Disconnected") {
               return;
             }
-            setWsStatus("Connecting");
+            dispatch(changeWSStatus({ status: "Connecting" }));
             break;
           default:
-            setWsStatus("Disconnected");
-            onOpenDisconnectModal();
+            dispatch(changeWSStatus({ status: "Disconnected" }));
+            disconnectModalDisclosure.onOpen();
             break;
         }
       });
 
       // eslint-disable-next-line
       ws.on("terminate_with_error", (error: ErrorMessage) => {
-        setWsStatus("Disconnected");
-        onOpenDisconnectModal();
+        dispatch(changeWSStatus({ status: "Disconnected" }));
+        disconnectModalDisclosure.onOpen();
       });
 
       ws.on("user_join", (joinedNickname: Nickname) => {
         toast.sendSuccessMessage("", {
-          title: `${joinedNickname.nickname} has joined the room!`,
+          title: `${joinedNickname.nickname} has joined the room!`
         });
       });
 
       ws.on("user_leave", (leftNickname: Nickname) => {
         toast.sendAlertMessage("", {
-          title: `${leftNickname.nickname} has left the room.`,
+          title: `${leftNickname.nickname} has left the room.`
         });
       });
 
       ws.on("lang_change", (languageChange: { language: Language }) => {
         const { language } = languageChange;
-        setSelectedLang(language);
+        dispatch(changeLanguage({ lang: language }));
       });
 
       ws.on("question_get", (q: QuestionMessage) => {
         const { question: qStr, isCompleted: ic } = q;
         const questionObj: Question = Question.fromJsonString(qStr);
-        setQuestion(questionObj);
-        setIsCompleted(ic);
+        dispatch(setQuestion({ question: questionObj }));
+        dispatch(changeIsCompleted({ isComplete: ic }));
         toast.sendInfoMessage("Question loaded");
       });
 
       ws.on("savecode_send", () => {
         toast.sendInfoMessage("Your partner is saving this attempt");
-        setIsEditorLocked.on();
+        dispatch(changeEditorLocked({ editorLocked: true }));
       });
 
       ws.on("savecode_ack", (e: ErrorMessage) => {
@@ -149,7 +136,7 @@ function Session() {
         } else {
           toast.sendErrorMessage(errorMsg);
         }
-        setIsEditorLocked.off();
+        dispatch(changeEditorLocked({ editorLocked: false }));
       });
 
       ws.on("message_receive", (e: Chat) => {
@@ -163,7 +150,7 @@ function Session() {
       // Yjs initialisation
       const tempyDoc = new Y.Doc();
       const params: { [x: string]: string } = {
-        room: roomToken === undefined ? "" : roomToken,
+        room: roomToken === undefined ? "" : roomToken
       };
 
       const tempprovider = buildWSProvider(tempyDoc, params);
@@ -184,7 +171,7 @@ function Session() {
   const changeLangHandler = (e: ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
     provider?.sendLanguageChange(newLang);
-    setSelectedLang(newLang as Language);
+    dispatch(changeLanguage({ lang: newLang as Language }));
   };
 
   const leaveSessionHandler = () => {
@@ -192,8 +179,7 @@ function Session() {
     yDoc?.destroy();
     // Clears the room session token
     dispatch(leaveRoom());
-    // Clears the session chat
-    dispatch(clearChat());
+    dispatch(reset());
 
     // Just in case when use joins a brand new session
     isInit = false;
@@ -223,37 +209,8 @@ function Session() {
     }
 
     toast.sendInfoMessage("Saving code");
-    setIsEditorLocked.on();
+    dispatch(changeEditorLocked({ editorLocked: true }));
     provider.sendCodeSnapshot(code, selectedLang);
-  };
-
-  const toggleCompletionHandler = () => {
-    if (!question || !username) {
-      return;
-    }
-
-    // console.log("Temp suppress");
-    const { questionId } = question;
-    const completed: HistoryCompletion = { questionId, username };
-    const request: SetHistoryCompletionRequest = { completed };
-    axios
-      .post<SetHistoryCompletionResponse>(
-        "/api/user/history/completion",
-        request,
-        { withCredentials: true }
-      )
-      .then((res) => {
-        const { errorMessage } = res.data;
-
-        if (errorMessage !== "") {
-          throw new Error(errorMessage);
-        }
-
-        setIsCompleted((prev) => !prev);
-      })
-      .catch((err) => {
-        toast.sendErrorMessage(err.message);
-      });
   };
 
   if (!roomToken || !nickname) {
@@ -274,15 +231,12 @@ function Session() {
   return (
     <>
       {/* Navbar for session */}
-      <SessionNavbar onOpen={onOpenLeaveModal} status={wsStatus} />
+      <SessionNavbar onOpen={leaveModalDisclosure.onOpen} status={wsStatus} />
 
       <Grid templateColumns="1fr 2fr" mx="auto">
         <EditorTabs
-          isCompleted={isCompleted}
-          question={question}
           getQuestion={getQuestionHandler}
           sendTextMessage={sendTextMessageHandler}
-          onToggle={toggleCompletionHandler}
         />
         {/* Code Editor */}
         <Grid templateRows="10% 7fr auto" h="91vh">
@@ -295,7 +249,6 @@ function Session() {
             py={2}
           >
             <EditorLanguage
-              selectedLang={selectedLang}
               isDisabled={wsStatus !== "Connected"}
               changeLangHandler={changeLangHandler}
             />
@@ -312,9 +265,7 @@ function Session() {
               provider={provider}
               undoManager={undoManager}
               nickname={nickname}
-              selectedLang={selectedLang}
               onCodeUpdate={updateCodeHandler}
-              isEditable={!isEditorLocked}
             />
           )}
           {/* Test case window */}
@@ -322,9 +273,6 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
-              {/* <Button>
-                Mark A
-              </Button> */}
               <Button
                 onClick={sendCodeSnapshotHandler}
                 isDisabled={isEditorLocked}
@@ -338,13 +286,13 @@ function Session() {
 
       {/* Modals */}
       <LeaveModal
-        isOpen={isLeaveModalOpen}
-        onClose={onCloseLeaveModal}
+        isOpen={leaveModalDisclosure.isOpen}
+        onClose={leaveModalDisclosure.onClose}
         leaveSessionHandler={leaveSessionHandler}
       />
       <DisconnectModal
-        isOpen={isDisconnectModalOpen}
-        onClose={onCloseDisconnectModal}
+        isOpen={disconnectModalDisclosure.isOpen}
+        onClose={disconnectModalDisclosure.onClose}
         leaveSessionHandler={leaveSessionHandler}
       />
     </>

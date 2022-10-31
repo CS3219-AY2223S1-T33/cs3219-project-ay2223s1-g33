@@ -2,8 +2,8 @@ import { Button, Grid, Input } from "@chakra-ui/react";
 import { MdSend } from "react-icons/md";
 import React, { ChangeEvent, KeyboardEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage } from "../../feature/chat/chatSlice";
 import { RootState } from "../../app/store";
+import { addMessage } from "../../feature/session/sessionSlice";
 
 type Props = {
   sendTextMessage: (content: string) => void;
