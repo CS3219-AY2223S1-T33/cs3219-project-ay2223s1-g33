@@ -251,7 +251,6 @@ class CollabTunnelBridge {
     const stdin = qns.executionInput;
     const runner = new ExecuteBridge(stdin, request.data, this.executeAgent);
     await runner.run(async (value: string) => {
-      console.log(value);
       // Write to self & other user
       const completeData = createExecuteCompletePackage(value);
       await this.pubsub.pushMessage(createDataMessage(
