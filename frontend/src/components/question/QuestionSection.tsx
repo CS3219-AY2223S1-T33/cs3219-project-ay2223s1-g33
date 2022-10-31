@@ -1,12 +1,4 @@
-import {
-  // Badge,
-  Box,
-  // Button,
-  Divider,
-  Heading,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Divider, Heading, Text, VStack } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
 import CompletionStatus from "./CompletionStatus";
@@ -14,19 +6,12 @@ import CompletionStatus from "./CompletionStatus";
 import ConstraintsList from "./ConstraintsList";
 import {
   QuestionDifficulty,
-  Question,
+  Question
   // HistoryCompletion,
 } from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
 import { RootState } from "../../app/store";
-// import { selectUser } from "../../feature/user/userSlice";
-// import {
-//   SetHistoryCompletionRequest,
-//   SetHistoryCompletionResponse,
-// } from "../../proto/history-service";
-// import useFixedToast from "../../utils/hooks/useFixedToast";
-// import { changeIsCompleted } from "../../feature/session/sessionSlice";
 import { CompletionConfig } from "../../types";
 
 type Props = {
@@ -36,13 +21,13 @@ type Props = {
 const COMPLETED: CompletionConfig = {
   colorScheme: "green",
   badgeText: "COMPLETED",
-  btnText: "Not Complete",
+  btnText: "Not Complete"
 };
 
 const NOT_COMPLETED: CompletionConfig = {
   colorScheme: "gray",
   badgeText: "NOT COMPLETED",
-  btnText: "Complete",
+  btnText: "Complete"
 };
 
 function QuestionSection({ question }: Props) {
