@@ -58,6 +58,9 @@ function Session() {
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
   const [code, setCode] = useState("");
+  // eslint-disable-next-line
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -143,6 +146,16 @@ function Session() {
         dispatch(addMessage(e));
       });
 
+      // ws.on("execute_reply", (m: {state: string}) => {
+      //   const {state} = m;
+      //   // Change state for loading button
+      //   if (state === "pending") {
+      //     return;
+      //   } else if (state === "complete") {
+      //     setIsExecuting(false)
+      //   }
+      // })
+
       return ws;
     };
 
@@ -213,6 +226,15 @@ function Session() {
     provider.sendCodeSnapshot(code, selectedLang);
   };
 
+  const executeCodeHandler = () => {
+    if (!provider) {
+      return;
+    }
+
+    // provider.sendExecutionRequest()
+    setIsExecuting(true);
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -273,6 +295,9 @@ function Session() {
             <Text fontSize="lg">Testcases</Text>
             <Box>Content</Box>
             <Flex direction="row-reverse" px={12} pb={4}>
+              <Button onClick={executeCodeHandler} isLoading={isExecuting}>
+                Execute Code
+              </Button>
               <Button
                 onClick={sendCodeSnapshotHandler}
                 isDisabled={isEditorLocked}

@@ -110,6 +110,14 @@ messageHandlers[TEXTMSG_SEND] = (_encoder, decoder, provider, _emitSynced, _mess
 	provider.emit("message_receive", [{ from, message }]);
 };
 
+messageHandlers[EXECUTE_PENDING] = (_encoding, decoder, provider, _emitSynced, _messageType) => {
+	provider.emit("execute_reply", [{state: "pending"}])
+}
+
+messageHandlers[EXECUTE_COMPLETE] = (_encoding, decoder, provider, _emitSynced, _messageType) => {
+	provider.emit("execute_reply", [{state: "complete"}])
+}
+
 // @todo - this should depend on awareness.outdatedTime
 const messageReconnectTimeout = 30000;
 
@@ -531,6 +539,14 @@ export class WebsocketProvider extends Observable {
 		const encoder = encoding.createEncoder();
 		encoding.writeUint8(encoder, TEXTMSG_SEND);
 		encoding.writeVarString(encoder, from);
+		encoding.writeVarString(encoder, content);
+		broadcastMessage(this, encoding.toUint8Array(encoder));
+	}
+
+	sendExecutionRequest(/**@type {string} */ content, /**@type {string} */ language) {
+		const encoder = encoding.createEncoder();
+		encoding.writeUint8(encoder, EXECUTE_REQ);
+		encoding.writeVarString(encoder, language)
 		encoding.writeVarString(encoder, content);
 		broadcastMessage(this, encoding.toUint8Array(encoder));
 	}
