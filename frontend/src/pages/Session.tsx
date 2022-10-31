@@ -67,7 +67,9 @@ function Session() {
   const [code, setCode] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
   // eslint-disable-next-line
-  const [executionOutput, setExecutionOutput] = useState("");
+  const [executionOutput, setExecutionOutput] = useState(
+    "Hello\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWorld"
+  );
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -268,7 +270,7 @@ function Session() {
           sendTextMessage={sendTextMessageHandler}
         />
         {/* Code Editor */}
-        <Grid templateRows="10% 7fr auto" h="91vh">
+        <Grid templateRows="10% 7fr 20%" h="91vh">
           {/* Code Editor Settings */}
           <Flex
             direction="row"
