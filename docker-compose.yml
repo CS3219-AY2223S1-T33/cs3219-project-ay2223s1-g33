@@ -121,7 +121,6 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-signing.env
-      - config_env/session-service.env
 
     build:
       context: ./session-service
@@ -133,7 +132,6 @@ services:
       - "host.docker.internal:host-gateway"
 
   history-service:
-    platform: linux/amd64
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-db.env
@@ -168,4 +166,3 @@ services:
       dockerfile: redis.dockerfile
     ports:
       - "6379:6379"
-
