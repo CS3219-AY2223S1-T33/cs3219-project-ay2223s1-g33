@@ -12,13 +12,19 @@ import { UserCrudServiceClient } from '../../src/proto/user-crud-service.grpc-cl
 import { QuestionServiceClient } from '../../src/proto/question-service.grpc-client';
 import {
   CreateAttemptRequest,
-  CreateAttemptResponse, CreateCompletionRequest, CreateCompletionResponse,
+  CreateAttemptResponse,
+  CreateCompletionRequest,
+  CreateCompletionResponse,
   DeleteAttemptRequest,
-  DeleteAttemptResponse, DeleteCompletionRequest, DeleteCompletionResponse,
+  DeleteAttemptResponse,
+  DeleteCompletionRequest,
+  DeleteCompletionResponse,
   GetAttemptRequest,
   GetAttemptResponse,
   GetAttemptsRequest,
-  GetAttemptsResponse, GetCompletionRequest, GetCompletionResponse,
+  GetAttemptsResponse,
+  GetCompletionRequest,
+  GetCompletionResponse,
 } from '../../src/proto/history-crud-service';
 import { LoopbackRouteHandler } from '../../src/api_server/loopback_server_types';
 import HistoryCompletionEntity from '../../src/db/history_completion_entity';
@@ -45,6 +51,7 @@ const testQuestion: Question = {
   difficulty: QuestionDifficulty.EASY,
   content: 'Test Content',
   solution: 'Test Solution',
+  executionInput: 'Test Execution',
 };
 
 const testAttempt: HistoryAttempt = {
@@ -105,8 +112,9 @@ function makeMockCompletionStorage() {
   };
 }
 
-function forceCast<T extends object, U extends object>(object: any):
-LoopbackRouteHandler<handleUnaryCall<T, U>> {
+function forceCast<T extends object, U extends object>(
+  object: any
+): LoopbackRouteHandler<handleUnaryCall<T, U>> {
   return object as LoopbackRouteHandler<handleUnaryCall<T, U>>;
 }
 
@@ -126,11 +134,13 @@ function makeMockLoopbackChannel() {
       getAttempt: forceCast<GetAttemptRequest, GetAttemptResponse>(mock.getAttempt),
       createAttempt: forceCast<CreateAttemptRequest, CreateAttemptResponse>(mock.createAttempt),
       deleteAttempt: forceCast<DeleteAttemptRequest, DeleteAttemptResponse>(mock.deleteAttempt),
-      createCompletion:
-        forceCast<CreateCompletionRequest, CreateCompletionResponse>(mock.createCompletion),
+      createCompletion: forceCast<CreateCompletionRequest, CreateCompletionResponse>(
+        mock.createCompletion
+      ),
       getCompletion: forceCast<GetCompletionRequest, GetCompletionResponse>(mock.getCompletion),
-      deleteCompletion:
-        forceCast<DeleteCompletionRequest, DeleteCompletionResponse>(mock.deleteCompletion),
+      deleteCompletion: forceCast<DeleteCompletionRequest, DeleteCompletionResponse>(
+        mock.deleteCompletion
+      ),
     },
     mock,
   };
@@ -141,7 +151,7 @@ function makeMockUserClient() {
     'fakeUserServiceUrl',
     ChannelCredentials.createInsecure(),
     {},
-    {},
+    {}
   );
 }
 
@@ -150,7 +160,7 @@ function makeMockQuestionClient() {
     'fakeQuestionServiceUrl',
     ChannelCredentials.createInsecure(),
     {},
-    {},
+    {}
   );
 }
 

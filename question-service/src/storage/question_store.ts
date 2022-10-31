@@ -4,7 +4,7 @@ import { StoredQuestion } from '../model/question_store_model';
 import { QuestionDifficulty } from '../proto/types';
 import { IQuestionStore } from './storage';
 
-const returnValues = ['questionId', 'name', 'difficulty', 'content', 'solution'];
+const returnValues = ['questionId', 'name', 'difficulty', 'content', 'solution', 'executionInput'];
 
 class QuestionStore implements IQuestionStore {
   private dbConn: IDatabase;
@@ -14,15 +14,18 @@ class QuestionStore implements IQuestionStore {
   }
 
   async addQuestion(question: StoredQuestion): Promise<StoredQuestion> {
-    const { name, difficulty } = question;
+    const {
+      name, difficulty, content, solution, executionInput,
+    } = question;
 
-    if (difficulty === QuestionDifficulty.UNUSED) {
-      throw new Error('Question must have a difficulty');
+    if (
+      difficulty === QuestionDifficulty.UNUSED
+      || !Object.values(QuestionDifficulty).includes(difficulty)
+    ) {
+      throw new Error('Question must have a valid difficulty');
     }
 
-    const isExist = await this.dbConn
-      .getQuestionRepo()
-      .findOneBy({ name });
+    const isExist = await this.dbConn.getQuestionRepo().findOneBy({ name });
 
     if (isExist) {
       throw new Error('Question with same name already exists');
@@ -34,7 +37,9 @@ class QuestionStore implements IQuestionStore {
         .createQueryBuilder()
         .insert()
         .into(QuestionEntity)
-        .values([question])
+        .values({
+          name, difficulty, content, solution, executionInput,
+        })
         .returning(returnValues)
         .execute()
     ).raw[0];
@@ -55,11 +60,18 @@ class QuestionStore implements IQuestionStore {
   }
 
   async replaceQuestion(question: StoredQuestion): Promise<void> {
-    const { name, questionId } = question;
+    const {
+      questionId, name, difficulty, content, solution, executionInput,
+    } = question;
 
-    const isExist = await this.dbConn
-      .getQuestionRepo()
-      .findOneBy({ name });
+    if (
+      QuestionDifficulty.UNUSED === question.difficulty
+      || !Object.values(QuestionDifficulty).includes(question.difficulty)
+    ) {
+      throw new Error('Question must have a valid difficulty');
+    }
+
+    const isExist = await this.dbConn.getQuestionRepo().findOneBy({ name });
 
     if (isExist) {
       throw new Error('Question with same name already exists');
@@ -69,7 +81,9 @@ class QuestionStore implements IQuestionStore {
       .getDataSource()
       .createQueryBuilder()
       .update(QuestionEntity)
-      .set(question)
+      .set({
+        name, difficulty, content, solution, executionInput,
+      })
       .where('questionId = :questionId', { questionId })
       .execute();
   }
@@ -106,8 +120,9 @@ class QuestionStore implements IQuestionStore {
     return question;
   }
 
-  async getRandomQuestionByDifficulty(diffciulty: QuestionDifficulty):
-  Promise<StoredQuestion | undefined> {
+  async getRandomQuestionByDifficulty(
+    diffciulty: QuestionDifficulty,
+  ): Promise<StoredQuestion | undefined> {
     const selectResult: QuestionEntity | null = await this.dbConn
       .getQuestionRepo()
       .createQueryBuilder('question')

@@ -51,9 +51,7 @@ class QuestionAgent implements IQuestionAgent {
   }
 }
 
-function createQuestionService(
-  questionURL: string,
-): IQuestionAgent {
+function createQuestionService(questionURL: string): IQuestionAgent {
   return new QuestionAgent(questionURL);
 }
 

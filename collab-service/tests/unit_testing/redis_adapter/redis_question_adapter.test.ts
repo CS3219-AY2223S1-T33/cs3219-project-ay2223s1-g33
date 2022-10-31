@@ -12,7 +12,7 @@ const question: Question = {
   difficulty: 1,
   content: '1',
   solution: '1',
-  executionInput: '',
+  executionInput: 'Input',
 };
 
 const key = 'key';
@@ -22,11 +22,9 @@ describe('Function-Redis-Question setQuestionRedis', () => {
     const redis = new Redis();
     jest.spyOn(redis, 'set');
     await setQuestionRedis(key, question, redis);
-    expect(redis.set)
-      .toBeCalledTimes(1);
+    expect(redis.set).toBeCalledTimes(1);
     await redis.get(`collab-qns-${key}`, (_err: any, result: any) => {
-      expect(result)
-        .toBe(JSON.stringify(question));
+      expect(result).toBe(JSON.stringify(question));
     });
   });
 });
@@ -37,7 +35,6 @@ describe('Function-Redis-Question getQuestionRedis', () => {
     jest.spyOn(redis, 'get');
     await redis.set(`collab-qns-${key}`, JSON.stringify(question));
     const result = await getQuestionRedis(key, redis);
-    expect(result)
-      .toBe(JSON.stringify(question));
+    expect(result).toBe(JSON.stringify(question));
   });
 });
