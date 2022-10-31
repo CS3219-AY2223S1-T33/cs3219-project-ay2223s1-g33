@@ -1,4 +1,11 @@
-import { Flex, Button, Text, useDisclosure, Grid } from "@chakra-ui/react";
+import {
+  Flex,
+  Button,
+  Text,
+  useDisclosure,
+  Grid,
+  Code
+} from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
@@ -293,7 +300,9 @@ function Session() {
           {/* Test case window */}
           <Grid templateRows="1fr 3fr 1fr">
             <Text fontSize="lg">Output</Text>
-            <Text fontFamily="mono">{executionOutput}</Text>
+            <Code display="block" whiteSpace="pre-wrap">
+              {executionOutput}
+            </Code>
             <Flex direction="row-reverse" px={12} pb={4}>
               <Button onClick={executeCodeHandler} isLoading={isExecuting}>
                 Execute Code
