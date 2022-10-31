@@ -67,9 +67,7 @@ function Session() {
   const [code, setCode] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
   // eslint-disable-next-line
-  const [executionOutput, setExecutionOutput] = useState(
-    "Hello\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWorld"
-  );
+  const [executionOutput, setExecutionOutput] = useState("");
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */

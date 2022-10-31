@@ -26,7 +26,7 @@ class ExecuteAgent implements IExecuteAgent {
             resolve(value.token);
           } else {
             Logger.error(value.errorMessage);
-            resolve('Timeout');
+            resolve(value.errorMessage);
           }
         },
       );
@@ -48,7 +48,11 @@ class ExecuteAgent implements IExecuteAgent {
             resolve(value.output);
           } else {
             Logger.error(value.errorMessage);
-            resolve('Timeout');
+            if (value.output) {
+              resolve(value.output);
+            } else {
+              resolve(value.errorMessage);
+            }
           }
         },
       );

@@ -40,10 +40,17 @@ class ExecuteServiceClient implements IExecuteServiceClient {
       });
       callback(protoResponse);
     } catch (err) {
-      protoResponse = CreateExecuteResponse.create({
-        token: undefined,
-        errorMessage: 'Execute Request Failed',
-      });
+      if ((err as Error).name === 'AbortError') {
+        protoResponse = CreateExecuteResponse.create({
+          token: undefined,
+          errorMessage: 'Timeout',
+        });
+      } else {
+        protoResponse = CreateExecuteResponse.create({
+          token: undefined,
+          errorMessage: 'Execute Retrieval Failed',
+        });
+      }
     }
     callback(protoResponse);
   }
@@ -69,10 +76,17 @@ class ExecuteServiceClient implements IExecuteServiceClient {
         errorMessage: content.status.description,
       });
     } catch (err) {
-      protoResponse = GetExecuteResponse.create({
-        output: undefined,
-        errorMessage: 'Execute Retrieval Failed',
-      });
+      if ((err as Error).name === 'AbortError') {
+        protoResponse = GetExecuteResponse.create({
+          output: undefined,
+          errorMessage: 'Timeout',
+        });
+      } else {
+        protoResponse = GetExecuteResponse.create({
+          output: undefined,
+          errorMessage: 'Execute Retrieval Failed',
+        });
+      }
     }
     callback(protoResponse);
   }
