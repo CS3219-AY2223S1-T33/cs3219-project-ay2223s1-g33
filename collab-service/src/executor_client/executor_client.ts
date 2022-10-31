@@ -40,7 +40,7 @@ class ExecuteServiceClient implements IExecuteServiceClient {
       });
       callback(protoResponse);
     } catch (err) {
-      if ((err as Error).name === 'AbortError') {
+      if (ExecuteServiceClient.isTimeoutError(err)) {
         protoResponse = CreateExecuteResponse.create({
           token: undefined,
           errorMessage: 'Timeout',
@@ -76,7 +76,7 @@ class ExecuteServiceClient implements IExecuteServiceClient {
         errorMessage: content.status.description,
       });
     } catch (err) {
-      if ((err as Error).name === 'AbortError') {
+      if (ExecuteServiceClient.isTimeoutError(err)) {
         protoResponse = GetExecuteResponse.create({
           output: undefined,
           errorMessage: 'Timeout',
@@ -89,6 +89,10 @@ class ExecuteServiceClient implements IExecuteServiceClient {
       }
     }
     callback(protoResponse);
+  }
+
+  private static isTimeoutError(err: unknown) {
+    return (err as Error).name === 'AbortError';
   }
 }
 
