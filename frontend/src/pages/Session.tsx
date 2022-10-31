@@ -160,9 +160,8 @@ function Session() {
 
       ws.on("execute_complete", (o: { output: string }) => {
         const { output } = o;
-        console.log(output);
-        // Change the error box here
         setIsExecuting(false);
+        setExecutionOutput(output);
       });
 
       return ws;
@@ -302,7 +301,6 @@ function Session() {
           {/* Test case window */}
           <Grid templateRows="1fr 3fr 1fr">
             <Text fontSize="lg">Output</Text>
-            {/* <Box>Content</Box> */}
             <Code>{executionOutput}</Code>
             <Flex direction="row-reverse" px={12} pb={4}>
               <Button onClick={executeCodeHandler} isLoading={isExecuting}>
