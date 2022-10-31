@@ -5,7 +5,7 @@ import { RootState } from "../../app/store";
 import ChatMessage from "./ChatMessage";
 
 function ChatList() {
-  const chat = useSelector((state: RootState) => state.chat.chat);
+  const chat = useSelector((state: RootState) => state.session.chat);
 
   return (
     <Flex w="100%" minH="100%" flexGrow={2} direction="column-reverse">

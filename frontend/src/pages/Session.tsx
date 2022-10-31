@@ -19,8 +19,9 @@ import { selectUser } from "../feature/user/userSlice";
 import { Chat, Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-import { addMessage, clearChat } from "../feature/chat/chatSlice";
+// import { addMessage, clearChat } from "../feature/chat/chatSlice";
 import {
+  addMessage,
   changeEditorLocked,
   changeIsCompleted,
   changeLanguage,
@@ -178,8 +179,6 @@ function Session() {
     yDoc?.destroy();
     // Clears the room session token
     dispatch(leaveRoom());
-    // Clears the session chat
-    dispatch(clearChat());
     dispatch(reset());
 
     // Just in case when use joins a brand new session
