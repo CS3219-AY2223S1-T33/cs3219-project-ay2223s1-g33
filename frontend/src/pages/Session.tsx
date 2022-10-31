@@ -298,9 +298,9 @@ function Session() {
             />
           )}
           {/* Test case window */}
-          <Grid templateRows="1fr 3fr 1fr">
-            <Text fontSize="lg">Output</Text>
-            <Code display="block" whiteSpace="pre-wrap">
+          <Grid templateRows="1fr 3fr 1fr" p={4}>
+            <Text fontSize="lg">Execution Output</Text>
+            <Code display="block" whiteSpace="pre-wrap" overflowY="scroll">
               {executionOutput}
             </Code>
             <Flex direction="row-reverse" px={12} pb={4}>
