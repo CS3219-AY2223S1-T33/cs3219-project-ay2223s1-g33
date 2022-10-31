@@ -18,24 +18,33 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     metadata: { deadline: number },
     callback: (value: CreateExecuteResponse) => void,
   ) {
-    const rawResponse = await fetch(`http://${this.apiURL}/submissions`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      signal: getFetchDeadline(metadata.deadline),
-      body: JSON.stringify({
-        source_code: input.executeCode?.code,
-        language_id: input.executeCode?.languageId,
-        stdin: input.executeCode?.stdin,
-      }),
-    });
-    const content = await rawResponse.json();
-    const protoResponse = CreateExecuteResponse.create({
-      token: content.token,
-      errorMessage: '',
-    });
+    let protoResponse: CreateExecuteResponse;
+    try {
+      const rawResponse = await fetch(`http://${this.apiURL}/submissions`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        signal: getFetchDeadline(metadata.deadline),
+        body: JSON.stringify({
+          source_code: input.executeCode?.code,
+          language_id: input.executeCode?.languageId,
+          stdin: input.executeCode?.stdin,
+        }),
+      });
+      const content = await rawResponse.json();
+      protoResponse = CreateExecuteResponse.create({
+        token: content.token,
+        errorMessage: '',
+      });
+      callback(protoResponse);
+    } catch (err) {
+      protoResponse = CreateExecuteResponse.create({
+        token: undefined,
+        errorMessage: 'Execute Request Failed',
+      });
+    }
     callback(protoResponse);
   }
 
@@ -44,19 +53,27 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     metadata: { deadline: number },
     callback: (value: GetExecuteResponse) => void,
   ) {
-    const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}?fields=stdout,status`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      signal: getFetchDeadline(metadata.deadline),
-    });
-    const content = await rawResponse.json();
-    const protoResponse = GetExecuteResponse.create({
-      output: content.stdout,
-      errorMessage: content.status.description,
-    });
+    let protoResponse: GetExecuteResponse;
+    try {
+      const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}?fields=stdout,status`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        signal: getFetchDeadline(metadata.deadline),
+      });
+      const content = await rawResponse.json();
+      protoResponse = GetExecuteResponse.create({
+        output: content.stdout,
+        errorMessage: content.status.description,
+      });
+    } catch (err) {
+      protoResponse = GetExecuteResponse.create({
+        output: undefined,
+        errorMessage: 'Execute Retrieval Failed',
+      });
+    }
     callback(protoResponse);
   }
 }

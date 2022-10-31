@@ -26,6 +26,7 @@ class ExecuteAgent implements IExecuteAgent {
             resolve(value.token);
           } else {
             Logger.error(value.errorMessage);
+            resolve('Timeout');
           }
         },
       );
@@ -46,7 +47,8 @@ class ExecuteAgent implements IExecuteAgent {
             || value.errorMessage === 'Runtime Error (NZEC)') {
             resolve(value.output);
           } else {
-            resolve('');
+            Logger.error(value.errorMessage);
+            resolve('Timeout');
           }
         },
       );
