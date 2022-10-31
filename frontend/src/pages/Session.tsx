@@ -162,6 +162,7 @@ function Session() {
         const { output } = o;
         console.log(output);
         // Change the error box here
+        setIsExecuting(false);
       });
 
       return ws;
