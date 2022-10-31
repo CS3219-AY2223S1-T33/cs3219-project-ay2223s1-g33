@@ -141,8 +141,7 @@ class CollabTunnelBridge {
 
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
         Logger.info(`${this.username} requested for saving code`);
-        // await this.handleSaveHistoryRequest(request);
-        await this.handleExecuteCodeRequest(request);
+        await this.handleSaveHistoryRequest(request);
         break;
 
       case OPCODE_EXECUTE_REQ: // Execute code
