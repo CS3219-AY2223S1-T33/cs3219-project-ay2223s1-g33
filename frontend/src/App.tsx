@@ -12,36 +12,40 @@ import useFixedToast from "./utils/hooks/useFixedToast";
 let firstMount = true;
 
 function App() {
-	const toast = useFixedToast();
-	const dispatch = useDispatch();
-	const user = useSelector(selectUser);
+  const toast = useFixedToast();
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
 
-	// eslint-disable-next-line
-	const [cookies, setCookies, removeCookies] = useCookies(["AUTH-SESSION"]);
+  // eslint-disable-next-line
+  const [cookies, setCookies, removeCookies] = useCookies(["AUTH-SESSION"]);
 
-	useEffect(() => {
-		if (cookies["AUTH-SESSION"] && firstMount) {
-			console.log("Auth session exists");
-			firstMount = false;
-			UserAPI.getUserProfile()
-				.then((res) => {
-					const { user: fetchedUser } = res;
+  useEffect(() => {
+    if (cookies["AUTH-SESSION"] && firstMount) {
+      console.log("Auth session exists");
+      firstMount = false;
+      UserAPI.getUserProfile()
+        .then((res) => {
+          const { user: fetchedUser } = res;
 
-					if (!fetchedUser) {
-						throw new Error("No user fetched");
-					}
+          if (!fetchedUser) {
+            throw new Error("No user fetched");
+          }
 
-					dispatch(login({ user: fetchedUser }));
-				})
-				.catch((err) => {
-					toast.sendErrorMessage("Please log in again");
-					removeCookies("AUTH-SESSION");
-					console.error(err.message);
-				});
-		}
-	}, []);
+          dispatch(login({ user: fetchedUser }));
+        })
+        .catch((err) => {
+          toast.sendErrorMessage("Please log in again");
+          removeCookies("AUTH-SESSION");
+          console.error(err.message);
+        });
+    }
+  }, []);
 
-	return <BrowserRouter>{user ? <ProtectedRoute /> : <UnprotectedRoute />}</BrowserRouter>;
+  return (
+    <BrowserRouter>
+      {user ? <ProtectedRoute /> : <UnprotectedRoute />}
+    </BrowserRouter>
+  );
 }
 
 export default App;

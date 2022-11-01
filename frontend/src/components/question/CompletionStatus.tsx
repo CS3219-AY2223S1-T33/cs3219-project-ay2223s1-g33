@@ -10,46 +10,46 @@ import useFixedToast from "../../utils/hooks/useFixedToast";
 import HistoryAPI from "../../api/history";
 
 type Props = {
-	config: CompletionConfig;
-	question: Question;
-	isCompleted: boolean | undefined;
+  config: CompletionConfig;
+  question: Question;
+  isCompleted: boolean | undefined;
 };
 
 function CompletionStatus({ config, question, isCompleted }: Props) {
-	const username = useSelector((state: RootState) => state.user.user)?.username;
-	const dispatch = useDispatch();
-	const toast = useFixedToast();
+  const username = useSelector((state: RootState) => state.user.user)?.username;
+  const dispatch = useDispatch();
+  const toast = useFixedToast();
 
-	const toggleCompletionHandler = () => {
-		if (!username) {
-			return;
-		}
+  const toggleCompletionHandler = () => {
+    if (!username) {
+      return;
+    }
 
-		const { questionId } = question;
+    const { questionId } = question;
 
-		const completed: HistoryCompletion = { questionId, username };
-		const request: SetHistoryCompletionRequest = { completed };
-		HistoryAPI.setHistoryCompletion(request)
-			.then(() => {
-				dispatch(changeIsCompleted({ isComplete: !isCompleted }));
-			})
-			.catch((err) => {
-				toast.sendErrorMessage(err.message);
-			});
-	};
+    const completed: HistoryCompletion = { questionId, username };
+    const request: SetHistoryCompletionRequest = { completed };
+    HistoryAPI.setHistoryCompletion(request)
+      .then(() => {
+        dispatch(changeIsCompleted({ isComplete: !isCompleted }));
+      })
+      .catch((err) => {
+        toast.sendErrorMessage(err.message);
+      });
+  };
 
-	return (
-		<>
-			{" "}
-			<Badge colorScheme={config.colorScheme} size="lg" fontWeight="bold">
-				{config.badgeText}
-			</Badge>
-			<br />
-			<Button size="sm" onClick={toggleCompletionHandler}>
-				Mark as {config.btnText}
-			</Button>
-		</>
-	);
+  return (
+    <>
+      {" "}
+      <Badge colorScheme={config.colorScheme} size="lg" fontWeight="bold">
+        {config.badgeText}
+      </Badge>
+      <br />
+      <Button size="sm" onClick={toggleCompletionHandler}>
+        Mark as {config.btnText}
+      </Button>
+    </>
+  );
 }
 
 export default CompletionStatus;
