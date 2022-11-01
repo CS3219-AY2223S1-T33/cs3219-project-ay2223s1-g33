@@ -73,6 +73,6 @@ export default function loadEnvironment(): EnvironmentConfig {
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4005),
     USER_SERVICE_URL: requireString('USER_SERVICE_URL', 'localhost:4000'),
     QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL', 'localhost:4004'),
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
   };
 }

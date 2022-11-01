@@ -15,6 +15,7 @@ function ChangeNicknameForm() {
 		register,
 		handleSubmit,
 		formState: { errors },
+		reset,
 	} = useForm({ resolver: yupResolver(CHANGE_NICKNAME_VALIDTOR) });
 
 	const toast = useFixedToast();
@@ -39,6 +40,7 @@ function ChangeNicknameForm() {
 				// TODO Same logic as slice login(). May rename as setUser?
 				dispatch(changeNickname({ user: newUser }));
 				toast.sendSuccessMessage("Your nickname is changed!");
+				reset();
 			})
 			.catch((err) => {
 				toast.sendErrorMessage(err.message);

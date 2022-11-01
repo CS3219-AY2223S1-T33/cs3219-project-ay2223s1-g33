@@ -1,8 +1,17 @@
 import React from "react";
-import { Button, FormControl, FormLabel, Heading, VStack } from "@chakra-ui/react";
-import { FieldValues, SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  Heading,
+  VStack,
+} from "@chakra-ui/react";
+import {
+  FieldValues,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
 import useFixedToast from "../../utils/hooks/useFixedToast";
@@ -13,14 +22,12 @@ import PasswordInput from "../ui/form/PasswordInput";
 import { SET_PW_VALIDATOR } from "../../constants/validators";
 
 function ChangePasswordForm() {
-	const navigate = useNavigate();
-	const dispatch = useDispatch();
-
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
 
 	const toast = useFixedToast();
 
@@ -60,6 +67,15 @@ function ChangePasswordForm() {
 					<FormLabel>New Password</FormLabel>
 					<PasswordInput register={register} formKey="password" />
 				</FormControl>
+=======
+        toast.sendSuccessMessage("Your password is changed!");
+        reset();
+      })
+      .catch((err) => {
+        toast.sendErrorMessage(err.message);
+      });
+  };
+>>>>>>> main
 
 				<FormControl id="confirmPassword" isInvalid={!!errors.confirmPassword}>
 					<FormLabel>Confirm New Password</FormLabel>

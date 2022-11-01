@@ -90,8 +90,14 @@ func TestJwtBadToken(t *testing.T) {
 	realNow := time.Now()
 	tokenLife := realNow.Sub(baseTimestamp) - time.Hour
 
-	jwtAgent := &jwtAgent{
+	jwtAgent1 := &jwtAgent{
 		secret:        []byte(jwtTestSecret),
+		tokenValidity: tokenLife,
+		clock:         mockClock,
+	}
+
+	jwtAgent2 := &jwtAgent{
+		secret:        []byte("asdf"),
 		tokenValidity: tokenLife,
 		clock:         mockClock,
 	}
@@ -99,15 +105,31 @@ func TestJwtBadToken(t *testing.T) {
 	data := &TokenData{
 		Email: testEmail,
 	}
-	mockClock.EXPECT().Now().Return(baseTimestamp).Times(1)
+	gomock.InOrder(
+		mockClock.EXPECT().Now().Return(baseTimestamp),
+		mockClock.EXPECT().Now().Return(realNow.Add(time.Hour)).Times(2),
+	)
 
-	createdToken, err := jwtAgent.CreateToken(data)
+	createdToken, err := jwtAgent1.CreateToken(data)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, createdToken)
 
-	_, _, err = jwtAgent.VerifyToken(createdToken)
+	_, _, err = jwtAgent1.VerifyToken(createdToken)
 	assert.IsType(t, ExpiredTokenError{}, err)
 
-	_, _, err = jwtAgent.VerifyToken("gibberish.token.something")
+	signedDifferentlyToken, err := jwtAgent2.CreateToken(data)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, signedDifferentlyToken)
+
+	_, _, err = jwtAgent1.VerifyToken(signedDifferentlyToken)
+	assert.IsType(t, InvalidTokenError{}, err)
+
+	_, _, err = jwtAgent1.VerifyToken("gibberish.token.something")
+	assert.IsType(t, InvalidTokenError{}, err)
+
+	createdToken, err = jwtAgent1.CreateToken(nil)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, createdToken)
+	_, _, err = jwtAgent1.VerifyToken(createdToken)
 	assert.IsType(t, InvalidTokenError{}, err)
 }

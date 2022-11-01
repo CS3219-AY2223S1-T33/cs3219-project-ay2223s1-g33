@@ -1,5 +1,3 @@
-// import axios from "axios";
-// import { Routes } from "react-router-dom";
 import React, { useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,6 +35,7 @@ function App() {
 				})
 				.catch((err) => {
 					toast.sendErrorMessage("Please log in again");
+					removeCookies("AUTH-SESSION");
 					console.error(err.message);
 				});
 		}

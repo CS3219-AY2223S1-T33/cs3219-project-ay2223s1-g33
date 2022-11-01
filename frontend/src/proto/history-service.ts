@@ -13,6 +13,7 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MESSAGE_TYPE } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { HistoryCompletion } from "./types";
 import { HistoryAttempt } from "./types";
 /**
  * @generated from protobuf message history_service.GetAttemptHistoryRequest
@@ -65,6 +66,28 @@ export interface GetAttemptSubmissionResponse {
      * @generated from protobuf field: common.HistoryAttempt attempt = 1;
      */
     attempt?: HistoryAttempt;
+    /**
+     * @generated from protobuf field: string error_message = 2;
+     */
+    errorMessage: string;
+}
+/**
+ * @generated from protobuf message history_service.SetHistoryCompletionRequest
+ */
+export interface SetHistoryCompletionRequest {
+    /**
+     * @generated from protobuf field: common.HistoryCompletion completed = 1;
+     */
+    completed?: HistoryCompletion;
+}
+/**
+ * @generated from protobuf message history_service.SetHistoryCompletionResponse
+ */
+export interface SetHistoryCompletionResponse {
+    /**
+     * @generated from protobuf field: common.HistoryCompletion completed = 1;
+     */
+    completed?: HistoryCompletion;
     /**
      * @generated from protobuf field: string error_message = 2;
      */
@@ -293,10 +316,112 @@ class GetAttemptSubmissionResponse$Type extends MessageType<GetAttemptSubmission
  * @generated MessageType for protobuf message history_service.GetAttemptSubmissionResponse
  */
 export const GetAttemptSubmissionResponse = new GetAttemptSubmissionResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetHistoryCompletionRequest$Type extends MessageType<SetHistoryCompletionRequest> {
+    constructor() {
+        super("history_service.SetHistoryCompletionRequest", [
+            { no: 1, name: "completed", kind: "message", T: () => HistoryCompletion }
+        ]);
+    }
+    create(value?: PartialMessage<SetHistoryCompletionRequest>): SetHistoryCompletionRequest {
+        const message = {};
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<SetHistoryCompletionRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetHistoryCompletionRequest): SetHistoryCompletionRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.HistoryCompletion completed */ 1:
+                    message.completed = HistoryCompletion.internalBinaryRead(reader, reader.uint32(), options, message.completed);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetHistoryCompletionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.HistoryCompletion completed = 1; */
+        if (message.completed)
+            HistoryCompletion.internalBinaryWrite(message.completed, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_service.SetHistoryCompletionRequest
+ */
+export const SetHistoryCompletionRequest = new SetHistoryCompletionRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetHistoryCompletionResponse$Type extends MessageType<SetHistoryCompletionResponse> {
+    constructor() {
+        super("history_service.SetHistoryCompletionResponse", [
+            { no: 1, name: "completed", kind: "message", T: () => HistoryCompletion },
+            { no: 2, name: "error_message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<SetHistoryCompletionResponse>): SetHistoryCompletionResponse {
+        const message = { errorMessage: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<SetHistoryCompletionResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetHistoryCompletionResponse): SetHistoryCompletionResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* common.HistoryCompletion completed */ 1:
+                    message.completed = HistoryCompletion.internalBinaryRead(reader, reader.uint32(), options, message.completed);
+                    break;
+                case /* string error_message */ 2:
+                    message.errorMessage = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetHistoryCompletionResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* common.HistoryCompletion completed = 1; */
+        if (message.completed)
+            HistoryCompletion.internalBinaryWrite(message.completed, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string error_message = 2; */
+        if (message.errorMessage !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.errorMessage);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message history_service.SetHistoryCompletionResponse
+ */
+export const SetHistoryCompletionResponse = new SetHistoryCompletionResponse$Type();
 /**
  * @generated ServiceType for protobuf service history_service.HistoryService
  */
 export const HistoryService = new ServiceType("history_service.HistoryService", [
     { name: "GetAttemptHistory", options: {}, I: GetAttemptHistoryRequest, O: GetAttemptHistoryResponse },
-    { name: "GetAttemptSubmission", options: {}, I: GetAttemptSubmissionRequest, O: GetAttemptSubmissionResponse }
+    { name: "GetAttemptSubmission", options: {}, I: GetAttemptSubmissionRequest, O: GetAttemptSubmissionResponse },
+    { name: "SetHistoryCompletion", options: {}, I: SetHistoryCompletionRequest, O: SetHistoryCompletionResponse }
 ]);

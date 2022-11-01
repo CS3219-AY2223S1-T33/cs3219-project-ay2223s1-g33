@@ -16,6 +16,7 @@ import BaseHandler from '../../../src/controller/history_crud_service_handlers/b
 import HistoryAttemptEntity from '../../../src/db/history_entity';
 import GetAttemptHandler
   from '../../../src/controller/history_crud_service_handlers/get_attempt_handler';
+import { PasswordUser, Question } from '../../../src/proto/types';
 
 describe('Get Attempt Handler', () => {
   const makeRequest = (attemptId: number, username: string):
@@ -30,6 +31,7 @@ describe('Get Attempt Handler', () => {
   let mockAttemptStorage = makeMockAttemptStorage();
   let mockStorage: IStorage = {
     getAttemptStore: jest.fn(() => mockAttemptStorage),
+    getCompletionStore: jest.fn(),
   };
   let handler = new GetAttemptHandler(mockStorage, userClient, questionClient);
 
@@ -38,16 +40,17 @@ describe('Get Attempt Handler', () => {
     mockAttemptStorage = makeMockAttemptStorage();
     mockStorage = {
       getAttemptStore: jest.fn(() => mockAttemptStorage),
+      getCompletionStore: jest.fn(),
     };
     handler = new GetAttemptHandler(mockStorage, userClient, questionClient);
 
     jest.spyOn(BaseHandler.prototype, 'getQuestion')
       .mockImplementation(
-        () => testQuestion,
+        () => new Promise<Question | undefined>((resolve) => { resolve(testQuestion); }),
       );
     jest.spyOn(BaseHandler.prototype, 'getUser')
       .mockImplementation(
-        () => testPasswordUser,
+        () => new Promise<PasswordUser | undefined>((resolve) => { resolve(testPasswordUser); }),
       );
     mockAttemptStorage.getAttempt.mockImplementation(
       (): HistoryAttemptEntity => testHistoryAttemptEntity,

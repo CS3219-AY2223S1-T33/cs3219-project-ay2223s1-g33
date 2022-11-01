@@ -17,6 +17,7 @@ type EnvironmentConfig = {
   readonly EMAIL_IS_SECURE: boolean;
   readonly EMAIL_USERNAME: string;
   readonly EMAIL_PASSWORD: string;
+  readonly EMAIL_SENDER: string;
 
   readonly RESET_PASSWORD_URL: string;
 };
@@ -72,7 +73,7 @@ export default function loadEnvironment(): EnvironmentConfig {
 
   return {
     SESSION_SERVICE_URL: requireString('SESSION_SERVICE_URL'),
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8081),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4000),
 
@@ -88,6 +89,7 @@ export default function loadEnvironment(): EnvironmentConfig {
 
     EMAIL_USERNAME: requireString('EMAIL_USERNAME'),
     EMAIL_PASSWORD: requireString('EMAIL_PASSWORD'),
+    EMAIL_SENDER: requireString('EMAIL_SENDER'),
 
     RESET_PASSWORD_URL: requireString('RESET_PASSWORD_URL'),
   };

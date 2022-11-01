@@ -8,6 +8,7 @@ declare type SMTPServer = {
 declare type SMTPCredentials = {
   username: string;
   password: string;
+  sender: string;
 };
 
 export {

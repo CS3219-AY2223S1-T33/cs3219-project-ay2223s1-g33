@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 
 type EnvironmentConfig = {
-  readonly JWT_ROOM_SECRET: string,
+  readonly ROOM_SIGNING_SECRET: string,
   readonly REDIS_SERVER_URL: string,
 
   readonly HTTP_PORT: number,
@@ -58,8 +58,8 @@ export default function loadEnvironment(): EnvironmentConfig {
   config();
 
   return {
-    JWT_ROOM_SECRET: requireString('JWT_ROOM_SECRET'),
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
+    ROOM_SIGNING_SECRET: requireString('ROOM_SIGNING_SECRET'),
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8082),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4001),
   };

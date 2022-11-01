@@ -5,6 +5,12 @@
 import { HistoryCrudService } from "./history-crud-service";
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
+import type { DeleteCompletionResponse } from "./history-crud-service";
+import type { DeleteCompletionRequest } from "./history-crud-service";
+import type { GetCompletionResponse } from "./history-crud-service";
+import type { GetCompletionRequest } from "./history-crud-service";
+import type { CreateCompletionResponse } from "./history-crud-service";
+import type { CreateCompletionRequest } from "./history-crud-service";
 import type { DeleteAttemptResponse } from "./history-crud-service";
 import type { DeleteAttemptRequest } from "./history-crud-service";
 import type { CreateAttemptResponse } from "./history-crud-service";
@@ -46,6 +52,27 @@ export interface IHistoryCrudServiceClient {
     deleteAttempt(input: DeleteAttemptRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void): grpc.ClientUnaryCall;
     deleteAttempt(input: DeleteAttemptRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void): grpc.ClientUnaryCall;
     deleteAttempt(input: DeleteAttemptRequest, callback: (err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: CreateCompletion(history_crud_service.CreateCompletionRequest) returns (history_crud_service.CreateCompletionResponse);
+     */
+    createCompletion(input: CreateCompletionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
+    createCompletion(input: CreateCompletionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
+    createCompletion(input: CreateCompletionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
+    createCompletion(input: CreateCompletionRequest, callback: (err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: GetCompletion(history_crud_service.GetCompletionRequest) returns (history_crud_service.GetCompletionResponse);
+     */
+    getCompletion(input: GetCompletionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    getCompletion(input: GetCompletionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    getCompletion(input: GetCompletionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    getCompletion(input: GetCompletionRequest, callback: (err: grpc.ServiceError | null, value?: GetCompletionResponse) => void): grpc.ClientUnaryCall;
+    /**
+     * @generated from protobuf rpc: DeleteCompletion(history_crud_service.DeleteCompletionRequest) returns (history_crud_service.DeleteCompletionResponse);
+     */
+    deleteCompletion(input: DeleteCompletionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void): grpc.ClientUnaryCall;
+    deleteCompletion(input: DeleteCompletionRequest, metadata: grpc.Metadata, callback: (err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void): grpc.ClientUnaryCall;
+    deleteCompletion(input: DeleteCompletionRequest, options: grpc.CallOptions, callback: (err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void): grpc.ClientUnaryCall;
+    deleteCompletion(input: DeleteCompletionRequest, callback: (err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void): grpc.ClientUnaryCall;
 }
 /**
  * @generated from protobuf service history_crud_service.HistoryCrudService
@@ -83,5 +110,26 @@ export class HistoryCrudServiceClient extends grpc.Client implements IHistoryCru
     deleteAttempt(input: DeleteAttemptRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteAttemptResponse) => void)): grpc.ClientUnaryCall {
         const method = HistoryCrudService.methods[3];
         return this.makeUnaryRequest<DeleteAttemptRequest, DeleteAttemptResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: DeleteAttemptRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteAttemptResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: CreateCompletion(history_crud_service.CreateCompletionRequest) returns (history_crud_service.CreateCompletionResponse);
+     */
+    createCompletion(input: CreateCompletionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: CreateCompletionResponse) => void)): grpc.ClientUnaryCall {
+        const method = HistoryCrudService.methods[4];
+        return this.makeUnaryRequest<CreateCompletionRequest, CreateCompletionResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: CreateCompletionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): CreateCompletionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: GetCompletion(history_crud_service.GetCompletionRequest) returns (history_crud_service.GetCompletionResponse);
+     */
+    getCompletion(input: GetCompletionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetCompletionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: GetCompletionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: GetCompletionResponse) => void)): grpc.ClientUnaryCall {
+        const method = HistoryCrudService.methods[5];
+        return this.makeUnaryRequest<GetCompletionRequest, GetCompletionResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: GetCompletionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): GetCompletionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
+    }
+    /**
+     * @generated from protobuf rpc: DeleteCompletion(history_crud_service.DeleteCompletionRequest) returns (history_crud_service.DeleteCompletionResponse);
+     */
+    deleteCompletion(input: DeleteCompletionRequest, metadata: grpc.Metadata | grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void), options?: grpc.CallOptions | ((err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void), callback?: ((err: grpc.ServiceError | null, value?: DeleteCompletionResponse) => void)): grpc.ClientUnaryCall {
+        const method = HistoryCrudService.methods[6];
+        return this.makeUnaryRequest<DeleteCompletionRequest, DeleteCompletionResponse>(`/${HistoryCrudService.typeName}/${method.name}`, (value: DeleteCompletionRequest): Buffer => Buffer.from(method.I.toBinary(value, this._binaryOptions)), (value: Buffer): DeleteCompletionResponse => method.O.fromBinary(value, this._binaryOptions), input, (metadata as any), (options as any), (callback as any));
     }
 }
