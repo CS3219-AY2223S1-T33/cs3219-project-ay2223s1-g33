@@ -1,33 +1,20 @@
 import React from "react";
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Heading,
-  VStack,
-} from "@chakra-ui/react";
-import {
-  FieldValues,
-  SubmitErrorHandler,
-  SubmitHandler,
-  useForm,
-} from "react-hook-form";
+import { Button, FormControl, FormLabel, Heading, VStack } from "@chakra-ui/react";
+import { FieldValues, SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { ChangePasswordRequest } from "../../proto/user-service";
-import { reset } from "../../feature/matching/matchingSlice";
-import { logout } from "../../feature/user/userSlice";
 import PasswordInput from "../ui/form/PasswordInput";
 import { SET_PW_VALIDATOR } from "../../constants/validators";
 
 function ChangePasswordForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+	} = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
 
 	const toast = useFixedToast();
 
@@ -42,9 +29,7 @@ function ChangePasswordForm() {
 			.then(() => {
 				toast.sendSuccessMessage("Your password is changed! You will need to login again!");
 
-				dispatch(reset());
-				dispatch(logout());
-				navigate("/login", { replace: true });
+				reset();
 			})
 			.catch((err) => {
 				toast.sendErrorMessage(err.message);
@@ -67,15 +52,6 @@ function ChangePasswordForm() {
 					<FormLabel>New Password</FormLabel>
 					<PasswordInput register={register} formKey="password" />
 				</FormControl>
-=======
-        toast.sendSuccessMessage("Your password is changed!");
-        reset();
-      })
-      .catch((err) => {
-        toast.sendErrorMessage(err.message);
-      });
-  };
->>>>>>> main
 
 				<FormControl id="confirmPassword" isInvalid={!!errors.confirmPassword}>
 					<FormLabel>Confirm New Password</FormLabel>
