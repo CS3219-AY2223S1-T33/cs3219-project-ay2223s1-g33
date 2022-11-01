@@ -30,6 +30,7 @@ function Editor({
   const isEditable = !useSelector(
     (state: RootState) => state.session.isEditorLocked
   );
+  const fontSize = useSelector((state: RootState) => state.session.fontSize);
 
   useEffect(() => {
     if (!providerSet) {
@@ -54,7 +55,7 @@ function Editor({
       extensions={[lang, yCollab(yText, provider.awareness, { undoManager })]}
       onChange={onCodeUpdate}
       editable={isEditable}
-      style={{ overflowY: "auto" }}
+      style={{ overflowY: "auto", fontSize }}
     />
   );
 }

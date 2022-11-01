@@ -41,6 +41,7 @@ import {
   selectSelectedLanguage,
   setQuestion
 } from "../feature/session/sessionSlice";
+import FontSizeSelector from "../components/editor/FontSizeSelector";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -280,10 +281,8 @@ function Session() {
             px={12}
             py={2}
           >
-            <EditorLanguage
-              isDisabled={wsStatus !== "Connected"}
-              changeLangHandler={changeLangHandler}
-            />
+            <EditorLanguage changeLangHandler={changeLangHandler} />
+            <FontSizeSelector />
 
             {/* Other Quality of life options */}
             <Button leftIcon={<DownloadIcon />} onClick={downloadCodeHandler}>

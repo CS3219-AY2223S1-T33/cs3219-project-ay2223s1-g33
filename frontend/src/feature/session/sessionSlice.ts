@@ -12,6 +12,7 @@ interface SessionSlice {
 	isEditorLocked: boolean;
 	isCompleted: boolean | undefined;
 	chat: Chat[];
+	fontSize: number;
 }
 
 const initialState: SessionSlice = {
@@ -21,6 +22,7 @@ const initialState: SessionSlice = {
 	isEditorLocked: false,
 	isCompleted: undefined,
 	chat: [],
+	fontSize: 14,
 };
 
 export const sessionSlice = createSlice({
@@ -51,6 +53,10 @@ export const sessionSlice = createSlice({
 			const newChat = action.payload;
 			state.chat.unshift(newChat);
 		},
+		changeFontSize: (state, action: PayloadAction<{ fs: number }>) => {
+			const { fs } = action.payload;
+			state.fontSize = fs;
+		},
 		reset: (state) => {
 			state.wsStatus = initialState.wsStatus;
 			state.selectedLang = initialState.selectedLang;
@@ -64,8 +70,17 @@ export const sessionSlice = createSlice({
 
 export const selectSelectedLanguage = (state: RootState) => state.session.selectedLang;
 export const selectIsEditorLocked = (state: RootState) => state.session.isEditorLocked;
+export const selectFontSize = (state: RootState) => state.session.fontSize;
 
-export const { changeEditorLocked, changeIsCompleted, changeLanguage, changeWSStatus, reset, setQuestion, addMessage } =
-	sessionSlice.actions;
+export const {
+	changeEditorLocked,
+	changeIsCompleted,
+	changeLanguage,
+	changeWSStatus,
+	reset,
+	setQuestion,
+	addMessage,
+	changeFontSize,
+} = sessionSlice.actions;
 
 export default sessionSlice.reducer;
