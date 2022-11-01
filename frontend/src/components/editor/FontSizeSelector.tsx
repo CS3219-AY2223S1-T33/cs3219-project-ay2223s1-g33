@@ -1,4 +1,4 @@
-import { Select, Text } from "@chakra-ui/react";
+import { Select, Text, Box } from "@chakra-ui/react";
 import React, { ChangeEvent, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -6,12 +6,13 @@ import {
   selectFontSize
 } from "../../feature/session/sessionSlice";
 
+const DEFAULT_FONTSIZE = 12;
 function FontSizeSelector() {
   const dispatch = useDispatch();
   const currentFontSize = useSelector(selectFontSize);
 
   const fontSizes = useMemo(
-    () => Array.from({ length: 10 }, (_, i) => 14 + 2 * i),
+    () => Array.from({ length: 10 }, (_, i) => DEFAULT_FONTSIZE + 2 * i),
     []
   );
 
@@ -21,16 +22,16 @@ function FontSizeSelector() {
   };
 
   return (
-    <>
-      <Text>Language: </Text>
-      <Select value={currentFontSize} onChange={changeFontSizeHandler} w="30%">
+    <Box w="35%">
+      <Text>Font Size: </Text>
+      <Select value={currentFontSize} onChange={changeFontSizeHandler} w="90%">
         {fontSizes.map((f) => (
           <option value={f} key={f}>
             {f}
           </option>
         ))}
       </Select>
-    </>
+    </Box>
   );
 }
 

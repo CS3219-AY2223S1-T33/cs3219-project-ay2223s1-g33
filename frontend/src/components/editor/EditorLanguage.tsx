@@ -1,4 +1,4 @@
-import { Select, Text } from "@chakra-ui/react";
+import { Select, Text, Box } from "@chakra-ui/react";
 import React, { ChangeEvent } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../app/store";
@@ -13,13 +13,13 @@ function EditorLanguage({ changeLangHandler }: Props) {
   const wsStatus = useSelector((state: RootState) => state.session.wsStatus);
 
   return (
-    <>
+    <Box w="75%">
       <Text>Language: </Text>
       <Select
         value={selectedLang}
         isDisabled={wsStatus !== "Connected"}
         onChange={changeLangHandler}
-        w="30%"
+        w="90%"
       >
         {["javascript", "go", "java", "python"].map((l) => (
           <option value={l} key={l}>
@@ -27,7 +27,7 @@ function EditorLanguage({ changeLangHandler }: Props) {
           </option>
         ))}
       </Select>
-    </>
+    </Box>
   );
 }
 

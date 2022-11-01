@@ -1,20 +1,11 @@
-import {
-  Flex,
-  Button,
-  Text,
-  useDisclosure,
-  Grid,
-  Code,
-  ButtonGroup
-} from "@chakra-ui/react";
+import { Flex, Button, useDisclosure, Grid, Box } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { DownloadIcon } from "@chakra-ui/icons";
-import { VscVmRunning } from "react-icons/vsc";
-import { FaSave } from "react-icons/fa";
+import CodeExecution from "../components/editor/CodeExecution";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -29,7 +20,6 @@ import { selectUser } from "../feature/user/userSlice";
 import { Chat, Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-
 import {
   addMessage,
   changeEditorLocked,
@@ -37,8 +27,7 @@ import {
   changeLanguage,
   changeWSStatus,
   reset,
-  selectIsEditorLocked,
-  selectSelectedLanguage,
+  setExecution,
   setQuestion
 } from "../feature/session/sessionSlice";
 import FontSizeSelector from "../components/editor/FontSizeSelector";
@@ -52,9 +41,9 @@ let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const nickname = useSelector(selectUser)?.nickname;
-  const wsStatus = useSelector((state: RootState) => state.session.wsStatus);
-  const isEditorLocked = useSelector(selectIsEditorLocked);
-  const selectedLang = useSelector(selectSelectedLanguage);
+  const { wsStatus, selectedLang } = useSelector(
+    (state: RootState) => state.session
+  );
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -69,9 +58,6 @@ function Session() {
   const [undoManager, setundoManager] = useState<Y.UndoManager>();
 
   const [code, setCode] = useState("");
-  const [isExecuting, setIsExecuting] = useState(false);
-  // eslint-disable-next-line
-  const [executionOutput, setExecutionOutput] = useState("");
 
   useEffect(() => {
     /** Helper function to configure websocket with yDoc and custom events. */
@@ -158,13 +144,12 @@ function Session() {
       });
 
       ws.on("execute_pending", () => {
-        setIsExecuting(true);
+        dispatch(setExecution({ executing: true }));
       });
 
       ws.on("execute_complete", (o: { output: string }) => {
         const { output } = o;
-        setIsExecuting(false);
-        setExecutionOutput(output);
+        dispatch(setExecution({ executing: false, output }));
       });
 
       return ws;
@@ -243,7 +228,7 @@ function Session() {
     }
 
     provider.sendExecutionRequest(code, selectedLang);
-    setIsExecuting(true);
+    dispatch(setExecution({ executing: true }));
   };
 
   if (!roomToken || !nickname) {
@@ -274,21 +259,27 @@ function Session() {
         {/* Code Editor */}
         <Grid templateRows="10% 7fr 30%" h="91vh">
           {/* Code Editor Settings */}
-          <Flex
-            direction="row"
-            alignItems="center"
-            bg="gray.100"
-            px={12}
-            py={2}
-          >
-            <EditorLanguage changeLangHandler={changeLangHandler} />
-            <FontSizeSelector />
+          <Box bg="gray.100" px={12} py={2} w="100%">
+            <Flex
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              w="75%"
+              mx="auto"
+            >
+              <EditorLanguage changeLangHandler={changeLangHandler} />
+              <FontSizeSelector />
 
-            {/* Other Quality of life options */}
-            <Button leftIcon={<DownloadIcon />} onClick={downloadCodeHandler}>
-              Download code
-            </Button>
-          </Flex>
+              {/* Other Quality of life options */}
+              <Button
+                leftIcon={<DownloadIcon />}
+                onClick={downloadCodeHandler}
+                w="40%"
+              >
+                Download code
+              </Button>
+            </Flex>
+          </Box>
 
           {/* Editor */}
           {collabDefined && (
@@ -300,36 +291,12 @@ function Session() {
               onCodeUpdate={updateCodeHandler}
             />
           )}
-          {/* Test case window */}
-          <Grid
-            templateRows="1fr 3fr 1fr"
-            py={4}
-            px={8}
-            gap={4}
-            borderTop="1px solid #A0AEC0"
-          >
-            <Text fontSize="lg">Execution Output</Text>
-            <Code display="block" whiteSpace="pre-wrap" overflowY="scroll">
-              {executionOutput}
-            </Code>
-            <ButtonGroup gap={4}>
-              <Button
-                onClick={executeCodeHandler}
-                isLoading={isExecuting}
-                leftIcon={<VscVmRunning />}
-              >
-                Execute Code
-              </Button>
-              <Button
-                onClick={sendCodeSnapshotHandler}
-                isLoading={isEditorLocked}
-                loadingText="Submitting..."
-                leftIcon={<FaSave />}
-              >
-                Submit Code Snapshot
-              </Button>
-            </ButtonGroup>
-          </Grid>
+
+          {/* Code Execution window */}
+          <CodeExecution
+            executeCodeHandler={executeCodeHandler}
+            sendCodeSnapshotHandler={sendCodeSnapshotHandler}
+          />
         </Grid>
       </Grid>
 

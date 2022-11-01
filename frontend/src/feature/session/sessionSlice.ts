@@ -13,6 +13,8 @@ interface SessionSlice {
 	isCompleted: boolean | undefined;
 	chat: Chat[];
 	fontSize: number;
+	isExecuting: boolean;
+	executionOutput: string;
 }
 
 const initialState: SessionSlice = {
@@ -23,6 +25,8 @@ const initialState: SessionSlice = {
 	isCompleted: undefined,
 	chat: [],
 	fontSize: 14,
+	isExecuting: false,
+	executionOutput: "",
 };
 
 export const sessionSlice = createSlice({
@@ -57,6 +61,11 @@ export const sessionSlice = createSlice({
 			const { fs } = action.payload;
 			state.fontSize = fs;
 		},
+		setExecution: (state, action: PayloadAction<{ executing: boolean; output?: string }>) => {
+			const { executing, output } = action.payload;
+			state.isExecuting = executing;
+			state.executionOutput = output ?? state.executionOutput;
+		},
 		reset: (state) => {
 			state.wsStatus = initialState.wsStatus;
 			state.selectedLang = initialState.selectedLang;
@@ -81,6 +90,7 @@ export const {
 	setQuestion,
 	addMessage,
 	changeFontSize,
+	setExecution,
 } = sessionSlice.actions;
 
 export default sessionSlice.reducer;
