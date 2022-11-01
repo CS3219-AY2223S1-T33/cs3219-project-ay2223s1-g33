@@ -4,7 +4,8 @@ import {
   Text,
   useDisclosure,
   Grid,
-  Code
+  Code,
+  ButtonGroup
 } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +13,8 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { DownloadIcon } from "@chakra-ui/icons";
+import { VscVmRunning } from "react-icons/vsc";
+import { FaSave } from "react-icons/fa";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -26,7 +29,7 @@ import { selectUser } from "../feature/user/userSlice";
 import { Chat, Language } from "../types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-// import { addMessage, clearChat } from "../feature/chat/chatSlice";
+
 import {
   addMessage,
   changeEditorLocked,
@@ -268,7 +271,7 @@ function Session() {
           sendTextMessage={sendTextMessageHandler}
         />
         {/* Code Editor */}
-        <Grid templateRows="10% 7fr 20%" h="91vh">
+        <Grid templateRows="10% 7fr 30%" h="91vh">
           {/* Code Editor Settings */}
           <Flex
             direction="row"
@@ -281,9 +284,10 @@ function Session() {
               isDisabled={wsStatus !== "Connected"}
               changeLangHandler={changeLangHandler}
             />
+
             {/* Other Quality of life options */}
             <Button leftIcon={<DownloadIcon />} onClick={downloadCodeHandler}>
-              Save code
+              Download code
             </Button>
           </Flex>
 
@@ -298,22 +302,34 @@ function Session() {
             />
           )}
           {/* Test case window */}
-          <Grid templateRows="1fr 3fr 1fr" p={4}>
+          <Grid
+            templateRows="1fr 3fr 1fr"
+            py={4}
+            px={8}
+            gap={4}
+            borderTop="1px solid #A0AEC0"
+          >
             <Text fontSize="lg">Execution Output</Text>
             <Code display="block" whiteSpace="pre-wrap" overflowY="scroll">
               {executionOutput}
             </Code>
-            <Flex direction="row-reverse" px={12} pb={4}>
-              <Button onClick={executeCodeHandler} isLoading={isExecuting}>
+            <ButtonGroup gap={4}>
+              <Button
+                onClick={executeCodeHandler}
+                isLoading={isExecuting}
+                leftIcon={<VscVmRunning />}
+              >
                 Execute Code
               </Button>
               <Button
                 onClick={sendCodeSnapshotHandler}
-                isDisabled={isEditorLocked}
+                isLoading={isEditorLocked}
+                loadingText="Submitting..."
+                leftIcon={<FaSave />}
               >
-                {isEditorLocked ? "Submitting..." : "Submit code"}
+                Submit Code Snapshot
               </Button>
-            </Flex>
+            </ButtonGroup>
           </Grid>
         </Grid>
       </Grid>
@@ -326,7 +342,6 @@ function Session() {
       />
       <DisconnectModal
         isOpen={disconnectModalDisclosure.isOpen}
-        // onClose={disconnectModalDisclosure.onClose}
         onClose={leaveSessionHandler}
         leaveSessionHandler={leaveSessionHandler}
       />
