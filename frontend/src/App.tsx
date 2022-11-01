@@ -43,6 +43,7 @@ function App() {
         })
         .catch((err) => {
           toast.sendErrorMessage("Please log in again");
+          removeCookies("AUTH-SESSION");
           console.error(err.message);
         });
     }

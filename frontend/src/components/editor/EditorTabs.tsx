@@ -9,20 +9,22 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import React from "react";
-import { Question } from "../../proto/types";
+import { useSelector } from "react-redux";
 import QuestionSection from "../question/QuestionSection";
 import HistoryTable from "../history/HistoryTable";
 import ChatSection from "../chat/ChatSection";
+import { RootState } from "../../app/store";
 
 type Props = {
-  question: Question | undefined;
   getQuestion: () => void;
   sendTextMessage: (content: string) => void;
 };
 
 const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
-function EditorTabs({ question, getQuestion, sendTextMessage }: Props) {
+function EditorTabs({ getQuestion, sendTextMessage }: Props) {
+  const question = useSelector((state: RootState) => state.session.question);
+
   return (
     <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
       <TabList>
@@ -33,7 +35,6 @@ function EditorTabs({ question, getQuestion, sendTextMessage }: Props) {
 
       <TabPanels>
         <TabPanel key="question_section" h="85vh" overflowY="scroll">
-          {/* TODO Maybe have a refresh button? (Collab svc) */}
           {question ? (
             <QuestionSection question={question} />
           ) : (

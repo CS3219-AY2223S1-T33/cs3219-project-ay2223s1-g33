@@ -39,7 +39,7 @@ describe('Function-Message-Room createConnectedPackage', () => {
 describe('Function-Message-Room createQuestionRcvPackage', () => {
   test('Test encoding question receive', () => {
     const expectedQuestion = 'question';
-    const msg = createQuestionRcvPackage(expectedQuestion);
+    const msg = createQuestionRcvPackage(expectedQuestion, true);
 
     const decoder = decoding.createDecoder(msg);
     const opcode = decoding.readUint8(decoder);

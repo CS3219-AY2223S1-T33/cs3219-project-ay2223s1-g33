@@ -134,4 +134,25 @@ export default class BaseHandler {
       );
     });
   }
+
+  async getUserByUsername(username: string): Promise<PasswordUser | undefined> {
+    const searchUserObject: User = User.create();
+    searchUserObject.username = username;
+    try {
+      return await this.getUser(searchUserObject);
+    } catch (err) {
+      return undefined;
+    }
+  }
+
+  async checkQuestionExist(questionId: number): Promise<boolean> {
+    const searchQuestionObject: Question = Question.create();
+    searchQuestionObject.questionId = questionId;
+    try {
+      const question = await this.getQuestion(searchQuestionObject);
+      return question !== undefined;
+    } catch (err) {
+      return false;
+    }
+  }
 }

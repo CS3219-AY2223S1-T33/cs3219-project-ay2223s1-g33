@@ -33,6 +33,7 @@ message Question {
   QuestionDifficulty difficulty = 3;
   string content = 4;
   string solution = 5;
+  string executionInput = 6;
 }
 
 message HistoryAttempt {
@@ -42,4 +43,9 @@ message HistoryAttempt {
   uint64 timestamp = 4;
   repeated string users = 5;
   string submission = 6;
+}
+
+message HistoryCompletion {
+  string username = 1;
+  uint64 question_id = 2;
 }

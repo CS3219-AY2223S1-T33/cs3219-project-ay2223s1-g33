@@ -14,6 +14,7 @@ import { AttemptStoreSearchResult, IStorage } from '../../../src/storage/storage
 import BaseHandler from '../../../src/controller/history_crud_service_handlers/base_handler';
 import GetAttemptsHandler
   from '../../../src/controller/history_crud_service_handlers/get_attempts_handler';
+import { PasswordUser, Question } from '../../../src/proto/types';
 
 describe('Get Attempts Handler', () => {
   const makeRequest = (
@@ -42,6 +43,7 @@ describe('Get Attempts Handler', () => {
   let mockAttemptsStorage = makeMockAttemptStorage();
   let mockStorage: IStorage = {
     getAttemptStore: jest.fn(() => mockAttemptsStorage),
+    getCompletionStore: jest.fn(),
   };
   let handler = new GetAttemptsHandler(mockStorage, userClient, questionClient);
 
@@ -50,16 +52,17 @@ describe('Get Attempts Handler', () => {
     mockAttemptsStorage = makeMockAttemptStorage();
     mockStorage = {
       getAttemptStore: jest.fn(() => mockAttemptsStorage),
+      getCompletionStore: jest.fn(),
     };
     handler = new GetAttemptsHandler(mockStorage, userClient, questionClient);
 
     jest.spyOn(BaseHandler.prototype, 'getQuestion')
       .mockImplementation(
-        () => testQuestion,
+        () => new Promise<Question | undefined>((resolve) => { resolve(testQuestion); }),
       );
     jest.spyOn(BaseHandler.prototype, 'getUser')
       .mockImplementation(
-        () => testPasswordUser,
+        () => new Promise<PasswordUser | undefined>((resolve) => { resolve(testPasswordUser); }),
       );
     mockAttemptsStorage.getAttemptsByUserIdAndQuestionId.mockImplementation(
       (): AttemptStoreSearchResult => ({
@@ -159,7 +162,7 @@ describe('Get Attempts Handler', () => {
     );
     jest.spyOn(BaseHandler.prototype, 'getUser')
       .mockImplementation(
-        () => undefined,
+        () => new Promise<PasswordUser | undefined>((resolve) => { resolve(undefined); }),
       );
 
     const response = await handler.handle(request);

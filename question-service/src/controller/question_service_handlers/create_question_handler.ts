@@ -1,4 +1,4 @@
-import { Question } from '../../proto/types';
+import { Question, QuestionDifficulty } from '../../proto/types';
 import { CreateQuestionRequest, CreateQuestionResponse } from '../../proto/question-service';
 import { ApiRequest, ApiResponse, IApiHandler } from '../../api_server/api_server_types';
 import { IStorage, IQuestionStore } from '../../storage/storage.d';
@@ -11,12 +11,29 @@ class CreateQuestionHandler implements IApiHandler<CreateQuestionRequest, Create
     this.questionStore = storage.getQuestionStore();
   }
 
-  async handle(apiRequest: ApiRequest<CreateQuestionRequest>):
-  Promise<ApiResponse<CreateQuestionResponse>> {
+  async handle(
+    apiRequest: ApiRequest<CreateQuestionRequest>,
+  ): Promise<ApiResponse<CreateQuestionResponse>> {
     const { request } = apiRequest;
 
     if (!request.question) {
       return CreateQuestionHandler.buildErrorResponse('Invalid question information');
+    }
+
+    if (
+      request.question.content.length === 0
+      || request.question.name.length === 0
+      || request.question.solution.length === 0
+      || request.question.executionInput.length === 0
+    ) {
+      return CreateQuestionHandler.buildErrorResponse('Missing question information');
+    }
+
+    if (
+      request.question.difficulty === QuestionDifficulty.UNUSED
+      || !Object.values(QuestionDifficulty).includes(request.question.difficulty)
+    ) {
+      return CreateQuestionHandler.buildErrorResponse('Invalid question difficulty');
     }
 
     let question: StoredQuestion | undefined;
@@ -26,8 +43,7 @@ class CreateQuestionHandler implements IApiHandler<CreateQuestionRequest, Create
       return CreateQuestionHandler.buildErrorResponse(`${err}`);
     }
 
-    const resultQuestionModel : Question = {
-      questionId: question.questionId!,
+    const resultQuestionModel: Question = {
       ...question,
     };
 
