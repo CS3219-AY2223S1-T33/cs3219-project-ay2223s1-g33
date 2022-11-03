@@ -33,6 +33,7 @@ async function run() {
 
   const redis: RedisClientType = createClient({
     url: envConfig.REDIS_SERVER_URL,
+    password: envConfig.REDIS_PASSWORD.length > 0 ? envConfig.REDIS_PASSWORD : undefined,
   });
   await redis.connect();
   const redisUserStream = createUserDeleteProducer(redis);

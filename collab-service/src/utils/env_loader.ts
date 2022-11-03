@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 type EnvironmentConfig = {
   readonly ROOM_SIGNING_SECRET: string;
   readonly REDIS_SERVER_URL: string;
+  readonly REDIS_PASSWORD: string;
   readonly QUESTION_SERVICE_URL: string;
   readonly HISTORY_SERVICE_URL: string;
   readonly GRPC_PORT: number;
@@ -59,6 +60,7 @@ export default function loadEnvironment(): EnvironmentConfig {
   return {
     ROOM_SIGNING_SECRET: requireString('ROOM_SIGNING_SECRET'),
     REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
+    REDIS_PASSWORD: requireString('REDIS_PASSWORD', ''),
     QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL'),
     HISTORY_SERVICE_URL: requireString('HISTORY_SERVICE_URL'),
     GRPC_PORT: requireInt('GRPC_PORT', 4003),

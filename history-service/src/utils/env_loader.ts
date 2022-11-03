@@ -12,6 +12,7 @@ type EnvironmentConfig = {
   readonly USER_SERVICE_URL: string;
   readonly QUESTION_SERVICE_URL: string;
   readonly REDIS_SERVER_URL: string;
+  readonly REDIS_PASSWORD: string;
 };
 
 function requireExists(key: string): void {
@@ -74,5 +75,6 @@ export default function loadEnvironment(): EnvironmentConfig {
     USER_SERVICE_URL: requireString('USER_SERVICE_URL', 'localhost:4000'),
     QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL', 'localhost:4004'),
     REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
+    REDIS_PASSWORD: requireString('REDIS_PASSWORD', ''),
   };
 }
