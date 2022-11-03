@@ -5,11 +5,11 @@ import matchingReducer from "../feature/matching/matchingSlice";
 import sessionReducer from "../feature/session/sessionSlice";
 
 const store = configureStore({
-	reducer: {
-		user: userReducer,
-		matching: matchingReducer,
-		session: sessionReducer,
-	},
+  reducer: {
+    user: userReducer,
+    matching: matchingReducer,
+    session: sessionReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -3,7 +3,7 @@ import React, { ChangeEvent, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   changeFontSize,
-  selectFontSize
+  selectFontSize,
 } from "../../feature/session/sessionSlice";
 
 const DEFAULT_FONTSIZE = 12;
