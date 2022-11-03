@@ -95,21 +95,17 @@ class CollabTunnelBridge {
         break;
 
       case ConnectionOpCode.JOIN: // Receive A, Send B
-        Logger.info(`${this.username} received JOIN from ${sender}`);
         await this.pubsub.pushMessage(createAckMessage(this.username, this.nickname));
         break;
 
       case ConnectionOpCode.ACK: // Receive B, 'Connected'
-        Logger.info(`${this.username} received ACK from ${sender}`);
         break;
 
       case ConnectionOpCode.ROOM_DISCOVER: // Receive ARP discovery, Send 'Who Am I'
-        Logger.info(`${this.username} received ARP from ${sender}`);
         await this.pubsub.pushMessage(createHelloMessage(this.username));
         break;
 
       case ConnectionOpCode.ROOM_HELLO: // Receive 'Who Am I', Save attempt
-        Logger.info(`${this.username} received WMI from ${sender}`);
         // Complete saving snapshot
         this.attemptCache.setUsers([this.username, sender]);
         dataToSend = await this.saveAttempt();
@@ -135,17 +131,14 @@ class CollabTunnelBridge {
     // Handle external client message cases
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send question back to user
-        Logger.info(`${this.username} requested for question`);
         await this.handleRetrieveQuestionRequest();
         break;
 
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
-        Logger.info(`${this.username} requested for saving code`);
         await this.handleSaveHistoryRequest(request);
         break;
 
       case OPCODE_EXECUTE_REQ: // Execute code
-        Logger.info(`${this.username} requested for executing code`);
         await this.handleExecuteCodeRequest(request);
         break;
 
@@ -219,14 +212,10 @@ class CollabTunnelBridge {
   private async saveAttempt(): Promise<Uint8Array> {
     // Complete saving snapshot
     if (!this.attemptCache.isValid()) {
-      Logger.error('Attempt is not valid');
       return createSaveCodeFailedPackage();
     }
     const attempt = await this.attemptCache.getHistoryAttempt();
     const message = await this.historyAgent.uploadHistoryAttempt(attempt);
-    if (message) {
-      Logger.error(`Attempt: ${message}`);
-    }
     return createSaveCodeAckPackage(message);
   }
 

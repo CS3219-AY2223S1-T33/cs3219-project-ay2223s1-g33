@@ -37,8 +37,6 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
     if (this.handler !== undefined) {
       return;
     }
-
-    Logger.info(`Event ${this.topic} registered by ${this.username}`);
     this.handler = (res) => {
       const received = this.serializer.deserialize(res);
       if (received === undefined) {
@@ -61,7 +59,6 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
     if (this.handler === undefined) {
       return;
     }
-    Logger.info(`User ${this.username} unregistered event ${this.topic}`);
     call();
     await this.redisTopicPool.unregisterTopic(`pubsub-${this.topic}`, this.handler);
   }
