@@ -20,6 +20,7 @@ type RedisBlacklistClient interface {
 
 type blacklistClient struct {
 	server                string
+	serverPassword        string
 	sessionExpiryDuration time.Duration
 	refreshExpiryDuration time.Duration
 
@@ -34,11 +35,13 @@ type blacklistClient struct {
 
 func NewRedisBlacklistClient(
 	server string,
+	serverPassword string,
 	sessionExpiryDuration time.Duration,
 	refreshExpiryDuration time.Duration,
 ) RedisBlacklistClient {
 	return &blacklistClient{
 		server:                server,
+		serverPassword:        serverPassword,
 		sessionExpiryDuration: sessionExpiryDuration,
 		refreshExpiryDuration: refreshExpiryDuration,
 	}
@@ -51,7 +54,7 @@ func (client *blacklistClient) Connect() error {
 
 	connOptions := &redis.Options{
 		Addr:     client.server,
-		Password: "",
+		Password: client.serverPassword,
 		DB:       0,
 	}
 

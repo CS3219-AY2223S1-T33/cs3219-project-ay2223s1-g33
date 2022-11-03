@@ -49,6 +49,7 @@ class Database implements IDatabase {
       entities: [
         QuestionEntity,
       ],
+      poolSize: 2,
       subscribers: [],
       migrations: [],
       extra: {

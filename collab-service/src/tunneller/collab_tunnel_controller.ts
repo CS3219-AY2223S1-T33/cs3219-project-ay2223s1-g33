@@ -37,10 +37,9 @@ class CollabTunnelController {
 
   historyAgent: IHistoryAgent;
 
-  executeAgent: IExecuteAgent;
-
   constructor(
     redisUrl: string,
+    redisPassword: string,
     questionUrl: string,
     historyUrl: string,
     judge0URL: string,
@@ -49,10 +48,12 @@ class CollabTunnelController {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
     this.pub = createClient({
       url: redisUrl,
+      password: redisPassword.length > 0 ? redisPassword : undefined,
     });
 
     const sub: RedisClientType = createClient({
       url: redisUrl,
+      password: redisPassword.length > 0 ? redisPassword : undefined,
     });
 
     this.pub.connect();
@@ -167,6 +168,7 @@ class CollabTunnelController {
 
 function createCollabTunnelController(
   redisUrl: string,
+  redisPassword: string,
   questionUrl: string,
   historyUrl: string,
   judge0URL: string,

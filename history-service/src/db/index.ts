@@ -65,6 +65,7 @@ class Database implements IDatabase {
       ],
       subscribers: [],
       migrations: [],
+      poolSize: 2,
       extra: {
         max: 2,
         idleTimeoutMillis: 60 * 60 * 1000,
