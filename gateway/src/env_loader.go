@@ -6,12 +6,13 @@ import (
 )
 
 type GatewayConfiguration struct {
-	UserBFFServer  string
-	MatchingServer string
-	CollabServer   string
-	SessionServer  string
-	HistoryServer  string
-	StaticServer   string
+	UserServiceUrl     string
+	MatchingServiceUrl string
+	CollabServiceUrl   string
+	SessionServiceUrl  string
+	HistoryServiceUrl  string
+	StaticServerUrl    string
+	StaticFolderPath   string
 
 	Port int
 }
@@ -23,26 +24,29 @@ const (
 	envSessionService  = "SESSION_SERVICE_URL"
 	envHistoryService  = "HISTORY_SERVICE_URL"
 	envStaticServer    = "STATIC_SERVER"
+	envStaticFolder    = "STATIC_FOLDER"
 	envPort            = "GATEWAY_PORT"
 )
 
 func loadConfig() *GatewayConfiguration {
-	userBFFServer := loadEnvVariableOrDefaultString(envUserService, "localhost:4000")
+	userServer := loadEnvVariableOrDefaultString(envUserService, "localhost:4000")
 	matchingServer := loadEnvVariableOrDefaultString(envMatchingService, "localhost:4001")
 	collabServer := loadEnvVariableOrDefaultString(envCollabService, "localhost:4003")
 	sessionServer := loadEnvVariableOrDefaultString(envSessionService, "localhost:4100")
 	historyServer := loadEnvVariableOrDefaultString(envHistoryService, "localhost:4005")
-	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "localhost:8000")
+	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "")
+	staticFolder := loadEnvVariableOrDefaultString(envStaticFolder, "")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
 
 	return &GatewayConfiguration{
-		UserBFFServer:  userBFFServer,
-		MatchingServer: matchingServer,
-		CollabServer:   collabServer,
-		SessionServer:  sessionServer,
-		HistoryServer:  historyServer,
-		StaticServer:   staticServer,
-		Port:           port,
+		UserServiceUrl:     userServer,
+		MatchingServiceUrl: matchingServer,
+		CollabServiceUrl:   collabServer,
+		SessionServiceUrl:  sessionServer,
+		HistoryServiceUrl:  historyServer,
+		StaticServerUrl:    staticServer,
+		StaticFolderPath:   staticFolder,
+		Port:               port,
 	}
 }
 

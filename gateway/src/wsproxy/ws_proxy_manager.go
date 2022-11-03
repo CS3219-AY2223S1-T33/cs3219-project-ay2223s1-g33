@@ -135,7 +135,7 @@ func (conn *websocketConnection) startReadPump() {
 	for conn.isAlive {
 		_, message, err := conn.socket.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseMessage, websocket.CloseNormalClosure) {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseMessage, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
 				log.Printf("Websocket unexpectedly closed: %v", err)
 			}
 			break
