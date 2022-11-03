@@ -7,19 +7,15 @@ import {
   Button,
   Text,
 } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
+import AuthAPI from "../../api/auth";
 import Link from "../ui/Link";
 import { login } from "../../feature/user/userSlice";
-import {
-  UserCredentials,
-  LoginRequest,
-  LoginResponse,
-} from "../../proto/user-service";
+import { UserCredentials, LoginRequest } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { LOGIN_VALIDATOR } from "../../constants/validators";
 import PasswordInput from "../ui/form/PasswordInput";
@@ -39,26 +35,15 @@ function LoginForm() {
     const credentials: UserCredentials = { username: email, password };
     const loginReq: LoginRequest = { credentials };
 
-    axios
-      .post<LoginResponse>("/api/user/login", loginReq, {
-        withCredentials: true,
-      })
+    AuthAPI.login(loginReq)
       .then((res) => {
-        const { errorCode, errorMessage } = res.data;
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-
-        const { user } = res.data;
+        const { user } = res;
 
         if (!user) {
           throw new Error("Something went wrong.");
         }
 
-        // Store user information on redux
         dispatch(login({ user }));
-
-        // Redirect user on successful login
         navigate("/", { replace: true });
       })
       .catch((err) => {

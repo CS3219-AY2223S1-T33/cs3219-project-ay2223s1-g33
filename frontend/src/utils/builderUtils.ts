@@ -1,3 +1,5 @@
+import { AxiosResponse } from "axios";
+import { throwIfError } from "../api/general";
 import {
   GetAttemptHistoryRequest,
   GetAttemptHistoryResponse,
@@ -16,13 +18,10 @@ const createAttemptHistoryReqFactory = (questionId: number) => {
 };
 
 const createAttemptHistoryExtractor = () => {
-  const fn = (data: GetAttemptHistoryResponse) => {
-    const { errorMessage } = data;
-    if (errorMessage !== "") {
-      throw new Error(errorMessage);
-    }
+  const fn = (res: AxiosResponse<GetAttemptHistoryResponse, any>) => {
+    throwIfError(res);
 
-    const { attempts, totalCount } = data;
+    const { attempts, totalCount } = res.data;
     return { items: attempts, total: totalCount };
   };
 

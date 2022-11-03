@@ -7,7 +7,6 @@ import {
   Button,
   Text,
 } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import {
   useForm,
@@ -17,12 +16,10 @@ import {
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "../ui/Link";
-import {
-  ResetPasswordRequest,
-  ResetPasswordResponse,
-} from "../../proto/user-service";
+import { ResetPasswordRequest } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { RESET_PW_VALIDATIOR } from "../../constants/validators";
+import AuthAPI from "../../api/auth";
 
 function ResetPasswordForm() {
   const {
@@ -38,18 +35,9 @@ function ResetPasswordForm() {
 
     const resetPasswordRequest: ResetPasswordRequest = { username: email };
 
-    axios
-      .post<ResetPasswordResponse>("/api/reset", resetPasswordRequest)
-      .then((res) => {
-        const { data: resData } = res;
-
-        if (resData.errorCode) {
-          throw new Error(resData.errorMessage);
-        }
-
-        toast.sendSuccessMessage(
-          "If an account exist, a reset password email will be sent."
-        );
+    AuthAPI.resetPassword(resetPasswordRequest)
+      .then(() => {
+        toast.sendSuccessMessage("An email will be sent if the user exists");
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);

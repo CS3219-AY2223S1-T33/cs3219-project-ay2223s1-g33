@@ -2,13 +2,8 @@ import { Box, Divider, Heading, Text, VStack } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
 import CompletionStatus from "./CompletionStatus";
-// import axios from "axios";
 import ConstraintsList from "./ConstraintsList";
-import {
-  QuestionDifficulty,
-  Question
-  // HistoryCompletion,
-} from "../../proto/types";
+import { QuestionDifficulty, Question } from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
 import { RootState } from "../../app/store";
@@ -21,13 +16,13 @@ type Props = {
 const COMPLETED: CompletionConfig = {
   colorScheme: "green",
   badgeText: "COMPLETED",
-  btnText: "Not Complete"
+  btnText: "Not Complete",
 };
 
 const NOT_COMPLETED: CompletionConfig = {
   colorScheme: "gray",
   badgeText: "NOT COMPLETED",
-  btnText: "Complete"
+  btnText: "Complete",
 };
 
 function QuestionSection({ question }: Props) {

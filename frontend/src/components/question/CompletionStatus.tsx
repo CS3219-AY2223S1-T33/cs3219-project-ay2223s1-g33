@@ -1,16 +1,13 @@
 import { Badge, Button } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { changeIsCompleted } from "../../feature/session/sessionSlice";
-import {
-  SetHistoryCompletionRequest,
-  SetHistoryCompletionResponse,
-} from "../../proto/history-service";
+import { SetHistoryCompletionRequest } from "../../proto/history-service";
 import { HistoryCompletion, Question } from "../../proto/types";
 import { CompletionConfig } from "../../types";
 import useFixedToast from "../../utils/hooks/useFixedToast";
+import HistoryAPI from "../../api/history";
 
 type Props = {
   config: CompletionConfig;
@@ -32,20 +29,8 @@ function CompletionStatus({ config, question, isCompleted }: Props) {
 
     const completed: HistoryCompletion = { questionId, username };
     const request: SetHistoryCompletionRequest = { completed };
-    axios
-      .post<SetHistoryCompletionResponse>(
-        "/api/user/history/completion",
-        request,
-        { withCredentials: true }
-      )
-      .then((res) => {
-        const { errorMessage } = res.data;
-
-        if (errorMessage !== "") {
-          throw new Error(errorMessage);
-        }
-
-        // setIsCompleted((prev) => !prev);
+    HistoryAPI.setHistoryCompletion(request)
+      .then(() => {
         dispatch(changeIsCompleted({ isComplete: !isCompleted }));
       })
       .catch((err) => {
