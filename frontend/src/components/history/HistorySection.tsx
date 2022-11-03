@@ -1,22 +1,31 @@
-import { Code, Divider, Heading, VStack } from "@chakra-ui/react";
+import { Divider, Heading, VStack } from "@chakra-ui/react";
+import { loadLanguage } from "@uiw/codemirror-extensions-langs";
+import CodeMirror from "@uiw/react-codemirror";
 import React from "react";
+import { Language } from "../../types";
 import LoadingSection from "../ui/LoadingSection";
 
 type Props = {
   submission: string | undefined;
+  language: Language;
 };
 
-function HistorySection({ submission }: Props) {
+function HistorySection({ submission, language }: Props) {
+  const lang: any = loadLanguage(language);
+
   return (
-    <VStack spacing={4} width="50%">
+    <VStack spacing={4}>
       <Heading as="h4" size="md">
         Code Submitted
       </Heading>
       <Divider />
       {submission ? (
-        <Code width="100%" overflow="scroll">
-          {submission}
-        </Code>
+        <CodeMirror
+          value={submission}
+          extensions={[lang]}
+          style={{ overflowY: "auto", width: "100%", height: "75vh" }}
+          editable={false}
+        />
       ) : (
         <LoadingSection message="Loading Submission..." />
       )}
