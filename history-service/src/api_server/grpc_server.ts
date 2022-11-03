@@ -34,7 +34,7 @@ export default class GRPCServer implements IGRPCServer {
       this.grpcCredentials = ServerCredentials.createSsl(null, [{
         cert_chain: grpcCert,
         private_key: grpcKey,
-      }], true);
+      }], false);
     } else {
       Logger.warn('GRPC operating in insecure mode');
       this.grpcCredentials = ServerCredentials.createInsecure();

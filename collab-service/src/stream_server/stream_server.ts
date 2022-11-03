@@ -32,7 +32,7 @@ class StreamServer {
     let creds: ServerCredentials;
     if (this.grpcCertPair) {
       Logger.info('GRPC operating in secure mode');
-      creds = ServerCredentials.createSsl(null, [this.grpcCertPair], true);
+      creds = ServerCredentials.createSsl(null, [this.grpcCertPair], false);
     } else {
       Logger.warn('GRPC operating in insecure mode');
       creds = ServerCredentials.createInsecure();
