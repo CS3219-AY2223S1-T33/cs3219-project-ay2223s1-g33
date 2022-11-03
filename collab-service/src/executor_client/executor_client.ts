@@ -91,6 +91,42 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     callback(protoResponse);
   }
 
+  async deleteExecution(
+    input: GetExecuteRequest,
+    metadata: { deadline: number },
+    callback: (value: GetExecuteResponse) => void,
+  ) {
+    let protoResponse: GetExecuteResponse;
+    try {
+      const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}?fields=status`, {
+        method: 'DELETE',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Judge0-User': 'Auth-Judge0-User',
+        },
+        signal: getFetchDeadline(metadata.deadline),
+      });
+      const content = await rawResponse.json();
+      protoResponse = GetExecuteResponse.create({
+        errorMessage: content.status.description,
+      });
+    } catch (err) {
+      if (ExecuteServiceClient.isTimeoutError(err)) {
+        protoResponse = GetExecuteResponse.create({
+          output: undefined,
+          errorMessage: 'Timeout',
+        });
+      } else {
+        protoResponse = GetExecuteResponse.create({
+          output: undefined,
+          errorMessage: 'Execute Deletion Failed',
+        });
+      }
+    }
+    callback(protoResponse);
+  }
+
   private static isTimeoutError(err: unknown) {
     return (err as Error).name === 'AbortError';
   }

@@ -58,6 +58,23 @@ class ExecuteAgent implements IExecuteAgent {
       );
     });
   }
+
+  deleteResult(token: string) {
+    this.executeClient.deleteExecution(
+      {
+        token,
+      },
+      {
+        deadline: timeout,
+      },
+      (value) => {
+        if (!(value.errorMessage === 'Accepted'
+          || value.errorMessage === 'Runtime Error (NZEC)')) {
+          Logger.error(value.errorMessage);
+        }
+      },
+    );
+  }
 }
 
 function createExecuteAgent(

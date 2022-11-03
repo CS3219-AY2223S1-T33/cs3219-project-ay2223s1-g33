@@ -50,6 +50,7 @@ class ExecuteBridge {
       if (res) {
         clearInterval(interval);
         callback(res);
+        this.executeAgent.deleteResult(token);
       }
     }, 1000);
   }

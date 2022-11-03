@@ -15,4 +15,9 @@ declare interface IExecuteServiceClient {
     metadata: { deadline: number },
     callback: (value: GetExecuteResponse) => void,
   )
+  deleteExecution(
+    input: GetExecuteRequest,
+    metadata: { deadline: number },
+    callback: (value: GetExecuteResponse) => void,
+  )
 }
