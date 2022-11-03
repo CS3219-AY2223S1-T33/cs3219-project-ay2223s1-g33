@@ -3,19 +3,14 @@ import { useDispatch } from "react-redux";
 import React from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useNavigate } from "react-router-dom";
-import axios from "../../axios";
 import { enterRoom, leaveQueue } from "../../feature/matching/matchingSlice";
 import CountdownText from "./CountdownText";
-import {
-  CheckQueueStatusResponse,
-  LeaveQueueResponse,
-  QueueStatus,
-} from "../../proto/matching-service";
+import { QueueStatus } from "../../proto/matching-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
+import MatchingAPI from "../../api/matching";
 
 // ! console.log() s ar e intentionally left here for backend implementation
 function Countdown() {
-  // const toast = useToast();
   const toast = useFixedToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -28,20 +23,8 @@ function Countdown() {
   };
 
   const requestLeaveQueue = () => {
-    axios
-      .post<LeaveQueueResponse>(
-        "/api/queue/leave",
-        {},
-        {
-          withCredentials: true,
-        }
-      )
-      .then((res) => {
-        const { errorCode, errorMessage } = res.data;
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-      })
+    MatchingAPI.leaveQueue()
+      // .then((res) => {})
       .catch((err) => {
         toast.sendErrorMessage(err.message);
       })
@@ -60,20 +43,9 @@ function Countdown() {
       return;
     }
 
-    axios
-      .post<CheckQueueStatusResponse>(
-        "/api/queue/status",
-        {},
-        {
-          withCredentials: true,
-        }
-      )
+    MatchingAPI.checkQueueStatus()
       .then((res) => {
-        const { errorCode, errorMessage, queueStatus, roomToken } = res.data;
-
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
+        const { queueStatus, roomToken } = res;
 
         switch (queueStatus) {
           case QueueStatus.PENDING:
@@ -82,13 +54,13 @@ function Countdown() {
             // Leave the queue and transit to session
             dispatch(enterRoom({ roomToken }));
             leaveQueueHandler();
-            navigate(`/session`);
+            navigate("/session", { replace: true });
             break;
           case QueueStatus.EXPIRED:
             completeTimeHandler();
             break;
           default:
-            throw new Error("Invalid queueStatus");
+            throw new Error("Invalid queue status.");
         }
       })
       .catch((err) => {

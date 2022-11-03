@@ -308,7 +308,7 @@ function Session() {
       />
       <DisconnectModal
         isOpen={disconnectModalDisclosure.isOpen}
-        onClose={leaveSessionHandler}
+        onClose={disconnectModalDisclosure.onClose}
         leaveSessionHandler={leaveSessionHandler}
       />
     </>

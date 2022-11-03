@@ -13,12 +13,9 @@ import {
   useForm,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "../../axios";
+import AuthAPI from "../../api/auth";
 import useFixedToast from "../../utils/hooks/useFixedToast";
-import {
-  ChangePasswordRequest,
-  ChangePasswordResponse,
-} from "../../proto/user-service";
+import { ChangePasswordRequest } from "../../proto/user-service";
 import PasswordInput from "../ui/form/PasswordInput";
 import { SET_PW_VALIDATOR } from "../../constants/validators";
 
@@ -39,22 +36,12 @@ function ChangePasswordForm() {
       newPassword,
     };
 
-    axios
-      .post<ChangePasswordResponse>(
-        "/api/user/password",
-        changePasswordRequest,
-        {
-          withCredentials: true,
-        }
-      )
-      .then((res) => {
-        const { errorCode, errorMessage } = res.data;
+    AuthAPI.changePassword(changePasswordRequest)
+      .then(() => {
+        toast.sendSuccessMessage(
+          "Your password is changed! You will need to login again!"
+        );
 
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-
-        toast.sendSuccessMessage("Your password is changed!");
         reset();
       })
       .catch((err) => {

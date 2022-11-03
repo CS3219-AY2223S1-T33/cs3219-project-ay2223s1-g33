@@ -8,19 +8,16 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  Grid,
+  HStack,
 } from "@chakra-ui/react";
-import axios from "axios";
 import QuestionSection from "../question/QuestionSection";
 import HistorySection from "../history/HistorySection";
 import saveFile from "../../utils/fileDownloadUtil";
 import { Language } from "../../types";
 import { HistoryAttempt } from "../../proto/types";
-import {
-  GetAttemptSubmissionRequest,
-  GetAttemptSubmissionResponse,
-} from "../../proto/history-service";
+import { GetAttemptSubmissionRequest } from "../../proto/history-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
+import HistoryAPI from "../../api/history";
 
 type Props = {
   historyAttempt: HistoryAttempt | undefined;
@@ -39,31 +36,20 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
   const toast = useFixedToast();
   const [submission, setSubmission] = useState<string | undefined>();
 
-  const loadSubmission = async (
-    targetAttemptId: number
-  ): Promise<HistoryAttempt> => {
+  const loadSubmission = (targetAttemptId: number): Promise<HistoryAttempt> => {
     const request: GetAttemptSubmissionRequest = {
       attemptId: targetAttemptId,
     };
-    const res = await axios.post<GetAttemptSubmissionResponse>(
-      "/api/user/history/submission",
-      request,
-      {
-        withCredentials: true,
+
+    return HistoryAPI.getAttemptSubmission(request).then((res) => {
+      const { attempt } = res;
+
+      if (!attempt) {
+        throw new Error("Something went wrong.");
       }
-    );
 
-    const { errorMessage } = res.data;
-    if (errorMessage !== "") {
-      throw new Error(errorMessage);
-    }
-
-    const { attempt } = res.data;
-    if (!attempt) {
-      throw new Error("Something went wrong.");
-    }
-
-    return attempt;
+      return attempt;
+    });
   };
 
   useEffect(() => {
@@ -101,16 +87,14 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
         <ModalHeader>{header}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {/* <HStack spacing="24px" alignItems="flex-start"> */}
-          <Grid templateColumns="2fr 3fr" gap={6}>
+          <HStack spacing="24px" alignItems="flex-start">
+            {/* Wtf? */}
             <QuestionSection question={question!} />
             <HistorySection
               submission={submission}
               language={historyAttempt.language as Language}
             />
-          </Grid>
-
-          {/* </HStack> */}
+          </HStack>
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="blue" onClick={saveFileHandler} mr={3}>

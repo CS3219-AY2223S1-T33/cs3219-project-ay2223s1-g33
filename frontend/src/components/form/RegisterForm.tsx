@@ -7,7 +7,6 @@ import {
   Button,
   Text,
 } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import {
   useForm,
@@ -16,13 +15,10 @@ import {
   SubmitErrorHandler,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import AuthAPI from "../../api/auth";
 import Link from "../ui/Link";
 import PasswordInput from "../ui/form/PasswordInput";
-import {
-  UserCredentials,
-  RegisterRequest,
-  RegisterResponse,
-} from "../../proto/user-service";
+import { UserCredentials, RegisterRequest } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { REGISTER_VALIDATOR } from "../../constants/validators";
 
@@ -41,18 +37,8 @@ function RegisterForm() {
     const credentials: UserCredentials = { username: email, password };
     const registerRequest: RegisterRequest = { credentials, nickname };
 
-    // Send registration request to the server
-    axios
-      .post<RegisterResponse>("/api/user/register", registerRequest)
-      .then((res) => {
-        const { data: resData } = res;
-
-        // Since proto-buffers treat 0 and empty string as undefined, a successful registration
-        // will return an empty object
-        if (resData.errorCode) {
-          throw new Error(resData.errorMessage);
-        }
-
+    AuthAPI.register(registerRequest)
+      .then(() => {
         toast.sendSuccessMessage("Yay! Click on the link below to login.");
       })
       .catch((err) => {
