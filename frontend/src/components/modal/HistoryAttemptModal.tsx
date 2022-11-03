@@ -8,7 +8,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  HStack,
+  Grid,
 } from "@chakra-ui/react";
 import axios from "axios";
 import QuestionSection from "../question/QuestionSection";
@@ -101,10 +101,16 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
         <ModalHeader>{header}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <HStack spacing="24px" alignItems="flex-start">
+          {/* <HStack spacing="24px" alignItems="flex-start"> */}
+          <Grid templateColumns="2fr 3fr" gap={6}>
             <QuestionSection question={question!} />
-            <HistorySection submission={submission} />
-          </HStack>
+            <HistorySection
+              submission={submission}
+              language={historyAttempt.language as Language}
+            />
+          </Grid>
+
+          {/* </HStack> */}
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="blue" onClick={saveFileHandler} mr={3}>

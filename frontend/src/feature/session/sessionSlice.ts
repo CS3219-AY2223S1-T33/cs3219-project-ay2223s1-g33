@@ -82,8 +82,8 @@ export const sessionSlice = createSlice({
       state.isEditorLocked = initialState.isEditorLocked;
       state.isCompleted = initialState.isCompleted;
       state.chat = initialState.chat;
-			state.executionOutput = initialState.executionOutput;
-			state.isExecuting = initialState.isExecuting;
+      state.executionOutput = initialState.executionOutput;
+      state.isExecuting = initialState.isExecuting;
     },
   },
 });
