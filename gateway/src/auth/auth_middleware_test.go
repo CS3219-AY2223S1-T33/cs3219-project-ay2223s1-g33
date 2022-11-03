@@ -35,9 +35,8 @@ func TestMiddlewarePassthrough(t *testing.T) {
 	authAgent := mocks.NewMockAuthAgent(ctrl)
 	downstream := mocks.NewMockPipeInput(ctrl)
 	middleware := authMiddleware{
-		BasePipeOutput:    util.BasePipeOutput{},
-		sessionServiceUrl: "testurl",
-		authAgent:         authAgent,
+		BasePipeOutput: util.BasePipeOutput{},
+		authAgent:      authAgent,
 	}
 	middleware.PipeTo(downstream)
 
@@ -66,9 +65,8 @@ func TestMiddlewareSanitization(t *testing.T) {
 	authAgent := mocks.NewMockAuthAgent(ctrl)
 	downstream := mocks.NewMockPipeInput(ctrl)
 	middleware := authMiddleware{
-		BasePipeOutput:    util.BasePipeOutput{},
-		sessionServiceUrl: "testurl",
-		authAgent:         authAgent,
+		BasePipeOutput: util.BasePipeOutput{},
+		authAgent:      authAgent,
 	}
 	middleware.PipeTo(downstream)
 
@@ -92,9 +90,8 @@ func TestMiddlewareAuthInvalid(t *testing.T) {
 	authAgent := mocks.NewMockAuthAgent(ctrl)
 	downstream := mocks.NewMockPipeInput(ctrl)
 	middleware := authMiddleware{
-		BasePipeOutput:    util.BasePipeOutput{},
-		sessionServiceUrl: "testurl",
-		authAgent:         authAgent,
+		BasePipeOutput: util.BasePipeOutput{},
+		authAgent:      authAgent,
 	}
 	middleware.PipeTo(downstream)
 
@@ -150,9 +147,8 @@ func TestMiddlewareAuthDownstream(t *testing.T) {
 	authAgent := mocks.NewMockAuthAgent(ctrl)
 	downstream := mocks.NewMockPipeInput(ctrl)
 	middleware := authMiddleware{
-		BasePipeOutput:    util.BasePipeOutput{},
-		sessionServiceUrl: "testurl",
-		authAgent:         authAgent,
+		BasePipeOutput: util.BasePipeOutput{},
+		authAgent:      authAgent,
 	}
 	middleware.PipeTo(downstream)
 

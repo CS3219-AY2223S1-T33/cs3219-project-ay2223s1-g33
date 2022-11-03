@@ -127,6 +127,7 @@ services:
       - config_env/route-map-internal.env
       - config_env/secrets-signing.env
       - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: ./session-service
@@ -157,6 +158,7 @@ services:
     platform: linux/amd64
     env_file:
       - config_env/route-map-gateway.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: ./gateway

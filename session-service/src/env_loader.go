@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,6 +18,8 @@ type SessionServiceConfig struct {
 	RefreshSecret        string
 	SessionTokenLifespan time.Duration
 	RefreshTokenLifespan time.Duration
+
+	grpcCertificate *tls.Certificate
 }
 
 const (
@@ -26,6 +30,9 @@ const (
 	envRefreshSecret   = "REFRESH_SIGNING_SECRET"
 	envSessionLifespan = "SESSION_LIFESPAN_MINS"
 	envRefreshLifespan = "REFRESH_LIFESPAN_MINS"
+
+	envGRPCCert = "GRPC_CERT"
+	envGRPCKey  = "GRPC_KEY"
 )
 
 const (
@@ -50,12 +57,24 @@ func loadConfig() (*SessionServiceConfig, error) {
 		return nil, errors.New("Refresh Secret not set")
 	}
 
-	defaultRedisPassword := ""
-	redisPassword := loadEnvVariableOrDefaultString(envRedisPassword, &defaultRedisPassword)
+	defaultEmptyString := ""
+	redisPassword := loadEnvVariableOrDefaultString(envRedisPassword, &defaultEmptyString)
 	sessionTokenLifespan := loadEnvVariableOrDefaultInt(envSessionLifespan, defaultSessionTokenLifespan)
 	refreshTokenLifespan := loadEnvVariableOrDefaultInt(envRefreshLifespan, defaultRefreshTokenLifespan)
-
 	port := loadEnvVariableOrDefaultInt(envPort, 4100)
+
+	grpcCert := loadEnvVariableOrDefaultString(envGRPCCert, &defaultEmptyString)
+	grpcKey := loadEnvVariableOrDefaultString(envGRPCKey, &defaultEmptyString)
+	var certPtr *tls.Certificate = nil
+	if *grpcCert != "" && *grpcKey != "" {
+		cert, err := tls.X509KeyPair(
+			[]byte(sanitizeQuotesAndBreakline(*grpcCert)),
+			[]byte(sanitizeQuotesAndBreakline(*grpcKey)),
+		)
+		if err == nil {
+			certPtr = &cert
+		}
+	}
 
 	return &SessionServiceConfig{
 		RedisServer:          *server,
@@ -65,6 +84,7 @@ func loadConfig() (*SessionServiceConfig, error) {
 		RefreshSecret:        *refreshSecret,
 		SessionTokenLifespan: time.Duration(int64(sessionTokenLifespan) * int64(time.Minute)),
 		RefreshTokenLifespan: time.Duration(int64(refreshTokenLifespan) * int64(time.Minute)),
+		grpcCertificate:      certPtr,
 	}, nil
 }
 
@@ -88,4 +108,8 @@ func loadEnvVariableOrDefaultInt(envKey string, defaultValue int) int {
 	}
 
 	return intValue
+}
+
+func sanitizeQuotesAndBreakline(inp string) string {
+	return strings.ReplaceAll(strings.Trim(inp, "\"'"), "\\n", "\n")
 }

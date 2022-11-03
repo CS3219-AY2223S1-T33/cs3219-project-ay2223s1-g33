@@ -2,6 +2,7 @@ package grpc_adapter
 
 import (
 	"context"
+	"crypto/x509"
 	gw "cs3219-project-ay2223s1-g33/gateway/proto"
 	"cs3219-project-ay2223s1-g33/gateway/util"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -18,6 +20,7 @@ type grpcMiddleware struct {
 	userServiceUrl     string
 	matchingServiceUrl string
 	historyServiceUrl  string
+	certificate        *x509.CertPool
 	connCtx            context.Context
 	cancelCtx          context.CancelFunc
 	serveMux           *runtime.ServeMux
@@ -27,6 +30,7 @@ func NewGRPCMiddleware(
 	userServiceUrl string,
 	matchingServiceUrl string,
 	historyServiceUrl string,
+	grpcCertificate *x509.CertPool,
 ) util.DisposablePipeInput {
 	ctx, cancel := context.WithCancel(context.Background())
 	middleware := &grpcMiddleware{
@@ -35,6 +39,7 @@ func NewGRPCMiddleware(
 		historyServiceUrl:  historyServiceUrl,
 		connCtx:            ctx,
 		cancelCtx:          cancel,
+		certificate:        grpcCertificate,
 	}
 	if middleware.initServeMux() != nil {
 		return nil
@@ -70,7 +75,13 @@ func (middleware *grpcMiddleware) initServeMux() error {
 	outgoingHeaderOpts := runtime.WithOutgoingHeaderMatcher(gatewayOutgoingHeaderMatcher)
 	mux := runtime.NewServeMux(marshalerOpts, incomingHeaderOpts, outgoingHeaderOpts)
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	var clientCreds credentials.TransportCredentials
+	if middleware.certificate == nil {
+		clientCreds = insecure.NewCredentials()
+	} else {
+		clientCreds = credentials.NewClientTLSFromCert(middleware.certificate, "")
+	}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(clientCreds)}
 	log.Printf("Proxying to User-BFF on %s\n", middleware.userServiceUrl)
 	err := gw.RegisterUserServiceHandlerFromEndpoint(middleware.connCtx, mux, middleware.userServiceUrl, opts)
 	if err != nil {
