@@ -41,7 +41,7 @@ func main() {
 
 func run(config *GatewayConfiguration) error {
 	staticServeHandler := resolveStaticHandler(config)
-	proxyMiddleware := wsproxy.NewWSProxyMiddleware(config.CollabServiceUrl)
+	proxyMiddleware := wsproxy.NewWSProxyMiddleware(config.CollabServiceUrl, config.GRPCCertificate)
 
 	grpcMiddleware := grpc_adapter.NewGRPCMiddleware(
 		config.UserServiceUrl,

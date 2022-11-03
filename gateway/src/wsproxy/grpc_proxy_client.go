@@ -2,6 +2,7 @@ package wsproxy
 
 import (
 	"context"
+	"crypto/x509"
 	"errors"
 	"io"
 	"log"
@@ -11,6 +12,7 @@ import (
 	pb "cs3219-project-ay2223s1-g33/gateway/proto"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
@@ -26,6 +28,7 @@ type ProxyWorker interface {
 
 type proxyWorker struct {
 	server          string
+	certificate     *x509.CertPool
 	sessionUsername string
 	sessionNickname string
 	roomToken       string
@@ -42,6 +45,7 @@ type proxyWorker struct {
 
 func CreateProxyClient(
 	server string,
+	certificate *x509.CertPool,
 	roomToken string,
 	sessionUsername string,
 	sessionNickname string,
@@ -53,6 +57,7 @@ func CreateProxyClient(
 		roomToken:          roomToken,
 		deathSignalChannel: make(chan bool, 2),
 		isOpen:             false,
+		certificate:        certificate,
 	}
 }
 
@@ -68,7 +73,14 @@ func (worker *proxyWorker) Connect() (io.WriteCloser, error) {
 	worker.mutex.Lock()
 	defer worker.mutex.Unlock()
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	var clientCreds credentials.TransportCredentials
+	if worker.certificate == nil {
+		clientCreds = insecure.NewCredentials()
+	} else {
+		clientCreds = credentials.NewClientTLSFromCert(worker.certificate, "")
+	}
+
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(clientCreds)}
 	conn, err := grpc.Dial(worker.server, opts...)
 	if err != nil {
 		return nil, errors.New("Failed to dial downstream")

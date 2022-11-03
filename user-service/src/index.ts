@@ -40,6 +40,7 @@ async function run() {
 
   const authService: IAuthenticationAgent = createAuthenticationService(
     envConfig.SESSION_SERVICE_URL,
+    envConfig.GRPC_CERT,
   );
 
   const emailAdapter = createSMTPAdapter({

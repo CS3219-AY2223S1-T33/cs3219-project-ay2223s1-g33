@@ -1,6 +1,7 @@
 package wsproxy
 
 import (
+	"crypto/x509"
 	"cs3219-project-ay2223s1-g33/gateway/auth"
 	"cs3219-project-ay2223s1-g33/gateway/util"
 	"log"
@@ -10,13 +11,15 @@ import (
 type wsProxyMiddleware struct {
 	util.BasePipeOutput
 	collabServiceUrl string
+	grpcCert         *x509.CertPool
 	proxyManager     WebsocketProxyManager
 }
 
-func NewWSProxyMiddleware(downstreamUrl string) util.ThroughPipe {
+func NewWSProxyMiddleware(downstreamUrl string, grpcCert *x509.CertPool) util.ThroughPipe {
 	log.Printf("WS Proxy on Downstream %s\n", downstreamUrl)
 	return &wsProxyMiddleware{
 		collabServiceUrl: downstreamUrl,
+		grpcCert:         grpcCert,
 		proxyManager:     CreateWebsocketProxyManager(),
 	}
 }
@@ -38,7 +41,7 @@ func (middleware *wsProxyMiddleware) Receive(httpCtx *util.HTTPContext) error {
 
 	username := req.Header.Get(auth.AuthHeaderUsername)
 	nickname := req.Header.Get(auth.AuthHeaderNickname)
-	downstreamClient := CreateProxyClient(middleware.collabServiceUrl, roomToken, username, nickname)
+	downstreamClient := CreateProxyClient(middleware.collabServiceUrl, middleware.grpcCert, roomToken, username, nickname)
 	downstreamWriter, err := downstreamClient.Connect()
 	if err != nil {
 		log.Println("Failed to connect downstream")

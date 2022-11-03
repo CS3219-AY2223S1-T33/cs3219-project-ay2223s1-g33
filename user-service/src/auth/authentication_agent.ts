@@ -12,11 +12,15 @@ class AuthenticationAgent implements IAuthenticationAgent {
 
   grpcClient: SessionServiceClient;
 
-  constructor(sessionServiceUrl: string) {
+  constructor(sessionServiceUrl: string, grpcCert?: Buffer) {
     this.sessionServiceUrl = sessionServiceUrl;
+    let grpcCredentials = ChannelCredentials.createInsecure();
+    if (grpcCert) {
+      grpcCredentials = ChannelCredentials.createSsl(grpcCert);
+    }
     this.grpcClient = new SessionServiceClient(
       this.sessionServiceUrl,
-      ChannelCredentials.createInsecure(),
+      grpcCredentials,
       {},
       {},
     );
@@ -92,8 +96,11 @@ class AuthenticationAgent implements IAuthenticationAgent {
   }
 }
 
-function createAuthenticationService(sessionServiceUrl: string): IAuthenticationAgent {
-  return new AuthenticationAgent(sessionServiceUrl);
+function createAuthenticationService(
+  sessionServiceUrl: string,
+  grpcCert?: Buffer,
+): IAuthenticationAgent {
+  return new AuthenticationAgent(sessionServiceUrl, grpcCert);
 }
 
 export default createAuthenticationService;
