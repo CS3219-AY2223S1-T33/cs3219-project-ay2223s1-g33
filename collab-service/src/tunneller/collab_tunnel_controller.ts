@@ -37,6 +37,8 @@ class CollabTunnelController {
 
   historyAgent: IHistoryAgent;
 
+  executeAgent: IExecuteAgent;
+
   constructor(
     redisUrl: string,
     redisPassword: string,
@@ -176,6 +178,7 @@ function createCollabTunnelController(
 ): CollabTunnelController {
   return new CollabTunnelController(
     redisUrl,
+    redisPassword,
     questionUrl,
     historyUrl,
     judge0URL,

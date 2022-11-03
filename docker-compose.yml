@@ -201,7 +201,7 @@ services:
     ports:
       - "5432:5432"
 
-  redis-judge:
+  redis-judge0:
     image: redis:6.0
     command: [
       "bash", "-c",
