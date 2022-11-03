@@ -126,7 +126,7 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-signing.env
-      - config_env/session-service.env
+      - config_env/secrets-redis.env
 
     build:
       context: ./session-service
@@ -194,19 +194,3 @@ services:
     volumes:
       - ./execute-service/judge0.conf:/judge0.conf:ro
     privileged: true
-
-  db:
-    image: postgres:13.0
-    env_file: execute-service/judge0.conf
-    ports:
-      - "5432:5432"
-
-  redis-judge0:
-    image: redis:6.0
-    command: [
-      "bash", "-c",
-      'docker-entrypoint.sh --appendonly yes --requirepass "$$REDIS_PASSWORD"'
-    ]
-    env_file: execute-service/judge0.conf
-    ports:
-      - "6379:6379"
