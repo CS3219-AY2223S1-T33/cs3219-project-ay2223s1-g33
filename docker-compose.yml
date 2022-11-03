@@ -169,3 +169,36 @@ services:
     ports:
       - "6379:6379"
 
+  server:
+    image: judge0/judge0:1.13.0
+    volumes:
+      - ./execute-service/judge0.conf:/judge0.conf:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+
+  workers:
+    image: judge0/judge0:1.13.0
+    command: [
+      "bash", "-c",
+      "./scripts/workers"
+    ]
+    volumes:
+      - ./execute-service/judge0.conf:/judge0.conf:ro
+    privileged: true
+
+  db:
+    image: postgres:13.0
+    env_file: execute-service/judge0.conf
+    ports:
+      - "5432:5432"
+
+  redis-judge:
+    image: redis:6.0
+    command: [
+      "bash", "-c",
+      'docker-entrypoint.sh --appendonly yes --requirepass "$$REDIS_PASSWORD"'
+    ]
+    env_file: execute-service/judge0.conf
+    ports:
+      - "6379:6379"
