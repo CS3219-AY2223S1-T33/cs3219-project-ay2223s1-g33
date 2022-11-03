@@ -9,7 +9,11 @@ const version = `${Constants.VERSION_MAJOR}.${Constants.VERSION_MINOR}.${Constan
 Logger.info(`Starting Collab Service [V${version}]`);
 const envConfig = loadEnvironment();
 
-const streamServer = createStreamServer(envConfig.GRPC_PORT);
+const streamServer = createStreamServer(
+  envConfig.GRPC_PORT,
+  envConfig.GRPC_CERT,
+  envConfig.GRPC_KEY,
+);
 
 const collabController = createCollabTunnelController(
   envConfig.REDIS_SERVER_URL,
