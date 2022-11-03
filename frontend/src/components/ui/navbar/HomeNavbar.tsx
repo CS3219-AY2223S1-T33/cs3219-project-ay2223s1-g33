@@ -24,16 +24,11 @@ function HomeNavbar() {
   const dispatch = useDispatch();
 
   const logoutHandler = () => {
-    AuthAPI.logout()
-      // .then((res) => {})
-      // .catch((err) => {
-      // 	console.error(err.message);
-      // })
-      .finally(() => {
-        dispatch(reset());
-        dispatch(logout());
-        navigate("/login", { replace: true });
-      });
+    AuthAPI.logout().finally(() => {
+      dispatch(reset());
+      dispatch(logout());
+      navigate("/login", { replace: true });
+    });
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure();
