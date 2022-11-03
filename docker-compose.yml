@@ -22,6 +22,7 @@ services:
       - config_env/route-map-internal.env
       - config_env/secrets-db.env
       - config_env/secrets-email.env
+      - config_env/secrets-redis.env
 
     build:
       context: .
@@ -45,6 +46,7 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
 
     build:
       context: .
@@ -67,6 +69,7 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
 
     build:
       context: .
@@ -86,6 +89,7 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-db.env
+      - config_env/secrets-redis.env
 
     build:
       context: .
@@ -109,6 +113,7 @@ services:
     platform: linux/amd64
     env_file:
       - config_env/route-map-internal.env
+      - config_env/secrets-redis.env
 
     build:
       context: ./matchmaker
@@ -121,6 +126,7 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
 
     build:
       context: ./session-service
@@ -135,6 +141,7 @@ services:
     env_file:
       - config_env/route-map-internal.env
       - config_env/secrets-db.env
+      - config_env/secrets-redis.env
 
     build:
       context: .
@@ -161,6 +168,9 @@ services:
       - "host.docker.internal:host-gateway"
 
   redis:
+    env_file:
+      - config_env/secrets-redis.env
+
     build:
       context: ./images
       dockerfile: redis.dockerfile

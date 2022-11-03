@@ -50,6 +50,9 @@ env:
     DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
     DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
 
+  CONFIG_SECRETS_REDIS: |
+    REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
 jobs:
   deploy:
     name: Deploy to AWS ECS
@@ -183,6 +186,7 @@ jobs:
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_SIGNING }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Update task definition for question-service
         id: task-def-question-service
@@ -194,6 +198,7 @@ jobs:
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_DB }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
@@ -204,6 +209,7 @@ jobs:
           image: ${{ steps.build-image.outputs.matchmaker-image }}
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Update task definition for user-service
         id: task-def-user-service
@@ -216,6 +222,7 @@ jobs:
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_DB }}
             ${{ env.CONFIG_SECRETS_EMAIL }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Update task definition for matching-service
         id: task-def-matching-service
@@ -227,6 +234,7 @@ jobs:
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_SIGNING }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Update task definition for collab-service
         id: task-def-collab-service
@@ -238,6 +246,7 @@ jobs:
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_SIGNING }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Update task definition for frontend
         id: task-def-frontend
@@ -267,6 +276,7 @@ jobs:
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_DB }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
