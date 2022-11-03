@@ -1,5 +1,5 @@
 export default {
   VERSION_MAJOR: 4,
-  VERSION_MINOR: 3,
+  VERSION_MINOR: 5,
   VERSION_REVISION: 0,
 };

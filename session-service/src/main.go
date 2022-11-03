@@ -21,6 +21,7 @@ func main() {
 
 	redisClient := blacklist.NewRedisBlacklistClient(
 		config.RedisServer,
+		config.RedisPassword,
 		config.SessionTokenLifespan,
 		config.RefreshTokenLifespan,
 	)

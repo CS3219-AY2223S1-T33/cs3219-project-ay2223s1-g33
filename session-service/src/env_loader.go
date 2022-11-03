@@ -8,8 +8,9 @@ import (
 )
 
 type SessionServiceConfig struct {
-	RedisServer string
-	Port        int
+	RedisServer   string
+	RedisPassword string
+	Port          int
 
 	SessionSecret        string
 	RefreshSecret        string
@@ -19,6 +20,7 @@ type SessionServiceConfig struct {
 
 const (
 	envRedisServer     = "REDIS_SERVER"
+	envRedisPassword   = "REDIS_PASSWORD"
 	envPort            = "SERVER_PORT"
 	envSessionSecret   = "SESSION_SIGNING_SECRET"
 	envRefreshSecret   = "REFRESH_SIGNING_SECRET"
@@ -48,6 +50,8 @@ func loadConfig() (*SessionServiceConfig, error) {
 		return nil, errors.New("Refresh Secret not set")
 	}
 
+	defaultRedisPassword := ""
+	redisPassword := loadEnvVariableOrDefaultString(envRedisPassword, &defaultRedisPassword)
 	sessionTokenLifespan := loadEnvVariableOrDefaultInt(envSessionLifespan, defaultSessionTokenLifespan)
 	refreshTokenLifespan := loadEnvVariableOrDefaultInt(envRefreshLifespan, defaultRefreshTokenLifespan)
 
@@ -55,6 +59,7 @@ func loadConfig() (*SessionServiceConfig, error) {
 
 	return &SessionServiceConfig{
 		RedisServer:          *server,
+		RedisPassword:        *redisPassword,
 		Port:                 port,
 		SessionSecret:        *sessionSecret,
 		RefreshSecret:        *refreshSecret,

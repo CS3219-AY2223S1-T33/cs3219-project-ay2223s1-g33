@@ -1,14 +1,15 @@
 import { config } from 'dotenv';
 
 type EnvironmentConfig = {
-  readonly REDIS_SERVER_URL: string,
-  readonly HTTP_PORT: number,
-  readonly GRPC_PORT: number,
+  readonly REDIS_SERVER_URL: string;
+  readonly REDIS_PASSWORD: string;
+  readonly HTTP_PORT: number;
+  readonly GRPC_PORT: number;
 
-  readonly DATABASE_DBHOST: string,
-  readonly DATABASE_USERNAME: string,
-  readonly DATABASE_PASSWORD: string,
-  readonly DATABASE_NAME: string,
+  readonly DATABASE_DBHOST: string;
+  readonly DATABASE_USERNAME: string;
+  readonly DATABASE_PASSWORD: string;
+  readonly DATABASE_NAME: string;
 };
 
 function requireExists(key: string): void {
@@ -62,6 +63,7 @@ export default function loadEnvironment(): EnvironmentConfig {
 
   return {
     REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
+    REDIS_PASSWORD: requireString('REDIS_PASSWORD'),
     DATABASE_DBHOST: requireString('DATABASE_DBHOST'),
     DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
     DATABASE_PASSWORD: requireString('DATABASE_PASSWORD'),

@@ -18,7 +18,7 @@ func main() {
 
 	connOptions := &redis.Options{
 		Addr:     config.RedisServer,
-		Password: "",
+		Password: config.RedisPassword,
 		DB:       0,
 	}
 	redisClient := redis.NewClient(connOptions)

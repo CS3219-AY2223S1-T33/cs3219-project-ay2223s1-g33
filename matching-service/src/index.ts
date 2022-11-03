@@ -19,6 +19,7 @@ const envConfig = loadEnvironment();
 
 const redisClient: RedisClientType = createClient({
   url: envConfig.REDIS_SERVER_URL,
+  password: envConfig.REDIS_PASSWORD.length > 0 ? envConfig.REDIS_PASSWORD : undefined,
 });
 redisClient.connect();
 
