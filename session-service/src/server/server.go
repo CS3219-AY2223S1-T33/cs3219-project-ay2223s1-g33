@@ -1,10 +1,13 @@
 package server
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ApiServer interface {
@@ -15,6 +18,19 @@ type ApiServer interface {
 type apiServer struct {
 	port       int
 	grpcServer *grpc.Server
+}
+
+func CreateApiServerWithCreds(port int, certificate *tls.Certificate, options ...grpc.ServerOption) ApiServer {
+	var serverCreds credentials.TransportCredentials
+	if certificate == nil {
+		serverCreds = insecure.NewCredentials()
+	} else {
+		serverCreds = credentials.NewServerTLSFromCert(certificate)
+	}
+
+	newOpts := options
+	newOpts = append(newOpts, grpc.Creds(serverCreds))
+	return CreateApiServer(port, newOpts...)
 }
 
 func CreateApiServer(port int, options ...grpc.ServerOption) ApiServer {

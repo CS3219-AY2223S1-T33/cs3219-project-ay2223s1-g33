@@ -25,6 +25,12 @@ func main() {
 		log.Fatalln("Gateway not configured")
 	}
 
+	if config.GRPCCertificate == nil {
+		log.Println("WARN: GRPC using insecure mode because no cert was provided")
+	} else {
+		log.Println("GRPC Operating in secure mode")
+	}
+
 	log.Printf("Gateway Listening on port %d\n", config.Port)
 	if err := run(config); err != nil {
 		log.Fatalln(err)
@@ -35,19 +41,20 @@ func main() {
 
 func run(config *GatewayConfiguration) error {
 	staticServeHandler := resolveStaticHandler(config)
-	proxyMiddleware := wsproxy.NewWSProxyMiddleware(config.CollabServiceUrl)
+	proxyMiddleware := wsproxy.NewWSProxyMiddleware(config.CollabServiceUrl, config.GRPCCertificate)
 
 	grpcMiddleware := grpc_adapter.NewGRPCMiddleware(
 		config.UserServiceUrl,
 		config.MatchingServiceUrl,
 		config.HistoryServiceUrl,
+		config.GRPCCertificate,
 	)
 	if grpcMiddleware == nil {
 		return errors.New("Failed to register gateway routes")
 	}
 	defer grpcMiddleware.Dispose()
 
-	authMiddleware := auth.NewAuthMiddleware(config.SessionServiceUrl)
+	authMiddleware := auth.NewAuthMiddleware(config.SessionServiceUrl, config.GRPCCertificate)
 	if authMiddleware == nil {
 		return errors.New("Failed to register authentication layer")
 	}

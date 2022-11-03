@@ -2,7 +2,7 @@ package util
 
 const (
 	VersionMajor    = 5
-	VersionMinor    = 3
+	VersionMinor    = 4
 	VersionRevision = 0
 )
 

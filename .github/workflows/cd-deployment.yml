@@ -53,6 +53,11 @@ env:
   CONFIG_SECRETS_REDIS: |
     REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
 
+  CONFIG_SECRETS_GRPC_CERT: |
+    GRPC_CERT="${{ secrets.GRPC_CERT }}"
+    GRPC_KEY="${{ secrets.GRPC_KEY }}"
+
+
 jobs:
   deploy:
     name: Deploy to AWS ECS

@@ -37,7 +37,11 @@ async function run() {
   consumer.run();
 
   const httpServer = HTTPServer.create(envConfig.HTTP_PORT);
-  const grpcServer = GRPCServer.create(envConfig.GRPC_PORT);
+  const grpcServer = GRPCServer.create(
+    envConfig.GRPC_PORT,
+    envConfig.GRPC_CERT,
+    envConfig.GRPC_KEY,
+  );
   const apiServer = createApiServer(httpServer, grpcServer);
   const expressApp = httpServer.getServer();
 
@@ -51,6 +55,7 @@ async function run() {
     dataStore,
     envConfig.USER_SERVICE_URL,
     envConfig.QUESTION_SERVICE_URL,
+    envConfig.GRPC_CERT,
   );
   apiServer.registerServiceRoutes(crudController);
 

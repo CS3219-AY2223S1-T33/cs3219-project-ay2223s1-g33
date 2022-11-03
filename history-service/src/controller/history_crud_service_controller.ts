@@ -34,17 +34,26 @@ class HistoryCrudServiceApi implements ApiService<IHistoryCrudService> {
 
   serviceDefinition: ServiceDefinition<IHistoryCrudService>;
 
-  constructor(storage: IStorage, userServiceUrl: string, questionServiceUrl: string) {
+  constructor(
+    storage: IStorage,
+    userServiceUrl: string,
+    questionServiceUrl: string,
+    grpcCert?: Buffer,
+  ) {
+    let grpcCredentials = ChannelCredentials.createInsecure();
+    if (grpcCert) {
+      grpcCredentials = ChannelCredentials.createSsl(grpcCert);
+    }
     const userGrpcClient = new UserCrudServiceClient(
       userServiceUrl,
-      ChannelCredentials.createInsecure(),
+      grpcCredentials,
       {},
       {},
     );
 
     const questionGrpcClient = new QuestionServiceClient(
       questionServiceUrl,
-      ChannelCredentials.createInsecure(),
+      grpcCredentials,
       {},
       {},
     );

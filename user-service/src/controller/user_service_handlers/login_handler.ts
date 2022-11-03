@@ -12,6 +12,7 @@ import { IUserCrudService } from '../../proto/user-crud-service.grpc-server';
 import { GetUserRequest } from '../../proto/user-crud-service';
 import IHashAgent from '../../auth/hash_agent_types.d';
 import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
+import Logger from '../../utils/logger';
 
 class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
   rpcLoopback: ILoopbackServiceChannel<IUserCrudService>;
@@ -76,7 +77,8 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
         username: user.userInfo?.username,
         nickname: user.userInfo?.nickname,
       });
-    } catch {
+    } catch (ex) {
+      Logger.warn(`${ex}`);
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_INTERNAL_ERROR,
         'Internal Error',

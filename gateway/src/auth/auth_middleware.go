@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/x509"
 	"cs3219-project-ay2223s1-g33/gateway/util"
 	"fmt"
 	"log"
@@ -17,20 +18,18 @@ const (
 
 type authMiddleware struct {
 	util.BasePipeOutput
-	sessionServiceUrl string
-	authAgent         AuthAgent
+	authAgent AuthAgent
 }
 
-func NewAuthMiddleware(sessionServiceUrl string) util.DisposableThroughPipe {
+func NewAuthMiddleware(sessionServiceUrl string, certificate *x509.CertPool) util.DisposableThroughPipe {
 	log.Printf("Auth Middleware using Session Service on %s\n", sessionServiceUrl)
-	authAgent, err := CreateAuthAgent(sessionServiceUrl)
+	authAgent, err := CreateAuthAgent(sessionServiceUrl, certificate)
 	if err != nil {
 		return nil
 	}
 
 	return &authMiddleware{
-		sessionServiceUrl: sessionServiceUrl,
-		authAgent:         authAgent,
+		authAgent: authAgent,
 	}
 }
 

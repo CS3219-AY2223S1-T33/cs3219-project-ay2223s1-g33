@@ -9,10 +9,14 @@ import getGrpcDeadline from '../utils/grpc_deadline';
 class HistoryAgent implements IHistoryAgent {
   historyClient: IHistoryCrudServiceClient;
 
-  constructor(historyURL: string) {
+  constructor(historyURL: string, grpcCert?: Buffer) {
+    let grpcCredentials = ChannelCredentials.createInsecure();
+    if (grpcCert) {
+      grpcCredentials = ChannelCredentials.createSsl(grpcCert);
+    }
     this.historyClient = new HistoryCrudServiceClient(
       historyURL,
-      ChannelCredentials.createInsecure(),
+      grpcCredentials,
       {},
       {},
     );
@@ -64,8 +68,9 @@ class HistoryAgent implements IHistoryAgent {
 
 function createHistoryAgent(
   historyURL: string,
+  grpcCert?: Buffer,
 ): IHistoryAgent {
-  return new HistoryAgent(historyURL);
+  return new HistoryAgent(historyURL, grpcCert);
 }
 
 export default createHistoryAgent;

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/x509"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type GatewayConfiguration struct {
@@ -13,6 +15,8 @@ type GatewayConfiguration struct {
 	HistoryServiceUrl  string
 	StaticServerUrl    string
 	StaticFolderPath   string
+
+	GRPCCertificate *x509.CertPool
 
 	Port int
 }
@@ -25,6 +29,7 @@ const (
 	envHistoryService  = "HISTORY_SERVICE_URL"
 	envStaticServer    = "STATIC_SERVER"
 	envStaticFolder    = "STATIC_FOLDER"
+	envGRPCCert        = "GRPC_CERT"
 	envPort            = "GATEWAY_PORT"
 )
 
@@ -36,7 +41,16 @@ func loadConfig() *GatewayConfiguration {
 	historyServer := loadEnvVariableOrDefaultString(envHistoryService, "localhost:4005")
 	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "")
 	staticFolder := loadEnvVariableOrDefaultString(envStaticFolder, "")
+	grpcCert := loadEnvVariableOrDefaultString(envGRPCCert, "")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
+
+	cp := x509.NewCertPool()
+	if grpcCert != "" {
+		grpcCert = sanitizeQuotesAndBreakline(grpcCert)
+		if !cp.AppendCertsFromPEM([]byte(grpcCert)) {
+			cp = nil
+		}
+	}
 
 	return &GatewayConfiguration{
 		UserServiceUrl:     userServer,
@@ -46,6 +60,7 @@ func loadConfig() *GatewayConfiguration {
 		HistoryServiceUrl:  historyServer,
 		StaticServerUrl:    staticServer,
 		StaticFolderPath:   staticFolder,
+		GRPCCertificate:    cp,
 		Port:               port,
 	}
 }
@@ -70,4 +85,8 @@ func loadEnvVariableOrDefaultInt(envKey string, defaultValue int) int {
 	}
 
 	return intValue
+}
+
+func sanitizeQuotesAndBreakline(inp string) string {
+	return strings.ReplaceAll(strings.Trim(inp, "\"'"), "\\n", "\n")
 }
