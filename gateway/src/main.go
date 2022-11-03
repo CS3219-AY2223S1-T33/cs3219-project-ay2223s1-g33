@@ -48,7 +48,7 @@ func run(config *GatewayConfiguration) error {
 	defer grpcMiddleware.Dispose()
 
 	authMiddleware := auth.NewAuthMiddleware(config.SessionServiceUrl)
-	if authMiddleware != nil {
+	if authMiddleware == nil {
 		return errors.New("Failed to register authentication layer")
 	}
 	defer authMiddleware.Dispose()
