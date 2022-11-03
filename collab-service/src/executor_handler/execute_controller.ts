@@ -8,6 +8,9 @@ const languageNameToId = new Map([
   ['python', 71],
 ]);
 
+const RETRY_LIMIT = 5;
+const RETRY_INTERVAL = 1000;
+
 class ExecuteBridge {
   langName: string;
 
@@ -45,14 +48,16 @@ class ExecuteBridge {
     const executeCode = this.createExecuteCode();
     const token = await this.executeAgent.uploadCode(executeCode);
 
+    let counter = 0;
     const interval = setInterval(async () => {
       const res = await this.executeAgent.retrieveResult(token);
-      if (res) {
+      if (res || counter >= RETRY_LIMIT) {
         clearInterval(interval);
         callback(res);
         this.executeAgent.deleteResult(token);
       }
-    }, 1000);
+      counter += 1;
+    }, RETRY_INTERVAL);
   }
 }
 

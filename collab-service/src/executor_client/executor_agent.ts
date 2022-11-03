@@ -3,7 +3,7 @@ import ExecuteServiceClient from './executor_client';
 import { ExecuteCode } from '../proto/types';
 import Logger from '../utils/logger';
 
-const timeout = 2 * 1000;
+const TIMEOUT = 2000;
 
 class ExecuteAgent implements IExecuteAgent {
   executeClient: IExecuteServiceClient;
@@ -19,7 +19,7 @@ class ExecuteAgent implements IExecuteAgent {
           executeCode,
         },
         {
-          deadline: timeout,
+          deadline: TIMEOUT,
         },
         (value) => {
           if (!value.errorMessage) {
@@ -40,19 +40,18 @@ class ExecuteAgent implements IExecuteAgent {
           token,
         },
         {
-          deadline: timeout,
+          deadline: TIMEOUT,
         },
         (value) => {
-          if (value.errorMessage === 'Accepted'
-            || value.errorMessage === 'Runtime Error (NZEC)') {
+          if (value.errorMessage === 'Processing') {
+            resolve('');
+          } else if (value.errorMessage === 'Accepted'
+            || value.errorMessage === 'Processing'
+            || value.errorMessage === 'Runtime Error (NZEC)'
+            || value.errorMessage === 'Compilation Error') {
             resolve(value.output);
           } else {
-            Logger.error(value.errorMessage);
-            if (value.output) {
-              resolve(value.output);
-            } else {
-              resolve(value.errorMessage);
-            }
+            resolve(value.errorMessage);
           }
         },
       );
@@ -65,11 +64,10 @@ class ExecuteAgent implements IExecuteAgent {
         token,
       },
       {
-        deadline: timeout,
+        deadline: TIMEOUT,
       },
       (value) => {
-        if (!(value.errorMessage === 'Accepted'
-          || value.errorMessage === 'Runtime Error (NZEC)')) {
+        if (value.errorMessage) {
           Logger.error(value.errorMessage);
         }
       },

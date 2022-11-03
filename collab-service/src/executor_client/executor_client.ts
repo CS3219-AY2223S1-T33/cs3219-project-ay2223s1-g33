@@ -20,39 +20,51 @@ class ExecuteServiceClient implements IExecuteServiceClient {
   ) {
     let protoResponse: CreateExecuteResponse;
     try {
-      const rawResponse = await fetch(`http://${this.apiURL}/submissions`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+      const rawResponse = await fetch(
+        `http://${this.apiURL}/submissions`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          signal: getFetchDeadline(metadata.deadline),
+          body: JSON.stringify({
+            source_code: input.executeCode?.code,
+            language_id: input.executeCode?.languageId,
+            stdin: input.executeCode?.stdin,
+          }),
         },
-        signal: getFetchDeadline(metadata.deadline),
-        body: JSON.stringify({
-          source_code: input.executeCode?.code,
-          language_id: input.executeCode?.languageId,
-          stdin: input.executeCode?.stdin,
-        }),
-      });
+      );
       const content = await rawResponse.json();
-      protoResponse = CreateExecuteResponse.create({
-        token: content.token,
-        errorMessage: '',
-      });
+      protoResponse = ExecuteServiceClient
+        .createCreateResponse(content.token, '');
       callback(protoResponse);
     } catch (err) {
       if (ExecuteServiceClient.isTimeoutError(err)) {
-        protoResponse = CreateExecuteResponse.create({
-          token: undefined,
-          errorMessage: 'Timeout',
-        });
+        protoResponse = ExecuteServiceClient
+          .createErrorCreateResponse('Server Timeout');
       } else {
-        protoResponse = CreateExecuteResponse.create({
-          token: undefined,
-          errorMessage: 'Execute Retrieval Failed',
-        });
+        protoResponse = ExecuteServiceClient
+          .createErrorCreateResponse('Execute Retrieval Failed');
       }
     }
     callback(protoResponse);
+  }
+
+  private static createCreateResponse(
+    token: string | undefined,
+    errorMessage: string,
+  ) {
+    return CreateExecuteResponse.create({
+      token,
+      errorMessage,
+    });
+  }
+
+  private static createErrorCreateResponse(errorMessage: string) {
+    return ExecuteServiceClient
+      .createCreateResponse(undefined, errorMessage);
   }
 
   async retrieveExecution(
@@ -62,30 +74,33 @@ class ExecuteServiceClient implements IExecuteServiceClient {
   ) {
     let protoResponse: GetExecuteResponse;
     try {
-      const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}?fields=stdout,status`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+      const rawResponse = await fetch(
+        `http://${this.apiURL}/submissions/${input.token}?fields=stdout,status,compile_output,exit_code`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          signal: getFetchDeadline(metadata.deadline),
         },
-        signal: getFetchDeadline(metadata.deadline),
-      });
+      );
       const content = await rawResponse.json();
-      protoResponse = GetExecuteResponse.create({
-        output: content.stdout,
-        errorMessage: content.status.description,
-      });
+      let output;
+      if (content.exit_code !== null) {
+        output = `Exited with ${content.exit_code}`;
+      }
+      output = content.stdout ? content.stdout : output;
+      output = content.compile_output ? content.compile_output : output;
+      protoResponse = ExecuteServiceClient
+        .createGetResponse(output, content.status.description);
     } catch (err) {
       if (ExecuteServiceClient.isTimeoutError(err)) {
-        protoResponse = GetExecuteResponse.create({
-          output: undefined,
-          errorMessage: 'Timeout',
-        });
+        protoResponse = ExecuteServiceClient
+          .createErrorGetResponse('Server Timeout');
       } else {
-        protoResponse = GetExecuteResponse.create({
-          output: undefined,
-          errorMessage: 'Execute Retrieval Failed',
-        });
+        protoResponse = ExecuteServiceClient
+          .createErrorGetResponse('Execute Retrieval Failed');
       }
     }
     callback(protoResponse);
@@ -98,30 +113,28 @@ class ExecuteServiceClient implements IExecuteServiceClient {
   ) {
     let protoResponse: GetExecuteResponse;
     try {
-      const rawResponse = await fetch(`http://${this.apiURL}/submissions/${input.token}?fields=status`, {
-        method: 'DELETE',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'X-Judge0-User': 'Auth-Judge0-User',
+      const rawResponse = await fetch(
+        `http://${this.apiURL}/submissions/${input.token}?fields=status`,
+        {
+          method: 'DELETE',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-Judge0-User': 'Auth-Judge0-User',
+          },
+          signal: getFetchDeadline(metadata.deadline),
         },
-        signal: getFetchDeadline(metadata.deadline),
-      });
+      );
       const content = await rawResponse.json();
-      protoResponse = GetExecuteResponse.create({
-        errorMessage: content.status.description,
-      });
+      protoResponse = ExecuteServiceClient
+        .createGetResponse(content.status.description, content.error);
     } catch (err) {
       if (ExecuteServiceClient.isTimeoutError(err)) {
-        protoResponse = GetExecuteResponse.create({
-          output: undefined,
-          errorMessage: 'Timeout',
-        });
+        protoResponse = ExecuteServiceClient
+          .createErrorGetResponse('Server Timeout');
       } else {
-        protoResponse = GetExecuteResponse.create({
-          output: undefined,
-          errorMessage: 'Execute Deletion Failed',
-        });
+        protoResponse = ExecuteServiceClient
+          .createErrorGetResponse('Execute Deletion Failed');
       }
     }
     callback(protoResponse);
@@ -129,6 +142,21 @@ class ExecuteServiceClient implements IExecuteServiceClient {
 
   private static isTimeoutError(err: unknown) {
     return (err as Error).name === 'AbortError';
+  }
+
+  private static createGetResponse(
+    output: string | undefined,
+    errorMessage: string,
+  ) {
+    return GetExecuteResponse.create({
+      output,
+      errorMessage,
+    });
+  }
+
+  private static createErrorGetResponse(errorMessage: string) {
+    return ExecuteServiceClient
+      .createGetResponse(undefined, errorMessage);
   }
 }
 
