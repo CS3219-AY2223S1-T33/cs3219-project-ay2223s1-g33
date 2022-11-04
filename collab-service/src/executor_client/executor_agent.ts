@@ -43,7 +43,8 @@ class ExecuteAgent implements IExecuteAgent {
           deadline: TIMEOUT,
         },
         (value) => {
-          if (value.errorMessage === 'Processing') {
+          if (value.errorMessage === 'Processing'
+            || value.errorMessage === 'In Queue') {
             resolve('');
           } else if (value.errorMessage === 'Accepted'
             || value.errorMessage === 'Processing'

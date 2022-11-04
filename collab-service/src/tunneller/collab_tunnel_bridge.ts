@@ -28,7 +28,7 @@ import {
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
 import { createAttemptCache } from '../history_handler/attempt_cache';
 import { deserializeQuestion } from '../question_client/question_serializer';
-import ExecuteBridge from '../executor_handler/execute_controller';
+import ExecuteController from '../executor_handler/execute_controller';
 
 const SUBMISSION_WAIT = 4 * 1000;
 
@@ -238,7 +238,7 @@ class CollabTunnelBridge {
       return;
     }
     const stdin = qns.executionInput;
-    const runner = new ExecuteBridge(stdin, request.data, this.executeAgent);
+    const runner = new ExecuteController(stdin, request.data, this.executeAgent);
     await runner.run(async (value: string) => {
       // Write to self & other user
       const completeData = createExecuteCompletePackage(value);

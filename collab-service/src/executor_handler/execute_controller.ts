@@ -11,7 +11,7 @@ const languageNameToId = new Map([
 const RETRY_LIMIT = 5;
 const RETRY_INTERVAL = 1000;
 
-class ExecuteBridge {
+class ExecuteController {
   langName: string;
 
   stdin: string;
@@ -61,4 +61,4 @@ class ExecuteBridge {
   }
 }
 
-export default ExecuteBridge;
+export default ExecuteController;
