@@ -10,10 +10,14 @@ import { getGrpcDeadline } from '../utils/call_deadline';
 class QuestionAgent implements IQuestionAgent {
   questionClient: IQuestionServiceClient;
 
-  constructor(questionURL: string) {
+  constructor(questionURL: string, grpcCert?: Buffer) {
+    let grpcCredentials = ChannelCredentials.createInsecure();
+    if (grpcCert) {
+      grpcCredentials = ChannelCredentials.createSsl(grpcCert);
+    }
     this.questionClient = new QuestionServiceClient(
       questionURL,
-      ChannelCredentials.createInsecure(),
+      grpcCredentials,
       {},
       {},
     );
@@ -51,8 +55,8 @@ class QuestionAgent implements IQuestionAgent {
   }
 }
 
-function createQuestionService(questionURL: string): IQuestionAgent {
-  return new QuestionAgent(questionURL);
+function createQuestionService(questionURL: string, grpcCert?: Buffer): IQuestionAgent {
+  return new QuestionAgent(questionURL, grpcCert);
 }
 
 export default createQuestionService;

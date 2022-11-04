@@ -10,3 +10,6 @@ build:
 
 generate:
 	$(MAKE) -C src generate
+
+test:
+	$(MAKE) -C src test

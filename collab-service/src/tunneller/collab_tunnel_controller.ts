@@ -46,6 +46,7 @@ class CollabTunnelController {
     historyUrl: string,
     judge0URL: string,
     roomSecret: string,
+    grpcCert?: Buffer,
   ) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
     this.pub = createClient({
@@ -63,9 +64,9 @@ class CollabTunnelController {
 
     this.topicPool = createRedisTopicPool(sub);
 
-    this.questionAgent = createQuestionService(questionUrl);
+    this.questionAgent = createQuestionService(questionUrl, grpcCert);
 
-    this.historyAgent = createHistoryAgent(historyUrl);
+    this.historyAgent = createHistoryAgent(historyUrl, grpcCert);
 
     this.executeAgent = createExecuteAgent(judge0URL);
   }
@@ -176,6 +177,7 @@ function createCollabTunnelController(
   historyUrl: string,
   judge0URL: string,
   roomSecret: string,
+  grpcCert?: Buffer,
 ): CollabTunnelController {
   return new CollabTunnelController(
     redisUrl,
@@ -184,6 +186,7 @@ function createCollabTunnelController(
     historyUrl,
     judge0URL,
     roomSecret,
+    grpcCert,
   );
 }
 

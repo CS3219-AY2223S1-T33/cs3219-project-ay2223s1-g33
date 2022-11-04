@@ -21,6 +21,9 @@ type EnvironmentConfig = {
   readonly EMAIL_SENDER: string;
 
   readonly RESET_PASSWORD_URL: string;
+
+  readonly GRPC_CERT?: Buffer;
+  readonly GRPC_KEY?: Buffer;
 };
 
 function requireExists(key: string): void {
@@ -72,6 +75,9 @@ function requireInt(key: string, defaultValue?: number): number {
 export default function loadEnvironment(): EnvironmentConfig {
   config();
 
+  const grpcCert = requireString('GRPC_CERT', '');
+  const grpcKey = requireString('GRPC_KEY', '');
+
   return {
     SESSION_SERVICE_URL: requireString('SESSION_SERVICE_URL'),
     REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
@@ -94,5 +100,8 @@ export default function loadEnvironment(): EnvironmentConfig {
     EMAIL_SENDER: requireString('EMAIL_SENDER'),
 
     RESET_PASSWORD_URL: requireString('RESET_PASSWORD_URL'),
+
+    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert) : undefined,
+    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey) : undefined,
   };
 }

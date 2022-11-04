@@ -12,7 +12,9 @@
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output_ts",
     "gen-proto-go": "./scripts/gen-proto-go.sh proto $npm_package_config_proto_output_go",
     "gen-gateway": "./scripts/gen-gateway.sh proto ./gateway",
-    "gen-y-websocket": "./scripts/gen-y-websocket.sh"
+    "gen-y-websocket": "./scripts/gen-y-websocket.sh",
+    "gen-certs": "./scripts/gen-certs.sh",
+    "init": "npm run-script init-permissions && npm-run-script gen-y-websocket"
   },
   "repository": {
     "type": "git",

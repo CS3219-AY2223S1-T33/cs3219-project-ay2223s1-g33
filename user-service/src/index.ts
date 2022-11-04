@@ -40,6 +40,7 @@ async function run() {
 
   const authService: IAuthenticationAgent = createAuthenticationService(
     envConfig.SESSION_SERVICE_URL,
+    envConfig.GRPC_CERT,
   );
 
   const emailAdapter = createSMTPAdapter({
@@ -55,7 +56,12 @@ async function run() {
   const emailSender = createEmailSender(emailAdapter, envConfig.RESET_PASSWORD_URL);
 
   const httpServer = HTTPServer.create(envConfig.HTTP_PORT);
-  const grpcServer = GRPCServer.create(envConfig.GRPC_PORT);
+  const grpcServer = GRPCServer.create(
+    envConfig.GRPC_PORT,
+    envConfig.GRPC_CERT,
+    envConfig.GRPC_KEY,
+  );
+
   const apiServer = createApiServer(httpServer, grpcServer);
   const expressApp = httpServer.getServer();
 
