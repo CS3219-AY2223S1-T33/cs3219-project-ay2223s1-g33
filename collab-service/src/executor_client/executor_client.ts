@@ -6,11 +6,14 @@ import {
 } from '../proto/execute-service';
 import { getFetchDeadline } from '../utils/call_deadline';
 
+const GET_FIELDS = 'stdout,status,compile_output,exit_code';
+const DELETE_FIELDS = 'status';
+
 class ExecuteServiceClient implements IExecuteServiceClient {
-  apiURL: string;
+  executeEndpoint: string;
 
   constructor(apiURL: string) {
-    this.apiURL = apiURL;
+    this.executeEndpoint = `http://${apiURL}/submissions`;
   }
 
   async createExecution(
@@ -21,7 +24,7 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     let protoResponse: CreateExecuteResponse;
     try {
       const rawResponse = await fetch(
-        `http://${this.apiURL}/submissions`,
+        this.executeEndpoint,
         {
           method: 'POST',
           headers: {
@@ -75,7 +78,7 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     let protoResponse: GetExecuteResponse;
     try {
       const rawResponse = await fetch(
-        `http://${this.apiURL}/submissions/${input.token}?fields=stdout,status,compile_output,exit_code`,
+        `${this.executeEndpoint}/${input.token}?fields=${GET_FIELDS}`,
         {
           method: 'GET',
           headers: {
@@ -114,7 +117,7 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     let protoResponse: GetExecuteResponse;
     try {
       const rawResponse = await fetch(
-        `http://${this.apiURL}/submissions/${input.token}?fields=status`,
+        `${this.executeEndpoint}/${input.token}?fields=${DELETE_FIELDS}`,
         {
           method: 'DELETE',
           headers: {
