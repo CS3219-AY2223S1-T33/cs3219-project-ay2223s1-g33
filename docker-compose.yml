@@ -177,20 +177,21 @@ services:
     ports:
       - "6379:6379"
 
-  server:
+  execute-service:
     image: judge0/judge0:1.13.0
-    volumes:
-      - ./execute-service/judge0.conf:/judge0.conf:ro
+    env_file:
+      - config_env/config-execute.env
+      - config_env/secrets-db-judge0.env
+      - config_env/secrets-redis.env
     ports:
       - "2358:2358"
     privileged: true
 
-  workers:
+  execute-service-worker:
     image: judge0/judge0:1.13.0
-    command: [
-      "bash", "-c",
-      "./scripts/workers"
-    ]
-    volumes:
-      - ./execute-service/judge0.conf:/judge0.conf:ro
+    command: ["./scripts/workers"]
+    env_file:
+      - config_env/config-execute.env
+      - config_env/secrets-db-judge0.env
+      - config_env/secrets-redis.env
     privileged: true
