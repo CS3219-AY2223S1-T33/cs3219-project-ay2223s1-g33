@@ -8,7 +8,7 @@ const languageNameToId = new Map([
   ['python', 71],
 ]);
 
-const RETRY_LIMIT = 5;
+const RETRY_LIMIT = 10;
 const RETRY_INTERVAL = 1000;
 
 class ExecuteController {
