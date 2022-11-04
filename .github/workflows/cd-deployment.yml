@@ -54,8 +54,8 @@ env:
     REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
 
   CONFIG_SECRETS_GRPC_CERT: |
-    GRPC_CERT="${{ secrets.GRPC_CERT }}"
-    GRPC_KEY="${{ secrets.GRPC_KEY }}"
+    GRPC_CERT=${{ secrets.GRPC_CERT }}
+    GRPC_KEY=${{ secrets.GRPC_KEY }}
 
 
 jobs:
@@ -192,6 +192,7 @@ jobs:
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_SIGNING }}
             ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
 
       - name: Update task definition for question-service
         id: task-def-question-service
@@ -204,6 +205,7 @@ jobs:
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_DB }}
             ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
 
       - name: Update task definition for matchmaker
         id: task-def-matchmaker
@@ -228,6 +230,7 @@ jobs:
             ${{ env.CONFIG_SECRETS_DB }}
             ${{ env.CONFIG_SECRETS_EMAIL }}
             ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
 
       - name: Update task definition for matching-service
         id: task-def-matching-service
@@ -240,6 +243,7 @@ jobs:
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_SIGNING }}
             ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
 
       - name: Update task definition for collab-service
         id: task-def-collab-service
@@ -252,6 +256,7 @@ jobs:
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_SIGNING }}
             ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
 
       - name: Update task definition for frontend
         id: task-def-frontend
@@ -270,6 +275,7 @@ jobs:
           image: ${{ steps.build-image.outputs.gateway-image }}      
           environment-variables: |
             ${{ env.CONFIG_ROUTE_MAP_GATEWAY }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
 
       - name: Update task definition for history-service
         id: task-def-history-service
@@ -282,11 +288,22 @@ jobs:
             ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
             ${{ env.CONFIG_SECRETS_DB }}
             ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for redis
+        id: task-def-redis
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-history-service.outputs.task-definition }}
+          container-name: redis
+          image: 856252906546.dkr.ecr.ap-southeast-1.amazonaws.com/cs3219:redis-c255d0423194fa28e120ae54f4beb70c8d60ae96
+          environment-variables: |
+            ${{ env.CONFIG_SECRETS_REDIS }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.task-def-history-service.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-redis.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
