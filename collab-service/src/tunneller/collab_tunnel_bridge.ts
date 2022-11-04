@@ -55,6 +55,8 @@ class CollabTunnelBridge {
 
   questionId: number | undefined;
 
+  difficulty: number;
+
   constructor(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
@@ -65,6 +67,7 @@ class CollabTunnelBridge {
     username: string,
     nickname: string,
     roomId: string,
+    difficulty: number,
   ) {
     this.call = call;
     this.pubsub = pubsub;
@@ -76,6 +79,7 @@ class CollabTunnelBridge {
     this.username = username;
     this.nickname = nickname;
     this.roomId = roomId;
+    this.difficulty = difficulty;
   }
 
   /**
@@ -175,12 +179,11 @@ class CollabTunnelBridge {
 
   /**
    * Generates random difficulty question and stores in Redis
-   * @param difficulty
    */
-  async generateQuestion(difficulty: number) {
-    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
+  async generateQuestion() {
+    const question = await this.questionAgent.getQuestionByDifficulty(this.difficulty);
     if (question === undefined) {
-      Logger.error(`No question of ${difficulty} was found`);
+      Logger.error(`No question of ${this.difficulty} was found`);
       return;
     }
     await setQuestionRedis(this.roomId, question, this.redis);
@@ -193,6 +196,10 @@ class CollabTunnelBridge {
    */
   private async handleRetrieveQuestionRequest() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
+    if (finalQuestion === '') {
+      this.generateQuestion();
+      return;
+    }
     const qns = deserializeQuestion(finalQuestion);
     if (!qns) {
       return;
@@ -261,6 +268,7 @@ export default function createCollabTunnelBridge(
   username: string,
   nickname: string,
   roomId: string,
+  difficulty: number,
 ): CollabTunnelBridge {
   return new CollabTunnelBridge(
     call,
@@ -272,5 +280,6 @@ export default function createCollabTunnelBridge(
     username,
     nickname,
     roomId,
+    difficulty,
   );
 }

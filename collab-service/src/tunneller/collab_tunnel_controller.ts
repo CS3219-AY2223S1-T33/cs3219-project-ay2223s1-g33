@@ -114,6 +114,7 @@ class CollabTunnelController {
       username,
       nickname,
       roomId,
+      difficulty,
     );
 
     await redisPubSubAdapter.addOnMessageListener(
@@ -124,7 +125,7 @@ class CollabTunnelController {
     await redisPubSubAdapter.pushMessage(createJoinMessage(username, nickname));
 
     // Retrieve and send question
-    tunnelBridge.generateQuestion(difficulty);
+    tunnelBridge.generateQuestion();
 
     // Upkeep gateway connection & question in redis
     const heartbeatWorker = setInterval(() => {
