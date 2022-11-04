@@ -24,5 +24,5 @@ spec:
             limits:
               cpu: 30m
               memory: 32Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 

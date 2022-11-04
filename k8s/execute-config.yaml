@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: execution-config
+  namespace: default
+data:
+  config.yaml: |
+    initializationCount=0
+    port=980
+  CPU_TIME_LIMIT: "2"
+  MAX_CPU_TIME_LIMIT: "3"
+  CPU_EXTRA_TIME: "0"
+  MAX_CPU_EXTRA_TIME: "1"
+  WALL_TIME_LIMIT: "3"
+  MAX_WALL_TIME_LIMIT: "4"
+  MEMORY_LIMIT: "64000"
+  MAX_MEMORY_LIMIT: "64000"
+  STACK_LIMIT: "64000"
+  MAX_STACK_LIMIT: "64000"
+  NUMBER_OF_RUNS: "1"
+  MAX_NUMBER_OF_RUNS: "2"
+  REDIRECT_STDERR_TO_STDOUT: "true"
+  ENABLE_SUBMISSION_DELETE: "true"
+
+  AUTHZ_HEADER: X-Judge0-User
+  AUTHZ_TOKEN: Auth-Judge0-User
+
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"

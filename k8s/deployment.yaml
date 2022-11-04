@@ -4,6 +4,7 @@ metadata:
   name: session-service
   labels:
     app: session-service
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -22,9 +23,13 @@ spec:
               containerPort: 4100
           envFrom:
           - secretRef:
-                name: secrets
+                name: secrets-signing
+          - secretRef:
+                name: secrets-redis
+          - secretRef:
+                name: secrets-grpc-cert
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           env:
           - name: SESSION_LIFESPAN_MINS
             value: "1"
@@ -40,6 +45,7 @@ metadata:
   name: user-service
   labels:
     app: user-service
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -60,9 +66,15 @@ spec:
               containerPort: 8081
           envFrom:
           - secretRef:
-                name: secrets
+                name: secrets-db
+          - secretRef:
+                name: secrets-email
+          - secretRef:
+                name: secrets-redis
+          - secretRef:
+                name: secrets-grpc-cert
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           resources:
             limits:
               cpu: 50m
@@ -75,6 +87,7 @@ metadata:
   name: gateway
   labels:
     app: gateway
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -91,17 +104,11 @@ spec:
           ports:
             - name: http
               containerPort: 5000
-          env:
-            - name: USER_BFF_SERVER
-              value: "user-service:4000"
-            - name: SESSION_SERVER
-              value: "session-service:4100"
-            - name: MATCHING_SERVER
-              value: "matching-service:4001"
-            - name: COLLAB_SERVER
-              value: "collab-service:4003"
-            - name: HISTORY_SERVER
-              value: "history-service:4005"
+          envFrom:
+          - secretRef:
+                name: secrets-grpc-cert
+          - configMapRef:
+                name: route-map-gateway
           resources:
             limits:
               cpu: 60m
@@ -114,6 +121,7 @@ metadata:
   name: question-service
   labels:
     app: question-service
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -134,9 +142,13 @@ spec:
               containerPort: 8084
           envFrom:
           - secretRef:
-                name: secrets
+                name: secrets-db
+          - secretRef:
+                name: secrets-redis
+          - secretRef:
+                name: secrets-grpc-cert
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           resources:
             limits:
               cpu: 50m
@@ -149,6 +161,7 @@ metadata:
   name: history-service
   labels:
     app: history-service
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -169,9 +182,13 @@ spec:
               containerPort: 8085
           envFrom:
           - secretRef:
-                name: secrets
+                name: secrets-db
+          - secretRef:
+                name: secrets-redis
+          - secretRef:
+                name: secrets-grpc-cert
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           resources:
             limits:
               cpu: 50m
@@ -184,6 +201,7 @@ metadata:
   name: matching-service
   labels:
     app: matching-service
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -204,9 +222,13 @@ spec:
               containerPort: 8085
           envFrom:
           - secretRef:
-                name: secrets
+                name: secrets-signing
+          - secretRef:
+                name: secrets-redis
+          - secretRef:
+                name: secrets-grpc-cert
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           resources:
             limits:
               cpu: 50m
@@ -219,6 +241,8 @@ metadata:
   name: matchmaker
   labels:
     app: matchmaker
+    scaleType: elastic
+    isAtomic: atomic
 spec:
   replicas: 1
   selector:
@@ -233,8 +257,10 @@ spec:
         - name: matchmaker
           image: gcr.io/cs3219-peerprep-366617/matchmaker:latest
           envFrom:
+          - secretRef:
+                name: secrets-redis
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           resources:
             limits:
               cpu: 50m
@@ -247,6 +273,7 @@ metadata:
   name: collab-service
   labels:
     app: collab-service
+    scaleType: elastic
 spec:
   replicas: 1
   selector:
@@ -267,9 +294,13 @@ spec:
               containerPort: 8083
           envFrom:
           - secretRef:
-                name: secrets
+                name: secrets-signing
+          - secretRef:
+                name: secrets-redis
+          - secretRef:
+                name: secrets-grpc-cert
           - configMapRef:
-                name: service-names
+                name: route-map-internal
           resources:
             limits:
               cpu: 70m
