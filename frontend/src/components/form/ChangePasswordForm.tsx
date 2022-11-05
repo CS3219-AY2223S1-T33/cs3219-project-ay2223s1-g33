@@ -4,6 +4,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  useBoolean,
   VStack,
 } from "@chakra-ui/react";
 import {
@@ -26,10 +27,11 @@ function ChangePasswordForm() {
     formState: { errors },
     reset,
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
-
   const toast = useFixedToast();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { password: newPassword } = data;
 
     const changePasswordRequest: ChangePasswordRequest = {
@@ -41,12 +43,12 @@ function ChangePasswordForm() {
         toast.sendSuccessMessage(
           "Your password is changed! You will need to login again!"
         );
-
         reset();
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
@@ -75,13 +77,11 @@ function ChangePasswordForm() {
         </FormControl>
         <Button
           loadingText="Submitting"
-          mt={4}
-          bg="blue.400"
-          color="white"
-          _hover={{
-            bg: "blue.500",
-          }}
+          isLoading={isLoading}
+          size="lg"
+          colorScheme="blue"
           type="submit"
+          mt={4}
         >
           Update
         </Button>

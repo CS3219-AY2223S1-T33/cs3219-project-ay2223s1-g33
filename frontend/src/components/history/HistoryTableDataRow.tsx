@@ -10,17 +10,9 @@ type Props = {
 function HistoryTableDataRow({ row }: Props) {
   return (
     <Tr {...row.getRowProps()}>
-      {
-        // Loop over the rows cells and apply cell props
-        row.cells.map((cell) => (
-          <Td {...cell.getCellProps()}>
-            {
-              // Render the cell contents
-              cell.render("Cell")
-            }
-          </Td>
-        ))
-      }
+      {row.cells.map((cell) => (
+        <Td {...cell.getCellProps()}>{cell.render("Cell")}</Td>
+      ))}
     </Tr>
   );
 }

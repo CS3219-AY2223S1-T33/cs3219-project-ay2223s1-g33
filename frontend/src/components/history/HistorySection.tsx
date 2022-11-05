@@ -2,7 +2,7 @@ import { Divider, Heading, VStack } from "@chakra-ui/react";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import CodeMirror from "@uiw/react-codemirror";
 import React from "react";
-import { Language } from "../../types";
+import { Language } from "../../types/types";
 import LoadingSection from "../ui/LoadingSection";
 
 type Props = {

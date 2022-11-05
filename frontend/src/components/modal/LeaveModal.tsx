@@ -25,9 +25,7 @@ function LeaveModal({ isOpen, onClose, leaveSessionHandler }: Props) {
         <ModalHeader>Leaving soon?</ModalHeader>
         <ModalCloseButton />
 
-        <ModalBody>
-          Leaving this session will also terminate this session with your buddy.
-        </ModalBody>
+        <ModalBody>Are you sure you want to leave the session?</ModalBody>
         <ModalFooter>
           <HStack gap={4}>
             <Button variant="outline" colorScheme="green" onClick={onClose}>

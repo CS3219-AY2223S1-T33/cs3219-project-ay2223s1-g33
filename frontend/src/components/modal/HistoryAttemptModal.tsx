@@ -9,11 +9,12 @@ import {
   ModalBody,
   ModalFooter,
   HStack,
+  Text,
 } from "@chakra-ui/react";
 import QuestionSection from "../question/QuestionSection";
 import HistorySection from "../history/HistorySection";
 import saveFile from "../../utils/fileDownloadUtil";
-import { Language } from "../../types";
+import { Language } from "../../types/types";
 import { HistoryAttempt } from "../../proto/types";
 import { GetAttemptSubmissionRequest } from "../../proto/history-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
@@ -55,12 +56,8 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
   useEffect(() => {
     if (historyAttempt) {
       loadSubmission(historyAttempt.attemptId)
-        .then((attempt) => {
-          setSubmission(attempt.submission);
-        })
-        .catch((err) => {
-          toast.sendErrorMessage(err.message);
-        });
+        .then((attempt) => setSubmission(attempt.submission))
+        .catch((err) => toast.sendErrorMessage(err.message));
     } else {
       setSubmission(undefined);
     }
@@ -88,8 +85,13 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
         <ModalCloseButton />
         <ModalBody>
           <HStack spacing="24px" alignItems="flex-start">
-            {/* Wtf? */}
-            <QuestionSection question={question!} />
+            {question ? (
+              <QuestionSection question={question} />
+            ) : (
+              <Text w="100%" textAlign="center">
+                No question available.
+              </Text>
+            )}
             <HistorySection
               submission={submission}
               language={historyAttempt.language as Language}

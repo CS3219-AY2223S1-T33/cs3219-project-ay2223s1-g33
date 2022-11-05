@@ -1,5 +1,5 @@
 import FileSaver from "file-saver";
-import { Language } from "../types";
+import { Language } from "../types/types";
 
 const getFileExtension = (lang: Language) => {
   switch (lang) {

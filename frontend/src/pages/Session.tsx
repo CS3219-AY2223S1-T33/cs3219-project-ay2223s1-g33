@@ -17,7 +17,7 @@ import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
-import { Chat, Language } from "../types";
+import { Chat, Language } from "../types/types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
 import {

@@ -31,6 +31,7 @@ function CodeExecution({ executeCodeHandler, sendCodeSnapshotHandler }: Props) {
         <Button
           onClick={executeCodeHandler}
           isLoading={isExecuting}
+          loadingText="Executing Code..."
           leftIcon={<VscVmRunning />}
         >
           Execute Code

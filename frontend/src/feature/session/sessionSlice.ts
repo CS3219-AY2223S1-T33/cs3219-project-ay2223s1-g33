@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // eslint-disable-next-line
 import { RootState } from "../../app/store";
 import { Question } from "../../proto/types";
-import { Chat, Language } from "../../types";
+import { Chat, Language } from "../../types/types";
 
 interface SessionSlice {
   wsStatus: string;

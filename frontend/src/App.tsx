@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import UnprotectedRoute from "./components/auth/UnprotectedRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import UserAPI from "./api/user";
-import { login, selectUser } from "./feature/user/userSlice";
+import { selectUser, setUser } from "./feature/user/userSlice";
 import useFixedToast from "./utils/hooks/useFixedToast";
 
 // Workaround to double useEffect calls for React.StrictMode
@@ -21,7 +21,6 @@ function App() {
 
   useEffect(() => {
     if (cookies["AUTH-SESSION"] && firstMount) {
-      console.log("Auth session exists");
       firstMount = false;
       UserAPI.getUserProfile()
         .then((res) => {
@@ -31,7 +30,7 @@ function App() {
             throw new Error("No user fetched");
           }
 
-          dispatch(login({ user: fetchedUser }));
+          dispatch(setUser({ user: fetchedUser }));
         })
         .catch((err) => {
           toast.sendErrorMessage("Please log in again");

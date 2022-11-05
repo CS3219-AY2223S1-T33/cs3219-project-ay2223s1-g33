@@ -6,6 +6,7 @@ import {
   FormErrorMessage,
   Button,
   Text,
+  useBoolean,
 } from "@chakra-ui/react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -14,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
 import Link from "../ui/Link";
-import { login } from "../../feature/user/userSlice";
+import { setUser } from "../../feature/user/userSlice";
 import { UserCredentials, LoginRequest } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { LOGIN_VALIDATOR } from "../../constants/validators";
@@ -29,8 +30,10 @@ function LoginForm() {
   const toast = useFixedToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const validFormHandler = (data: any) => {
+    setIsLoading.on();
     const { email, password } = data;
     const credentials: UserCredentials = { username: email, password };
     const loginReq: LoginRequest = { credentials };
@@ -43,12 +46,13 @@ function LoginForm() {
           throw new Error("Something went wrong.");
         }
 
-        dispatch(login({ user }));
+        dispatch(setUser({ user }));
         navigate("/", { replace: true });
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler = () => {
@@ -78,13 +82,10 @@ function LoginForm() {
         </FormControl>
 
         <Button
+          isLoading={isLoading}
           loadingText="Submitting"
           size="lg"
-          bg="blue.400"
-          color="white"
-          _hover={{
-            bg: "blue.500",
-          }}
+          colorScheme="blue"
           type="submit"
         >
           Sign in
