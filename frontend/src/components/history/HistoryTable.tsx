@@ -105,7 +105,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
         ),
       },
       {
-        Header: "Submited At",
+        Header: "Submitted At",
         accessor: "timestamp",
         Cell: (props) => (
           <Text>

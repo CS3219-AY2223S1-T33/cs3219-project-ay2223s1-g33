@@ -90,7 +90,10 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
           <HStack spacing="24px" alignItems="flex-start">
             {/* Wtf? */}
             <QuestionSection question={question!} />
-            <HistorySection submission={submission} />
+            <HistorySection
+              submission={submission}
+              language={historyAttempt.language as Language}
+            />
           </HStack>
         </ModalBody>
         <ModalFooter>

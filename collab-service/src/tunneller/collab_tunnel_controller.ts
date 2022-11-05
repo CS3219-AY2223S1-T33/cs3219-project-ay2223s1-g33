@@ -19,6 +19,7 @@ import { IQuestionAgent } from '../question_client/question_agent_types';
 import createHistoryAgent from '../history_client/history_agent';
 import { TunnelMessage } from '../message_handler/internal/internal_message_types';
 import createCollabTunnelBridge from './collab_tunnel_bridge';
+import createExecuteAgent from '../executor_client/executor_agent';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -36,11 +37,14 @@ class CollabTunnelController {
 
   historyAgent: IHistoryAgent;
 
+  executeAgent: IExecuteAgent;
+
   constructor(
     redisUrl: string,
     redisPassword: string,
     questionUrl: string,
     historyUrl: string,
+    judge0URL: string,
     roomSecret: string,
     grpcCert?: Buffer,
   ) {
@@ -63,6 +67,8 @@ class CollabTunnelController {
     this.questionAgent = createQuestionService(questionUrl, grpcCert);
 
     this.historyAgent = createHistoryAgent(historyUrl, grpcCert);
+
+    this.executeAgent = createExecuteAgent(judge0URL);
   }
 
   /**
@@ -105,9 +111,11 @@ class CollabTunnelController {
       this.pub,
       this.questionAgent,
       this.historyAgent,
+      this.executeAgent,
       username,
       nickname,
       roomId,
+      difficulty,
     );
 
     await redisPubSubAdapter.addOnMessageListener(
@@ -118,7 +126,7 @@ class CollabTunnelController {
     await redisPubSubAdapter.pushMessage(createJoinMessage(username, nickname));
 
     // Retrieve and send question
-    tunnelBridge.generateQuestion(difficulty);
+    tunnelBridge.generateQuestion();
 
     // Upkeep gateway connection & question in redis
     const heartbeatWorker = setInterval(() => {
@@ -167,6 +175,7 @@ function createCollabTunnelController(
   redisPassword: string,
   questionUrl: string,
   historyUrl: string,
+  judge0URL: string,
   roomSecret: string,
   grpcCert?: Buffer,
 ): CollabTunnelController {
@@ -175,6 +184,7 @@ function createCollabTunnelController(
     redisPassword,
     questionUrl,
     historyUrl,
+    judge0URL,
     roomSecret,
     grpcCert,
   );

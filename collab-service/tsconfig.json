@@ -4,6 +4,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "es2021",
+    "lib": ["ES2021", "DOM"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",

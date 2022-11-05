@@ -15,13 +15,20 @@ import {
 } from '../message_handler/internal/internal_message_builder';
 import { isHeartbeat, makeDataResponse } from '../message_handler/room/response_message_builder';
 import {
-  createQuestionRcvPackage, createSaveCodeAckPackage, createSaveCodeFailedPackage,
-  OPCODE_QUESTION_REQ, OPCODE_SAVE_CODE_REQ,
+  createExecuteCompletePackage,
+  createExecutePendingPackage,
+  createQuestionRcvPackage,
+  createSaveCodeAckPackage,
+  createSaveCodeFailedPackage,
+  OPCODE_EXECUTE_REQ,
+  OPCODE_QUESTION_REQ,
+  OPCODE_SAVE_CODE_REQ,
   readConnectionOpCode,
 } from '../message_handler/room/connect_message_builder';
 import { getQuestionRedis, setQuestionRedis } from '../redis_adapter/redis_question_adapter';
 import { createAttemptCache } from '../history_handler/attempt_cache';
 import { deserializeQuestion } from '../question_client/question_serializer';
+import ExecuteController from '../executor_handler/execute_controller';
 
 const SUBMISSION_WAIT = 4 * 1000;
 
@@ -38,6 +45,8 @@ class CollabTunnelBridge {
 
   historyAgent: IHistoryAgent;
 
+  executeAgent: IExecuteAgent;
+
   username: string;
 
   nickname: string;
@@ -46,15 +55,19 @@ class CollabTunnelBridge {
 
   questionId: number | undefined;
 
+  difficulty: number;
+
   constructor(
     call: ServerDuplexStream<CollabTunnelRequest, CollabTunnelResponse>,
     pubsub: TunnelPubSub<TunnelMessage>,
     redis: RedisClientType,
     questionAgent: IQuestionAgent,
     historyAgent: IHistoryAgent,
+    executeAgent: IExecuteAgent,
     username: string,
     nickname: string,
     roomId: string,
+    difficulty: number,
   ) {
     this.call = call;
     this.pubsub = pubsub;
@@ -62,9 +75,11 @@ class CollabTunnelBridge {
     this.attemptCache = createAttemptCache();
     this.questionAgent = questionAgent;
     this.historyAgent = historyAgent;
+    this.executeAgent = executeAgent;
     this.username = username;
     this.nickname = nickname;
     this.roomId = roomId;
+    this.difficulty = difficulty;
   }
 
   /**
@@ -84,21 +99,17 @@ class CollabTunnelBridge {
         break;
 
       case ConnectionOpCode.JOIN: // Receive A, Send B
-        Logger.info(`${this.username} received JOIN from ${sender}`);
         await this.pubsub.pushMessage(createAckMessage(this.username, this.nickname));
         break;
 
       case ConnectionOpCode.ACK: // Receive B, 'Connected'
-        Logger.info(`${this.username} received ACK from ${sender}`);
         break;
 
       case ConnectionOpCode.ROOM_DISCOVER: // Receive ARP discovery, Send 'Who Am I'
-        Logger.info(`${this.username} received ARP from ${sender}`);
         await this.pubsub.pushMessage(createHelloMessage(this.username));
         break;
 
       case ConnectionOpCode.ROOM_HELLO: // Receive 'Who Am I', Save attempt
-        Logger.info(`${this.username} received WMI from ${sender}`);
         // Complete saving snapshot
         this.attemptCache.setUsers([this.username, sender]);
         dataToSend = await this.saveAttempt();
@@ -124,13 +135,15 @@ class CollabTunnelBridge {
     // Handle external client message cases
     switch (readConnectionOpCode(request.data)) {
       case OPCODE_QUESTION_REQ: // Retrieve question, send question back to user
-        Logger.info(`${this.username} requested for question`);
-        await this.writeQuestionToClient();
+        await this.handleRetrieveQuestionRequest();
         break;
 
       case OPCODE_SAVE_CODE_REQ: // Snapshot code
-        Logger.info(`${this.username} requested for saving code`);
-        await this.handleIncomingSaveRequest(request);
+        await this.handleSaveHistoryRequest(request);
+        break;
+
+      case OPCODE_EXECUTE_REQ: // Execute code
+        await this.handleExecuteCodeRequest(request);
         break;
 
       default: // Normal data, push to publisher
@@ -143,7 +156,7 @@ class CollabTunnelBridge {
    * @param request
    * @private
    */
-  private async handleIncomingSaveRequest(request: CollabTunnelRequest) {
+  private async handleSaveHistoryRequest(request: CollabTunnelRequest) {
     // Prepare saving snapshot
     const questionResponse = await getQuestionRedis(this.roomId, this.redis);
     this.attemptCache.setQuestion(questionResponse);
@@ -166,24 +179,27 @@ class CollabTunnelBridge {
 
   /**
    * Generates random difficulty question and stores in Redis
-   * @param difficulty
    */
-  async generateQuestion(difficulty: number) {
-    const question = await this.questionAgent.getQuestionByDifficulty(difficulty);
+  async generateQuestion() {
+    const question = await this.questionAgent.getQuestionByDifficulty(this.difficulty);
     if (question === undefined) {
-      Logger.error(`No question of ${difficulty} was found`);
+      Logger.error(`No question of ${this.difficulty} was found`);
       return;
     }
     await setQuestionRedis(this.roomId, question, this.redis);
-    await this.writeQuestionToClient();
+    await this.handleRetrieveQuestionRequest();
   }
 
   /**
    * Retrieves stored question and writes to client
    * @private
    */
-  private async writeQuestionToClient() {
+  private async handleRetrieveQuestionRequest() {
     const finalQuestion = await getQuestionRedis(this.roomId, this.redis);
+    if (finalQuestion === '') {
+      this.generateQuestion();
+      return;
+    }
     const qns = deserializeQuestion(finalQuestion);
     if (!qns) {
       return;
@@ -203,15 +219,42 @@ class CollabTunnelBridge {
   private async saveAttempt(): Promise<Uint8Array> {
     // Complete saving snapshot
     if (!this.attemptCache.isValid()) {
-      Logger.error('Attempt is not valid');
       return createSaveCodeFailedPackage();
     }
     const attempt = await this.attemptCache.getHistoryAttempt();
     const message = await this.historyAgent.uploadHistoryAttempt(attempt);
-    if (message) {
-      Logger.error(`Attempt: ${message}`);
-    }
     return createSaveCodeAckPackage(message);
+  }
+
+  /**
+   * Executes code.
+   * @private
+   */
+  private async handleExecuteCodeRequest(request: CollabTunnelRequest) {
+    if (!this.questionId) {
+      return;
+    }
+    // Notify self & other user
+    const pendingData = createExecutePendingPackage();
+    await this.pubsub.pushMessage(createDataMessage(this.username, pendingData));
+    this.call.write(makeDataResponse(pendingData));
+
+    const question = await getQuestionRedis(this.roomId, this.redis);
+    const qns = deserializeQuestion(question);
+    if (!qns) {
+      return;
+    }
+    const stdin = qns.executionInput;
+    const runner = new ExecuteController(stdin, request.data, this.executeAgent);
+    await runner.run(async (value: string) => {
+      // Write to self & other user
+      const completeData = createExecuteCompletePackage(value);
+      await this.pubsub.pushMessage(createDataMessage(
+        this.username,
+        completeData,
+      ));
+      this.call.write(makeDataResponse(completeData));
+    });
   }
 }
 
@@ -221,9 +264,11 @@ export default function createCollabTunnelBridge(
   redis: RedisClientType,
   questionAgent: IQuestionAgent,
   historyAgent: IHistoryAgent,
+  executeAgent: IExecuteAgent,
   username: string,
   nickname: string,
   roomId: string,
+  difficulty: number,
 ): CollabTunnelBridge {
   return new CollabTunnelBridge(
     call,
@@ -231,8 +276,10 @@ export default function createCollabTunnelBridge(
     redis,
     questionAgent,
     historyAgent,
+    executeAgent,
     username,
     nickname,
     roomId,
+    difficulty,
   );
 }

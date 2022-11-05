@@ -20,6 +20,7 @@ const collabController = createCollabTunnelController(
   envConfig.REDIS_PASSWORD,
   envConfig.QUESTION_SERVICE_URL,
   envConfig.HISTORY_SERVICE_URL,
+  envConfig.JUDGE0_SERVER_URL,
   envConfig.ROOM_SIGNING_SECRET,
   envConfig.GRPC_CERT,
 );
