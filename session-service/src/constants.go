@@ -2,6 +2,6 @@ package main
 
 const (
 	VersionMajor    = 2
-	VersionMinor    = 0
+	VersionMinor    = 2
 	VersionRevision = 0
 )

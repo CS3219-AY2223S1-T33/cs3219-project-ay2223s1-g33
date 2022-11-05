@@ -1,48 +1,67 @@
 package main
 
 import (
+	"crypto/x509"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type GatewayConfiguration struct {
-	UserBFFServer  string
-	MatchingServer string
-	CollabServer   string
-	SessionServer  string
-	HistoryServer  string
-	StaticServer   string
+	UserServiceUrl     string
+	MatchingServiceUrl string
+	CollabServiceUrl   string
+	SessionServiceUrl  string
+	HistoryServiceUrl  string
+	StaticServerUrl    string
+	StaticFolderPath   string
+
+	GRPCCertificate *x509.CertPool
 
 	Port int
 }
 
 const (
-	envUserBFFServer  = "USER_BFF_SERVER"
-	envMatchingServer = "MATCHING_SERVER"
-	envCollabServer   = "COLLAB_SERVER"
-	envSessionServer  = "SESSION_SERVER"
-	envHistoryServer  = "HISTORY_SERVER"
-	envStaticServer   = "STATIC_SERVER"
-	envPort           = "GATEWAY_PORT"
+	envUserService     = "USER_SERVICE_URL"
+	envMatchingService = "MATCHING_SERVICE_URL"
+	envCollabService   = "COLLAB_SERVICE_URL"
+	envSessionService  = "SESSION_SERVICE_URL"
+	envHistoryService  = "HISTORY_SERVICE_URL"
+	envStaticServer    = "STATIC_SERVER"
+	envStaticFolder    = "STATIC_FOLDER"
+	envGRPCCert        = "GRPC_CERT"
+	envPort            = "GATEWAY_PORT"
 )
 
 func loadConfig() *GatewayConfiguration {
-	userBFFServer := loadEnvVariableOrDefaultString(envUserBFFServer, "localhost:4000")
-	matchingServer := loadEnvVariableOrDefaultString(envMatchingServer, "localhost:4001")
-	collabServer := loadEnvVariableOrDefaultString(envCollabServer, "localhost:4003")
-	sessionServer := loadEnvVariableOrDefaultString(envSessionServer, "localhost:4100")
-	historyServer := loadEnvVariableOrDefaultString(envHistoryServer, "localhost:4005")
-	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "localhost:8000")
+	userServer := loadEnvVariableOrDefaultString(envUserService, "localhost:4000")
+	matchingServer := loadEnvVariableOrDefaultString(envMatchingService, "localhost:4001")
+	collabServer := loadEnvVariableOrDefaultString(envCollabService, "localhost:4003")
+	sessionServer := loadEnvVariableOrDefaultString(envSessionService, "localhost:4100")
+	historyServer := loadEnvVariableOrDefaultString(envHistoryService, "localhost:4005")
+	staticServer := loadEnvVariableOrDefaultString(envStaticServer, "")
+	staticFolder := loadEnvVariableOrDefaultString(envStaticFolder, "")
+	grpcCert := loadEnvVariableOrDefaultString(envGRPCCert, "")
 	port := loadEnvVariableOrDefaultInt(envPort, 5000)
 
+	cp := x509.NewCertPool()
+	if grpcCert != "" {
+		grpcCert = sanitizeQuotesAndBreakline(grpcCert)
+		if !cp.AppendCertsFromPEM([]byte(grpcCert)) {
+			cp = nil
+		}
+	}
+
 	return &GatewayConfiguration{
-		UserBFFServer:  userBFFServer,
-		MatchingServer: matchingServer,
-		CollabServer:   collabServer,
-		SessionServer:  sessionServer,
-		HistoryServer:  historyServer,
-		StaticServer:   staticServer,
-		Port:           port,
+		UserServiceUrl:     userServer,
+		MatchingServiceUrl: matchingServer,
+		CollabServiceUrl:   collabServer,
+		SessionServiceUrl:  sessionServer,
+		HistoryServiceUrl:  historyServer,
+		StaticServerUrl:    staticServer,
+		StaticFolderPath:   staticFolder,
+		GRPCCertificate:    cp,
+		Port:               port,
 	}
 }
 
@@ -66,4 +85,8 @@ func loadEnvVariableOrDefaultInt(envKey string, defaultValue int) int {
 	}
 
 	return intValue
+}
+
+func sanitizeQuotesAndBreakline(inp string) string {
+	return strings.ReplaceAll(strings.Trim(inp, "\"'"), "\\n", "\n")
 }

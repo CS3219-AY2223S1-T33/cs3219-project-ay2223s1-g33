@@ -10,11 +10,10 @@ import {
 import { IStorage } from '../../../src/storage/storage';
 import CreateAttemptHandler
   from '../../../src/controller/history_crud_service_handlers/create_attempt_handler';
-import { HistoryAttempt } from '../../../src/proto/types';
+import { HistoryAttempt, PasswordUser, Question } from '../../../src/proto/types';
 import BaseHandler from '../../../src/controller/history_crud_service_handlers/base_handler';
-import HistoryAttemptEntity from '../../../src/db/history_entity';
 
-describe('Get Attempt Handler', () => {
+describe('Create Attempt Handler', () => {
   const makeRequest = (attempt: HistoryAttempt | undefined):
   ApiRequest<CreateAttemptRequest> => ({
     request: { attempt },
@@ -27,6 +26,7 @@ describe('Get Attempt Handler', () => {
   let mockAttemptStorage = makeMockAttemptStorage();
   let mockStorage: IStorage = {
     getAttemptStore: jest.fn(() => mockAttemptStorage),
+    getCompletionStore: jest.fn(),
   };
   let handler = new CreateAttemptHandler(mockStorage, userClient, questionClient);
 
@@ -35,19 +35,20 @@ describe('Get Attempt Handler', () => {
     mockAttemptStorage = makeMockAttemptStorage();
     mockStorage = {
       getAttemptStore: jest.fn(() => mockAttemptStorage),
+      getCompletionStore: jest.fn(),
     };
     handler = new CreateAttemptHandler(mockStorage, userClient, questionClient);
 
     jest.spyOn(BaseHandler.prototype, 'getQuestion')
       .mockImplementation(
-        () => testQuestion,
+        () => new Promise<Question | undefined>((resolve) => { resolve(testQuestion); }),
       );
     jest.spyOn(BaseHandler.prototype, 'getUser')
       .mockImplementation(
-        () => testPasswordUser,
+        () => new Promise<PasswordUser | undefined>((resolve) => { resolve(testPasswordUser); }),
       );
     mockAttemptStorage.addAttempt.mockImplementation(
-      (): HistoryAttemptEntity => testHistoryAttemptEntity,
+      () => testHistoryAttemptEntity,
     );
   });
 
@@ -82,7 +83,7 @@ describe('Get Attempt Handler', () => {
   test('Invalid Question Request', async () => {
     jest.spyOn(BaseHandler.prototype, 'getQuestion')
       .mockImplementation(
-        () => undefined,
+        () => new Promise<Question | undefined>((resolve) => { resolve(undefined); }),
       );
 
     const request = makeRequest(testAttempt);

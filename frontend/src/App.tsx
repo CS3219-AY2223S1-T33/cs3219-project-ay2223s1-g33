@@ -1,13 +1,10 @@
-// import axios from "axios";
-// import { Routes } from "react-router-dom";
 import React, { useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import UnprotectedRoute from "./components/auth/UnprotectedRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import axios from "./axios";
-import { GetUserProfileResponse } from "./proto/user-service";
+import UserAPI from "./api/user";
 import { login, selectUser } from "./feature/user/userSlice";
 import useFixedToast from "./utils/hooks/useFixedToast";
 
@@ -26,23 +23,19 @@ function App() {
     if (cookies["AUTH-SESSION"] && firstMount) {
       console.log("Auth session exists");
       firstMount = false;
-      axios
-        .post<GetUserProfileResponse>(
-          "/api/user/profile",
-          {},
-          { withCredentials: true }
-        )
+      UserAPI.getUserProfile()
         .then((res) => {
-          const { errorMessage, user: fetchedUser } = res.data;
+          const { user: fetchedUser } = res;
 
           if (!fetchedUser) {
-            throw new Error(errorMessage);
+            throw new Error("No user fetched");
           }
 
           dispatch(login({ user: fetchedUser }));
         })
         .catch((err) => {
           toast.sendErrorMessage("Please log in again");
+          removeCookies("AUTH-SESSION");
           console.error(err.message);
         });
     }

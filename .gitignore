@@ -109,4 +109,7 @@ user-service/.env
 /.idea/
 config_env/user-service.env
 .DS_Store
-config_env/*.env
+!config_env/*.env
+config_env/secrets*.env
+key.pem
+cert.pem

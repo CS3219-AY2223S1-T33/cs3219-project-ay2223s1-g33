@@ -41,7 +41,6 @@ type websocketConnection struct {
 const (
 	// Data channel parameters
 	writeWait       = 10 * time.Second
-	maxMessageSize  = 512
 	writeBufferSize = 10
 
 	// KeepAlive Parameters, ping period must be smaller than pong wait
@@ -127,7 +126,6 @@ func (conn *websocketConnection) ConnectTunnel() error {
 }
 
 func (conn *websocketConnection) startReadPump() {
-	conn.socket.SetReadLimit(maxMessageSize)
 	conn.socket.SetReadDeadline(time.Now().Add(maxPongInterval))
 	conn.socket.SetPongHandler(func(string) error {
 		conn.socket.SetReadDeadline(time.Now().Add(maxPongInterval))
@@ -137,7 +135,7 @@ func (conn *websocketConnection) startReadPump() {
 	for conn.isAlive {
 		_, message, err := conn.socket.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseMessage, websocket.CloseNormalClosure) {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseMessage, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
 				log.Printf("Websocket unexpectedly closed: %v", err)
 			}
 			break

@@ -19,17 +19,18 @@ const envConfig = loadEnvironment();
 
 const redisClient: RedisClientType = createClient({
   url: envConfig.REDIS_SERVER_URL,
+  password: envConfig.REDIS_PASSWORD.length > 0 ? envConfig.REDIS_PASSWORD : undefined,
 });
 redisClient.connect();
 
 const redisMatchingAdapter = createRedisMatchingAdapter(redisClient);
 const httpServer = HTTPServer.create(envConfig.HTTP_PORT);
-const grpcServer = GRPCServer.create(envConfig.GRPC_PORT);
+const grpcServer = GRPCServer.create(envConfig.GRPC_PORT, envConfig.GRPC_CERT, envConfig.GRPC_KEY);
 const apiServer = createApiServer(httpServer, grpcServer);
 const expressApp = httpServer.getServer();
 
 const roomAuthService: IRoomSessionAgent = createRoomSessionService(
-  envConfig.JWT_ROOM_SECRET,
+  envConfig.ROOM_SIGNING_SECRET,
 );
 
 expressApp.get('/', (_: Request, resp: Response) => {

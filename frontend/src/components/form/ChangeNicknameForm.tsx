@@ -16,12 +16,9 @@ import {
 } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "../../axios";
+import AuthAPI from "../../api/auth";
 import useFixedToast from "../../utils/hooks/useFixedToast";
-import {
-  ChangeNicknameRequest,
-  ChangeNicknameResponse,
-} from "../../proto/user-service";
+import { ChangeNicknameRequest } from "../../proto/user-service";
 import { changeNickname, selectUser } from "../../feature/user/userSlice";
 import { User } from "../../proto/types";
 import { CHANGE_NICKNAME_VALIDTOR } from "../../constants/validators";
@@ -49,25 +46,12 @@ function ChangeNicknameForm() {
       newNickname,
     };
 
-    axios
-      .post<ChangeNicknameResponse>(
-        "/api/user/nickname",
-        changeNicknameRequest,
-        {
-          withCredentials: true,
-        }
-      )
-      .then((res) => {
-        const { errorCode, errorMessage } = res.data;
+    AuthAPI.changeNickname(changeNicknameRequest)
+      .then(() => {
+        const newUser: User = { ...user, nickname: newNickname };
 
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-
-        const newUser: User = { ...user };
-        newUser.nickname = newNickname;
+        // TODO Same logic as slice login(). May rename as setUser?
         dispatch(changeNickname({ user: newUser }));
-
         toast.sendSuccessMessage("Your nickname is changed!");
         reset();
       })
