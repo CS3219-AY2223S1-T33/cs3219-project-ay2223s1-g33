@@ -9,7 +9,7 @@ import {
   MenuItem,
   MenuList,
   Text,
-  useDisclosure,
+  useDisclosure
 } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -54,7 +54,7 @@ function HomeNavbar() {
 
               <Menu>
                 <MenuButton as={Button} variant="ghost" cursor="pointer">
-                  <Text fontSize="lg">{`Hello, ${user.nickname}!`}</Text>
+                  <Text fontSize="xl">{`Hello, ${user.nickname}!`}</Text>
                 </MenuButton>
                 <MenuList alignItems="center">
                   <MenuItem onClick={onOpen}>Account Settings</MenuItem>

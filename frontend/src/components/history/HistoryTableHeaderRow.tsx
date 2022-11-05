@@ -9,12 +9,9 @@ type Props = {
 function HistoryTableHeaderRow({ headerGroup }: Props) {
   return (
     <Tr {...headerGroup.getHeaderGroupProps()}>
-      {
-        // Loop over the headers in each row and apply the header cell props
-        headerGroup.headers.map((column) => (
-          <Th {...column.getHeaderProps()}>{column.render("Header")}</Th>
-        ))
-      }
+      {headerGroup.headers.map((column) => (
+        <Th {...column.getHeaderProps()}>{column.render("Header")}</Th>
+      ))}
     </Tr>
   );
 }

@@ -40,7 +40,6 @@ function CompletionStatus({ config, question, isCompleted }: Props) {
 
   return (
     <>
-      {" "}
       <Badge colorScheme={config.colorScheme} size="lg" fontWeight="bold">
         {config.badgeText}
       </Badge>

@@ -13,7 +13,6 @@ function Home() {
   return (
     <>
       <Navbar />
-      {/* TODO Expected Responsive problems to happen here */}
       <Grid
         templateColumns="70% 30%"
         gap={10}
