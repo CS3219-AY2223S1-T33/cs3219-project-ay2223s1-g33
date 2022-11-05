@@ -6,7 +6,7 @@ import {
   FormErrorMessage,
   Button,
   Text,
-  useBoolean
+  useBoolean,
 } from "@chakra-ui/react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -25,7 +25,7 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(LOGIN_VALIDATOR) });
   const toast = useFixedToast();
   const dispatch = useDispatch();
@@ -59,7 +59,7 @@ function LoginForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };

@@ -13,7 +13,7 @@ import {
   Button,
   // TableContainer,
   Heading,
-  Divider
+  Divider,
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import PaginationControl from "../ui/PaginationControl";
@@ -26,7 +26,7 @@ import usePagination from "../../utils/hooks/usePagination";
 import { RootState } from "../../app/store";
 import {
   createAttemptHistoryExtractor,
-  createAttemptHistoryReqFactory
+  createAttemptHistoryReqFactory,
 } from "../../utils/builderUtils";
 
 type Props = {
@@ -40,7 +40,7 @@ const DATETIME_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: "numeric",
   year: "numeric",
   month: "short",
-  day: "numeric"
+  day: "numeric",
 };
 
 function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
@@ -49,7 +49,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   const pagination = usePagination({
     fetchUrl: "/api/user/history",
     requestFactory: createAttemptHistoryReqFactory(questionId),
-    responseExtractor: createAttemptHistoryExtractor()
+    responseExtractor: createAttemptHistoryExtractor(),
   });
 
   const [modalHistoryAttempt, setModalHistoryAttempt] = useState<
@@ -59,7 +59,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
       setModalHistoryAttempt(undefined);
-    }
+    },
   });
 
   const onHistoryAttemptClick = (historyAttempt: HistoryAttempt) => {
@@ -71,14 +71,14 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
     () => [
       {
         Header: "ID",
-        accessor: "attemptId"
+        accessor: "attemptId",
       },
       {
         Header: "question",
         accessor: "question",
         Cell: (props) => (
           <Text fontWeight="bold">{`${props.value?.questionId}. ${props.value?.name}`}</Text>
-        )
+        ),
       },
       {
         id: "difficulty",
@@ -90,19 +90,19 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           >
             {QuestionDifficulty[row.question!.difficulty].toString()}
           </Text>
-        )
+        ),
       },
       {
         Header: "language",
         accessor: "language",
-        Cell: (props) => <Code>{props.value}</Code>
+        Cell: (props) => <Code>{props.value}</Code>,
       },
       {
         Header: "users",
         accessor: "users",
         Cell: (props) => (
           <Text>{props.value.find((user) => user !== currUser?.username)}</Text>
-        )
+        ),
       },
       {
         Header: "Submitted At",
@@ -114,7 +114,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
               DATETIME_OPTIONS
             )}
           </Text>
-        )
+        ),
       },
       {
         Header: "submission",
@@ -123,8 +123,8 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           <Button onClick={() => onHistoryAttemptClick(row)} colorScheme="blue">
             View
           </Button>
-        )
-      }
+        ),
+      },
     ],
     [currUser]
   );
@@ -134,7 +134,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
       {
         columns,
         data: pagination.items,
-        initialState: { hiddenColumns }
+        initialState: { hiddenColumns },
       },
       useSortBy
     );

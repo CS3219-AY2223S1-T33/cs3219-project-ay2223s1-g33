@@ -5,13 +5,13 @@ import {
   FormLabel,
   Heading,
   useBoolean,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm
+  useForm,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
@@ -25,7 +25,7 @@ function ChangePasswordForm() {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
   const toast = useFixedToast();
   const [isLoading, setIsLoading] = useBoolean(false);
@@ -35,7 +35,7 @@ function ChangePasswordForm() {
     const { password: newPassword } = data;
 
     const changePasswordRequest: ChangePasswordRequest = {
-      newPassword
+      newPassword,
     };
 
     AuthAPI.changePassword(changePasswordRequest)
@@ -55,7 +55,7 @@ function ChangePasswordForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };

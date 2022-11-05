@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   HStack,
-  Button
+  Button,
 } from "@chakra-ui/react";
 import React from "react";
 

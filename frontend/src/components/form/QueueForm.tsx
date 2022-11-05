@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import {
   enterQueue,
-  toggleDifficulty
+  toggleDifficulty,
 } from "../../feature/matching/matchingSlice";
 import { JoinQueueRequest } from "../../proto/matching-service";
 import { RootState } from "../../app/store";
@@ -37,7 +37,7 @@ function QueueForm() {
       .forEach((x) => selectedDifficulties.push(x as QuestionDifficulty));
 
     const joinQueueReq: JoinQueueRequest = {
-      difficulties: selectedDifficulties
+      difficulties: selectedDifficulties,
     };
 
     MatchingAPI.joinQueue(joinQueueReq)

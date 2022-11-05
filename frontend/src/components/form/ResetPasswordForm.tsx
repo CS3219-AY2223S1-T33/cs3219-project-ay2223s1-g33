@@ -6,14 +6,14 @@ import {
   FormErrorMessage,
   Button,
   Text,
-  useBoolean
+  useBoolean,
 } from "@chakra-ui/react";
 import React from "react";
 import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler
+  SubmitErrorHandler,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "../ui/Link";
@@ -26,7 +26,7 @@ function ResetPasswordForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(RESET_PW_VALIDATIOR) });
   const toast = useFixedToast();
   const [isLoading, setIsLoading] = useBoolean(false);
@@ -53,7 +53,7 @@ function ResetPasswordForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };

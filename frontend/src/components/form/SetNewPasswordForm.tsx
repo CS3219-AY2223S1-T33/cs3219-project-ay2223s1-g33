@@ -5,14 +5,14 @@ import {
   Button,
   FormErrorMessage,
   Text,
-  useBoolean
+  useBoolean,
 } from "@chakra-ui/react";
 import React from "react";
 import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler
+  SubmitErrorHandler,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +31,7 @@ function SetNewPasswordForm({ token }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
   const toast = useFixedToast();
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ function SetNewPasswordForm({ token }: Props) {
 
     const consumeResetTokenRequest: ConsumeResetTokenRequest = {
       token,
-      newPassword
+      newPassword,
     };
 
     AuthAPI.setNewPassword(consumeResetTokenRequest)
@@ -63,7 +63,7 @@ function SetNewPasswordForm({ token }: Props) {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };

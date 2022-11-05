@@ -6,14 +6,14 @@ import {
   FormErrorMessage,
   Button,
   Text,
-  useBoolean
+  useBoolean,
 } from "@chakra-ui/react";
 import React from "react";
 import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler
+  SubmitErrorHandler,
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +28,7 @@ function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({ resolver: yupResolver(REGISTER_VALIDATOR) });
   const toast = useFixedToast();
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ function RegisterForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };

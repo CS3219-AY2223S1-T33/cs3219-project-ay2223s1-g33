@@ -7,13 +7,13 @@ import {
   Heading,
   Input,
   useBoolean,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm
+  useForm,
 } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -29,7 +29,7 @@ function ChangeNicknameForm() {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm({ resolver: yupResolver(CHANGE_NICKNAME_VALIDTOR) });
   const toast = useFixedToast();
   const dispatch = useDispatch();
@@ -45,7 +45,7 @@ function ChangeNicknameForm() {
     const { nickname: newNickname } = data;
 
     const changeNicknameRequest: ChangeNicknameRequest = {
-      newNickname
+      newNickname,
     };
 
     AuthAPI.changeNickname(changeNicknameRequest)
@@ -66,7 +66,7 @@ function ChangeNicknameForm() {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!"
+        title: "Oops!",
       }
     );
   };
