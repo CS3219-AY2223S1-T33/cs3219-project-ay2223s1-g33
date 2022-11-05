@@ -11,36 +11,24 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { reset } from "../../../feature/matching/matchingSlice";
 import { logout, selectUser } from "../../../feature/user/userSlice";
-import { LogoutResponse } from "../../../proto/user-service";
 import AccountSettingsModal from "../../modal/AccountSettingsModal";
+import AuthAPI from "../../../api/auth";
 
 function HomeNavbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const logoutHandler = () => {
-    axios
-      .post<LogoutResponse>("/api/user/logout", {}, { withCredentials: true })
-      .then((res) => {
-        const { errorCode, errorMessage } = res.data;
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-      })
-      .catch((err) => {
-        console.error(err.message);
-      })
-      .finally(() => {
-        dispatch(reset());
-        dispatch(logout());
-        navigate("/login", { replace: true });
-      });
+    AuthAPI.logout().finally(() => {
+      dispatch(reset());
+      dispatch(logout());
+      navigate("/login", { replace: true });
+    });
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure();

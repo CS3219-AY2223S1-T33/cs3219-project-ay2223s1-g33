@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+//go:generate mockgen -destination=../token/mock_token_agent.go -build_flags=-mod=mod -package=token cs3219-project-ay2223s1-g33/session-service/token TokenAgent
+
 type TokenAgent interface {
 	CreateToken(data *TokenData) (string, error)
 	ValidateToken(token string) (*TokenData, error)

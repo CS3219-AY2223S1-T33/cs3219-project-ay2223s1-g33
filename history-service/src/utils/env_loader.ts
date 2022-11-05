@@ -12,6 +12,10 @@ type EnvironmentConfig = {
   readonly USER_SERVICE_URL: string;
   readonly QUESTION_SERVICE_URL: string;
   readonly REDIS_SERVER_URL: string;
+  readonly REDIS_PASSWORD: string;
+
+  readonly GRPC_CERT?: Buffer;
+  readonly GRPC_KEY?: Buffer;
 };
 
 function requireExists(key: string): void {
@@ -63,6 +67,9 @@ function requireInt(key: string, defaultValue?: number): number {
 export default function loadEnvironment(): EnvironmentConfig {
   config();
 
+  const grpcCert = requireString('GRPC_CERT', '');
+  const grpcKey = requireString('GRPC_KEY', '');
+
   return {
     DATABASE_DBHOST: requireString('DATABASE_DBHOST'),
     DATABASE_USERNAME: requireString('DATABASE_USERNAME'),
@@ -73,6 +80,10 @@ export default function loadEnvironment(): EnvironmentConfig {
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4005),
     USER_SERVICE_URL: requireString('USER_SERVICE_URL', 'localhost:4000'),
     QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL', 'localhost:4004'),
-    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER_URL')}`,
+    REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
+    REDIS_PASSWORD: requireString('REDIS_PASSWORD', ''),
+
+    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert.replaceAll('\\n', '\n')) : undefined,
+    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey.replaceAll('\\n', '\n')) : undefined,
   };
 }

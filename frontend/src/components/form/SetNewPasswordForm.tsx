@@ -6,7 +6,6 @@ import {
   FormErrorMessage,
   Text,
 } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import {
   useForm,
@@ -16,13 +15,11 @@ import {
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Link from "../ui/Link";
-import {
-  ConsumeResetTokenRequest,
-  ConsumeResetTokenResponse,
-} from "../../proto/user-service";
+import { ConsumeResetTokenRequest } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import PasswordInput from "../ui/form/PasswordInput";
 import { SET_PW_VALIDATOR } from "../../constants/validators";
+import AuthAPI from "../../api/auth";
 
 type Props = {
   token: string;
@@ -45,18 +42,8 @@ function SetNewPasswordForm({ token }: Props) {
       newPassword,
     };
 
-    axios
-      .post<ConsumeResetTokenResponse>(
-        "/api/reset/confirm",
-        consumeResetTokenRequest
-      )
-      .then((res) => {
-        const { errorCode, errorMessage } = res.data;
-
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-
+    AuthAPI.setNewPassword(consumeResetTokenRequest)
+      .then(() => {
         toast.sendSuccessMessage(
           "Your password is reset! Click on the link below to login."
         );

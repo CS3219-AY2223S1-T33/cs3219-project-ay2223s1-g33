@@ -32,6 +32,9 @@ export const QUESTION_RCV = 9;
 export const SAVECODE_SEND = 10;
 export const SAVECODE_ACK = 11;
 export const TEXTMSG_SEND = 12;
+export const EXECUTE_REQ = 13;
+export const EXECUTE_PENDING = 14;
+export const EXECUTE_COMPLETE = 15;
 
 /**
  *                       encoder,          decoder,          provider,          emitSynced, messageType
@@ -88,7 +91,8 @@ messageHandlers[LANG_CHANGE] = (_encoder, decoder, provider, _emitSynced, _messa
 
 messageHandlers[QUESTION_RCV] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
 	const question = decoding.readVarString(decoder);
-	provider.emit("question_get", [{ question }]);
+	const isCompleted = !!decoding.readUint8(decoder);
+	provider.emit("question_get", [{ question, isCompleted }]);
 };
 
 messageHandlers[SAVECODE_SEND] = (_encoder, decoder, provider, _emitSynced, _messageType) => {

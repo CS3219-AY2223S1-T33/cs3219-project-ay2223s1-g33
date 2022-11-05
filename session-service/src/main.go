@@ -16,11 +16,18 @@ func main() {
 		log.Fatalf("Server is not configured correctly: %s \n", err)
 	}
 
+	if config.grpcCertificate == nil {
+		log.Println("WARN: GRPC using insecure mode because no cert was provided")
+	} else {
+		log.Println("GRPC Operating in secure mode")
+	}
+
 	log.Printf("Session Token Lifespan: %d minutes\n", config.SessionTokenLifespan/time.Minute)
 	log.Printf("Refresh Token Lifespan: %d minutes\n", config.RefreshTokenLifespan/time.Minute)
 
 	redisClient := blacklist.NewRedisBlacklistClient(
 		config.RedisServer,
+		config.RedisPassword,
 		config.SessionTokenLifespan,
 		config.RefreshTokenLifespan,
 	)
@@ -42,7 +49,8 @@ func main() {
 		redisClient.GetRefreshBlacklist(),
 		redisClient.GetRefreshBlacklistQuerier(),
 	)
-	apiServer := server.CreateApiServer(config.Port)
+
+	apiServer := server.CreateApiServerWithCreds(config.Port, config.grpcCertificate)
 	sessionService := service.CreateSessionService(
 		sessionTokenAgent,
 		refreshTokenAgent,

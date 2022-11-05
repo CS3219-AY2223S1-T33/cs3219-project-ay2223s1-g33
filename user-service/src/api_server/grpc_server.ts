@@ -23,9 +23,22 @@ export default class GRPCServer implements IGRPCServer {
 
   grpcServer: BaseServer;
 
-  private constructor(grpcPort: number) {
+  grpcCredentials: ServerCredentials;
+
+  private constructor(grpcPort: number, grpcCert?: Buffer, grpcKey?: Buffer) {
     this.grpcPort = grpcPort;
     this.grpcServer = new BaseServer();
+
+    if (grpcCert && grpcKey) {
+      Logger.info('GRPC operating in secure mode');
+      this.grpcCredentials = ServerCredentials.createSsl(null, [{
+        cert_chain: grpcCert,
+        private_key: grpcKey,
+      }], false);
+    } else {
+      Logger.warn('GRPC operating in insecure mode');
+      this.grpcCredentials = ServerCredentials.createInsecure();
+    }
   }
 
   registerServiceRoutes<T extends UntypedServiceImplementation>(apiService: ApiService<T>): void {
@@ -50,7 +63,7 @@ export default class GRPCServer implements IGRPCServer {
 
     this.grpcServer.bindAsync(
       `${HOST_ADDRESS}:${this.grpcPort}`,
-      ServerCredentials.createInsecure(),
+      this.grpcCredentials,
       errorCallback,
     );
   }
@@ -114,7 +127,7 @@ export default class GRPCServer implements IGRPCServer {
     return responseHeaders;
   }
 
-  static create(grpcPort: number): IGRPCServer {
-    return new GRPCServer(grpcPort);
+  static create(grpcPort: number, grpcCert?: Buffer, grpcKey?: Buffer): IGRPCServer {
+    return new GRPCServer(grpcPort, grpcCert, grpcKey);
   }
 }

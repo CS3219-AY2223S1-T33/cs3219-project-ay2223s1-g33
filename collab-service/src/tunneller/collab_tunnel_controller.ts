@@ -36,14 +36,23 @@ class CollabTunnelController {
 
   historyAgent: IHistoryAgent;
 
-  constructor(redisUrl: string, questionUrl: string, historyUrl: string, roomSecret: string) {
+  constructor(
+    redisUrl: string,
+    redisPassword: string,
+    questionUrl: string,
+    historyUrl: string,
+    roomSecret: string,
+    grpcCert?: Buffer,
+  ) {
     this.roomTokenAgent = createRoomSessionService(roomSecret);
     this.pub = createClient({
       url: redisUrl,
+      password: redisPassword.length > 0 ? redisPassword : undefined,
     });
 
     const sub: RedisClientType = createClient({
       url: redisUrl,
+      password: redisPassword.length > 0 ? redisPassword : undefined,
     });
 
     this.pub.connect();
@@ -51,9 +60,9 @@ class CollabTunnelController {
 
     this.topicPool = createRedisTopicPool(sub);
 
-    this.questionAgent = createQuestionService(questionUrl);
+    this.questionAgent = createQuestionService(questionUrl, grpcCert);
 
-    this.historyAgent = createHistoryAgent(historyUrl);
+    this.historyAgent = createHistoryAgent(historyUrl, grpcCert);
   }
 
   /**
@@ -155,11 +164,20 @@ class CollabTunnelController {
 
 function createCollabTunnelController(
   redisUrl: string,
+  redisPassword: string,
   questionUrl: string,
   historyUrl: string,
   roomSecret: string,
+  grpcCert?: Buffer,
 ): CollabTunnelController {
-  return new CollabTunnelController(redisUrl, questionUrl, historyUrl, roomSecret);
+  return new CollabTunnelController(
+    redisUrl,
+    redisPassword,
+    questionUrl,
+    historyUrl,
+    roomSecret,
+    grpcCert,
+  );
 }
 
 export {

@@ -24,6 +24,11 @@ func NewValidateTokenHandler(sessionAgent token.TokenAgent, refreshAgent token.T
 }
 
 func (handler *validateTokenHandler) Handle(req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+	if req.GetSessionToken() == "" {
+		return &pb.ValidateTokenResponse{
+			ErrorCode: pb.ValidateTokenErrorCode_VALIDATE_TOKEN_ERROR_INVALID,
+		}, nil
+	}
 	tokenData, err := handler.sessionAgent.ValidateToken(req.GetSessionToken())
 
 	if err != nil && errors.As(err, &expiredErr) {

@@ -114,6 +114,5 @@ config_env/user-service.env
 config_env/secrets*.env
 key.pem
 cert.pem
-
 k8s/secrets.yaml
 k8s/secrets*.yaml

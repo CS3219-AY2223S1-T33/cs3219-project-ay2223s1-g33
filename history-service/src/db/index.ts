@@ -61,9 +61,16 @@ class Database implements IDatabase {
       entities: [
         HistoryEntity,
         HistoryOwnerEntity,
+        HistoryCompletionEntity,
       ],
       subscribers: [],
       migrations: [],
+      poolSize: 2,
+      extra: {
+        max: 2,
+        idleTimeoutMillis: 60 * 60 * 1000,
+        connectionTimeoutMillis: 30 * 1000,
+      },
     });
   }
 

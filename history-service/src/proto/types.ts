@@ -83,6 +83,10 @@ export interface Question {
      * @generated from protobuf field: string solution = 5;
      */
     solution: string;
+    /**
+     * @generated from protobuf field: string executionInput = 6;
+     */
+    executionInput: string;
 }
 /**
  * @generated from protobuf message common.HistoryAttempt
@@ -112,6 +116,19 @@ export interface HistoryAttempt {
      * @generated from protobuf field: string submission = 6;
      */
     submission: string;
+}
+/**
+ * @generated from protobuf message common.HistoryCompletion
+ */
+export interface HistoryCompletion {
+    /**
+     * @generated from protobuf field: string username = 1;
+     */
+    username: string;
+    /**
+     * @generated from protobuf field: uint64 question_id = 2;
+     */
+    questionId: number;
 }
 /**
  * @generated from protobuf enum common.QuestionDifficulty
@@ -318,11 +335,12 @@ class Question$Type extends MessageType<Question> {
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] },
             { no: 4, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "executionInput", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<Question>): Question {
-        const message = { questionId: 0, name: "", difficulty: 0, content: "", solution: "" };
+        const message = { questionId: 0, name: "", difficulty: 0, content: "", solution: "", executionInput: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<Question>(this, message, value);
@@ -347,6 +365,9 @@ class Question$Type extends MessageType<Question> {
                     break;
                 case /* string solution */ 5:
                     message.solution = reader.string();
+                    break;
+                case /* string executionInput */ 6:
+                    message.executionInput = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -375,6 +396,9 @@ class Question$Type extends MessageType<Question> {
         /* string solution = 5; */
         if (message.solution !== "")
             writer.tag(5, WireType.LengthDelimited).string(message.solution);
+        /* string executionInput = 6; */
+        if (message.executionInput !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.executionInput);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -467,3 +491,57 @@ class HistoryAttempt$Type extends MessageType<HistoryAttempt> {
  * @generated MessageType for protobuf message common.HistoryAttempt
  */
 export const HistoryAttempt = new HistoryAttempt$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class HistoryCompletion$Type extends MessageType<HistoryCompletion> {
+    constructor() {
+        super("common.HistoryCompletion", [
+            { no: 1, name: "username", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "question_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ }
+        ]);
+    }
+    create(value?: PartialMessage<HistoryCompletion>): HistoryCompletion {
+        const message = { username: "", questionId: 0 };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<HistoryCompletion>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: HistoryCompletion): HistoryCompletion {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string username */ 1:
+                    message.username = reader.string();
+                    break;
+                case /* uint64 question_id */ 2:
+                    message.questionId = reader.uint64().toNumber();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: HistoryCompletion, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string username = 1; */
+        if (message.username !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.username);
+        /* uint64 question_id = 2; */
+        if (message.questionId !== 0)
+            writer.tag(2, WireType.Varint).uint64(message.questionId);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message common.HistoryCompletion
+ */
+export const HistoryCompletion = new HistoryCompletion$Type();

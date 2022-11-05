@@ -2,12 +2,16 @@ package auth
 
 import (
 	"context"
+	"crypto/x509"
 	pb "cs3219-project-ay2223s1-g33/gateway/proto"
 	"errors"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+//go:generate mockgen -destination=../mocks/auth_mock.go -build_flags=-mod=mod -package=mocks cs3219-project-ay2223s1-g33/gateway/auth AuthAgent
 
 type AuthAgent interface {
 	ValidateToken(sessionToken string, refreshToken string) (
@@ -25,8 +29,14 @@ type authAgent struct {
 	sessionClient pb.SessionServiceClient
 }
 
-func CreateAuthAgent(sessionServer string) (AuthAgent, error) {
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+func CreateAuthAgent(sessionServer string, certificate *x509.CertPool) (AuthAgent, error) {
+	var clientCreds credentials.TransportCredentials
+	if certificate == nil {
+		clientCreds = insecure.NewCredentials()
+	} else {
+		clientCreds = credentials.NewClientTLSFromCert(certificate, "")
+	}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(clientCreds)}
 	conn, err := grpc.Dial(sessionServer, opts...)
 	if err != nil {
 		return nil, err

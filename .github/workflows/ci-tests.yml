@@ -113,3 +113,6 @@ jobs:
 
       - name: 'Run session service test'
         run: 'cd session-service && make test'
+
+      - name: 'Run gateway test'
+        run: 'cd gateway && make test'

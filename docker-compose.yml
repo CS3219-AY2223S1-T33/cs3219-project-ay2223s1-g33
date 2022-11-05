@@ -18,7 +18,12 @@ services:
 
   user-service:
     platform: linux/amd64
-    env_file: config_env/user-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-email.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: .
@@ -39,7 +44,11 @@ services:
       - "host.docker.internal:host-gateway"
 
   matching-service:
-    env_file: config_env/matching-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: .
@@ -59,7 +68,11 @@ services:
       - "host.docker.internal:host-gateway"
 
   collab-service:
-    env_file: config_env/collab-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: .
@@ -76,7 +89,11 @@ services:
       - /app/collab-service/node_modules
 
   question-service:
-    env_file: config_env/question-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: .
@@ -98,7 +115,9 @@ services:
 
   matchmaker:
     platform: linux/amd64
-    env_file: config_env/matchmaker.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-redis.env
 
     build:
       context: ./matchmaker
@@ -108,7 +127,11 @@ services:
 
   session-service:
     platform: linux/amd64
-    env_file: config_env/session-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: ./session-service
@@ -120,8 +143,11 @@ services:
       - "host.docker.internal:host-gateway"
 
   history-service:
-    platform: linux/amd64
-    env_file: config_env/history-service.env
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: .
@@ -135,7 +161,9 @@ services:
 
   gateway:
     platform: linux/amd64
-    env_file: config_env/gateway.env
+    env_file:
+      - config_env/route-map-gateway.env
+      - config_env/secrets-grpc-cert.env
 
     build:
       context: ./gateway
@@ -147,9 +175,11 @@ services:
       - "host.docker.internal:host-gateway"
 
   redis:
+    env_file:
+      - config_env/secrets-redis.env
+
     build:
       context: ./images
       dockerfile: redis.dockerfile
     ports:
       - "6379:6379"
-

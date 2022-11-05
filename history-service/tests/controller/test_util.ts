@@ -1,6 +1,7 @@
 import { ChannelCredentials, handleUnaryCall } from '@grpc/grpc-js';
 import {
   HistoryAttempt,
+  HistoryCompletion,
   PasswordUser,
   Question,
   QuestionDifficulty,
@@ -12,14 +13,21 @@ import { QuestionServiceClient } from '../../src/proto/question-service.grpc-cli
 import {
   CreateAttemptRequest,
   CreateAttemptResponse,
+  CreateCompletionRequest,
+  CreateCompletionResponse,
   DeleteAttemptRequest,
   DeleteAttemptResponse,
+  DeleteCompletionRequest,
+  DeleteCompletionResponse,
   GetAttemptRequest,
   GetAttemptResponse,
   GetAttemptsRequest,
   GetAttemptsResponse,
+  GetCompletionRequest,
+  GetCompletionResponse,
 } from '../../src/proto/history-crud-service';
 import { LoopbackRouteHandler } from '../../src/api_server/loopback_server_types';
+import HistoryCompletionEntity from '../../src/db/history_completion_entity';
 
 const gatewayHeaderUsername = 'grpc-x-bearer-username';
 
@@ -43,6 +51,7 @@ const testQuestion: Question = {
   difficulty: QuestionDifficulty.EASY,
   content: 'Test Content',
   solution: 'Test Solution',
+  executionInput: 'Test Execution',
 };
 
 const testAttempt: HistoryAttempt = {
@@ -73,6 +82,16 @@ const testHistoryAttemptEntity: HistoryAttemptEntity = {
   updateDateTime: testDate,
 };
 
+const testCompletion: HistoryCompletion = {
+  username: testUser.username,
+  questionId: testQuestion.questionId,
+};
+
+const testCompletionEntity: HistoryCompletionEntity = {
+  userId: testUser.userId,
+  questionId: testQuestion.questionId,
+};
+
 function makeMockAttemptStorage() {
   return {
     addAttempt: jest.fn(),
@@ -85,8 +104,17 @@ function makeMockAttemptStorage() {
   };
 }
 
-function forceCast<T extends object, U extends object>(object: any):
-LoopbackRouteHandler<handleUnaryCall<T, U>> {
+function makeMockCompletionStorage() {
+  return {
+    addCompletion: jest.fn(),
+    getCompletion: jest.fn(),
+    removeCompletion: jest.fn(),
+  };
+}
+
+function forceCast<T extends object, U extends object>(
+  object: any
+): LoopbackRouteHandler<handleUnaryCall<T, U>> {
   return object as LoopbackRouteHandler<handleUnaryCall<T, U>>;
 }
 
@@ -96,6 +124,9 @@ function makeMockLoopbackChannel() {
     getAttempt: jest.fn(),
     createAttempt: jest.fn(),
     deleteAttempt: jest.fn(),
+    createCompletion: jest.fn(),
+    getCompletion: jest.fn(),
+    deleteCompletion: jest.fn(),
   };
   return {
     client: {
@@ -103,6 +134,13 @@ function makeMockLoopbackChannel() {
       getAttempt: forceCast<GetAttemptRequest, GetAttemptResponse>(mock.getAttempt),
       createAttempt: forceCast<CreateAttemptRequest, CreateAttemptResponse>(mock.createAttempt),
       deleteAttempt: forceCast<DeleteAttemptRequest, DeleteAttemptResponse>(mock.deleteAttempt),
+      createCompletion: forceCast<CreateCompletionRequest, CreateCompletionResponse>(
+        mock.createCompletion
+      ),
+      getCompletion: forceCast<GetCompletionRequest, GetCompletionResponse>(mock.getCompletion),
+      deleteCompletion: forceCast<DeleteCompletionRequest, DeleteCompletionResponse>(
+        mock.deleteCompletion
+      ),
     },
     mock,
   };
@@ -113,7 +151,7 @@ function makeMockUserClient() {
     'fakeUserServiceUrl',
     ChannelCredentials.createInsecure(),
     {},
-    {},
+    {}
   );
 }
 
@@ -122,7 +160,7 @@ function makeMockQuestionClient() {
     'fakeQuestionServiceUrl',
     ChannelCredentials.createInsecure(),
     {},
-    {},
+    {}
   );
 }
 
@@ -135,7 +173,10 @@ export {
   testHistoryAttemptEntity,
   testUser,
   testPasswordUser,
+  testCompletion,
+  testCompletionEntity,
   makeMockAttemptStorage,
+  makeMockCompletionStorage,
   makeMockLoopbackChannel,
   makeMockUserClient,
   makeMockQuestionClient,

@@ -6,7 +6,7 @@ type ExtractedResponse<T> = { items: T[]; total: number };
 type PaginationProps<T, U, V> = {
   fetchUrl: string;
   requestFactory: (offset: number, limit: number) => U;
-  responseExtractor: (data: V) => ExtractedResponse<T>;
+  responseExtractor: (data: AxiosResponse<V, any>) => ExtractedResponse<T>;
 };
 
 const PER_PAGE = 10;
@@ -36,7 +36,7 @@ const usePagination = <T, U, V>({
   useEffect(() => {
     const request = requestFactory(offset, PER_PAGE);
     fetchData(request, (res) => {
-      const updatedItems = responseExtractor(res.data);
+      const updatedItems = responseExtractor(res);
       setItems(updatedItems.items);
       setTotal(updatedItems.total);
       setTotalPages(Math.ceil(updatedItems.total / PER_PAGE) + 1);
@@ -48,7 +48,7 @@ const usePagination = <T, U, V>({
     const newOffset = offset + PER_PAGE;
     const request: U = requestFactory(newOffset, PER_PAGE);
     fetchData(request, (res) => {
-      const updatedItems = responseExtractor(res.data);
+      const updatedItems = responseExtractor(res);
       setItems(updatedItems.items);
       setOffset(newOffset);
       setHasNext(newOffset + PER_PAGE < total);
@@ -63,7 +63,7 @@ const usePagination = <T, U, V>({
     const newOffset = Math.max(0, offset - PER_PAGE);
     const request: U = requestFactory(newOffset, PER_PAGE);
     fetchData(request, (res) => {
-      const updatedItems = responseExtractor(res.data);
+      const updatedItems = responseExtractor(res);
       setItems(updatedItems.items);
       setOffset(newOffset);
       setHasNext(true);

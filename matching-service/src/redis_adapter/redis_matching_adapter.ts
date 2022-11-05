@@ -29,11 +29,17 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
   }
 
   async pushStream(username: string, difficulties: number[]): Promise<string | undefined> {
-    const queueId = await this.redisClient.xAdd(
-      MATCHMAKER_QUEUE_KEY,
-      '*',
-      RedisMatchingAdapter.createQueueItem(username, JSON.stringify(difficulties)),
-    );
+    let queueId: string;
+    try {
+      queueId = await this.redisClient.xAdd(
+        MATCHMAKER_QUEUE_KEY,
+        '*',
+        RedisMatchingAdapter.createQueueItem(username, JSON.stringify(difficulties)),
+      );
+    } catch {
+      return undefined;
+    }
+
     if (queueId === '') {
       return undefined;
     }
@@ -47,9 +53,14 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
 
   async getUserLock(username: string): Promise<MatchResult | null> {
     const key = getMatchmakerUserKey(username);
-    const result = await this.redisClient.get(key);
-    if (result === null) {
-      return result;
+    let result: (string | null);
+    try {
+      result = await this.redisClient.get(key);
+      if (result === null) {
+        return result;
+      }
+    } catch {
+      return null;
     }
 
     if (!result.includes(MATCHMAKER_RESULT_DELIMITER)) {
@@ -81,7 +92,13 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
 
   async deleteUserLock(username: string): Promise<boolean> {
     const key = getMatchmakerUserKey(username);
-    const result = await this.redisClient.del(key);
+    let result: number;
+    try {
+      result = await this.redisClient.del(key);
+    } catch {
+      return false;
+    }
+
     if (result === 0) {
       return false;
     }
@@ -90,11 +107,16 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
 
   async lockIfUnset(username: string): Promise<boolean> {
     const key = getMatchmakerUserKey(username);
-    const result = await this.redisClient.set(key, '', {
-      NX: true,
-      GET: true,
-      EX: MATCHMAKER_LOCK_EXPIRY,
-    });
+    let result: (string | null);
+    try {
+      result = await this.redisClient.set(key, '', {
+        NX: true,
+        GET: true,
+        EX: MATCHMAKER_LOCK_EXPIRY,
+      });
+    } catch {
+      return false;
+    }
 
     if (result !== null) {
       return false;
@@ -104,15 +126,24 @@ class RedisMatchingAdapter implements IRedisMatchingAdapter {
 
   async setUserLock(username: string, value: string): Promise<boolean> {
     const key = getMatchmakerUserKey(username);
-    const oldValue = await this.redisClient.set(key, value, {
-      GET: true,
-      KEEPTTL: true,
-    });
-
-    if (oldValue && oldValue.includes(MATCHMAKER_RESULT_DELIMITER)) {
-      await this.redisClient.set(key, oldValue, {
+    let oldValue: (string | null);
+    try {
+      oldValue = await this.redisClient.set(key, value, {
+        GET: true,
         KEEPTTL: true,
       });
+    } catch {
+      return false;
+    }
+
+    if (oldValue && oldValue.includes(MATCHMAKER_RESULT_DELIMITER)) {
+      try {
+        await this.redisClient.set(key, oldValue, {
+          KEEPTTL: true,
+        });
+      } catch {
+        return false;
+      }
     }
 
     return true;

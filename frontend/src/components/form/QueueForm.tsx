@@ -1,18 +1,15 @@
 import { Button, Stack } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
-import axios from "../../axios";
 import {
   enterQueue,
   toggleDifficulty,
 } from "../../feature/matching/matchingSlice";
-import {
-  JoinQueueResponse,
-  JoinQueueRequest,
-} from "../../proto/matching-service";
+import { JoinQueueRequest } from "../../proto/matching-service";
 import { RootState } from "../../app/store";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { QuestionDifficulty } from "../../proto/types";
+import MatchingAPI from "../../api/matching";
 
 const DIFFICULTY = [
   {
@@ -58,18 +55,8 @@ function QueueForm() {
       difficulties: selectedDifficulties,
     };
 
-    axios
-      .post<JoinQueueResponse>("/api/queue/join", joinQueueReq, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        const { errorCode, errorMessage } = res.data;
-
-        if (errorCode) {
-          throw new Error(errorMessage);
-        }
-
-        // For now just change the flag
+    MatchingAPI.joinQueue(joinQueueReq)
+      .then(() => {
         dispatch(enterQueue());
       })
       .catch((err) => {
