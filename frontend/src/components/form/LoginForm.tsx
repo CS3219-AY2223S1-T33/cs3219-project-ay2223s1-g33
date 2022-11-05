@@ -6,6 +6,7 @@ import {
   FormErrorMessage,
   Button,
   Text,
+  useBoolean
 } from "@chakra-ui/react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -24,13 +25,15 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm({ resolver: yupResolver(LOGIN_VALIDATOR) });
   const toast = useFixedToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const validFormHandler = (data: any) => {
+    setIsLoading.on();
     const { email, password } = data;
     const credentials: UserCredentials = { username: email, password };
     const loginReq: LoginRequest = { credentials };
@@ -48,14 +51,15 @@ function LoginForm() {
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler = () => {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!",
+        title: "Oops!"
       }
     );
   };
@@ -78,13 +82,10 @@ function LoginForm() {
         </FormControl>
 
         <Button
+          isLoading={isLoading}
           loadingText="Submitting"
           size="lg"
-          bg="blue.400"
-          color="white"
-          _hover={{
-            bg: "blue.500",
-          }}
+          colorScheme="blue"
           type="submit"
         >
           Sign in

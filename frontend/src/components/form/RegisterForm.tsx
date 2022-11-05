@@ -6,15 +6,17 @@ import {
   FormErrorMessage,
   Button,
   Text,
+  useBoolean
 } from "@chakra-ui/react";
 import React from "react";
 import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler,
+  SubmitErrorHandler
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigate } from "react-router-dom";
 import AuthAPI from "../../api/auth";
 import Link from "../ui/Link";
 import PasswordInput from "../ui/form/PasswordInput";
@@ -26,12 +28,14 @@ function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm({ resolver: yupResolver(REGISTER_VALIDATOR) });
-
   const toast = useFixedToast();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { email, password, nickname } = data;
 
     const credentials: UserCredentials = { username: email, password };
@@ -39,18 +43,22 @@ function RegisterForm() {
 
     AuthAPI.register(registerRequest)
       .then(() => {
-        toast.sendSuccessMessage("Yay! Click on the link below to login.");
+        toast.sendSuccessMessage(
+          "Account registered! You may login to Peerprep!"
+        );
+        navigate("/login");
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!",
+        title: "Oops!"
       }
     );
   };
@@ -91,12 +99,9 @@ function RegisterForm() {
         <Stack spacing={10} pt={2}>
           <Button
             loadingText="Submitting"
+            isLoading={isLoading}
             size="lg"
-            bg="blue.400"
-            color="white"
-            _hover={{
-              bg: "blue.500",
-            }}
+            colorScheme="blue"
             type="submit"
           >
             Sign up

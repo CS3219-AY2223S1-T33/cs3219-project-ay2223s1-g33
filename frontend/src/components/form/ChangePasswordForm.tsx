@@ -4,13 +4,14 @@ import {
   FormControl,
   FormLabel,
   Heading,
-  VStack,
+  useBoolean,
+  VStack
 } from "@chakra-ui/react";
 import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm,
+  useForm
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
@@ -24,16 +25,17 @@ function ChangePasswordForm() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    reset
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
-
   const toast = useFixedToast();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { password: newPassword } = data;
 
     const changePasswordRequest: ChangePasswordRequest = {
-      newPassword,
+      newPassword
     };
 
     AuthAPI.changePassword(changePasswordRequest)
@@ -41,19 +43,19 @@ function ChangePasswordForm() {
         toast.sendSuccessMessage(
           "Your password is changed! You will need to login again!"
         );
-
         reset();
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!",
+        title: "Oops!"
       }
     );
   };
@@ -75,13 +77,11 @@ function ChangePasswordForm() {
         </FormControl>
         <Button
           loadingText="Submitting"
-          mt={4}
-          bg="blue.400"
-          color="white"
-          _hover={{
-            bg: "blue.500",
-          }}
+          isLoading={isLoading}
+          size="lg"
+          colorScheme="blue"
           type="submit"
+          mt={4}
         >
           Update
         </Button>

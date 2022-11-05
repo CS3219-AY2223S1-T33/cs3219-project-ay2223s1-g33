@@ -6,13 +6,14 @@ import {
   FormLabel,
   Heading,
   Input,
-  VStack,
+  useBoolean,
+  VStack
 } from "@chakra-ui/react";
 import {
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
-  useForm,
+  useForm
 } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -28,11 +29,11 @@ function ChangeNicknameForm() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    reset
   } = useForm({ resolver: yupResolver(CHANGE_NICKNAME_VALIDTOR) });
-
   const toast = useFixedToast();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const user = useSelector(selectUser);
   if (!user) {
@@ -40,10 +41,11 @@ function ChangeNicknameForm() {
   }
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { nickname: newNickname } = data;
 
     const changeNicknameRequest: ChangeNicknameRequest = {
-      newNickname,
+      newNickname
     };
 
     AuthAPI.changeNickname(changeNicknameRequest)
@@ -57,14 +59,15 @@ function ChangeNicknameForm() {
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!",
+        title: "Oops!"
       }
     );
   };
@@ -85,13 +88,11 @@ function ChangeNicknameForm() {
         </FormControl>
         <Button
           loadingText="Submitting"
-          mt={4}
-          bg="blue.400"
-          color="white"
-          _hover={{
-            bg: "blue.500",
-          }}
+          isLoading={isLoading}
+          size="lg"
+          colorScheme="blue"
           type="submit"
+          mt={4}
         >
           Update
         </Button>

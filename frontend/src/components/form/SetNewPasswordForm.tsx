@@ -5,15 +5,17 @@ import {
   Button,
   FormErrorMessage,
   Text,
+  useBoolean
 } from "@chakra-ui/react";
 import React from "react";
 import {
   useForm,
   SubmitHandler,
   FieldValues,
-  SubmitErrorHandler,
+  SubmitErrorHandler
 } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigate } from "react-router-dom";
 import Link from "../ui/Link";
 import { ConsumeResetTokenRequest } from "../../proto/user-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
@@ -29,35 +31,39 @@ function SetNewPasswordForm({ token }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm({ resolver: yupResolver(SET_PW_VALIDATOR) });
-
   const toast = useFixedToast();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { password: newPassword } = data;
 
     const consumeResetTokenRequest: ConsumeResetTokenRequest = {
       token,
-      newPassword,
+      newPassword
     };
 
     AuthAPI.setNewPassword(consumeResetTokenRequest)
       .then(() => {
         toast.sendSuccessMessage(
-          "Your password is reset! Click on the link below to login."
+          "Your password has been reset! You can login to Peerprep."
         );
+        navigate("/login");
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
     toast.sendErrorMessage(
       "Please check if you have filled everything in correctly before submitting",
       {
-        title: "Oops!",
+        title: "Oops!"
       }
     );
   };
@@ -84,12 +90,9 @@ function SetNewPasswordForm({ token }: Props) {
         <Stack spacing={10} pt={2}>
           <Button
             loadingText="Submitting"
+            isLoading={isLoading}
             size="lg"
-            bg="blue.400"
-            color="white"
-            _hover={{
-              bg: "blue.500",
-            }}
+            colorScheme="blue"
             type="submit"
           >
             Reset
