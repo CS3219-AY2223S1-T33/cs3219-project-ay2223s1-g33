@@ -70,7 +70,7 @@ export default function loadEnvironment(): EnvironmentConfig {
     QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL'),
     HISTORY_SERVICE_URL: requireString('HISTORY_SERVICE_URL'),
     GRPC_PORT: requireInt('GRPC_PORT', 4003),
-    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert) : undefined,
-    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey) : undefined,
+    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert.replaceAll('\\n', '\n')) : undefined,
+    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey.replaceAll('\\n', '\n')) : undefined,
   };
 }
