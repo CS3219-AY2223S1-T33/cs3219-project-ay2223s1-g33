@@ -5,7 +5,7 @@ import { RootState } from "../../app/store";
 import { changeIsCompleted } from "../../feature/session/sessionSlice";
 import { SetHistoryCompletionRequest } from "../../proto/history-service";
 import { HistoryCompletion, Question } from "../../proto/types";
-import { CompletionConfig } from "../../types";
+import { CompletionConfig } from "../../types/types";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import HistoryAPI from "../../api/history";
 

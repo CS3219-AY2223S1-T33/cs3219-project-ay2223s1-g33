@@ -8,12 +8,12 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  HStack,
+  HStack
 } from "@chakra-ui/react";
 import QuestionSection from "../question/QuestionSection";
 import HistorySection from "../history/HistorySection";
 import saveFile from "../../utils/fileDownloadUtil";
-import { Language } from "../../types";
+import { Language } from "../../types/types";
 import { HistoryAttempt } from "../../proto/types";
 import { GetAttemptSubmissionRequest } from "../../proto/history-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
@@ -38,7 +38,7 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
 
   const loadSubmission = (targetAttemptId: number): Promise<HistoryAttempt> => {
     const request: GetAttemptSubmissionRequest = {
-      attemptId: targetAttemptId,
+      attemptId: targetAttemptId
     };
 
     return HistoryAPI.getAttemptSubmission(request).then((res) => {

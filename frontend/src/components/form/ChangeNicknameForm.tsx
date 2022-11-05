@@ -20,7 +20,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { ChangeNicknameRequest } from "../../proto/user-service";
-import { changeNickname, selectUser } from "../../feature/user/userSlice";
+import { selectUser, setUser } from "../../feature/user/userSlice";
 import { User } from "../../proto/types";
 import { CHANGE_NICKNAME_VALIDTOR } from "../../constants/validators";
 
@@ -52,8 +52,7 @@ function ChangeNicknameForm() {
       .then(() => {
         const newUser: User = { ...user, nickname: newNickname };
 
-        // TODO Same logic as slice login(). May rename as setUser?
-        dispatch(changeNickname({ user: newUser }));
+        dispatch(setUser({ user: newUser }));
         toast.sendSuccessMessage("Your nickname is changed!");
         reset();
       })

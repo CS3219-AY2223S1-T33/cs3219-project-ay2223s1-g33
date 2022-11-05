@@ -7,7 +7,7 @@ import { QuestionDifficulty, Question } from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
 import { RootState } from "../../app/store";
-import { CompletionConfig } from "../../types";
+import { CompletionConfig } from "../../types/types";
 
 type Props = {
   question: Question;
@@ -16,13 +16,13 @@ type Props = {
 const COMPLETED: CompletionConfig = {
   colorScheme: "green",
   badgeText: "COMPLETED",
-  btnText: "Not Complete",
+  btnText: "Not Complete"
 };
 
 const NOT_COMPLETED: CompletionConfig = {
   colorScheme: "gray",
   badgeText: "NOT COMPLETED",
-  btnText: "Complete",
+  btnText: "Complete"
 };
 
 function QuestionSection({ question }: Props) {
