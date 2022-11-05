@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: gcr.io/cs3219-peerprep-366617/redis:latest
+          ports:
+            - name: redis-tcp
+              containerPort: 6379
+          resources:
+            limits:
+              cpu: 60m
+              memory: 64Mi
+          imagePullPolicy: Always
+          envFrom:
+          - secretRef:
+                name: secrets-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis
+  name: redis
+spec:
+  selector:
+    app: redis
+  type: ClusterIP
+  ports:
+    - name: redis-tcp
+      port: 6379
+      protocol: TCP
+      targetPort: redis-tcp
