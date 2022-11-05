@@ -8,3 +8,6 @@ docker build -t gcr.io/cs3219-peerprep-366617/collab-service -f ./collab-service
 docker build -t gcr.io/cs3219-peerprep-366617/matching-service -f ./matching-service/Dockerfile .
 
 docker build -t gcr.io/cs3219-peerprep-366617/gateway ./gateway
+docker build -t gcr.io/cs3219-peerprep-366617/matchmaker ./matchmaker
+
+docker build -t gcr.io/cs3219-peerprep-366617/frontend -f ./frontend/Dockerfile .

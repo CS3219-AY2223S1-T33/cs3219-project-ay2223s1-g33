@@ -25,4 +25,19 @@ spec:
               cpu: 30m
               memory: 32Mi
           imagePullPolicy: Always
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  selector:
+    app: nginx
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http

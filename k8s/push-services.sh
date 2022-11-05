@@ -9,3 +9,5 @@ docker push gcr.io/cs3219-peerprep-366617/matching-service
 
 docker push gcr.io/cs3219-peerprep-366617/gateway
 docker push gcr.io/cs3219-peerprep-366617/matchmaker
+
+docker push gcr.io/cs3219-peerprep-366617/frontend
