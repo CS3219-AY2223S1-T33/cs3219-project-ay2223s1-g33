@@ -71,7 +71,7 @@ export default function loadEnvironment(): EnvironmentConfig {
     HTTP_PORT: requireInt('SERVER_HTTP_PORT', 8082),
     GRPC_PORT: requireInt('SERVER_GRPC_PORT', 4001),
 
-    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert) : undefined,
-    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey) : undefined,
+    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert.replaceAll('\\n', '\n')) : undefined,
+    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey.replaceAll('\\n', '\n')) : undefined,
   };
 }

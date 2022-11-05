@@ -101,7 +101,7 @@ export default function loadEnvironment(): EnvironmentConfig {
 
     RESET_PASSWORD_URL: requireString('RESET_PASSWORD_URL'),
 
-    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert) : undefined,
-    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey) : undefined,
+    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert.replaceAll('\\n', '\n')) : undefined,
+    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey.replaceAll('\\n', '\n')) : undefined,
   };
 }

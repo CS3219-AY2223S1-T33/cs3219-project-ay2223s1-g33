@@ -83,7 +83,7 @@ export default function loadEnvironment(): EnvironmentConfig {
     REDIS_SERVER_URL: `redis://${requireString('REDIS_SERVER')}`,
     REDIS_PASSWORD: requireString('REDIS_PASSWORD', ''),
 
-    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert) : undefined,
-    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey) : undefined,
+    GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert.replaceAll('\\n', '\n')) : undefined,
+    GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey.replaceAll('\\n', '\n')) : undefined,
   };
 }
