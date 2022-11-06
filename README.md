@@ -14,7 +14,7 @@ The repository is organised as a mono-repository, with each service taking a sub
     - To also run execute-service, configure the environment file `secrets-db-judge0`.
     - Use `npm run-script up`. Note that the image for executor exceeds 10GB in size.
 
-> **Note**
+> **Note**<br/>
 > In order to use secure gRPC, you need to configure `secrets-grpc-cert.env`. you may use `npm run-script gen-certs` to obtain the self-signed certificates.
 
 ## Developer Extras
@@ -28,14 +28,14 @@ Some setup is required for development. Note that these steps are not required t
 1. In the root of the project, run `npm i`.
 2. Then, run `npm run-script gen-proto-go`.
 
-> **Warning**
+> **Warning**<br/>
 > You will need Golang on your system to perform this step.
 
 ### Gateway Generation (Golang)
 1. In the root of the project, run `npm i`.
 2. Then, run `npm run-script gen-gateway`.
 
-> **Warning**
+> **Warning**<br/>
 > You will need Golang on your system to perform this step.
 
 ### Running each Service
@@ -52,7 +52,7 @@ Some setup is required for development. Note that these steps are not required t
     - `npm i`
     - `npm run-script build`
     - `npm start`
-4. For Golang servies, execute
+4. For Golang services, execute
     - `make run`
 
 ### Running the Frontend
