@@ -47,6 +47,7 @@ func (handler *createTokenHandler) Handle(req *pb.CreateTokenRequest) (*pb.Creat
 		}, nil
 	}
 
+	log.Printf("Issued token for %s\n", req.GetEmail())
 	return &pb.CreateTokenResponse{
 		SessionToken: sessionToken,
 		RefreshToken: refreshToken,
