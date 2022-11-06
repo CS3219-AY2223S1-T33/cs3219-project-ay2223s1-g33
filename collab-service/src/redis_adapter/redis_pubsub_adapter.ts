@@ -46,7 +46,7 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
       call(received);
     };
 
-    Logger.info(`Event ${this.topic} registered by ${this.username}`);
+    Logger.info(`Topic ${this.topic} registered: ${this.username}`);
     this.redisTopicPool.registerTopic(`pubsub-${this.topic}`, this.handler);
   }
 
@@ -62,7 +62,7 @@ class RedisPubSubAdapter<T> implements TunnelPubSub<T> {
     }
     call();
 
-    Logger.info(`User ${this.username} unregistered event ${this.topic}`);
+    Logger.info(`Topic ${this.topic} unregistered: ${this.username}`);
     await this.redisTopicPool.unregisterTopic(`pubsub-${this.topic}`, this.handler);
   }
 }
