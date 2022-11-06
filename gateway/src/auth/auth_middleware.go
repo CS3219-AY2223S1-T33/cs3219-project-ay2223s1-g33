@@ -65,7 +65,6 @@ func (middleware *authMiddleware) Receive(httpCtx *util.HTTPContext) error {
 		return writeUnauthorizedResponse(resp)
 	}
 
-	log.Println("Authenticating with server")
 	username, nickname, newSessionToken, err := middleware.authAgent.ValidateToken(sessionToken, refreshToken)
 	if err != nil {
 		return writeUnauthorizedResponse(resp)
@@ -80,6 +79,7 @@ func (middleware *authMiddleware) Receive(httpCtx *util.HTTPContext) error {
 		sessionToken = newSessionToken
 	}
 
+	log.Printf("Authed %s\n", username)
 	addAuthHeaders(req, username, nickname, sessionToken, refreshToken)
 	return middleware.WriteToDownstream(httpCtx)
 }
