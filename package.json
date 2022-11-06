@@ -16,6 +16,7 @@
     "gen-certs": "./scripts/gen-certs.sh",
     "init": "npm run-script init-permissions && npm run-script gen-y-websocket",
     "up": "docker-compose -p cs3219-g33-peerprep -f docker-compose.yml up",
+    "up-core": "docker-compose -p cs3219-g33-peerprep -f docker-compose.yml up redis session-service user-service matching-service matchmaker question-service collab-service history-service gateway frontend",
     "up-sharded": "docker-compose -p cs3219-g33-peerprep-sharded -f docker-compose-sharded.yml up"
   },
   "repository": {
