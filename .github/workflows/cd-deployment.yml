@@ -18,6 +18,7 @@ env:
     QUESTION_SERVICE_URL=question-service:4004
     HISTORY_SERVICE_URL=history-service:4005
     SESSION_SERVICE_URL=session-service:4100
+    JUDGE0_SERVER_URL=execute-service:2358
     REDIS_SERVER=redis:6379
 
   CONFIG_ROUTE_MAP_GATEWAY: |
