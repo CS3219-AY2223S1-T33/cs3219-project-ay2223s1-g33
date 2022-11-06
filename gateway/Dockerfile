@@ -9,6 +9,6 @@ FROM alpine:3.16
 RUN apk add libc6-compat 
 
 WORKDIR /app
-COPY --from=0 /build/dist/backend .
+COPY --from=0 /build/dist/gateway .
 
 ENTRYPOINT /app/gateway

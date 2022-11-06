@@ -1,8 +1,8 @@
 #!make
-include .env
-export
 
 run:
+	$(eval include .env)
+	$(eval export)
 	$(MAKE) -C src run
 
 build:
