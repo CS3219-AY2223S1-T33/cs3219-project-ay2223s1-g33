@@ -1,0 +1,273 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+
+    restart: always
+
+    ports:
+      - "80:80"
+
+    expose:
+      - 3000
+
+    volumes:
+      - /etc/nginx/
+
+  user-service:
+    platform: linux/amd64
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-email.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
+    environment:
+      - REDIS_SERVER=redis-d:6379
+
+    build:
+      context: .
+      dockerfile: ./user-service/Dockerfile
+
+    ports:
+      - "8081:8081"
+      - "4000:4000"
+
+    expose:
+      - "8081"
+
+    volumes:
+      - .:/app/user-service/build
+      - /app/user-service/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  matching-service:
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
+    environment:
+      - REDIS_SERVER=redis-b:6379
+
+    build:
+      context: .
+      dockerfile: ./matching-service/Dockerfile
+
+    ports:
+      - "8082:8082"
+      - "4001:4001"
+
+    expose:
+      - "8082"
+
+    volumes:
+      - .:/app/matching-service/build
+      - /app/matching-service/node_modules
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  collab-service:
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
+    environment:
+      - REDIS_SERVER=redis-c:6379
+
+    build:
+      context: .
+      dockerfile: ./collab-service/Dockerfile
+
+    ports:
+      - "4003:4003"
+
+    expose:
+      - "4003"
+
+    volumes:
+      - .:/app/collab-service/build
+      - /app/collab-service/node_modules
+
+  question-service:
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
+    environment:
+      - REDIS_SERVER=redis-d:6379
+
+    build:
+      context: .
+      dockerfile: ./question-service/Dockerfile
+
+    ports:
+      - "8084:8084"
+      - "4004:4004"
+
+    expose:
+      - "8084"
+
+    volumes:
+      - .:/app/question-service/build
+      - /app/question-service/node_modules
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  matchmaker:
+    platform: linux/amd64
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-redis.env
+    environment:
+      - REDIS_SERVER=redis-b:6379
+
+    build:
+      context: ./matchmaker
+      dockerfile: Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  session-service:
+    platform: linux/amd64
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-signing.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
+    environment:
+      - REDIS_SERVER=redis-a:6379
+
+    build:
+      context: ./session-service
+      dockerfile: Dockerfile
+
+    ports:
+      - "4100:4100"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  history-service:
+    env_file:
+      - config_env/route-map-internal.env
+      - config_env/secrets-db.env
+      - config_env/secrets-redis.env
+      - config_env/secrets-grpc-cert.env
+    environment:
+      - REDIS_SERVER=redis-d:6379
+
+    build:
+      context: .
+      dockerfile: history-service/Dockerfile
+
+    ports:
+      - "4005:4005"
+      - "8085:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  gateway:
+    platform: linux/amd64
+    env_file:
+      - config_env/route-map-gateway.env
+      - config_env/secrets-grpc-cert.env
+
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+
+    ports:
+      - "5001:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  redis-a:
+    env_file:
+      - config_env/secrets-redis.env
+
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+
+  redis-b:
+    env_file:
+      - config_env/secrets-redis.env
+
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+
+  redis-c:
+    env_file:
+      - config_env/secrets-redis.env
+
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+
+  redis-d:
+    env_file:
+      - config_env/secrets-redis.env
+
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+
+  redis-e:
+    env_file:
+      - config_env/secrets-redis.env
+
+    build:
+      context: ./images
+      dockerfile: redis.dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+
+  execute-service:
+    image: judge0/judge0:1.13.0
+    env_file:
+      - config_env/config-execute.env
+      - config_env/secrets-db-judge0.env
+      - config_env/secrets-redis.env
+    environment: 
+      - REDIS_HOST=redis-e
+    ports:
+      - "2358:2358"
+    privileged: true
+
+  execute-service-worker:
+    image: judge0/judge0:1.13.0
+    command: ["./scripts/workers"]
+    env_file:
+      - config_env/config-execute.env
+      - config_env/secrets-db-judge0.env
+      - config_env/secrets-redis.env
+    environment: 
+      - REDIS_HOST=redis-e
+    privileged: true
