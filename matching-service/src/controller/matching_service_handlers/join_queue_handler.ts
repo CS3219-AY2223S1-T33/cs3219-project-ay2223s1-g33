@@ -3,6 +3,7 @@ import { IApiHandler, ApiRequest, ApiResponse } from '../../api_server/api_serve
 import { IRedisMatchingAdapter } from '../../redis_adapter/redis_matching_adapter';
 import GatewayConstants from '../../utils/gateway_constants';
 import { safeReadFirstHeader } from '../controller_utils';
+import Logger from '../../utils/logger';
 
 class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueResponse> {
   redisAdapter: IRedisMatchingAdapter;
@@ -50,6 +51,7 @@ class JoinQueueHandler implements IApiHandler<JoinQueueRequest, JoinQueueRespons
       );
     }
 
+    Logger.info(`Joined Queue: ${username}`);
     await this.redisAdapter.setUserLock(username, queueId);
     return JoinQueueHandler.buildResponse(
       JoinQueueErrorCode.JOIN_QUEUE_ERROR_NONE,
