@@ -8,13 +8,15 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/sync-db-definitions.sh && chmod 755 ./scripts/gen-gateway.sh",
+    "init-permissions": "chmod 755 ./scripts/gen-proto.sh && chmod 755 ./scripts/gen-proto-go.sh && chmod 755 ./scripts/gen-y-websocket.sh && chmod 755 ./scripts/gen-gateway.sh && chmod 755 ./scripts/gen-certs.sh",
     "gen-proto": "./scripts/gen-proto.sh proto $npm_package_config_proto_output_ts",
     "gen-proto-go": "./scripts/gen-proto-go.sh proto $npm_package_config_proto_output_go",
     "gen-gateway": "./scripts/gen-gateway.sh proto ./gateway",
     "gen-y-websocket": "./scripts/gen-y-websocket.sh",
     "gen-certs": "./scripts/gen-certs.sh",
-    "init": "npm run-script init-permissions && npm-run-script gen-y-websocket"
+    "init": "npm run-script init-permissions && npm run-script gen-y-websocket",
+    "up": "docker-compose -p cs3219-g33-peerprep -f docker-compose.yml up",
+    "up-sharded": "docker-compose -p cs3219-g33-peerprep-sharded -f docker-compose-sharded.yml up"
   },
   "repository": {
     "type": "git",
