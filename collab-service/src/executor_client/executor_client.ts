@@ -46,10 +46,10 @@ class ExecuteServiceClient implements IExecuteServiceClient {
     } catch (err) {
       if (ExecuteServiceClient.isTimeoutError(err)) {
         protoResponse = ExecuteServiceClient
-          .createErrorCreateResponse('Server Timeout');
+          .createErrorCreateResponse('Could Reach an Executor');
       } else {
         protoResponse = ExecuteServiceClient
-          .createErrorCreateResponse('Execute Retrieval Failed');
+          .createErrorCreateResponse('An Execution Error Occurred');
       }
     }
     callback(protoResponse);

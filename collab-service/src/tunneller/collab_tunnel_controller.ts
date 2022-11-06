@@ -20,6 +20,7 @@ import createHistoryAgent from '../history_client/history_agent';
 import { TunnelMessage } from '../message_handler/internal/internal_message_types';
 import createCollabTunnelBridge from './collab_tunnel_bridge';
 import createExecuteAgent from '../executor_client/executor_agent';
+import Logger from '../utils/logger';
 
 const PROXY_HEADER_USERNAME = 'X-Gateway-Proxy-Username';
 const PROXY_HEADER_NICKNAME = 'X-Gateway-Proxy-Nickname';
@@ -139,6 +140,7 @@ class CollabTunnelController {
 
     // When stream closes
     call.on('end', () => {
+      Logger.info(`Left Room: ${roomId} , ${username}`);
       clearInterval(heartbeatWorker);
 
       // Send 'Disconnected'
@@ -149,6 +151,8 @@ class CollabTunnelController {
       const endFunc = () => call.end();
       redisPubSubAdapter.clean(endFunc);
     });
+
+    Logger.info(`Joined Room: ${roomId} , ${username}`);
   }
 
   /**

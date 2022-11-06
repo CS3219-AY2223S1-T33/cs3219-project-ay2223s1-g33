@@ -74,7 +74,9 @@ class ResetPasswordHandler implements IApiHandler<ResetPasswordRequest, ResetPas
       username,
       userObject.nickname,
       token,
-    ).catch((err) => Logger.warn(`Failed to send email: ${err}`));
+    )
+      .then(() => Logger.info(`Reset Email Sent: ${username}`))
+      .catch((err) => Logger.warn(`Failed to send reset email: ${err}`));
 
     return {
       response: ResetPasswordResponse.create(),

@@ -99,7 +99,6 @@ func (conn *websocketConnection) Close() error {
 		return nil
 	}
 
-	log.Println("Closing WS Connection")
 	close(conn.writeBuffer)
 	err := conn.socket.Close()
 
@@ -145,14 +144,12 @@ func (conn *websocketConnection) startReadPump() {
 		}
 	}
 
-	log.Println("WS Read Pump Death")
 	conn.Close()
 }
 
 func (conn *websocketConnection) startWritePump() {
 	ticker := time.NewTicker(pingInterval)
 	defer func() {
-		log.Println("WS Write Pump Death")
 		conn.Close()
 		ticker.Stop()
 	}()

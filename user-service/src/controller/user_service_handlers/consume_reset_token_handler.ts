@@ -15,6 +15,7 @@ import { PasswordResetToken, PasswordUser, User } from '../../proto/types';
 import IHashAgent from '../../auth/hash_agent_types';
 import { IAuthenticationAgent } from '../../auth/authentication_agent_types';
 import { ILoopbackServiceChannel } from '../../api_server/loopback_server_types';
+import Logger from '../../utils/logger';
 
 class ConsumeResetTokenHandler
 implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
@@ -98,6 +99,7 @@ implements IApiHandler<ConsumeResetTokenRequest, ConsumeResetTokenResponse> {
       );
     }
 
+    Logger.info(`Password Reset: ${user.userInfo.username}`);
     return ConsumeResetTokenHandler.buildHeaderlessResponse({
       errorCode: ConsumeResetTokenErrorCode.CONSUME_RESET_TOKEN_ERROR_NONE,
       errorMessage: '',
