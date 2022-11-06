@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: route-map-internal
+  namespace: default
+data:
+  REDIS_SERVER: "redis:6379"
+  USER_SERVICE_URL: "user-service:4000"
+  MATCHING_SERVICE_URL: "matching-service:4001"
+  COLLAB_SERVICE_URL: "collab-service:4003"
+  QUESTION_SERVICE_URL: "question-service:4004"
+  HISTORY_SERVICE_URL: "history-service:4005"
+  SESSION_SERVICE_URL: "session-service:4100"
+  JUDGE0_SERVER_URL: "execute-service:2358"

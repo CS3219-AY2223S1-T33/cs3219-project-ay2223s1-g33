@@ -6,6 +6,7 @@ import {
   FormLabel,
   Heading,
   Input,
+  useBoolean,
   VStack,
 } from "@chakra-ui/react";
 import {
@@ -19,7 +20,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import AuthAPI from "../../api/auth";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { ChangeNicknameRequest } from "../../proto/user-service";
-import { changeNickname, selectUser } from "../../feature/user/userSlice";
+import { selectUser, setUser } from "../../feature/user/userSlice";
 import { User } from "../../proto/types";
 import { CHANGE_NICKNAME_VALIDTOR } from "../../constants/validators";
 
@@ -30,9 +31,9 @@ function ChangeNicknameForm() {
     formState: { errors },
     reset,
   } = useForm({ resolver: yupResolver(CHANGE_NICKNAME_VALIDTOR) });
-
   const toast = useFixedToast();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useBoolean(false);
 
   const user = useSelector(selectUser);
   if (!user) {
@@ -40,6 +41,7 @@ function ChangeNicknameForm() {
   }
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { nickname: newNickname } = data;
 
     const changeNicknameRequest: ChangeNicknameRequest = {
@@ -50,14 +52,14 @@ function ChangeNicknameForm() {
       .then(() => {
         const newUser: User = { ...user, nickname: newNickname };
 
-        // TODO Same logic as slice login(). May rename as setUser?
-        dispatch(changeNickname({ user: newUser }));
+        dispatch(setUser({ user: newUser }));
         toast.sendSuccessMessage("Your nickname is changed!");
         reset();
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
@@ -85,13 +87,11 @@ function ChangeNicknameForm() {
         </FormControl>
         <Button
           loadingText="Submitting"
-          mt={4}
-          bg="blue.400"
-          color="white"
-          _hover={{
-            bg: "blue.500",
-          }}
+          isLoading={isLoading}
+          size="lg"
+          colorScheme="blue"
           type="submit"
+          mt={4}
         >
           Update
         </Button>

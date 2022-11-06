@@ -84,7 +84,7 @@ export interface Question {
      */
     solution: string;
     /**
-     * @generated from protobuf field: string executionInput = 6;
+     * @generated from protobuf field: string execution_input = 6;
      */
     executionInput: string;
 }
@@ -129,6 +129,23 @@ export interface HistoryCompletion {
      * @generated from protobuf field: uint64 question_id = 2;
      */
     questionId: number;
+}
+/**
+ * @generated from protobuf message common.ExecuteCode
+ */
+export interface ExecuteCode {
+    /**
+     * @generated from protobuf field: uint64 language_id = 1;
+     */
+    languageId: number;
+    /**
+     * @generated from protobuf field: string stdin = 2;
+     */
+    stdin: string;
+    /**
+     * @generated from protobuf field: string code = 3;
+     */
+    code: string;
 }
 /**
  * @generated from protobuf enum common.QuestionDifficulty
@@ -336,7 +353,7 @@ class Question$Type extends MessageType<Question> {
             { no: 3, name: "difficulty", kind: "enum", T: () => ["common.QuestionDifficulty", QuestionDifficulty, "QUESTION_DIFFICULTY_"] },
             { no: 4, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "solution", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "executionInput", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 6, name: "execution_input", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<Question>): Question {
@@ -366,7 +383,7 @@ class Question$Type extends MessageType<Question> {
                 case /* string solution */ 5:
                     message.solution = reader.string();
                     break;
-                case /* string executionInput */ 6:
+                case /* string execution_input */ 6:
                     message.executionInput = reader.string();
                     break;
                 default:
@@ -396,7 +413,7 @@ class Question$Type extends MessageType<Question> {
         /* string solution = 5; */
         if (message.solution !== "")
             writer.tag(5, WireType.LengthDelimited).string(message.solution);
-        /* string executionInput = 6; */
+        /* string execution_input = 6; */
         if (message.executionInput !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.executionInput);
         let u = options.writeUnknownFields;
@@ -545,3 +562,64 @@ class HistoryCompletion$Type extends MessageType<HistoryCompletion> {
  * @generated MessageType for protobuf message common.HistoryCompletion
  */
 export const HistoryCompletion = new HistoryCompletion$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExecuteCode$Type extends MessageType<ExecuteCode> {
+    constructor() {
+        super("common.ExecuteCode", [
+            { no: 1, name: "language_id", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "stdin", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "code", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExecuteCode>): ExecuteCode {
+        const message = { languageId: 0, stdin: "", code: "" };
+        globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
+        if (value !== undefined)
+            reflectionMergePartial<ExecuteCode>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExecuteCode): ExecuteCode {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint64 language_id */ 1:
+                    message.languageId = reader.uint64().toNumber();
+                    break;
+                case /* string stdin */ 2:
+                    message.stdin = reader.string();
+                    break;
+                case /* string code */ 3:
+                    message.code = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExecuteCode, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint64 language_id = 1; */
+        if (message.languageId !== 0)
+            writer.tag(1, WireType.Varint).uint64(message.languageId);
+        /* string stdin = 2; */
+        if (message.stdin !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.stdin);
+        /* string code = 3; */
+        if (message.code !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.code);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message common.ExecuteCode
+ */
+export const ExecuteCode = new ExecuteCode$Type();

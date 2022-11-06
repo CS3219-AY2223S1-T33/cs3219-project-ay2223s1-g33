@@ -59,12 +59,15 @@ func (middleware *wsProxyMiddleware) Receive(httpCtx *util.HTTPContext) error {
 	wsConn.PipeTo(downstreamWriter)
 
 	downstreamClient.SetCloseListener(func() {
+		log.Printf("Closed gRPC Conn for %s\n", username)
 		wsConn.Close()
 	})
 	wsConn.SetCloseListener(func() {
+		log.Printf("Closed WS for %s\n", username)
 		downstreamClient.Close()
 	})
 
+	log.Printf("Starting WS Tunnel for %s", username)
 	return wsConn.ConnectTunnel()
 }
 

@@ -13,29 +13,13 @@ function SortedArrow({ isSorted, isDesc }: Props) {
   }
 
   return (
-    <>
-      <chakra.span pl="4">
-        {isDesc ? (
-          <TriangleDownIcon aria-label="sorted descending" />
-        ) : (
-          <TriangleUpIcon aria-label="sorted ascending" />
-        )}
-      </chakra.span>
-      {/* <chakra.span pl="4">
-        {isSorted && isSortedDesc ? (
-          <TriangleDownIcon aria-label="sorted descending" />
-        ) : (
-          ""
-        )}
-      </chakra.span>
-      <chakra.span pl="4">
-        {isSorted && isSortedDesc === false ? (
-          <TriangleUpIcon aria-label="sorted ascending" />
-        ) : (
-          ""
-        )}
-      </chakra.span> */}
-    </>
+    <chakra.span pl="4">
+      {isDesc ? (
+        <TriangleDownIcon aria-label="sorted descending" />
+      ) : (
+        <TriangleUpIcon aria-label="sorted ascending" />
+      )}
+    </chakra.span>
   );
 }
 

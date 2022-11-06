@@ -202,7 +202,6 @@ func (worker *proxyWorker) isFlagSet(flags int32, targetFlag int32) bool {
 }
 
 func (worker *proxyWorker) runHeartbeatWorker(deathSignal <-chan bool) {
-	log.Printf("Starting Heartbeat Worker for %s\n", worker.sessionUsername)
 	isAlive := true
 	for isAlive {
 		select {
@@ -218,5 +217,4 @@ func (worker *proxyWorker) runHeartbeatWorker(deathSignal <-chan bool) {
 			}
 		}
 	}
-	log.Printf("Heartbeat Worker death for %s\n", worker.sessionUsername)
 }

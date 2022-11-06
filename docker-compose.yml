@@ -183,3 +183,22 @@ services:
       dockerfile: redis.dockerfile
     ports:
       - "6379:6379"
+
+  execute-service:
+    image: judge0/judge0:1.13.0
+    env_file:
+      - config_env/config-execute.env
+      - config_env/secrets-db-judge0.env
+      - config_env/secrets-redis.env
+    ports:
+      - "2358:2358"
+    privileged: true
+
+  execute-service-worker:
+    image: judge0/judge0:1.13.0
+    command: ["./scripts/workers"]
+    env_file:
+      - config_env/config-execute.env
+      - config_env/secrets-db-judge0.env
+      - config_env/secrets-redis.env
+    privileged: true

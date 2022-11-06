@@ -1,10 +1,11 @@
-import { Flex, Button, Text, useDisclosure, Box, Grid } from "@chakra-ui/react";
+import { Flex, Button, useDisclosure, Grid, Box } from "@chakra-ui/react";
 import * as Y from "yjs";
 import { useNavigate } from "react-router-dom";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { WebsocketProvider } from "y-websocket-peerprep";
 import { DownloadIcon } from "@chakra-ui/icons";
+import CodeExecution from "../components/editor/CodeExecution";
 import EditorLanguage from "../components/editor/EditorLanguage";
 import LeaveModal from "../components/modal/LeaveModal";
 import DisconnectModal from "../components/modal/DisconnectModal";
@@ -16,10 +17,9 @@ import SessionNavbar from "../components/ui/navbar/SessionNavbar";
 import Editor from "../components/editor/Editor";
 import useFixedToast from "../utils/hooks/useFixedToast";
 import { selectUser } from "../feature/user/userSlice";
-import { Chat, Language } from "../types";
+import { Chat, Language } from "../types/types";
 import { Question } from "../proto/types";
 import saveFile from "../utils/fileDownloadUtil";
-// import { addMessage, clearChat } from "../feature/chat/chatSlice";
 import {
   addMessage,
   changeEditorLocked,
@@ -27,10 +27,10 @@ import {
   changeLanguage,
   changeWSStatus,
   reset,
-  selectIsEditorLocked,
-  selectSelectedLanguage,
+  setExecution,
   setQuestion,
 } from "../feature/session/sessionSlice";
+import FontSizeSelector from "../components/editor/FontSizeSelector";
 
 type Status = { status: "disconnected" | "connecting" | "connected" };
 type Nickname = { nickname: string };
@@ -41,9 +41,9 @@ let isInit = false;
 function Session() {
   const roomToken = useSelector((state: RootState) => state.matching.roomToken);
   const nickname = useSelector(selectUser)?.nickname;
-  const wsStatus = useSelector((state: RootState) => state.session.wsStatus);
-  const isEditorLocked = useSelector(selectIsEditorLocked);
-  const selectedLang = useSelector(selectSelectedLanguage);
+  const { wsStatus, selectedLang } = useSelector(
+    (state: RootState) => state.session
+  );
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -143,6 +143,15 @@ function Session() {
         dispatch(addMessage(e));
       });
 
+      ws.on("execute_pending", () => {
+        dispatch(setExecution({ executing: true }));
+      });
+
+      ws.on("execute_complete", (o: { output: string }) => {
+        const { output } = o;
+        dispatch(setExecution({ executing: false, output }));
+      });
+
       return ws;
     };
 
@@ -213,6 +222,15 @@ function Session() {
     provider.sendCodeSnapshot(code, selectedLang);
   };
 
+  const executeCodeHandler = () => {
+    if (!provider) {
+      return;
+    }
+
+    provider.sendExecutionRequest(code, selectedLang);
+    dispatch(setExecution({ executing: true }));
+  };
+
   if (!roomToken || !nickname) {
     return <InvalidSession leaveSessionHandler={leaveSessionHandler} />;
   }
@@ -239,24 +257,29 @@ function Session() {
           sendTextMessage={sendTextMessageHandler}
         />
         {/* Code Editor */}
-        <Grid templateRows="10% 7fr auto" h="91vh">
+        <Grid templateRows="10% 7fr 30%" h="91vh">
           {/* Code Editor Settings */}
-          <Flex
-            direction="row"
-            alignItems="center"
-            bg="gray.100"
-            px={12}
-            py={2}
-          >
-            <EditorLanguage
-              isDisabled={wsStatus !== "Connected"}
-              changeLangHandler={changeLangHandler}
-            />
-            {/* Other Quality of life options */}
-            <Button leftIcon={<DownloadIcon />} onClick={downloadCodeHandler}>
-              Save code
-            </Button>
-          </Flex>
+          <Box bg="gray.100" px={12} py={2} w="100%">
+            <Flex
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              w="75%"
+              mx="auto"
+            >
+              <EditorLanguage changeLangHandler={changeLangHandler} />
+              <FontSizeSelector />
+
+              {/* Other Quality of life options */}
+              <Button
+                leftIcon={<DownloadIcon />}
+                onClick={downloadCodeHandler}
+                w="40%"
+              >
+                Download code
+              </Button>
+            </Flex>
+          </Box>
 
           {/* Editor */}
           {collabDefined && (
@@ -268,19 +291,12 @@ function Session() {
               onCodeUpdate={updateCodeHandler}
             />
           )}
-          {/* Test case window */}
-          <Grid templateRows="1fr 3fr 1fr">
-            <Text fontSize="lg">Testcases</Text>
-            <Box>Content</Box>
-            <Flex direction="row-reverse" px={12} pb={4}>
-              <Button
-                onClick={sendCodeSnapshotHandler}
-                isDisabled={isEditorLocked}
-              >
-                {isEditorLocked ? "Submitting..." : "Submit code"}
-              </Button>
-            </Flex>
-          </Grid>
+
+          {/* Code Execution window */}
+          <CodeExecution
+            executeCodeHandler={executeCodeHandler}
+            sendCodeSnapshotHandler={sendCodeSnapshotHandler}
+          />
         </Grid>
       </Grid>
 

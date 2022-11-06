@@ -6,6 +6,7 @@ type EnvironmentConfig = {
   readonly REDIS_PASSWORD: string;
   readonly QUESTION_SERVICE_URL: string;
   readonly HISTORY_SERVICE_URL: string;
+  readonly JUDGE0_SERVER_URL: string;
   readonly GRPC_PORT: number;
 
   readonly GRPC_CERT?: Buffer;
@@ -69,6 +70,7 @@ export default function loadEnvironment(): EnvironmentConfig {
     REDIS_PASSWORD: requireString('REDIS_PASSWORD', ''),
     QUESTION_SERVICE_URL: requireString('QUESTION_SERVICE_URL'),
     HISTORY_SERVICE_URL: requireString('HISTORY_SERVICE_URL'),
+    JUDGE0_SERVER_URL: requireString('JUDGE0_SERVER_URL'),
     GRPC_PORT: requireInt('GRPC_PORT', 4003),
     GRPC_CERT: grpcCert.length > 0 ? Buffer.from(grpcCert.replaceAll('\\n', '\n')) : undefined,
     GRPC_KEY: grpcKey.length > 0 ? Buffer.from(grpcKey.replaceAll('\\n', '\n')) : undefined,

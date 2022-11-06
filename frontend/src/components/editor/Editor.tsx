@@ -30,6 +30,7 @@ function Editor({
   const isEditable = !useSelector(
     (state: RootState) => state.session.isEditorLocked
   );
+  const fontSize = useSelector((state: RootState) => state.session.fontSize);
 
   useEffect(() => {
     if (!providerSet) {
@@ -50,9 +51,11 @@ function Editor({
     <CodeMirror
       value=""
       height="100%"
+      placeholder="Please ensure that you are reading inputs from stdin"
       extensions={[lang, yCollab(yText, provider.awareness, { undoManager })]}
       onChange={onCodeUpdate}
       editable={isEditable}
+      style={{ overflowY: "auto", fontSize }}
     />
   );
 }

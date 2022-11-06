@@ -1,0 +1,256 @@
+name: cd-deployment-dry-run
+
+on:
+  workflow_dispatch:
+    branches:
+      - release
+      - main
+  push:
+    branches:
+      - main
+
+env:
+  CONFIG_ROUTE_MAP_INTERNAL: |
+    USER_SERVICE_URL=user-service:4000
+    MATCHING_SERVICE_URL=matching-service:4001
+    COLLAB_SERVICE_URL=collab-service:4003
+    QUESTION_SERVICE_URL=question-service:4004
+    HISTORY_SERVICE_URL=history-service:4005
+    SESSION_SERVICE_URL=session-service:4100
+    REDIS_SERVER=redis:6379
+
+  CONFIG_ROUTE_MAP_GATEWAY: |
+    USER_SERVICE_URL=user-service:4000
+    MATCHING_SERVICE_URL=matching-service:4001
+    COLLAB_SERVICE_URL=collab-service:4003
+    HISTORY_SERVICE_URL=history-service:4005
+    SESSION_SERVICE_URL=session-service:4100
+    STATIC_SERVER=frontend:80
+
+  CONFIG_SECRETS_SIGNING: |
+    REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
+    SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
+    ROOM_SIGNING_SECRET=${{ secrets.ROOM_SIGNING_SECRET }}
+  
+  CONFIG_SECRETS_EMAIL: |
+    EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
+    EMAIL_SERVER=${{ secrets.EMAIL_SERVER }}
+    EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+    EMAIL_IS_SECURE=${{ secrets.EMAIL_IS_SECURE }}
+
+    EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
+    EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+    EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
+    RESET_PASSWORD_URL=https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN
+  
+  CONFIG_SECRETS_DB: |
+    DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+    DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+    DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+    DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+
+  CONFIG_SECRETS_REDIS: |
+    REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
+  CONFIG_SECRETS_GRPC_CERT: |
+    GRPC_CERT=${{ secrets.GRPC_CERT }}
+    GRPC_KEY=${{ secrets.GRPC_KEY }}
+
+jobs:
+  deploy:
+    name: Build Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
+
+      - name: Build, tag, and push images to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: dummy-registry
+          ECR_REPOSITORY: dummy-repo
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          PID_LIST=()
+          # Build Images
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG -f ./frontend/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG -f ./question-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG -f ./matching-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG -f ./collab-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG -f ./user-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG -f ./history-service/Dockerfile . &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG -f ./matchmaker/Dockerfile ./matchmaker &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG -f ./gateway/Dockerfile ./gateway &
+          PID_LIST+=($!)
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG -f ./session-service/Dockerfile ./session-service &
+          PID_LIST+=($!)
+
+          RET_CODES=()
+          EXIT_CODE=0
+
+          for PID in ${PID_LIST[*]}; do
+              wait $PID
+              CODE=$?
+              if [ $CODE -ne 0 ]; then
+                  EXIT_CODE=$CODE
+              fi
+          done
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            exit $EXIT_CODE
+          fi
+
+          # Output the image variables
+          echo "frontend-image=$ECR_REGISTRY/$ECR_REPOSITORY:frontend-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "question-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:question-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "matching-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:matching-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "collab-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:collab-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "user-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:user-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "history-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:history-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+          # go services
+          echo "matchmaker-image=$ECR_REGISTRY/$ECR_REPOSITORY:matchmaker-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "gateway-image=$ECR_REGISTRY/$ECR_REPOSITORY:gateway-$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "session-service-image=$ECR_REGISTRY/$ECR_REPOSITORY:session-service-$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update task definition for session-service
+        id: task-def-session-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/task-definition.json
+          container-name: session-service
+          image: ${{ steps.build-image.outputs.session-service-image }}
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_SIGNING }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for question-service
+        id: task-def-question-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-session-service.outputs.task-definition }}
+          container-name: question-service
+          image: ${{ steps.build-image.outputs.question-service-image }}
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_DB }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for matchmaker
+        id: task-def-matchmaker
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-question-service.outputs.task-definition }}
+          container-name: matchmaker
+          image: ${{ steps.build-image.outputs.matchmaker-image }}
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+
+      - name: Update task definition for user-service
+        id: task-def-user-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-matchmaker.outputs.task-definition }}
+          container-name: user-service
+          image: ${{ steps.build-image.outputs.user-service-image }}
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_DB }}
+            ${{ env.CONFIG_SECRETS_EMAIL }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for matching-service
+        id: task-def-matching-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-user-service.outputs.task-definition }}
+          container-name: matching-service
+          image: ${{ steps.build-image.outputs.matching-service-image }}
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_SIGNING }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for collab-service
+        id: task-def-collab-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-matching-service.outputs.task-definition }}
+          container-name: collab-service
+          image: ${{ steps.build-image.outputs.collab-service-image }}
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_SIGNING }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for frontend
+        id: task-def-frontend
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-collab-service.outputs.task-definition }}
+          container-name: frontend
+          image: ${{ steps.build-image.outputs.frontend-image }}
+          
+      - name: Update task definition for gateway
+        id: task-def-gateway
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
+          container-name: gateway
+          image: ${{ steps.build-image.outputs.gateway-image }}      
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_GATEWAY }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for history-service
+        id: task-def-history-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-gateway.outputs.task-definition }}
+          container-name: history-service
+          image: ${{ steps.build-image.outputs.history-service-image }}  
+          environment-variables: |
+            ${{ env.CONFIG_ROUTE_MAP_INTERNAL }}
+            ${{ env.CONFIG_SECRETS_DB }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_GRPC_CERT }}
+
+      - name: Update task definition for redis
+        id: task-def-redis
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-history-service.outputs.task-definition }}
+          container-name: redis
+          image: 856252906546.dkr.ecr.ap-southeast-1.amazonaws.com/cs3219:redis-c255d0423194fa28e120ae54f4beb70c8d60ae96
+          environment-variables: |
+            ${{ env.CONFIG_SECRETS_REDIS }}
+
+      - name: Dry Run Deploy Amazon ECS task definition
+        run: echo "Dry Run Successful"
+          

@@ -6,6 +6,7 @@ import {
   FormErrorMessage,
   Button,
   Text,
+  useBoolean,
 } from "@chakra-ui/react";
 import React from "react";
 import {
@@ -27,10 +28,12 @@ function ResetPasswordForm() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(RESET_PW_VALIDATIOR) });
-
   const toast = useFixedToast();
+  const [isLoading, setIsLoading] = useBoolean(false);
+  const [requestSubmitted, setRequestSubmitted] = useBoolean(false);
 
   const validFormHandler: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading.on();
     const { email } = data;
 
     const resetPasswordRequest: ResetPasswordRequest = { username: email };
@@ -38,10 +41,12 @@ function ResetPasswordForm() {
     AuthAPI.resetPassword(resetPasswordRequest)
       .then(() => {
         toast.sendSuccessMessage("An email will be sent if the user exists");
+        setRequestSubmitted.on();
       })
       .catch((err) => {
         toast.sendErrorMessage(err.message);
-      });
+      })
+      .finally(() => setIsLoading.off());
   };
 
   const invalidFormHandler: SubmitErrorHandler<FieldValues> = () => {
@@ -65,12 +70,10 @@ function ResetPasswordForm() {
         <Stack spacing={10} pt={2}>
           <Button
             loadingText="Submitting"
+            isLoading={isLoading}
+            isDisabled={requestSubmitted}
             size="lg"
-            bg="blue.400"
-            color="white"
-            _hover={{
-              bg: "blue.500",
-            }}
+            colorScheme="blue"
             type="submit"
           >
             Reset

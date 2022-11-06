@@ -52,7 +52,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
-    if (!user) {
+    if (!user || !user.userInfo) {
       return LoginHandler.buildErrorResponse(
         LoginErrorCode.LOGIN_ERROR_INVALID_CREDENTIALS,
         'Invalid Credentials',
@@ -74,8 +74,8 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
     let token: TokenPair;
     try {
       token = await this.authAgent.createToken({
-        username: user.userInfo?.username,
-        nickname: user.userInfo?.nickname,
+        username: user.userInfo.username,
+        nickname: user.userInfo.nickname,
       });
     } catch (ex) {
       Logger.warn(`${ex}`);
@@ -85,6 +85,7 @@ class LoginHandler implements IApiHandler<LoginRequest, LoginResponse> {
       );
     }
 
+    Logger.info(`Login from: ${user.userInfo.username}`);
     return {
       response: {
         errorCode: LoginErrorCode.LOGIN_ERROR_NONE,

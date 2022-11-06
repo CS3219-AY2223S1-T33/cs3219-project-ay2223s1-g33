@@ -82,19 +82,19 @@ func (middleware *grpcMiddleware) initServeMux() error {
 		clientCreds = credentials.NewClientTLSFromCert(middleware.certificate, "")
 	}
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(clientCreds)}
-	log.Printf("Proxying to User-BFF on %s\n", middleware.userServiceUrl)
+	log.Printf("Proxying to User-Service on %s\n", middleware.userServiceUrl)
 	err := gw.RegisterUserServiceHandlerFromEndpoint(middleware.connCtx, mux, middleware.userServiceUrl, opts)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Proxying to Matching on %s\n", middleware.matchingServiceUrl)
+	log.Printf("Proxying to Matching-Service on %s\n", middleware.matchingServiceUrl)
 	err = gw.RegisterQueueServiceHandlerFromEndpoint(middleware.connCtx, mux, middleware.matchingServiceUrl, opts)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Proxying to History on %s\n", middleware.historyServiceUrl)
+	log.Printf("Proxying to History-Service on %s\n", middleware.historyServiceUrl)
 	err = gw.RegisterHistoryServiceHandlerFromEndpoint(middleware.connCtx, mux, middleware.historyServiceUrl, opts)
 	if err != nil {
 		return err

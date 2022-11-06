@@ -7,7 +7,7 @@ import { QuestionDifficulty, Question } from "../../proto/types";
 import difficultyColor from "../../utils/difficultyColors";
 import ExampleList from "./ExampleList";
 import { RootState } from "../../app/store";
-import { CompletionConfig } from "../../types";
+import { CompletionConfig } from "../../types/types";
 
 type Props = {
   question: Question;

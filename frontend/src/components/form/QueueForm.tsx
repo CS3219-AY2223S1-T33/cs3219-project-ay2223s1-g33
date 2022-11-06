@@ -10,21 +10,7 @@ import { RootState } from "../../app/store";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import { QuestionDifficulty } from "../../proto/types";
 import MatchingAPI from "../../api/matching";
-
-const DIFFICULTY = [
-  {
-    name: "Easy",
-    colorScheme: "green",
-  },
-  {
-    name: "Medium",
-    colorScheme: "orange",
-  },
-  {
-    name: "Hard",
-    colorScheme: "red",
-  },
-];
+import { DIFFICULTY } from "../../constants/difficulty";
 
 function QueueForm() {
   const dispatch = useDispatch();
@@ -39,7 +25,6 @@ function QueueForm() {
   };
 
   const enterQueueHandler = () => {
-    // API call to enter queue, probably may need to pass some information to redux store
     if (noneSelected) {
       toast.sendErrorMessage("You must select at least 1 difficulty");
       return;

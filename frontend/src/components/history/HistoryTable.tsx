@@ -11,9 +11,8 @@ import {
   Code,
   useDisclosure,
   Button,
-  TableContainer,
   Heading,
-  Divider,
+  Divider
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import PaginationControl from "../ui/PaginationControl";
@@ -26,7 +25,7 @@ import usePagination from "../../utils/hooks/usePagination";
 import { RootState } from "../../app/store";
 import {
   createAttemptHistoryExtractor,
-  createAttemptHistoryReqFactory,
+  createAttemptHistoryReqFactory
 } from "../../utils/builderUtils";
 
 type Props = {
@@ -40,7 +39,7 @@ const DATETIME_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: "numeric",
   year: "numeric",
   month: "short",
-  day: "numeric",
+  day: "numeric"
 };
 
 function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
@@ -49,7 +48,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   const pagination = usePagination({
     fetchUrl: "/api/user/history",
     requestFactory: createAttemptHistoryReqFactory(questionId),
-    responseExtractor: createAttemptHistoryExtractor(),
+    responseExtractor: createAttemptHistoryExtractor()
   });
 
   const [modalHistoryAttempt, setModalHistoryAttempt] = useState<
@@ -59,7 +58,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
       setModalHistoryAttempt(undefined);
-    },
+    }
   });
 
   const onHistoryAttemptClick = (historyAttempt: HistoryAttempt) => {
@@ -71,14 +70,14 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
     () => [
       {
         Header: "ID",
-        accessor: "attemptId",
+        accessor: "attemptId"
       },
       {
         Header: "question",
         accessor: "question",
         Cell: (props) => (
           <Text fontWeight="bold">{`${props.value?.questionId}. ${props.value?.name}`}</Text>
-        ),
+        )
       },
       {
         id: "difficulty",
@@ -90,22 +89,22 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           >
             {QuestionDifficulty[row.question!.difficulty].toString()}
           </Text>
-        ),
+        )
       },
       {
         Header: "language",
         accessor: "language",
-        Cell: (props) => <Code>{props.value}</Code>,
+        Cell: (props) => <Code>{props.value}</Code>
       },
       {
         Header: "users",
         accessor: "users",
         Cell: (props) => (
           <Text>{props.value.find((user) => user !== currUser?.username)}</Text>
-        ),
+        )
       },
       {
-        Header: "Submited At",
+        Header: "Submitted At",
         accessor: "timestamp",
         Cell: (props) => (
           <Text>
@@ -114,7 +113,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
               DATETIME_OPTIONS
             )}
           </Text>
-        ),
+        )
       },
       {
         Header: "submission",
@@ -123,8 +122,8 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
           <Button onClick={() => onHistoryAttemptClick(row)} colorScheme="blue">
             View
           </Button>
-        ),
-      },
+        )
+      }
     ],
     [currUser]
   );
@@ -134,15 +133,7 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
       {
         columns,
         data: pagination.items,
-        initialState: {
-          sortBy: [
-            {
-              id: "timestamp",
-              desc: false,
-            },
-          ],
-          hiddenColumns,
-        },
+        initialState: { hiddenColumns }
       },
       useSortBy
     );
@@ -157,37 +148,26 @@ function HistoryTable({ hiddenColumns, questionId = 0 }: Props) {
 
   return (
     <>
-      <TableContainer>
-        <Heading as="h4" size="md" pb={4}>
-          Page {pagination.page}
-        </Heading>
-        <Divider />
-        <Table overflow="auto" {...getTableProps()}>
-          <Thead>
-            {
-              // Loop over the header rows and apply the header row props
-              headerGroups.map((headerGroup) => (
-                <HistoryTableHeaderRow
-                  headerGroup={headerGroup}
-                  key={`header-${headerGroup.id}`}
-                />
-              ))
-            }
-          </Thead>
-          {/* Apply the table body props */}
-          <Tbody {...getTableBodyProps()}>
-            {
-              // Loop over the table rows
-              rows.map((row) => {
-                // Prepare the row for display
-                prepareRow(row);
-                // Apply the row props
-                return <HistoryTableDataRow row={row} key={`row-${row.id}`} />;
-              })
-            }
-          </Tbody>
-        </Table>
-      </TableContainer>
+      <Heading as="h4" size="md" pb={4}>
+        Page {pagination.page}
+      </Heading>
+      <Divider />
+      <Table {...getTableProps()}>
+        <Thead>
+          {headerGroups.map((headerGroup) => (
+            <HistoryTableHeaderRow
+              headerGroup={headerGroup}
+              key={`header-${headerGroup.id}`}
+            />
+          ))}
+        </Thead>
+        <Tbody {...getTableBodyProps()}>
+          {rows.map((row) => {
+            prepareRow(row);
+            return <HistoryTableDataRow row={row} key={`row-${row.id}`} />;
+          })}
+        </Tbody>
+      </Table>
       <PaginationControl
         hasPrevious={!pagination.hasPrevious}
         hasNext={!pagination.hasNext}

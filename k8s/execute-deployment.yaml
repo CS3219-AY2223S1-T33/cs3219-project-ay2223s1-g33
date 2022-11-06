@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: execute-service
+  labels:
+    app: execute-service
+    scale-type: execute-elastic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: execute-service
+  template:
+    metadata:
+      labels:
+        app: execute-service
+    spec:
+      containers:
+        - name: execute-service
+          image: judge0/judge0:1.13.0
+          ports:
+            - name: judgeport
+              containerPort: 2358
+          envFrom:
+          - secretRef:
+                name: secrets-db-judge
+          - secretRef:
+                name: secrets-redis
+          - configMapRef:
+                name: execution-config
+          resources:
+            limits:
+              cpu: 100m
+              memory: 250Mi
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+      nodeSelector:
+        execution-reserve: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: execute-service-worker
+  labels:
+    app: execute-service-worker
+    scale-type: execute-elastic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: execute-service-worker
+  template:
+    metadata:
+      labels:
+        app: execute-service-worker
+    spec:
+      containers:
+        - name: execute-service-worker
+          image: judge0/judge0:1.13.0
+          command: ["./scripts/workers"]
+          ports:
+            - name: judgeport
+              containerPort: 2358
+          envFrom:
+          - secretRef:
+                name: secrets-db-judge
+          - secretRef:
+                name: secrets-redis
+          - configMapRef:
+                name: execution-config
+          resources:
+            limits:
+              cpu: 500m
+              memory: 600Mi
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+      nodeSelector:
+        execution-reserve: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: execute-service
+  name: execute-service
+spec:
+  selector:
+    app: execute-service
+  type: ClusterIP
+  ports:
+    - name: judgeport
+      port: 2358
+      protocol: TCP
+      targetPort: judgeport
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: execute-service-worker
+  name: execute-service-worker
+spec:
+  selector:
+    app: execute-service-worker
+  type: ClusterIP
+  ports:
+    - name: judgeport
+      port: 2358
+      protocol: TCP
+      targetPort: judgeport

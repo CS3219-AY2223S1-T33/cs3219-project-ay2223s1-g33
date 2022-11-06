@@ -23,7 +23,7 @@ function DisconnectModal({ isOpen, onClose, leaveSessionHandler }: Props) {
       onClose={onClose}
       size="xl"
       isCentered
-      closeOnOverlayClick
+      closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>

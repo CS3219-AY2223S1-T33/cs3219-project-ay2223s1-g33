@@ -9,7 +9,6 @@ import { QueueStatus } from "../../proto/matching-service";
 import useFixedToast from "../../utils/hooks/useFixedToast";
 import MatchingAPI from "../../api/matching";
 
-// ! console.log() s ar e intentionally left here for backend implementation
 function Countdown() {
   const toast = useFixedToast();
   const navigate = useNavigate();
@@ -24,7 +23,6 @@ function Countdown() {
 
   const requestLeaveQueue = () => {
     MatchingAPI.leaveQueue()
-      // .then((res) => {})
       .catch((err) => {
         toast.sendErrorMessage(err.message);
       })

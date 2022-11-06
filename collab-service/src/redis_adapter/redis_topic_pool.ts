@@ -1,5 +1,4 @@
 import { RedisClientType } from 'redis';
-import Logger from '../utils/logger';
 
 interface RedisTopicPool {
   registerTopic(topic: string, listener: (msg: string) => void): void;
@@ -54,12 +53,10 @@ class RedisTopicPoolManager implements RedisTopicPool {
   }
 
   async subscribeTopic(topic: string) {
-    Logger.info(`Subscribing topic ${topic}`);
     await this.redisSubClient.subscribe(topic, this.createMuxHandler(topic));
   }
 
   async unsubscribeTopic(topic: string) {
-    Logger.info(`Unsubscribing Topic ${topic}`);
     await this.redisSubClient.unsubscribe(topic);
   }
 }

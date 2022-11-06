@@ -33,7 +33,7 @@ message Question {
   QuestionDifficulty difficulty = 3;
   string content = 4;
   string solution = 5;
-  string executionInput = 6;
+  string execution_input = 6;
 }
 
 message HistoryAttempt {
@@ -48,4 +48,10 @@ message HistoryAttempt {
 message HistoryCompletion {
   string username = 1;
   uint64 question_id = 2;
+}
+
+message ExecuteCode {
+  uint64 language_id = 1;
+  string stdin = 2;
+  string code = 3;
 }

@@ -83,7 +83,7 @@ class AttemptStore implements IAttemptStore {
       .createQueryBuilder('histories')
       .innerJoinAndSelect('histories.users', 'history_owners')
       .where('history_owners.user_id = :userId', { userId })
-      .orderBy('histories.attempt_id')
+      .orderBy('histories.attempt_id', 'DESC')
       .limit(limit)
       .offset(offset);
 
@@ -121,7 +121,7 @@ class AttemptStore implements IAttemptStore {
       .innerJoinAndSelect('histories.users', 'history_owners')
       .where('history_owners.user_id = :userId', { userId })
       .andWhere('question_id = :questionId', { questionId })
-      .orderBy('histories.attempt_id')
+      .orderBy('histories.attempt_id', 'DESC')
       .limit(limit)
       .offset(offset);
 
