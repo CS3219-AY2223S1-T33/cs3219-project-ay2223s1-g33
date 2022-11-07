@@ -90,7 +90,7 @@ jobs:
     name: Deploy to AWS ECS
     runs-on: ubuntu-latest
     environment:
-      name: 'Production'
+      name: 'Staging'
       url: https://peerprep.launchsite.com.sg
 
     steps:
