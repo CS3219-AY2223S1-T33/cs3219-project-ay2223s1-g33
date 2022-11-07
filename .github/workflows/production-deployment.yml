@@ -1,0 +1,175 @@
+name: production-deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        type: choice
+        description: What action to perform on cluster
+        options: 
+        - deploy-images
+        - rollout-deployment
+        - scale-core
+        - scale-execution
+        required: true
+      scaling-factor:
+        type: string
+        description: Used for the scaling up and scaling down
+    branches:
+      - release
+      - main
+
+env:
+  AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: cs3219                       # set this to your Amazon ECR repository name
+  ECS_SERVICE_MAIN: cs3219-service
+  ECS_SERVICE_JUDDGE0: cs3219-judge0
+  ECS_CLUSTER: cs3219-cluster
+
+  CONFIG_ROUTE_MAP_INTERNAL: |
+    USER_SERVICE_URL=user-service:4000
+    MATCHING_SERVICE_URL=matching-service:4001
+    COLLAB_SERVICE_URL=collab-service:4003
+    QUESTION_SERVICE_URL=question-service:4004
+    HISTORY_SERVICE_URL=history-service:4005
+    SESSION_SERVICE_URL=session-service:4100
+    JUDGE0_SERVER_URL=${{ secrets.JUDGE0_SERVICE_URL}}
+    REDIS_SERVER=redis:6379
+
+  CONFIG_ROUTE_MAP_GATEWAY: |
+    USER_SERVICE_URL=user-service:4000
+    MATCHING_SERVICE_URL=matching-service:4001
+    COLLAB_SERVICE_URL=collab-service:4003
+    HISTORY_SERVICE_URL=history-service:4005
+    SESSION_SERVICE_URL=session-service:4100
+    STATIC_SERVER=frontend:80
+
+  CONFIG_SECRETS_SIGNING: |
+    REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
+    SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
+    ROOM_SIGNING_SECRET=${{ secrets.ROOM_SIGNING_SECRET }}
+  
+  CONFIG_SECRETS_EMAIL: |
+    EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
+    EMAIL_SERVER=${{ secrets.EMAIL_SERVER }}
+    EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+    EMAIL_IS_SECURE=${{ secrets.EMAIL_IS_SECURE }}
+
+    EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
+    EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+    EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
+    RESET_PASSWORD_URL=https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN
+  
+  CONFIG_SECRETS_DB: |
+    DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
+    DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+    DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+    DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+
+  CONFIG_SECRETS_DB_JUDGE0: |
+    POSTGRES_HOST=${{ secrets.DATABASE_DBHOST }}
+    POSTGRES_USER=${{ secrets.DATABASE_NAME_JUDGE0 }}
+    POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD_JUDGE0 }}
+    POSTGRES_DB=${{ secrets.DATABASE_NAME }}
+
+  CONFIG_SECRETS_REDIS: |
+    REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
+  CONFIG_SECRETS_GRPC_CERT: |
+    GRPC_CERT=${{ secrets.GRPC_CERT }}
+    GRPC_KEY=${{ secrets.GRPC_KEY }}
+
+  CONFIG_EXECUTE: |
+    CPU_TIME_LIMIT=2
+    MAX_CPU_TIME_LIMIT=3
+    CPU_EXTRA_TIME=0
+    MAX_CPU_EXTRA_TIME=1
+    WALL_TIME_LIMIT=3
+    MAX_WALL_TIME_LIMIT=4
+    MEMORY_LIMIT=64000
+    MAX_MEMORY_LIMIT=64000
+    STACK_LIMIT=64000
+    MAX_STACK_LIMIT=64000
+    NUMBER_OF_RUNS=1
+    MAX_NUMBER_OF_RUNS=2
+    REDIRECT_STDERR_TO_STDOUT=true
+    ENABLE_SUBMISSION_DELETE=true
+    AUTHZ_HEADER=${{ secrets.AUTHZ_HEADER }}
+    AUTHZ_TOKEN=${{ secrets.AUTHZ_TOKEN }}
+    REDIS_HOST=redis
+    REDIS_PORT=6379
+
+jobs:
+  scale-core:
+    name: Scale Core Services
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: https://35.213.143.95
+
+    if: github.event.inputs.action == scale-core
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - run: |-
+        gcloud --quiet auth configure-docker
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Scale Replicas
+        run: 'kubectl scale deploy -l scaleType=elastic --replicas=${{ github.event.inputs.scaling-factor }}'
+
+  scale-execution:
+    name: Scale Execution Services
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: https://35.213.143.95
+
+    if: github.event.inputs.action == scale-execution
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - run: |-
+        gcloud --quiet auth configure-docker
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Scale Replicas
+        run: 'kubectl scale deploy -l scaleType=execute-elastic --replicas=${{ github.event.inputs.scaling-factor }}'
+
+          
