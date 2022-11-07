@@ -1,12 +1,10 @@
 name: cd-deployment
 
 on:
-  workflow_dispatch:
-    branches:
-      - deployment/judge0
   push:
     branches:
       - release
+      - deployment/judge0
 
 env:
   AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
