@@ -1,6 +1,9 @@
 name: cd-deployment
 
 on:
+  workflow_dispatch:
+    branches:
+      - deployment/judge0
   push:
     branches:
       - release
