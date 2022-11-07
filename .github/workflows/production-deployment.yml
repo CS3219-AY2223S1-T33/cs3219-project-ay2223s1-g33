@@ -20,101 +20,15 @@ on:
       - main
 
 env:
-  AWS_REGION: ap-southeast-1                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: cs3219                       # set this to your Amazon ECR repository name
-  ECS_SERVICE_MAIN: cs3219-service
-  ECS_SERVICE_JUDDGE0: cs3219-judge0
-  ECS_CLUSTER: cs3219-cluster
-
-  CONFIG_ROUTE_MAP_INTERNAL: |
-    USER_SERVICE_URL=user-service:4000
-    MATCHING_SERVICE_URL=matching-service:4001
-    COLLAB_SERVICE_URL=collab-service:4003
-    QUESTION_SERVICE_URL=question-service:4004
-    HISTORY_SERVICE_URL=history-service:4005
-    SESSION_SERVICE_URL=session-service:4100
-    JUDGE0_SERVER_URL=${{ secrets.JUDGE0_SERVICE_URL}}
-    REDIS_SERVER=redis:6379
-
-  CONFIG_ROUTE_MAP_GATEWAY: |
-    USER_SERVICE_URL=user-service:4000
-    MATCHING_SERVICE_URL=matching-service:4001
-    COLLAB_SERVICE_URL=collab-service:4003
-    HISTORY_SERVICE_URL=history-service:4005
-    SESSION_SERVICE_URL=session-service:4100
-    STATIC_SERVER=frontend:80
-
-  CONFIG_SECRETS_SIGNING: |
-    REFRESH_SIGNING_SECRET=${{ secrets.REFRESH_SIGNING_SECRET }}
-    SESSION_SIGNING_SECRET=${{ secrets.SESSION_SIGNING_SECRET }}
-    ROOM_SIGNING_SECRET=${{ secrets.ROOM_SIGNING_SECRET }}
-  
-  CONFIG_SECRETS_EMAIL: |
-    EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
-    EMAIL_SERVER=${{ secrets.EMAIL_SERVER }}
-    EMAIL_PORT=${{ secrets.EMAIL_PORT }}
-    EMAIL_IS_SECURE=${{ secrets.EMAIL_IS_SECURE }}
-
-    EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
-    EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-    EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
-    RESET_PASSWORD_URL=https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN
-  
-  CONFIG_SECRETS_DB: |
-    DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
-    DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-    DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-    DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-
-  CONFIG_SECRETS_DB_JUDGE0: |
-    POSTGRES_HOST=${{ secrets.DATABASE_DBHOST }}
-    POSTGRES_USER=${{ secrets.DATABASE_NAME_JUDGE0 }}
-    POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD_JUDGE0 }}
-    POSTGRES_DB=${{ secrets.DATABASE_NAME }}
-
-  CONFIG_SECRETS_REDIS: |
-    REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-
-  CONFIG_SECRETS_GRPC_CERT: |
-    GRPC_CERT=${{ secrets.GRPC_CERT }}
-    GRPC_KEY=${{ secrets.GRPC_KEY }}
-
-  CONFIG_EXECUTE: |
-    CPU_TIME_LIMIT=2
-    MAX_CPU_TIME_LIMIT=3
-    CPU_EXTRA_TIME=0
-    MAX_CPU_EXTRA_TIME=1
-    WALL_TIME_LIMIT=3
-    MAX_WALL_TIME_LIMIT=4
-    MEMORY_LIMIT=64000
-    MAX_MEMORY_LIMIT=64000
-    STACK_LIMIT=64000
-    MAX_STACK_LIMIT=64000
-    NUMBER_OF_RUNS=1
-    MAX_NUMBER_OF_RUNS=2
-    REDIRECT_STDERR_TO_STDOUT=true
-    ENABLE_SUBMISSION_DELETE=true
-    AUTHZ_HEADER=${{ secrets.AUTHZ_HEADER }}
-    AUTHZ_TOKEN=${{ secrets.AUTHZ_TOKEN }}
-    REDIS_HOST=redis
-    REDIS_PORT=6379
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
 
 jobs:
   scale-core:
     name: Scale Core Services
     runs-on: ubuntu-latest
-    environment:
-      name: 'Production'
-      url: https://35.213.143.95
 
-    if: github.event.inputs.action == scale-core
+    if: github.event.inputs.action == 'scale-core' && github.event.inputs.scaling-factor != ''
     steps:
-      - name: Set up repository
-        uses: actions/checkout@v3
-
-      - name: Build y-socket
-        run: 'npm run gen-y-websocket'
-
       - name: 'Authenticate with GCP'
         id: 'auth'
         uses: 'google-github-actions/auth@v0'
@@ -124,13 +38,10 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
 
-      - run: |-
-        gcloud --quiet auth configure-docker
-
       - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
           credentials: ${{ secrets.GCP_SA_KEY }}
 
       - name: Scale Replicas
@@ -139,17 +50,42 @@ jobs:
   scale-execution:
     name: Scale Execution Services
     runs-on: ubuntu-latest
-    environment:
-      name: 'Production'
-      url: https://35.213.143.95
 
-    if: github.event.inputs.action == scale-execution
+    if: github.event.inputs.action == 'scale-execution' && github.event.inputs.scaling-factor != ''
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Scale Replicas
+        run: 'kubectl scale deploy -l scaleType=execute-elastic --replicas=${{ github.event.inputs.scaling-factor }}'
+
+  build-go-services:
+    name: Push Golang Service to GCR
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [matchmaker, gateway, session-service]
+    if: github.event.inputs.action == 'deploy-images'
+  
     steps:
       - name: Set up repository
         uses: actions/checkout@v3
 
-      - name: Build y-socket
-        run: 'npm run gen-y-websocket'
+      - name: Build
+        run: |-
+          docker build --tag "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest" ./${{ matrix.service }}/
 
       - name: 'Authenticate with GCP'
         id: 'auth'
@@ -160,16 +96,146 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
 
-      - run: |-
-        gcloud --quiet auth configure-docker
+      - name: Configure Docker
+        run: |-
+          gcloud --quiet auth configure-docker
+      
+      - name: Publish
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
+
+  build-ts-services:
+    name: Push TS Service to GCR
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [user-service, question-service, history-service, collab-service, matching-service]
+    if: github.event.inputs.action == 'deploy-images'
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: |-
+          docker build --tag "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest" -f ./${{ matrix.service }}/Dockerfile .
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Configure Docker
+        run: |-
+          gcloud --quiet auth configure-docker
+      
+      - name: Publish
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
+
+  build-frontend:
+    name: Push Frontend to GCR
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'deploy-images'
+    
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
+
+      - name: Build
+        run: |-
+          docker build --tag "gcr.io/$PROJECT_ID/frontend:latest" -f ./frontend/Dockerfile .
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Configure Docker
+        run: |-
+          gcloud --quiet auth configure-docker
+      
+      - name: Publish
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/frontend:latest"
+
+  rollout-deployment:
+    name: Rollout Deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: https://35.213.143.95
+    needs: [build-go-services, build-ts-services,build-frontend]
+    if: github.event.inputs.action == 'deploy-images'
+
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
 
       - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
           credentials: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Scale Replicas
-        run: 'kubectl scale deploy -l scaleType=execute-elastic --replicas=${{ github.event.inputs.scaling-factor }}'
+      - name: Rollout New Images
+        run: |
+          kubectl rollout restart deploy/session-service
+          kubectl rollout restart deploy/gateway
+          kubectl rollout restart deploy/matchmaker
+          kubectl rollout restart deploy/frontend
+          kubectl rollout restart deploy/user-service
+          kubectl rollout restart deploy/history-service
+          kubectl rollout restart deploy/question-service
+          kubectl rollout restart deploy/collab-service
+          kubectl rollout restart deploy/matching-service
+  
+  rollout-deployment-only:
+    name: Rollout Deployment Only
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'rollout-deployment'
 
-          
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Rollout New Images
+        run: |
+          kubectl rollout restart deploy/session-service
+          kubectl rollout restart deploy/gateway
+          kubectl rollout restart deploy/matchmaker
+          kubectl rollout restart deploy/frontend
+          kubectl rollout restart deploy/user-service
+          kubectl rollout restart deploy/history-service
+          kubectl rollout restart deploy/question-service
+          kubectl rollout restart deploy/collab-service
+          kubectl rollout restart deploy/matching-service
