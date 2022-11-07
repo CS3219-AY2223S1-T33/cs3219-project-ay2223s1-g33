@@ -17,9 +17,8 @@ env:
     QUESTION_SERVICE_URL=question-service:4004
     HISTORY_SERVICE_URL=history-service:4005
     SESSION_SERVICE_URL=session-service:4100
-    JUDGE0_SERVER_URL=execute-service:2358
+    JUDGE0_SERVER_URL=${{ secrets.JUDGE0_SERVICE_URL}}
     REDIS_SERVER=redis:6379
-
 
   CONFIG_ROUTE_MAP_GATEWAY: |
     USER_SERVICE_URL=user-service:4000
@@ -279,11 +278,21 @@ jobs:
           environment-variables: |
             ${{ env.CONFIG_SECRETS_REDIS }}
       
+      - name: Update task definition for judge0 redis
+        id: task-def-redis-2
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/task-definition-judge0.json
+          container-name: redis
+          image: 856252906546.dkr.ecr.ap-southeast-1.amazonaws.com/cs3219:redis-c255d0423194fa28e120ae54f4beb70c8d60ae96
+          environment-variables: |
+            ${{ env.CONFIG_SECRETS_REDIS }}
+
       - name: Update task definition for execute-service
         id: task-def-execute-service
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ steps.task-def-redis.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-redis-2.outputs.task-definition }}
           container-name: execute-service
           image: docker.io/judge0/judge0:1.13.0
           environment-variables: |
