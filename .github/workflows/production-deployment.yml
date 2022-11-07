@@ -104,6 +104,10 @@ jobs:
         run: |-
           docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
 
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/${{ matrix.service }} --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/${{ matrix.service }}@{arg}" --quiet
+
   build-ts-services:
     name: Push TS Service to GCR
     runs-on: ubuntu-latest
@@ -137,6 +141,10 @@ jobs:
         run: |-
           docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
 
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/${{ matrix.service }} --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/${{ matrix.service }}@{arg}" --quiet
+
   build-frontend:
     name: Push Frontend to GCR
     runs-on: ubuntu-latest
@@ -169,6 +177,10 @@ jobs:
       - name: Publish
         run: |-
           docker push "gcr.io/$PROJECT_ID/frontend:latest"
+
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/frontend --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/frontend@{arg}" --quiet
 
   rollout-deployment:
     name: Rollout Deployment
