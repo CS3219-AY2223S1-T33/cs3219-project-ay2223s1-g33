@@ -18,8 +18,9 @@ env:
     QUESTION_SERVICE_URL=question-service:4004
     HISTORY_SERVICE_URL=history-service:4005
     SESSION_SERVICE_URL=session-service:4100
-    REDIS_SERVER=redis:6379
     JUDGE0_SERVER_URL=execute-service:2358
+    REDIS_SERVER=redis:6379
+
 
   CONFIG_ROUTE_MAP_GATEWAY: |
     USER_SERVICE_URL=user-service:4000
@@ -285,6 +286,7 @@ jobs:
         with:
           task-definition: ${{ steps.task-def-redis.outputs.task-definition }}
           container-name: execute-service
+          image: docker.io/judge0/judge0:1.13.0
           environment-variables: |
             ${{ env.CONFIG_EXECUTE }}
             ${{ env.CONFIG_SECRETS_REDIS }}
@@ -296,11 +298,11 @@ jobs:
         with:
           task-definition: ${{ steps.task-def-execute-service.outputs.task-definition }}
           container-name: execute-service-worker
+          image: docker.io/judge0/judge0:1.13.0
           environment-variables: |
             ${{ env.CONFIG_EXECUTE }}
             ${{ env.CONFIG_SECRETS_REDIS }}
             ${{ env.CONFIG_SECRETS_DB_JUDGE0 }}
-
 
       - name: Dry Run Deploy Amazon ECS task definition
         run: echo "Dry Run Successful"
