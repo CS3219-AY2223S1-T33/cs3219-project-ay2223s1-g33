@@ -17,6 +17,7 @@ env:
     QUESTION_SERVICE_URL=question-service:4004
     HISTORY_SERVICE_URL=history-service:4005
     SESSION_SERVICE_URL=session-service:4100
+    JUDGE0_SERVER_URL=${{ secrets.JUDGE0_SERVICE_URL}}
     REDIS_SERVER=redis:6379
 
   CONFIG_ROUTE_MAP_GATEWAY: |
@@ -49,12 +50,38 @@ env:
     DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
     DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
 
+  CONFIG_SECRETS_DB_JUDGE0: |
+    POSTGRES_HOST=${{ secrets.DATABASE_DBHOST }}
+    POSTGRES_USER=${{ secrets.DATABASE_NAME_JUDGE0 }}
+    POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD_JUDGE0 }}
+    POSTGRES_DB=${{ secrets.DATABASE_NAME }}
+
   CONFIG_SECRETS_REDIS: |
     REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
 
   CONFIG_SECRETS_GRPC_CERT: |
     GRPC_CERT=${{ secrets.GRPC_CERT }}
     GRPC_KEY=${{ secrets.GRPC_KEY }}
+  
+  CONFIG_EXECUTE: |
+    CPU_TIME_LIMIT=2
+    MAX_CPU_TIME_LIMIT=3
+    CPU_EXTRA_TIME=0
+    MAX_CPU_EXTRA_TIME=1
+    WALL_TIME_LIMIT=3
+    MAX_WALL_TIME_LIMIT=4
+    MEMORY_LIMIT=64000
+    MAX_MEMORY_LIMIT=64000
+    STACK_LIMIT=64000
+    MAX_STACK_LIMIT=64000
+    NUMBER_OF_RUNS=1
+    MAX_NUMBER_OF_RUNS=2
+    REDIRECT_STDERR_TO_STDOUT=true
+    ENABLE_SUBMISSION_DELETE=true
+    AUTHZ_HEADER=${{ secrets.AUTHZ_HEADER }}
+    AUTHZ_TOKEN=${{ secrets.AUTHZ_TOKEN }}
+    REDIS_HOST=redis
+    REDIS_PORT=6379
 
 jobs:
   deploy:
@@ -250,6 +277,40 @@ jobs:
           image: 856252906546.dkr.ecr.ap-southeast-1.amazonaws.com/cs3219:redis-c255d0423194fa28e120ae54f4beb70c8d60ae96
           environment-variables: |
             ${{ env.CONFIG_SECRETS_REDIS }}
+      
+      - name: Update task definition for judge0 redis
+        id: task-def-redis-2
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .aws/task-definition-judge0.json
+          container-name: redis
+          image: 856252906546.dkr.ecr.ap-southeast-1.amazonaws.com/cs3219:redis-c255d0423194fa28e120ae54f4beb70c8d60ae96
+          environment-variables: |
+            ${{ env.CONFIG_SECRETS_REDIS }}
+
+      - name: Update task definition for execute-service
+        id: task-def-execute-service
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-redis-2.outputs.task-definition }}
+          container-name: execute-service
+          image: docker.io/judge0/judge0:1.13.0
+          environment-variables: |
+            ${{ env.CONFIG_EXECUTE }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_DB_JUDGE0 }}
+      
+      - name: Update task definition for execute-service-worker
+        id: task-def-execute-service-worker
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-execute-service.outputs.task-definition }}
+          container-name: execute-service-worker
+          image: docker.io/judge0/judge0:1.13.0
+          environment-variables: |
+            ${{ env.CONFIG_EXECUTE }}
+            ${{ env.CONFIG_SECRETS_REDIS }}
+            ${{ env.CONFIG_SECRETS_DB_JUDGE0 }}
 
       - name: Dry Run Deploy Amazon ECS task definition
         run: echo "Dry Run Successful"
