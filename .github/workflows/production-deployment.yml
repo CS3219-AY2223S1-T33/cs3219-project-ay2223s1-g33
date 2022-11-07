@@ -14,7 +14,7 @@ on:
         required: true
       scaling-factor:
         type: string
-        description: Used for the scaling up and scaling down
+        description: 'Scaling Factor (Used only for scaling operations)'
     branches:
       - release
       - main
@@ -200,7 +200,7 @@ jobs:
           kubectl rollout restart deploy/session-service
           kubectl rollout restart deploy/gateway
           kubectl rollout restart deploy/matchmaker
-          kubectl rollout restart deploy/frontend
+          kubectl rollout restart deploy/nginx
           kubectl rollout restart deploy/user-service
           kubectl rollout restart deploy/history-service
           kubectl rollout restart deploy/question-service
@@ -233,7 +233,7 @@ jobs:
           kubectl rollout restart deploy/session-service
           kubectl rollout restart deploy/gateway
           kubectl rollout restart deploy/matchmaker
-          kubectl rollout restart deploy/frontend
+          kubectl rollout restart deploy/nginx
           kubectl rollout restart deploy/user-service
           kubectl rollout restart deploy/history-service
           kubectl rollout restart deploy/question-service
