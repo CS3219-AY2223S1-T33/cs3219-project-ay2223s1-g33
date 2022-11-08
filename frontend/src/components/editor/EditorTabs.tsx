@@ -26,19 +26,27 @@ function EditorTabs({ getQuestion, sendTextMessage }: Props) {
   const question = useSelector((state: RootState) => state.session.question);
 
   return (
-    <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
+    <Tabs
+      variant="enclosed"
+      borderRight="1px solid #A0AEC0">
       <TabList>
         <Tab key="question">Question</Tab>
         <Tab key="chat">Chat</Tab>
         <Tab key="history">History</Tab>
+        <Tab key="solution">Solution</Tab>
       </TabList>
 
       <TabPanels>
-        <TabPanel key="question_section" h="85vh" overflowY="scroll">
+        <TabPanel
+          key="question_section"
+          h="85vh"
+          overflowY="scroll">
           {question ? (
             <QuestionSection question={question} />
           ) : (
-            <VStack align="center" spacing={6}>
+            <VStack
+              align="center"
+              spacing={6}>
               <Text>Error: No question received.</Text>
               <Button onClick={getQuestion}>Get Question</Button>
             </VStack>
@@ -56,6 +64,11 @@ function EditorTabs({ getQuestion, sendTextMessage }: Props) {
           ) : (
             <Text>No question provided</Text>
           )}
+        </TabPanel>
+        <TabPanel key="solution_section">
+          {
+            question?.solution
+          }
         </TabPanel>
       </TabPanels>
     </Tabs>
