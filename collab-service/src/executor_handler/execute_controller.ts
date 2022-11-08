@@ -61,7 +61,7 @@ class ExecuteController {
   }
 
   private buildInputAndOutput(res: string): string {
-    return `Input: ${this.stdin}\nOutput: ${res}`;
+    return `Input:\n${this.stdin}\nOutput:\n${res}`;
   }
 }
 
