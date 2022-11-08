@@ -1,0 +1,253 @@
+name: production-deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        type: choice
+        description: What action to perform on cluster
+        options: 
+        - deploy-images
+        - rollout-deployment
+        - scale-core
+        - scale-execution
+        required: true
+      scaling-factor:
+        type: string
+        description: 'Scaling Factor (Used only for scaling operations)'
+    branches:
+      - release
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+
+jobs:
+  scale-core:
+    name: Scale Core Services
+    runs-on: ubuntu-latest
+
+    if: github.event.inputs.action == 'scale-core' && github.event.inputs.scaling-factor != ''
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Scale Replicas
+        run: 'kubectl scale deploy -l scaleType=elastic --replicas=${{ github.event.inputs.scaling-factor }}'
+
+  scale-execution:
+    name: Scale Execution Services
+    runs-on: ubuntu-latest
+
+    if: github.event.inputs.action == 'scale-execution' && github.event.inputs.scaling-factor != ''
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Scale Replicas
+        run: 'kubectl scale deploy -l scaleType=execute-elastic --replicas=${{ github.event.inputs.scaling-factor }}'
+
+  build-go-services:
+    name: Push Golang Service to GCR
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [matchmaker, gateway, session-service]
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
+  
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: |-
+          docker build --tag "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest" ./${{ matrix.service }}/
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Configure Docker
+        run: |-
+          gcloud --quiet auth configure-docker
+      
+      - name: Publish
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
+
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/${{ matrix.service }} --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/${{ matrix.service }}@{arg}" --quiet
+
+  build-ts-services:
+    name: Push TS Service to GCR
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [user-service, question-service, history-service, collab-service, matching-service]
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: |-
+          docker build --tag "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest" -f ./${{ matrix.service }}/Dockerfile .
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Configure Docker
+        run: |-
+          gcloud --quiet auth configure-docker
+      
+      - name: Publish
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
+
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/${{ matrix.service }} --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/${{ matrix.service }}@{arg}" --quiet
+
+  build-frontend:
+    name: Push Frontend to GCR
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
+    
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Build y-socket
+        run: 'npm run gen-y-websocket'
+
+      - name: Build
+        run: |-
+          docker build --tag "gcr.io/$PROJECT_ID/frontend:latest" -f ./frontend/Dockerfile .
+
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Configure Docker
+        run: |-
+          gcloud --quiet auth configure-docker
+      
+      - name: Publish
+        run: |-
+          docker push "gcr.io/$PROJECT_ID/frontend:latest"
+
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/frontend --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/frontend@{arg}" --quiet
+
+  rollout-deployment:
+    name: Rollout Deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: https://peerprep.launchsite.com.sg
+    needs: [build-go-services, build-ts-services,build-frontend]
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
+
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Rollout New Images
+        run: |
+          kubectl rollout restart deploy/session-service
+          kubectl rollout restart deploy/gateway
+          kubectl rollout restart deploy/matchmaker
+          kubectl rollout restart deploy/nginx
+          kubectl rollout restart deploy/user-service
+          kubectl rollout restart deploy/history-service
+          kubectl rollout restart deploy/question-service
+          kubectl rollout restart deploy/collab-service
+          kubectl rollout restart deploy/matching-service
+  
+  rollout-deployment-only:
+    name: Rollout Deployment Only
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'rollout-deployment'
+
+    steps:
+      - name: 'Authenticate with GCP'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Rollout New Images
+        run: |
+          kubectl rollout restart deploy/session-service
+          kubectl rollout restart deploy/gateway
+          kubectl rollout restart deploy/matchmaker
+          kubectl rollout restart deploy/nginx
+          kubectl rollout restart deploy/user-service
+          kubectl rollout restart deploy/history-service
+          kubectl rollout restart deploy/question-service
+          kubectl rollout restart deploy/collab-service
+          kubectl rollout restart deploy/matching-service

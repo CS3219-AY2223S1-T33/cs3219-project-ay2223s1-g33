@@ -53,11 +53,15 @@ class ExecuteController {
       const res = await this.executeAgent.retrieveResult(token);
       if (res || counter >= RETRY_LIMIT) {
         clearInterval(interval);
-        callback(res);
+        callback(this.buildInputAndOutput(res));
         this.executeAgent.deleteResult(token);
       }
       counter += 1;
     }, RETRY_INTERVAL);
+  }
+
+  private buildInputAndOutput(res: string): string {
+    return `Input:\n${this.stdin}\nOutput:\n${res}`;
   }
 }
 

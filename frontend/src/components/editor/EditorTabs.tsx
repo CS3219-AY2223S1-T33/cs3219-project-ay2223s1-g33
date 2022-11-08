@@ -10,10 +10,13 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { useSelector } from "react-redux";
+import CodeMirror from "@uiw/react-codemirror";
+import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import QuestionSection from "../question/QuestionSection";
 import HistoryTable from "../history/HistoryTable";
 import ChatSection from "../chat/ChatSection";
 import { RootState } from "../../app/store";
+import { Language } from "../../types/types";
 
 type Props = {
   getQuestion: () => void;
@@ -24,13 +27,15 @@ const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
 function EditorTabs({ getQuestion, sendTextMessage }: Props) {
   const question = useSelector((state: RootState) => state.session.question);
-
+  const language: Language = "java" as Language;
+  const lang: any = loadLanguage(language);
   return (
-    <Tabs variant="enclosed" borderRight="1px solid #A0AEC0">
+    <Tabs variant="enclosed" borderRight="1px solid #A0AEC0" size="lg">
       <TabList>
         <Tab key="question">Question</Tab>
         <Tab key="chat">Chat</Tab>
         <Tab key="history">History</Tab>
+        <Tab key="solution">Solution</Tab>
       </TabList>
 
       <TabPanels>
@@ -56,6 +61,19 @@ function EditorTabs({ getQuestion, sendTextMessage }: Props) {
           ) : (
             <Text>No question provided</Text>
           )}
+        </TabPanel>
+        <TabPanel key="solution_section">
+          <CodeMirror
+            value={question?.solution}
+            extensions={[lang]}
+            style={{
+              overflowY: "scroll",
+              width: "100%",
+              height: "75vh",
+              overflowX: "scroll",
+            }}
+            editable={false}
+          />
         </TabPanel>
       </TabPanels>
     </Tabs>
