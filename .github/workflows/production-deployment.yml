@@ -14,7 +14,7 @@ on:
         required: true
       scaling-factor:
         type: string
-        description: Used for the scaling up and scaling down
+        description: 'Scaling Factor (Used only for scaling operations)'
     branches:
       - release
       - main
@@ -77,7 +77,7 @@ jobs:
     strategy:
       matrix:
         service: [matchmaker, gateway, session-service]
-    if: github.event.inputs.action == 'deploy-images'
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
   
     steps:
       - name: Set up repository
@@ -104,13 +104,17 @@ jobs:
         run: |-
           docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
 
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/${{ matrix.service }} --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/${{ matrix.service }}@{arg}" --quiet
+
   build-ts-services:
     name: Push TS Service to GCR
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [user-service, question-service, history-service, collab-service, matching-service]
-    if: github.event.inputs.action == 'deploy-images'
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
 
     steps:
       - name: Set up repository
@@ -137,10 +141,14 @@ jobs:
         run: |-
           docker push "gcr.io/$PROJECT_ID/${{ matrix.service }}:latest"
 
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/${{ matrix.service }} --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/${{ matrix.service }}@{arg}" --quiet
+
   build-frontend:
     name: Push Frontend to GCR
     runs-on: ubuntu-latest
-    if: github.event.inputs.action == 'deploy-images'
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
     
     steps:
       - name: Set up repository
@@ -170,6 +178,10 @@ jobs:
         run: |-
           docker push "gcr.io/$PROJECT_ID/frontend:latest"
 
+      - name: Delete Old Images
+        run: |-
+          gcloud container images list-tags gcr.io/$PROJECT_ID/frontend --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete  "gcr.io/$PROJECT_ID/frontend@{arg}" --quiet
+
   rollout-deployment:
     name: Rollout Deployment
     runs-on: ubuntu-latest
@@ -177,7 +189,7 @@ jobs:
       name: 'Production'
       url: https://35.213.143.95
     needs: [build-go-services, build-ts-services,build-frontend]
-    if: github.event.inputs.action == 'deploy-images'
+    if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
 
     steps:
       - name: 'Authenticate with GCP'
@@ -200,7 +212,7 @@ jobs:
           kubectl rollout restart deploy/session-service
           kubectl rollout restart deploy/gateway
           kubectl rollout restart deploy/matchmaker
-          kubectl rollout restart deploy/frontend
+          kubectl rollout restart deploy/nginx
           kubectl rollout restart deploy/user-service
           kubectl rollout restart deploy/history-service
           kubectl rollout restart deploy/question-service
@@ -233,7 +245,7 @@ jobs:
           kubectl rollout restart deploy/session-service
           kubectl rollout restart deploy/gateway
           kubectl rollout restart deploy/matchmaker
-          kubectl rollout restart deploy/frontend
+          kubectl rollout restart deploy/nginx
           kubectl rollout restart deploy/user-service
           kubectl rollout restart deploy/history-service
           kubectl rollout restart deploy/question-service
