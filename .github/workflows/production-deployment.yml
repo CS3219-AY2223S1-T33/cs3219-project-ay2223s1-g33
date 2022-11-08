@@ -187,7 +187,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: 'Production'
-      url: https://35.213.143.95
+      url: https://peerprep.launchsite.com.sg
     needs: [build-go-services, build-ts-services,build-frontend]
     if: github.event.inputs.action == 'deploy-images' && github.ref == 'refs/heads/release'
 
