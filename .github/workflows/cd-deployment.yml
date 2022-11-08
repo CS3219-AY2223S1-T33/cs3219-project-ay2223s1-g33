@@ -44,7 +44,7 @@ env:
     EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
     EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
     EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
-    RESET_PASSWORD_URL=https://peerprep.launchsite.com.sg/resetToken?token=$TOKEN
+    RESET_PASSWORD_URL=http://ec2-18-138-225-25.ap-southeast-1.compute.amazonaws.com/resetToken?token=$TOKEN
   
   CONFIG_SECRETS_DB: |
     DATABASE_DBHOST=${{ secrets.DATABASE_DBHOST }}
@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: 'Staging'
-      url: https://peerprep.launchsite.com.sg
+      url: http://ec2-18-138-225-25.ap-southeast-1.compute.amazonaws.com/
 
     steps:
       - name: Set up repository
