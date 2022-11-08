@@ -14,6 +14,9 @@ import QuestionSection from "../question/QuestionSection";
 import HistoryTable from "../history/HistoryTable";
 import ChatSection from "../chat/ChatSection";
 import { RootState } from "../../app/store";
+import CodeMirror from "@uiw/react-codemirror";
+import { Language } from "../../types/types";
+import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 
 type Props = {
   getQuestion: () => void;
@@ -24,7 +27,8 @@ const hiddenColumns = ["attemptId", "question", "users", "difficulty"];
 
 function EditorTabs({ getQuestion, sendTextMessage }: Props) {
   const question = useSelector((state: RootState) => state.session.question);
-
+  const language : Language = "java" as Language;
+  const lang: any = loadLanguage(language);
   return (
     <Tabs
       variant="enclosed"
@@ -66,9 +70,12 @@ function EditorTabs({ getQuestion, sendTextMessage }: Props) {
           )}
         </TabPanel>
         <TabPanel key="solution_section">
-          {
-            question?.solution
-          }
+        <CodeMirror
+          value={question?.solution}
+          extensions={[lang]}
+          style={{ overflowY: "auto", width: "100%", height: "75vh" }}
+          editable={false}
+        />
         </TabPanel>
       </TabPanels>
     </Tabs>
