@@ -2,6 +2,9 @@
 
 PeerPrep is a web application for collaborating on technical interview questions and challenges. Users can practice with other like-minded users on coding challenges and take each other to new heights through peer-learning. The collaborative nature of the application breaks the monotonous grind of improving technical skills, tailored to the user’s skills.
 
+> **Note**<br/>
+> The report for the project can be found in the repository: [33-ProjectReport.pdf](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33/blob/main/33-ProjectReport.pdf).
+
 ## Repository Organization
 The repository is organised as a mono-repository, with each service taking a sub-folder.
 
