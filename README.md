@@ -22,6 +22,7 @@ The repository is organised as a mono-repository, with each service taking a sub
     - This will up all services except `execute-service`.
     - To also run execute-service, configure the environment file `secrets-db-judge0`.
     - Use `npm run-script up`. Note that the image for executor exceeds 10GB in size.
+4. Once started, the system will be available on [http://localhost:5001](http://localhost:5001)
 
 > **Note**<br/>
 > In order to use secure gRPC, you need to configure `secrets-grpc-cert.env`. you may use `npm run-script gen-certs` to obtain the self-signed certificates.
