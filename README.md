@@ -5,6 +5,12 @@ PeerPrep is a web application for collaborating on technical interview questions
 > **Note**<br/>
 > The report for the project can be found in the repository: [33-ProjectReport.pdf](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g33/blob/main/33-ProjectReport.pdf).
 
+## Deployed Copy
+Environment | URL
+-- | ---- 
+Staging | [http://ec2-18-138-225-25.ap-southeast-1.compute.amazonaws.com](http://ec2-18-138-225-25.ap-southeast-1.compute.amazonaws.com)
+Production | [https://peerprep.launchsite.com.sg](https://peerprep.launchsite.com.sg)
+
 ## Repository Organization
 The repository is organised as a mono-repository, with each service taking a sub-folder.
 
