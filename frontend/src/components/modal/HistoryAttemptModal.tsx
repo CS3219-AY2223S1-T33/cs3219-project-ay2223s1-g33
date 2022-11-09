@@ -10,7 +10,7 @@ import {
   ModalFooter,
   // HStack,
   Text,
-  SimpleGrid
+  SimpleGrid,
 } from "@chakra-ui/react";
 import QuestionSection from "../question/QuestionSection";
 import HistorySection from "../history/HistorySection";
@@ -40,7 +40,7 @@ function HistoryAttemptModal({ historyAttempt, isOpen, onClose }: Props) {
 
   const loadSubmission = (targetAttemptId: number): Promise<HistoryAttempt> => {
     const request: GetAttemptSubmissionRequest = {
-      attemptId: targetAttemptId
+      attemptId: targetAttemptId,
     };
 
     return HistoryAPI.getAttemptSubmission(request).then((res) => {
